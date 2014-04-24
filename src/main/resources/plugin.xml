@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?eclipse version="3.0"?>
+
+<plugin>
+
+	<!-- Tabs -->
+	
+	<extension id="NCIEditTab" point="org.protege.editor.core.application.WorkspaceTab">
+		<label value="NCI Edit Tab"/>
+		<class value="gov.nih.nci.ui.NCIEditTab"/>
+		<index value="X"/>
+		<editorKitId value="OWLEditorKit"/>
+		<defaultViewConfigFileName value="edit-tab-config.xml"/>
+   </extension>
+
+
+	<!-- View -->
+	
+	
+
+	<extension id="ConceptView" point="org.protege.editor.core.application.ViewComponent">
+		<label value="Example view component" />
+		<class value="gov.nih.nci.ui.ConceptView" />
+		<headerColor value="@org.protege.ontologycolor"/>
+		<category value="@org.protege.ontologycategory" />
+	</extension>
+	
+	<extension id="NCIOWLAssertedClassHierarchy"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="Class  Foo hierarchy"/>
+        <class value="gov.nih.nci.ui.NCIToldOWLClassHierarchyViewComponent"/>
+        <headerColor value="@org.protege.classcolor"/>
+        <category value="@org.protege.classcategory"/>
+        <navigates value="@org.protege.classcategory"/>
+    </extension>
+    
+     <extension id="PropertyTableView"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="Ontology metrics"/>
+        <class value="gov.nih.nci.ui.NCIPropertyViewComponent"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="@org.protege.ontologycategory"/>
+    </extension>
+	
+	
+    
+</plugin>

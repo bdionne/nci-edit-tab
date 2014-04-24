@@ -1,0 +1,15 @@
+# Maven
+target/
+
+# IntelliJ
+.idea
+*.iml
+
+# Eclipse
+.classpath
+.project
+.settings/
+META-INF/
+
+# OS X
+.DS_Store
