@@ -131,7 +131,7 @@ public class PropertyTablePanel extends JPanel {
             });
             tablePanel.add(table);
             tablePanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(2, 2, 14, 2),
-                                                                    ComponentFactory.createTitledBorder("TestFoo")));
+                                                                    ComponentFactory.createTitledBorder("TestBAR")));
             table.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
             box.add(tablePanel);
         
