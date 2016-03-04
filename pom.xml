@@ -68,6 +68,7 @@
                             org.protege.editor.owl.*;version="5.0",
                             *
                         </Import-Package>
+                        <Update-Url>http://github.com/bdionne/nci-edit-tab/blob/master/src/main/resources/update.properties</Update-Url>
                         <Include-Resource>{maven-resources}</Include-Resource>
                     </instructions>
                 </configuration>
