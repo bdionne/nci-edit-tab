@@ -22,10 +22,25 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <protege.version>5.0.0-beta-22-SNAPSHOT</protege.version>
+        <protege.version>5.0.0-beta-24-SNAPSHOT</protege.version>
     </properties>
     	
 	<dependencies>
+	    <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.6.2</version>
+        </dependency> 
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.10</version>
+        </dependency>     
 	   <dependency>
             <groupId>edu.stanford.protege</groupId>
             <artifactId>protege-editor-core</artifactId>
@@ -68,7 +83,7 @@
                             org.protege.editor.owl.*;version="5.0",
                             *
                         </Import-Package>
-                        <Update-Url>http://github.com/bdionne/nci-edit-tab/blob/master/src/main/resources/update.properties</Update-Url>
+                        <Update-Url>https://raw.githubusercontent.com/bdionne/nci-edit-tab/master/src/main/resources/update.properties</Update-Url>
                         <Include-Resource>{maven-resources}</Include-Resource>
                     </instructions>
                 </configuration>
