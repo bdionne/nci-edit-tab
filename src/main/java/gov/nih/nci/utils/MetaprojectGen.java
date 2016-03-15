@@ -1,4 +1,3 @@
-package gov.nih.nci.utils;
 /** This is a simple program that does two things:
  *  1. exercises the metaproject API to generate a simple json file
  *  2. deserializes and load the json file for use with EditTab
@@ -6,11 +5,11 @@ package gov.nih.nci.utils;
  *  This gives us a stub of the metaproject to work with whilst waiting for the
  *  client/server integration
  */
-import java.io.BufferedReader;
+
+package gov.nih.nci.utils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -42,30 +41,8 @@ public class MetaprojectGen {
 	public static Metaproject getMetaproject() {
 		Metaproject proj = null;
 		try {
-			proj = Manager.loadMetaproject(new File(MetaprojectGen.METAPROJECT_FILE_NAME));
-			/*
-			FileReader in = new FileReader(MetaprojectGen.METAPROJECT_FILE_NAME);
-			BufferedReader reader = new BufferedReader(in);
-			String line;
-			StringBuilder  stringBuilder = new StringBuilder();
-			
-			while( ( line = reader.readLine() ) != null ) {
-	            stringBuilder.append( line );
-	        }
-			
-			String js = stringBuilder.toString();
-			
-			Gson gson = new DefaultJsonSerializer().getInstance();
-						
-			proj = gson.fromJson(js, Metaproject.class);
-			
-			reader.close();
-			*/
-			
-			
+			proj = Manager.loadMetaproject(new File(MetaprojectGen.METAPROJECT_FILE_NAME));			
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ObjectConversionException e) {
 			// TODO Auto-generated catch block

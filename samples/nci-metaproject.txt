@@ -1,0 +1,240 @@
+{
+  "policy": {
+    "001": {
+      "001": [
+        "001"
+      ]
+    },
+    "002": {
+      "001": [
+        "002"
+      ]
+    },
+    "003": {
+      "001": [
+        "003"
+      ]
+    }
+  },
+  "users": [
+    {
+      "id": "001",
+      "name": "Bob Dionne",
+      "emailAddress": "robert.dionne@nih.gov"
+    },
+    {
+      "id": "002",
+      "name": "Alice Please",
+      "emailAddress": "alice.please@nih.gov"
+    },
+    {
+      "id": "003",
+      "name": "Ted Tester",
+      "emailAddress": "teddy.bear@nih.gov"
+    }
+  ],
+  "projects": [
+    {
+      "id": "001",
+      "name": "thesaurus",
+      "description": "NCI ontology",
+      "address": "parts unknown",
+      "owner": "001",
+      "administrators": [
+        "001"
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "id": "001",
+      "name": "admin",
+      "description": "The big cheese",
+      "operations": [
+        "001",
+        "002",
+        "003",
+        "004",
+        "005",
+        "006",
+        "007"
+      ]
+    },
+    {
+      "id": "002",
+      "name": "modeler",
+      "description": "A workflow modeler",
+      "operations": [
+        "001",
+        "003",
+        "005",
+        "006",
+        "007"
+      ]
+    },
+    {
+      "id": "003",
+      "name": "reviewer",
+      "description": "Read only reviewer of content",
+      "operations": []
+    }
+  ],
+  "operations": [
+    {
+      "id": "001",
+      "name": "pre-merge",
+      "description": "can propose two classes for merging",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "002",
+      "name": "merge",
+      "description": "can merge two classes that have been pre-merged",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "003",
+      "name": "pre-retire",
+      "description": "can propose a class for retiremet",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "004",
+      "name": "retire",
+      "description": "can retire a class that is pre-retired",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "005",
+      "name": "split",
+      "description": "can split a class into two distinct classes",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "006",
+      "name": "clone",
+      "description": "can make a copy of a class with a new name",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "007",
+      "name": "edit",
+      "description": "can edit a class",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "add-import",
+      "name": "Add ontology import",
+      "description": "Add an imported ontology to the ontology",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "add-ontology-annotation",
+      "name": "Add ontology annotation",
+      "description": "Add an annotation to the ontology",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "add-operation",
+      "name": "Add operation",
+      "description": "Add an operation to the operation registry",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "add-project",
+      "name": "Add project",
+      "description": "Add a project to the project registry",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "add-role",
+      "name": "Add role",
+      "description": "Add a role to the role registry",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "add-user",
+      "name": "Add user",
+      "description": "Add a user to the user registry",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "assign-role",
+      "name": "Assign role",
+      "description": "Assign a role to a user within a project",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "modify-config",
+      "name": "Modify server configuration",
+      "description": "Make changes to the configuration of the server",
+      "type": "SERVER"
+    },
+    {
+      "id": "modify-ontology-iri",
+      "name": "Modify the ontology IRI",
+      "description": "Modify the IRI of the ontology",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "remove-import",
+      "name": "Remove ontology import",
+      "description": "Remove an imported ontology from the ontology",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "remove-ontology-annotation",
+      "name": "Remove ontology annotation",
+      "description": "Remove an annotation from the ontology",
+      "type": "ONTOLOGY"
+    },
+    {
+      "id": "remove-operation",
+      "name": "Remove operation",
+      "description": "Remove an operation from the operation registry",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "remove-project",
+      "name": "Remove project",
+      "description": "Remove a project from the project registry",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "remove-role",
+      "name": "Remove role",
+      "description": "Remove a role from the role registry",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "remove-user",
+      "name": "Remove user",
+      "description": "Remove a user from the user registry",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "restart-server",
+      "name": "Restart the server",
+      "description": "Restart the execution of the server",
+      "type": "SERVER"
+    },
+    {
+      "id": "retract-role",
+      "name": "Retract role",
+      "description": "Retract a role from a user",
+      "type": "METAPROJECT"
+    },
+    {
+      "id": "stop-server",
+      "name": "Stop the server",
+      "description": "Stop the execution of the server",
+      "type": "SERVER"
+    },
+    {
+      "id": "view-project",
+      "name": "View project",
+      "description": "View a project in the project registry",
+      "type": "METAPROJECT"
+    }
+  ]
+}
