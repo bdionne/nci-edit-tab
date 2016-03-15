@@ -42,6 +42,38 @@
         <category value="@org.protege.ontologycategory"/>
     </extension>
 	
+	<extension id="Split"
+               point="org.protege.editor.core.application.EditorKitMenuAction">
+        <name value="Split Class..."/>
+        <class value="gov.nih.nci.ui.action.SplitClassAction"/>
+        <toolTip value="Split a class into two new ones"/>
+        <path value="[NCIAssertedClassHierarchy]/SlotAA-A"/>
+        <editorKitId value="OWLEditorKit"/>
+    </extension>
+    <extension id="Clone"
+               point="org.protege.editor.core.application.EditorKitMenuAction">
+        <name value="Clone a class..."/>
+        <class value="gov.nih.nci.ui.action.CloneClassAction"/>
+        <toolTip value="Makes an identical copy of a class"/>
+        <path value="[NCIAssertedClassHierarchy]/SlotAA-B"/>
+        <editorKitId value="OWLEditorKit"/>
+    </extension>
+    <extension id="Merge"
+               point="org.protege.editor.core.application.EditorKitMenuAction">
+        <name value="Merge selected classes..."/>
+        <class value="gov.nih.nci.ui.action.MergeClassAction"/>
+        <toolTip value="Merges two classes"/>
+        <path value="[NCIAssertedClassHierarchy]/SlotAA-C"/>
+        <editorKitId value="OWLEditorKit"/>
+    </extension>
+    <extension id="Retire"
+               point="org.protege.editor.core.application.EditorKitMenuAction">
+        <name value="Retire selected class..."/>
+        <class value="gov.nih.nci.ui.action.RetireClassAction"/>
+        <toolTip value="Retires class"/>
+        <path value="[NCIAssertedClassHierarchy]/SlotAA-D"/>
+        <editorKitId value="OWLEditorKit"/>
+    </extension>
 	
     
 </plugin>
