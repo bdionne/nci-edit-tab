@@ -25,7 +25,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 	public static Operation MERGE;
 	
 	// use undo/redo facility
-	private HistoryManager history;
+	//private HistoryManager history;
 	
 	private Metaproject metaproject;
 	
@@ -40,7 +40,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
     @Override
 	public void initialise() {
 		super.initialise();
-		history = this.getOWLModelManager().getHistoryManager();
+		//.history = this.getOWLModelManager().getHistoryManager();
 		log.info("NCI Edit Tab initialized");
 		
 		metaproject = MetaprojectGen.getMetaproject();

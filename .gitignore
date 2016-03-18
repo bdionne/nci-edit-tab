@@ -13,3 +13,6 @@ META-INF/
 
 # OS X
 .DS_Store
+
+samples/*.xml
+samples/thesaurus.owl

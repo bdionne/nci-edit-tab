@@ -4,8 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -26,8 +28,12 @@ import org.protege.editor.owl.ui.view.CreateNewTarget;
 import org.protege.editor.owl.ui.view.cls.AbstractOWLClassHierarchyViewComponent;
 import org.protege.editor.owl.ui.view.cls.ToldOWLClassHierarchyViewComponent;
 import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
@@ -158,6 +164,7 @@ RetireClassTarget {
 		
         if (set != null){
             OWLClass newClass = set.getOWLEntity();
+            System.out.println(newClass.getIRI().getRemainder().or("NONE"));
             OWLClass selectedClass = getSelectedEntity();
             List<OWLOntologyChange> changes = new ArrayList<>();
             changes.addAll(set.getOntologyChanges());
@@ -167,6 +174,27 @@ RetireClassTarget {
                 OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(set.getOWLEntity(), selectedClass);
                 changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
             }
+            
+            IRI brcal = IRI.create("&owl2lexevs;Brca1");
+            
+            Set<OWLAxiom> refs = 
+            		getOWLEditorKit().getOWLModelManager().getActiveOntology().getReferencingAxioms(selectedClass);
+            
+            System.out.println("The refs are: " + refs.toString());
+            
+            
+            
+            IRI codeIri = IRI.create("http://ncicb.nci.nih.gov/xml/owl/EVS/owl2lexevs.owl#C-00000029");
+            
+            String code = newClass.getIRI().getRemainder().or("NONE");
+            
+            OWLAnnotationProperty codeProp = df.getOWLAnnotationProperty(codeIri);
+            
+            OWLLiteral con = df.getOWLLiteral(code);
+            
+            OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(codeProp, newClass.getIRI(), con);
+            changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
+            
             mngr.applyChanges(changes);
             getTree().setSelectedOWLObject(newClass);
         }

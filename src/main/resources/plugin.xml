@@ -42,6 +42,15 @@
         <category value="@org.protege.ontologycategory"/>
     </extension>
 	
+	<extension id="ComplexEditView"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="Complex Edit"/>
+        <class value="gov.nih.nci.ui.NCIComplexEditViewComponent"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="@org.protege.ontologycategory"/>
+    </extension>
+	
+	
 	<extension id="Split"
                point="org.protege.editor.core.application.EditorKitMenuAction">
         <name value="Split Class..."/>

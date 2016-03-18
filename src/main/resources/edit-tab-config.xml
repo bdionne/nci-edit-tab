@@ -6,6 +6,7 @@
                 <Property id="pluginId" value="nci-edit-tab.NCIOWLAssertedClassHierarchy"/>
             </Component>            
         </CNode>
+        <!-- 
         <HSNode splits="0.375 0.625">
             <CNode>
                 <Component label="Properties">
@@ -34,5 +35,18 @@
                 </Component>
             </CNode>
         </HSNode>
+         -->
+         <CNode>
+            <Component label="Properties">
+                <Property id="pluginId" value="nci-edit-tab.PropertyTableView"/>
+            </Component>
+            <Component label="Edit">
+                <Property id="pluginId" value="org.protege.editor.owl.OWLClassAnnotations"/>
+            </Component>
+        	<Component label="ComplexEdit">
+        		<Property id="pluginId" value="nci-edit-tab.ComplexEditView"/>
+        	</Component>
+        	      
+        </CNode>         
     </VSNode>
 </layout>
