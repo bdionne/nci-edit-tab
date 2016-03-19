@@ -48,23 +48,6 @@ public class ComplexEditPanel extends JPanel {
         this.owlEditorKit = editorKit;
         this.list = list;
         createUI();
-        createPopupMenu();
-    }
-
-
-    private void createPopupMenu() {
-        popupMenu = new JPopupMenu();
-        popupMenu.add(new AbstractAction("Show axioms") {
-            /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			public void actionPerformed(ActionEvent e) {
-                
-
-            }
-        });
     }
 
 
@@ -96,11 +79,6 @@ public class ComplexEditPanel extends JPanel {
     
     private JPanel createJButtonPanel() {
 		JPanel panel = new JPanel();
-		//panel.setLayout(new BorderLayout());
-		//panel.add(splitButton = createButton("Split", true));
-		//panel.add(copyButton = createButton("Copy", true));
-		//panel.add(preMergeButton = createButton("PreMerge", true));
-		//panel.add(mergeButton = createButton("Merge", true));
 		panel.add(saveButton = createButton("Save", true));
 		panel.add(clearButton = createButton("Clear", true));
 		return panel;
@@ -132,11 +110,8 @@ public class ComplexEditPanel extends JPanel {
      * @return The newly created button.
      */
     protected JButton createButton(String label, boolean enable) {
-    	//protected ArrayList<JButton> buttons = new ArrayList<JButton>();
-        JButton button = new JButton(label);
-        //button.addActionListener(new ButtonHandler());
+    	JButton button = new JButton(label);
         button.setEnabled(enable);
-        //buttons.add(button);
         return button;
     }   
 }
