@@ -1,17 +1,13 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
@@ -27,45 +23,49 @@ public class ComplexEditPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private OWLEditorKit owlEditorKit;
+    
+    private OWLFrameList<OWLAnnotationSubject> upperPanelList;
+    
+    private OWLFrameList<OWLAnnotationSubject> lowerPanelList;
+    
+    private JPanel radioButtonPanel;
+    
+    private JRadioButton splitButton;
 
-    private JPopupMenu popupMenu;
+    private JRadioButton cloneButton;
     
-    private OWLFrameList<OWLAnnotationSubject> list;
+    private JRadioButton mergeButton;
     
-    private JButton splitButton;
-
-    private JButton copyButton;
+    private JRadioButton retireButton;
     
-    private JButton preMergeButton;
-    
-    private JButton mergeButton;
+    private JPanel buttonPanel;
     
     private JButton saveButton;
     
     private JButton clearButton;
     
-    public ComplexEditPanel(OWLEditorKit editorKit, OWLFrameList<OWLAnnotationSubject> list) {
+    public ComplexEditPanel(OWLEditorKit editorKit, OWLFrameList<OWLAnnotationSubject> upperPanelList, OWLFrameList<OWLAnnotationSubject> lowerPanelList) {
         this.owlEditorKit = editorKit;
-        this.list = list;
+        this.upperPanelList = upperPanelList;
+        this.lowerPanelList = lowerPanelList;
         createUI();
     }
 
 
     private void createUI() {
         setLayout(new BorderLayout());
-        //Box box = new Box(BoxLayout.Y_AXIS);
-        JScrollPane comp = new JScrollPane(list);
-        comp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        
         JPanel upperPanel = new JPanel(new BorderLayout());
         JPanel lowerPanel = new JPanel(new BorderLayout());
         
-        upperPanel.add(comp);
+        JScrollPane upperComp = new JScrollPane(upperPanelList);
+        upperComp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         
-        JTextField txtTest = new JTextField();
-        txtTest.setText("Test");
-        txtTest.setColumns(10);
-        lowerPanel.setSize(1000,1000);
-        lowerPanel.add(txtTest);
+        upperPanel.add(upperComp);
+        
+        JScrollPane lowerComp = new JScrollPane(lowerPanelList);
+        lowerComp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        lowerPanel.add(lowerComp);
         
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperPanel, lowerPanel);
 		splitPane.setOneTouchExpandable(true);
@@ -78,40 +78,61 @@ public class ComplexEditPanel extends JPanel {
     }
     
     private JPanel createJButtonPanel() {
-		JPanel panel = new JPanel();
-		panel.add(saveButton = createButton("Save", true));
-		panel.add(clearButton = createButton("Clear", true));
-		return panel;
+		buttonPanel = new JPanel();
+		saveButton = new JButton("Save");
+		saveButton.setEnabled(true);
+		clearButton = new JButton("Clear");
+		clearButton.setEnabled(true);
+		
+		buttonPanel.add(saveButton);
+		buttonPanel.add(clearButton);
+		return buttonPanel;
 	}
     
     private JPanel createRadioButtonPanel() {
-    	JPanel panel = new JPanel();
-    	JRadioButton splitButton = new JRadioButton("Split");
-    	JRadioButton copyButton = new JRadioButton("Copy");
-    	JRadioButton mergeButton = new JRadioButton("Merge");
-    	JRadioButton retireButton = new JRadioButton("Retire");
+    	radioButtonPanel = new JPanel();
+    	splitButton = new JRadioButton("Split");
+    	cloneButton = new JRadioButton("Copy");
+    	mergeButton = new JRadioButton("Merge");
+    	retireButton = new JRadioButton("Retire");
     	ButtonGroup btnGrp = new ButtonGroup();
     	btnGrp.add(splitButton);
-    	btnGrp.add(copyButton);
+    	btnGrp.add(cloneButton);
     	btnGrp.add(mergeButton);
     	btnGrp.add(retireButton);
-    	panel.add(splitButton);
-    	panel.add(copyButton);
-    	panel.add(mergeButton);
-    	panel.add(retireButton);
-    	return panel;
+    	radioButtonPanel.add(splitButton);
+    	radioButtonPanel.add(cloneButton);
+    	radioButtonPanel.add(mergeButton);
+    	radioButtonPanel.add(retireButton);
+    	return radioButtonPanel;
+    }
+    
+    public boolean isSplitBtnSelected() {
+    	return splitButton.isSelected();
+    }
+    
+    public boolean isCloneBtnSelected() {
+    	return cloneButton.isSelected();
     }
 
-    /**
-     * Creates a button with a specific label.
-     * 
-     * @param label The button label.
-     * @param enable If true, enables this button.
-     * @return The newly created button.
-     */
-    protected JButton createButton(String label, boolean enable) {
-    	JButton button = new JButton(label);
-        button.setEnabled(enable);
-        return button;
-    }   
+    public boolean isMergeBtnSelected() {
+    	return mergeButton.isSelected();
+    }
+    
+    public boolean isRetireBtnSelected() {
+    	return retireButton.isSelected();
+    }
+    
+    public OWLEditorKit getEditorKit() {
+    	return owlEditorKit;
+    }
+    
+    public OWLFrameList getUpperPanelList() {
+    	return upperPanelList;
+    }
+    
+    public OWLFrameList getLowerPanelList() {
+    	return lowerPanelList;
+    }
+    
 }

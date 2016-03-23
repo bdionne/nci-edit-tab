@@ -14,12 +14,17 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 
     private static final long serialVersionUID = 1L;
 	private ComplexEditPanel complexEditPanel;
-	private OWLFrameList<OWLAnnotationSubject> list;
+	private OWLFrameList<OWLAnnotationSubject> upperPanelList;
+	private OWLFrameList<OWLAnnotationSubject> lowerPanelList;
     
     public void initialiseClassView() throws Exception {
-    	list = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
-    	list.setTransferHandler(new ListTransferHandler());
-    	complexEditPanel = new ComplexEditPanel(getOWLEditorKit(), list);
+    	upperPanelList = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
+    	lowerPanelList = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
+    	
+    	complexEditPanel = new ComplexEditPanel(getOWLEditorKit(), upperPanelList, lowerPanelList);
+    	upperPanelList.setTransferHandler(new ListTransferHandler(complexEditPanel));
+    	lowerPanelList.setTransferHandler(new ListTransferHandler(complexEditPanel));
+    	
         setLayout(new BorderLayout());
         add(complexEditPanel);
         
@@ -46,4 +51,12 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 		// TODO Auto-generated method stub
 		
 	}
+	
+	/*public ComplexEditPanel getComplexEditPanel() {
+		return complexEditPanel;
+	}
+	
+	public OWLFrameList<OWLAnnotationSubject> getList() {
+		return list;
+	}*/
 }
