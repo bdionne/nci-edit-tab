@@ -1,6 +1,8 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -81,8 +83,28 @@ public class ComplexEditPanel extends JPanel {
 		buttonPanel = new JPanel();
 		saveButton = new JButton("Save");
 		saveButton.setEnabled(true);
+		
+		saveButton.addActionListener(new ActionListener() {
+			 
+            public void actionPerformed(ActionEvent e)
+            {
+                //Execute when button is pressed
+            	
+            }
+        });     
+		
 		clearButton = new JButton("Clear");
 		clearButton.setEnabled(true);
+		
+		clearButton.addActionListener(new ActionListener() {
+			 
+            public void actionPerformed(ActionEvent e)
+            {
+                //Execute when button is pressed
+            	upperPanelList.setRootObject(null);
+            	lowerPanelList.setRootObject(null);
+            }
+        });     
 		
 		buttonPanel.add(saveButton);
 		buttonPanel.add(clearButton);
