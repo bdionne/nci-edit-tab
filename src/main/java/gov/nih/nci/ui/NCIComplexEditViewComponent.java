@@ -49,6 +49,8 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 	@Override
 	public void disposeView() {
 		// TODO Auto-generated method stub
+		this.upperPanelList.dispose();
+		this.lowerPanelList.dispose();
 		
 	}
 	
