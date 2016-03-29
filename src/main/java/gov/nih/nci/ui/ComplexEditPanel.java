@@ -149,11 +149,11 @@ public class ComplexEditPanel extends JPanel {
     	return owlEditorKit;
     }
     
-    public OWLFrameList getUpperPanelList() {
+    public OWLFrameList<OWLAnnotationSubject> getUpperPanelList() {
     	return upperPanelList;
     }
     
-    public OWLFrameList getLowerPanelList() {
+    public OWLFrameList<OWLAnnotationSubject> getLowerPanelList() {
     	return lowerPanelList;
     }
     
