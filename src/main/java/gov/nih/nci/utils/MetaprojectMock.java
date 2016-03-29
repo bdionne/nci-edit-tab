@@ -1,5 +1,5 @@
-/** This is a simple program that does two things:
- *  1. exercises the metaproject API to generate a simple json file
+/** This is a simple program that mocks out the metaproject
+ *  1. The main method exercises the metaproject API to generate a simple json file
  *  2. deserializes and load the json file for use with EditTab
  *  
  *  This gives us a stub of the metaproject to work with whilst waiting for the
@@ -11,8 +11,10 @@ package gov.nih.nci.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,32 +31,52 @@ import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.api.User;
 import edu.stanford.protege.metaproject.api.UserId;
 import edu.stanford.protege.metaproject.api.exception.ObjectConversionException;
+import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
 import edu.stanford.protege.metaproject.impl.MetaprojectImpl;
 import edu.stanford.protege.metaproject.serialization.DefaultJsonSerializer;
 
-public class MetaprojectGen {
+public class MetaprojectMock {
 	
 	private static String METAPROJECT_FILE_NAME = "nci-metaproject.txt";
 	
-	public MetaprojectGen() {}
+	private Metaproject proj = null;
 	
-	public static Metaproject getMetaproject() {
-		Metaproject proj = null;
+	public MetaprojectMock() {
 		try {
-			proj = Manager.loadMetaproject(new File(MetaprojectGen.METAPROJECT_FILE_NAME));			
+			proj = Manager.loadMetaproject(new File(MetaprojectMock.METAPROJECT_FILE_NAME));			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (ObjectConversionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return proj;
+	}
+	
+	public Metaproject getMetaproject() {
+		return proj;	
 		
+	}
+	
+	/** The metaproject probably needs something like a getCurrentProject method **/
+	public Project currentProject() {
+		try {
+			return proj.getProjectRegistry().getProject(Utils.getProjectId("001"));
+		} catch (UnknownProjectIdException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
+		return null;
+	}
+	
+	/** For a given project the metaproject needs to return a list of properties that are complex **/
+	public List<String> getComplexPropertyNames(Project p) {
+		return Arrays.asList("full_syn", "definition", "go_annotation");		
 	}
 
 	public static void main(String[] args) {
 		
-		MetaprojectGen gen = new MetaprojectGen();	
+		MetaprojectMock gen = new MetaprojectMock();	
 		
 		try {		
 			
@@ -81,15 +103,14 @@ public class MetaprojectGen {
 			
 			Operation pre_merge = gen.genOp("001", "pre-merge", "can propose two classes for merging");
 			Operation merge = gen.genOp("002", "merge", "can merge two classes that have been pre-merged");
-			Operation pre_retire = gen.genOp("003", "pre-retire", "can propose a class for retiremet");
-			Operation retire = gen.genOp("004", "retire",  "can retire a class that is pre-retired");
-			Operation split = gen.genOp("005", "split",  "can split a class into two distinct classes");
-			Operation clone = gen.genOp("006", "clone",  "can make a copy of a class with a new name");
-			Operation edit = gen.genOp("007", "edit",  "can edit a class");
+			Operation retire = gen.genOp("003", "retire",  "can retire a class that is pre-retired");
+			Operation split = gen.genOp("004", "split",  "can split a class into two distinct classes");
+			Operation clone = gen.genOp("005", "clone",  "can make a copy of a class with a new name");
+			Operation edit = gen.genOp("006", "edit",  "can edit a class");
 			
 			Set<OperationId> admin_ops = new HashSet<>();
 			admin_ops.addAll(Arrays.asList(pre_merge.getId(), 
-					merge.getId(), pre_retire.getId(), 
+					merge.getId(), 
 					retire.getId(), split.getId(), clone.getId(),
 					edit.getId()));
 				
@@ -100,7 +121,7 @@ public class MetaprojectGen {
 			
 			Set<OperationId> modeler_ops = new HashSet<>();
 			modeler_ops.addAll(Arrays.asList(pre_merge.getId(),
-					pre_retire.getId(), split.getId(), clone.getId(),
+					split.getId(), clone.getId(),
 					edit.getId()));
 			
 			Role workflow = Utils.getRole(Utils.getRoleId("002"),
@@ -115,7 +136,7 @@ public class MetaprojectGen {
 					Utils.getDescription("Read only reviewer of content"),
 					reviewer_ops);
 			
-			metaproject.getOperationRegistry().add(pre_merge, merge, pre_retire,
+			metaproject.getOperationRegistry().add(pre_merge, merge,
 					retire, split, clone, edit);
 			
 			metaproject.getRoleRegistry().add(admin, workflow, reviewer);
@@ -128,7 +149,7 @@ public class MetaprojectGen {
 			
 			
 			
-			PrintWriter out = new PrintWriter(MetaprojectGen.METAPROJECT_FILE_NAME);
+			PrintWriter out = new PrintWriter(MetaprojectMock.METAPROJECT_FILE_NAME);
 			Gson gson = new DefaultJsonSerializer().getInstance();
 			out.println(gson.toJson(metaproject, Metaproject.class));
 			out.close();
