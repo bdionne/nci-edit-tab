@@ -5,37 +5,7 @@
             <Component label="Class hierarchy">
                 <Property id="pluginId" value="nci-edit-tab.NCIOWLAssertedClassHierarchy"/>
             </Component>            
-        </CNode>
-        <!-- 
-        <HSNode splits="0.375 0.625">
-            <CNode>
-                <Component label="Properties">
-                            <Property id="pluginId" value="nci-edit-tab.PropertyTableView"/>
-                        </Component>
-                <Component label="Edit">
-                    <Property id="pluginId" value="org.protege.editor.owl.OWLClassAnnotations"/>
-                </Component>
-            	<Component label="Split">
-            		<Property id="pluginId" value="nci-edit-tab.ConceptView"/>
-            	</Component>
-            	<Component label="Merge">
-            		<Property id="pluginId" value="nci-edit-tab.ConceptView"/>
-            	</Component>
-            	<Component label="Clone">
-            		<Property id="pluginId" value="nci-edit-tab.ConceptView"/>
-            	</Component>
-            	<Component label="Retire">
-            		<Property id="pluginId" value="nci-edit-tab.ConceptView"/>
-            	</Component>
-            
-            </CNode>
-            <CNode>
-                <Component label="Description">
-                    <Property id="pluginId" value="org.protege.editor.owl.OWLClassDescription"/>
-                </Component>
-            </CNode>
-        </HSNode>
-         -->
+        </CNode>        
          <CNode>
             <Component label="Properties">
                 <Property id="pluginId" value="nci-edit-tab.PropertyTableView"/>

@@ -52,16 +52,9 @@ RetireClassTarget {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-	
-	
+	private static final long serialVersionUID = 1L;	
 
-	public NCIToldOWLClassHierarchyViewComponent() {
-		
-		// TODO Auto-generated constructor stub
-	}
-	
-	
+	public NCIToldOWLClassHierarchyViewComponent() {}	
 
 	public void performExtraInitialisation() throws Exception {
 
@@ -84,16 +77,8 @@ RetireClassTarget {
             public boolean canDrop(Object child, Object parent) {
                 return false;
             }
-
-
-            public void move(OWLClass child, OWLClass fromParent, OWLClass toParent) {
-                
-            }
-
-
-            public void add(OWLClass child, OWLClass parent) {
-                
-            }
+            public void move(OWLClass child, OWLClass fromParent, OWLClass toParent) {}
+            public void add(OWLClass child, OWLClass parent) {}
         });
         getAssertedTree().setPopupMenuId(new PopupMenuId("[NCIAssertedClassHierarchy]")); 
 		
@@ -102,19 +87,17 @@ RetireClassTarget {
 
 	@Override
 	public boolean canRetireClass() {
-		// TODO Auto-generated method stub
-		return (getSelectedEntities().size() == 1);
+		return (getSelectedEntities().size() == 1 &&
+				NCIEditTab.canRetire());
 	}
 
 	@Override
 	public void retireClass() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public boolean canMergeClass() {
-		// TODO Auto-generated method stub
 		return (getSelectedEntities().size() == 2 &&
 				NCIEditTab.canMerge());
 	}
@@ -122,43 +105,35 @@ RetireClassTarget {
 	@Override
 	public void mergeClass() {
 		System.out.println("OK, do the merge....");
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public boolean canCloneClass() {
-		// TODO Auto-generated method stub
 		return (getSelectedEntities().size() == 1);
 	}
 
 	@Override
 	public void cloneClass() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public boolean canSplitClass() {
-		// TODO Auto-generated method stub
 		return (getSelectedEntities().size() == 1);
 	}
 
 	@Override
 	public void splitClass() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public boolean canCreateNewChild() {
-		// TODO Auto-generated method stub
 		return (getSelectedEntities().size() == 1);
 	}
 
 	@Override
 	public void createNewChild() {
-		// TODO Auto-generated method stub
 		OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class);
 		
