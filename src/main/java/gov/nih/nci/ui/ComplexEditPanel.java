@@ -40,6 +40,8 @@ public class ComplexEditPanel extends JPanel {
     
     private JRadioButton retireButton;
     
+    private ButtonGroup radioButtonGroup;
+    
     private JPanel buttonPanel;
     
     private JButton saveButton;
@@ -100,9 +102,11 @@ public class ComplexEditPanel extends JPanel {
 			 
             public void actionPerformed(ActionEvent e)
             {
-                //Execute when button is pressed
+            	setEnableUnselectedRadioButtons(true);
+            	//Execute when button is pressed
             	upperPanelList.setRootObject(null);
             	lowerPanelList.setRootObject(null);
+            	radioButtonGroup.clearSelection();
             }
         });     
 		
@@ -117,11 +121,11 @@ public class ComplexEditPanel extends JPanel {
     	cloneButton = new JRadioButton("Copy");
     	mergeButton = new JRadioButton("Merge");
     	retireButton = new JRadioButton("Retire");
-    	ButtonGroup btnGrp = new ButtonGroup();
-    	btnGrp.add(splitButton);
-    	btnGrp.add(cloneButton);
-    	btnGrp.add(mergeButton);
-    	btnGrp.add(retireButton);
+    	radioButtonGroup = new ButtonGroup();
+    	radioButtonGroup.add(splitButton);
+    	radioButtonGroup.add(cloneButton);
+    	radioButtonGroup.add(mergeButton);
+    	radioButtonGroup.add(retireButton);
     	radioButtonPanel.add(splitButton);
     	radioButtonPanel.add(cloneButton);
     	radioButtonPanel.add(mergeButton);
@@ -144,6 +148,23 @@ public class ComplexEditPanel extends JPanel {
     public boolean isRetireBtnSelected() {
     	return retireButton.isSelected();
     }
+    
+    public void setEnableUnselectedRadioButtons(boolean enable) {
+    	
+    	if (!isSplitBtnSelected()) {
+    		splitButton.setEnabled(enable);
+    	}
+    	if (!isCloneBtnSelected()) {
+    		cloneButton.setEnabled(enable);
+    	}
+    	if (!isMergeBtnSelected()) {
+    		mergeButton.setEnabled(enable);
+    	}
+    	if (!isRetireBtnSelected()) {
+    		retireButton.setEnabled(enable);
+    	}
+    }
+    
     
     public OWLEditorKit getEditorKit() {
     	return owlEditorKit;

@@ -63,10 +63,12 @@ public class ListTransferHandler extends TransferHandler {
 				OWLAnnotationSubject newObject = (OWLAnnotationSubject)data.get(0).getIRI();
 				complexEditPanel.getUpperPanelList().setRootObject(newObject);
 				complexEditPanel.getLowerPanelList().setRootObject(newObject);
+				complexEditPanel.setEnableUnselectedRadioButtons(false);
 	        }
 		} else if (complexEditPanel.isMergeBtnSelected()) {
 			OWLFrameList<IRI> list = (OWLFrameList<IRI>)support.getComponent();
 			list.setRootObject(data.get(0).getIRI());
+			complexEditPanel.setEnableUnselectedRadioButtons(false);
 			
 		} else if (complexEditPanel.isRetireBtnSelected()) {
 			//handleRetire();
