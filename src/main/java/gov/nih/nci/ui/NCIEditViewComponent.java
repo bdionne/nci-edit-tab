@@ -10,23 +10,22 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.transferhandler.ListTransferHandler;
 
-public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponent {
-
-    private static final long serialVersionUID = 1L;
-	private ComplexEditPanel complexEditPanel;
-	private OWLFrameList<OWLAnnotationSubject> upperPanelList;
-	private OWLFrameList<OWLAnnotationSubject> lowerPanelList;
+public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent {
+	private static final long serialVersionUID = 1L;
+	private EditPanel editPanel;
+	//private OWLFrameList<OWLAnnotationSubject> upperPanelList;
+	//private OWLFrameList<OWLAnnotationSubject> lowerPanelList;
     
     public void initialiseClassView() throws Exception {
-    	upperPanelList = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
-    	lowerPanelList = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
+    	//upperPanelList = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
+    	//lowerPanelList = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
     	
-    	complexEditPanel = new ComplexEditPanel(getOWLEditorKit(), upperPanelList, lowerPanelList);
-    	upperPanelList.setTransferHandler(new ListTransferHandler(complexEditPanel));
-    	lowerPanelList.setTransferHandler(new ListTransferHandler(complexEditPanel));
+    	editPanel = new EditPanel(getOWLEditorKit());
+    	//upperPanelList.setTransferHandler(new ListTransferHandler(complexEditPanel));
+    	//lowerPanelList.setTransferHandler(new ListTransferHandler(complexEditPanel));
     	
         setLayout(new BorderLayout());
-        add(complexEditPanel);
+        add(editPanel);
         
     }
 
@@ -50,16 +49,9 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 	@Override
 	public void disposeView() {
 		// TODO Auto-generated method stub
-		this.upperPanelList.dispose();
-		this.lowerPanelList.dispose();
+		//this.upperPanelList.dispose();
+		//this.lowerPanelList.dispose();
 		
 	}
-	
-	/*public ComplexEditPanel getComplexEditPanel() {
-		return complexEditPanel;
-	}
-	
-	public OWLFrameList<OWLAnnotationSubject> getList() {
-		return list;
-	}*/
+
 }

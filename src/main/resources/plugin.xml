@@ -42,6 +42,14 @@
         <category value="@org.protege.ontologycategory"/>
     </extension>
 	
+	<extension id="EditView"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="Edit"/>
+        <class value="gov.nih.nci.ui.NCIEditViewComponent"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="@org.protege.ontologycategory"/>
+    </extension>
+    
 	<extension id="ComplexEditView"
                point="org.protege.editor.core.application.ViewComponent">
         <label value="Complex Edit"/>

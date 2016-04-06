@@ -11,7 +11,7 @@
                 <Property id="pluginId" value="nci-edit-tab.PropertyTableView"/>
             </Component>
             <Component label="Edit">
-                <Property id="pluginId" value="org.protege.editor.owl.OWLClassAnnotations"/>
+                <Property id="pluginId" value="nci-edit-tab.EditView"/>
             </Component>
         	<Component label="ComplexEdit">
         		<Property id="pluginId" value="nci-edit-tab.ComplexEditView"/>

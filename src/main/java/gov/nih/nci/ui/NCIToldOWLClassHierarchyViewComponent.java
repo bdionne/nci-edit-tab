@@ -30,10 +30,12 @@ import org.protege.editor.owl.ui.view.cls.ToldOWLClassHierarchyViewComponent;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
@@ -124,7 +126,20 @@ RetireClassTarget {
 
 	@Override
 	public void splitClass() {
+		OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(getOWLEditorKit(),
+				"Please enter a class name", OWLClass.class);
 		
+		if (set != null) {
+			OWLClass newClass = set.getOWLEntity();
+			OWLClass selectedClass = getSelectedEntity();
+			
+			OWLAnnotationSubject newObject = (OWLAnnotationSubject)selectedClass.getIRI();
+			
+			updateView(getOWLWorkspace().getOWLSelectionModel().getLastSelectedClass());
+			//complexEditPanel.getUpperPanelList().setRootObject(newObject);
+			//complexEditPanel.getLowerPanelList().setRootObject(newObject);
+			//complexEditPanel.setEnableUnselectedRadioButtons(false);
+        }
 	}
 
 	@Override
