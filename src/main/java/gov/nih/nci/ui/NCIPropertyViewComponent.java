@@ -30,7 +30,7 @@ public class NCIPropertyViewComponent extends AbstractOWLClassViewComponent {
 	@Override
 	protected OWLClass updateView(OWLClass selectedClass) {
 		// TODO Auto-generated method stub
-		propsPanel.setSelectedCls(selectedClass);
+		//propsPanel.setSelectedCls(selectedClass);
 		return selectedClass;
 	}
 

@@ -1,16 +1,24 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.framelist.OWLFrameList;
-import org.semanticweb.owlapi.model.OWLAnnotationSubject;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+
+import com.google.common.base.Optional;
+
 
 public class EditPanel extends JPanel {
 	/**
@@ -19,20 +27,21 @@ public class EditPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private OWLEditorKit owlEditorKit;
+	
+	private Set<OWLAnnotationProperty> complexProperties;
     
-    //private OWLFrameList<OWLAnnotationSubject> upperPanelList;
+    private List<PropertyTablePanel> tablePanelList = new ArrayList<PropertyTablePanel>();
     
-    //private OWLFrameList<OWLAnnotationSubject> lowerPanelList;
-    
+	private JSplitPane splitPane;
     
     public EditPanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
-        //this.upperPanelList = upperPanelList;
-        //this.lowerPanelList = lowerPanelList;
+        
+        complexProperties = NCIEditTab.currentTab().getComplexProperties();
+        
         createUI();
     }
-
-
+    
     private void createUI() {
         setLayout(new BorderLayout());
         
@@ -40,16 +49,20 @@ public class EditPanel extends JPanel {
         JPanel lowerPanel = new JPanel(new BorderLayout());
         lowerPanel.setBorder(BorderFactory.createTitledBorder("Description:"));
         
+        JPanel complexPropertyPanel = new JPanel();
+        complexPropertyPanel.setLayout(new BoxLayout(complexPropertyPanel, BoxLayout.Y_AXIS));
+
         JTabbedPane tabbedPane = new JTabbedPane();
-        
-        JScrollPane panel1 = new JScrollPane();// will add table to it
-        panel1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        tabbedPane.addTab("Complex Properties", panel1);
+        tabbedPane.addTab("Complex Properties", complexPropertyPanel);
 
         JScrollPane panel2 = new JScrollPane();//will add tree or list to it
         panel2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         tabbedPane.addTab("General", panel2);
         
+        Iterator it = complexProperties.iterator();
+        while(it.hasNext()) {
+        	addComplexPropertyTable(complexPropertyPanel, (OWLAnnotationProperty)it.next());
+        }
         
         upperPanel.add(tabbedPane);
         
@@ -57,19 +70,43 @@ public class EditPanel extends JPanel {
         lowerComp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         lowerPanel.add(lowerComp);
         
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperPanel, lowerPanel);
+        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperPanel, lowerPanel);
 		splitPane.setOneTouchExpandable(true);
-		splitPane.setDividerLocation(280);
+		splitPane.setDividerLocation(0.6);
 
 		add(splitPane, BorderLayout.CENTER);
 		
+		setVisible(true);
+		restoreDefaults();
+
+        
     }
+    
+    private void addComplexPropertyTable(JPanel complexPropertyPanel, OWLAnnotationProperty complexProperty) {
+    	Optional<String> tableName = NCIEditTab.currentTab().getRDFSLabel(complexProperty);
+    	PropertyTablePanel tablePanel = new PropertyTablePanel(this.owlEditorKit, complexProperty, tableName.get());
+    	complexPropertyPanel.add(tablePanel);
+    	tablePanelList.add(tablePanel);
+    }
+    
+    private void restoreDefaults() {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+            	splitPane.setDividerLocation(splitPane.getSize().height /2);
+            }
+        });
+    }
+
     
 
     public OWLEditorKit getEditorKit() {
     	return owlEditorKit;
     }
     
-
+    public List<PropertyTablePanel> getPropertyTablePanelList() {
+    	return tablePanelList;
+    }
 
 }

@@ -1,28 +1,19 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
+import java.util.List;
 
-import org.protege.editor.owl.ui.frame.OWLAnnotationsFrame;
-import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.protege.editor.owl.ui.view.cls.OWLClassAnnotationsViewComponent;
-import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
 
-import gov.nih.nci.ui.transferhandler.ListTransferHandler;
 
 public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent {
 	private static final long serialVersionUID = 1L;
 	private EditPanel editPanel;
-	//private OWLFrameList<OWLAnnotationSubject> upperPanelList;
-	//private OWLFrameList<OWLAnnotationSubject> lowerPanelList;
-    
+	
     public void initialiseClassView() throws Exception {
-    	//upperPanelList = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
-    	//lowerPanelList = new OWLFrameList<OWLAnnotationSubject>(getOWLEditorKit(), new OWLAnnotationsFrame(getOWLEditorKit()));
     	
     	editPanel = new EditPanel(getOWLEditorKit());
-    	//upperPanelList.setTransferHandler(new ListTransferHandler(complexEditPanel));
-    	//lowerPanelList.setTransferHandler(new ListTransferHandler(complexEditPanel));
     	
         setLayout(new BorderLayout());
         add(editPanel);
@@ -41,8 +32,11 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent {
 
 	@Override
 	protected OWLClass updateView(OWLClass selectedClass) {
-		//upperPanelList.setRootObject(selectedClass == null ? null : selectedClass.getIRI());
-		//lowerPanelList.setRootObject(selectedClass == null ? null : selectedClass.getIRI());
+		
+		List<PropertyTablePanel> tablePanelList = editPanel.getPropertyTablePanelList();
+		for (PropertyTablePanel tablePanel : tablePanelList) {
+			tablePanel.setSelectedCls(selectedClass);
+		}
         return selectedClass;
 	}
 

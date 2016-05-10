@@ -1,22 +1,20 @@
 package gov.nih.nci.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import org.protege.editor.core.ui.util.ComponentFactory;
 import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 
 public class PropertyTablePanel extends JPanel {
@@ -31,9 +29,21 @@ public class PropertyTablePanel extends JPanel {
     private JPopupMenu popupMenu;
     
     private PropertyTableModel tableModel;
+    
+    private OWLAnnotationProperty complexProp;
+    
+    private String tableName;
 
     public PropertyTablePanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
+        initialiseOWLView();
+        createPopupMenu();
+    }
+    
+    public PropertyTablePanel(OWLEditorKit editorKit, OWLAnnotationProperty complexProperty, String tableName) {
+        this.owlEditorKit = editorKit;
+        this.complexProp = complexProperty;
+        this.tableName = tableName;
         initialiseOWLView();
         createPopupMenu();
     }
@@ -54,15 +64,16 @@ public class PropertyTablePanel extends JPanel {
 
 
     protected void initialiseOWLView() {
-        tableModel = new PropertyTableModel(owlEditorKit);
+        tableModel = new PropertyTableModel(owlEditorKit, complexProp);
         createUI();
         
     }
 
 
     private void createUI() {
-        setLayout(new BorderLayout());
-        Box box = new Box(BoxLayout.Y_AXIS);
+        //setLayout(new BorderLayout());
+    	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        //Box box = new Box(BoxLayout.Y_AXIS);
         JTable table = new JTable(tableModel);
         
         table.setGridColor(Color.LIGHT_GRAY);
@@ -70,6 +81,7 @@ public class PropertyTablePanel extends JPanel {
         table.setShowGrid(true);       
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         table.getTableHeader().setReorderingAllowed(true);
+        table.setFillsViewportHeight(true);
         
         
         table.addMouseListener(new MouseAdapter() {
@@ -100,8 +112,9 @@ public class PropertyTablePanel extends JPanel {
         
         
 
-            final JPanel tablePanel = new JPanel(new BorderLayout());
-            
+        JScrollPane sp = new JScrollPane(table);
+    
+        /*final JPanel tablePanel = new JPanel(new BorderLayout());
           
             tablePanel.addMouseListener(new MouseAdapter() {
 
@@ -129,14 +142,14 @@ public class PropertyTablePanel extends JPanel {
                     menu.show(tablePanel, e.getX(), e.getY());
                 }
             });
-            tablePanel.add(table);
-            tablePanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(2, 2, 14, 2),
-                                                                    ComponentFactory.createTitledBorder("TestBAR")));
-            table.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-            box.add(tablePanel);
+            tablePanel.add(sp);*/
+            //tablePanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(2, 2, 14, 2),
+                                                                   //ComponentFactory.createTitledBorder("TestBAR")));
+            //table.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+            //box.add(tablePanel);
         
-        JScrollPane sp = new JScrollPane(box);
-        sp.setOpaque(false);
+        //sp.setOpaque(false);
+        add(new Label(tableName));
         add(sp);
     }
 

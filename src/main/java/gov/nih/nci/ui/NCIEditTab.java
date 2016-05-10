@@ -2,6 +2,7 @@ package gov.nih.nci.ui;
 
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,16 +17,37 @@ import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import com.google.common.base.Optional;
 
+import gov.nih.nci.ui.event.ComplexEditType;
+import gov.nih.nci.ui.event.EditTabChangeEvent;
+import gov.nih.nci.ui.event.EditTabChangeListener;
 import gov.nih.nci.utils.MetaprojectMock;
 
 public class NCIEditTab extends OWLWorkspaceViewsTab {
 	private static final Logger log = Logger.getLogger(NCIEditTab.class);
 	private static final long serialVersionUID = -4896884982262745722L;
+	
+	private static NCIEditTab tab;
+	
+	public static NCIEditTab currentTab() {
+		return tab;
+	}
+	
+	private OWLClass split_source;
+	private OWLClass split_target;
+	
+	public OWLClass getSplitSource() {
+		return split_source;
+	}
+	
+	public OWLClass getSplitTarget() {
+		return split_target;
+	}
 		
 	// use undo/redo facility
 	private HistoryManager history;
@@ -36,24 +58,58 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 	
 	private OWLModelManagerListener ont_listen;
 	
+	private static ArrayList<EditTabChangeListener> event_listeners = new ArrayList<EditTabChangeListener>();
+	
+	public static void addListener(EditTabChangeListener l) {
+		event_listeners.add(l);
+	}
+	
+	public static void removeListener(EditTabChangeListener l) {
+		event_listeners.remove(l);
+	}
+	
+	private void fireChange(EditTabChangeEvent ev) {
+		
+		for (EditTabChangeListener l : event_listeners) {
+			l.handleChange(ev);
+		}
+		
+	}
+	
+	
+	/** create a map of property names, .ie. their rdfs:labels, in order to look up properties
+	 * to populate specific collections
+	 * 
+	 */
 	private Map<String, OWLAnnotationProperty> label_map = new HashMap<String, OWLAnnotationProperty>();
 	
-	private static Set<OWLAnnotationProperty> complex_properties = new HashSet<OWLAnnotationProperty>();
+	private Set<OWLAnnotationProperty> complex_properties = new HashSet<OWLAnnotationProperty>();
 	
-	private static Map<OWLAnnotationProperty, Set<OWLAnnotationProperty>> annotation_dependencies =
+	private Map<OWLAnnotationProperty, Set<OWLAnnotationProperty>> required_annotation_dependencies =
 			new HashMap<OWLAnnotationProperty, Set<OWLAnnotationProperty>>();
+
+	private Map<OWLAnnotationProperty, Set<OWLAnnotationProperty>> optional_annotation_dependencies =
+			new HashMap<OWLAnnotationProperty, Set<OWLAnnotationProperty>>();
+	
+	private Set<OWLAnnotationProperty> immutable_properties = new HashSet<OWLAnnotationProperty>();
 			
 
 	public NCIEditTab() {
 		setToolTipText("Custom Editor for NCI");
+		tab = this;
 	}
 	
-	public static Set<OWLAnnotationProperty> getComplexProperties() {
+	public Set<OWLAnnotationProperty> getComplexProperties() {
 		return complex_properties;
 	}
 	
-	public static Set<OWLAnnotationProperty> getRequiredAnnotationsForAnnotation(OWLAnnotationProperty annp) {
-		return annotation_dependencies.get(annp);
+	public Set<OWLAnnotationProperty> getRequiredAnnotationsForAnnotation(OWLAnnotationProperty annp) {
+		return required_annotation_dependencies.get(annp);
+		
+	}
+	
+	public Set<OWLAnnotationProperty> getOptionalAnnotationsForAnnotation(OWLAnnotationProperty annp) {
+		return optional_annotation_dependencies.get(annp);
 		
 	}
 	
@@ -64,6 +120,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 		super.initialise();
 		log.info("NCI Edit Tab initialized");
 		
+		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
+		 * of additional times when the app initializes.
+		 */
 		ont_listen = new OWLModelManagerListener() {
 
 			@Override
@@ -77,9 +136,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 		
 		this.getOWLModelManager().addListener(ont_listen);
 		
+		// assuming we can gain access to the metaproject at this point
+		// and the project will have been selected, etc...
 		mock = new MetaprojectMock();	
 				
 		history = this.getOWLModelManager().getHistoryManager();
+		
 		
 	}
     
@@ -88,7 +150,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
      * and there is no need for a separate operation
      * 
      */
-    public static boolean canMerge() {
+    public boolean canMerge() {
     	return true;
     }
     
@@ -97,7 +159,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
      * review and only an admin user can do so. 
      * 
      */
-    public static boolean canRetire() {
+    public boolean canRetire() {
+    	return true;
+    }
+    
+    public boolean canSplit() {
+    	return true;
+    }
+    
+    public void splitClass(OWLClass from, OWLClass newClass) {
+    	split_source = from;
+    	split_target = newClass;
+    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT));   	
+    	
+    }
+    
+    public boolean canClone() {
     	return true;
     }
 
@@ -114,7 +191,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 		
 		Set<OWLAnnotationProperty> annProps = ontology.getAnnotationPropertiesInSignature();
 		
-		/** There must be an easier way to check the rdfs:labels of annotation properties **/
+		/** There must be an easier way to check the rdfs:labels of annotation properties 
+		 *  We'll be getting these from IRIs anyway. **/
 		for (OWLAnnotationProperty annp : annProps) {
 			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(annp.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
 	                .getRDFSLabel())) {
@@ -128,18 +206,33 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 		}
 		
 		Set<String> cprop_names = mock.getComplexAnnotationProperties();
+		populate_collection(cprop_names, complex_properties);
 		
-		for (String name : cprop_names) {
+		Set<String> ro_pnames = mock.getImmutableAnnotationProperties();
+		populate_collection(ro_pnames, immutable_properties);
+		
+		
+		Map<String, Set<String>> ann_deps = mock.getRequiredAnnotationsForAnnotation();
+		initialize_dependencies(ann_deps, required_annotation_dependencies);
+		
+		ann_deps = mock.getOptionalAnnotationAnnotations();
+		initialize_dependencies(ann_deps, optional_annotation_dependencies);		
+		
+	}
+	
+	private void populate_collection(Set<String> names, Set<OWLAnnotationProperty> props) {
+		for (String name : names) {
 			OWLAnnotationProperty p = label_map.get(name);
 			if (p != null) {
-				complex_properties.add(p);
+				props.add(p);
 			}		
 			
 		}
 		
-		
-		
-		Map<String, Set<String>> ann_deps = mock.getRequiredAnnotationsForAnnotation();
+	}
+	
+	private void initialize_dependencies(Map<String, Set<String>> ann_deps, 
+			Map<OWLAnnotationProperty, Set<OWLAnnotationProperty>> dependency_map) {
 		
 		for (String ads : ann_deps.keySet()) {
 			Set<OWLAnnotationProperty> ps = new HashSet<OWLAnnotationProperty>();
@@ -150,13 +243,30 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 					OWLAnnotationProperty p1 = label_map.get(s);
 					if (p1 != null) {
 						ps.add(p1);
-						
+
 					}
 				}
-				annotation_dependencies.put(p, ps);
-					
-				}
-			}	
+				dependency_map.put(p, ps);
+
+			}
+		}
+		
 		
 	}
+	
+	public Optional<String> getRDFSLabel(OWLAnnotationProperty prop) {
+		  
+		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(prop.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
+		                 .getRDFSLabel())) {
+			OWLAnnotationValue av = annotation.getValue();
+		    Optional<OWLLiteral> ol = av.asLiteral();
+		    if (ol.isPresent()) {
+		     return Optional.of(ol.get().getLiteral());
+		     
+		    }   
+		}
+		return Optional.absent();		  
+		  
+	}
+	
 }
