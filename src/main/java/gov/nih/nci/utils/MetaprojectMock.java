@@ -20,7 +20,7 @@ public class MetaprojectMock {
 	public MetaprojectMock() {}
 	
 	public Set<String> getComplexAnnotationProperties() {
-		String[] res = new String[] {"DEFINITION", "FULL_SYN", "ALT_DEFINITION", "Go_Annotation"};
+		String[] res = new String[] {"DEFINITION", "FULL_SYN", "ALT_DEFINITION", "Go_Annotation", "term"};
 		return new HashSet<String>(Arrays.asList(res));
 		
 	}
@@ -45,7 +45,7 @@ public class MetaprojectMock {
     public Map<String,Set<String>> getRequiredAnnotationsForAnnotation() {
     	HashMap<String, Set<String>> map = new HashMap<String, Set<String>>();
     	// Definition
-    	String[] req_deps = new String[] {"def-definition", "xml:lang"};
+    	String[] req_deps = new String[] {"provenance", "source"};
     	map.put("DEFINITION", new HashSet<String>(Arrays.asList(req_deps)));
     	// ALT_DEFINITION
     	map.put("ALT_DEFINITION", new HashSet<String>(Arrays.asList(req_deps)));
@@ -55,6 +55,8 @@ public class MetaprojectMock {
     	// Go_Annotation
     	req_deps = new String[] {"go-term", "xml:lang", "go-id"};
     	map.put("Go_Annotation", new HashSet<String>(Arrays.asList(req_deps)));
+    	req_deps = new String[] {"term_type", "term-source"};
+    	map.put("term", new HashSet<String>(Arrays.asList(req_deps)));
     	
     	return map;
     	
