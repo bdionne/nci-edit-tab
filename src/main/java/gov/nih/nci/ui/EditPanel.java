@@ -97,9 +97,7 @@ public class EditPanel extends JPanel {
             	splitPane.setDividerLocation(splitPane.getSize().height /2);
             }
         });
-    }
-
-    
+    }    
 
     public OWLEditorKit getEditorKit() {
     	return owlEditorKit;

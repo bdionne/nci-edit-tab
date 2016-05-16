@@ -42,9 +42,7 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent {
 
 	@Override
 	public void disposeView() {
-		// TODO Auto-generated method stub
-		//this.upperPanelList.dispose();
-		//this.lowerPanelList.dispose();
+		super.disposeView();
 		
 	}
 
