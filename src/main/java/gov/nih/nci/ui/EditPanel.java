@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -16,9 +17,6 @@ import javax.swing.SwingUtilities;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-
-import com.google.common.base.Optional;
-
 
 public class EditPanel extends JPanel {
 	/**

@@ -2,17 +2,24 @@ package gov.nih.nci.ui;
 
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.protege.editor.owl.client.ClientSession;
+import org.protege.editor.owl.client.LocalHttpClient;
+import org.protege.editor.owl.client.api.Client;
+import org.protege.editor.owl.client.api.exception.ClientRequestException;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.history.HistoryManager;
+import org.protege.editor.owl.server.api.exception.AuthorizationException;
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -21,7 +28,6 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import com.google.common.base.Optional;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
@@ -120,6 +126,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 		super.initialise();
 		log.info("NCI Edit Tab initialized");
 		
+		
+		
 		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
 		 * of additional times when the app initializes.
 		 */
@@ -134,7 +142,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 			}			
 		};
 		
-		this.getOWLModelManager().addListener(ont_listen);
+		this.getOWLEditorKit().getOWLModelManager().addListener(ont_listen);
 		
 		// assuming we can gain access to the metaproject at this point
 		// and the project will have been selected, etc...
@@ -186,8 +194,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 	}
 	
 	private void initProperties() {
+		Client sess = ClientSession.getInstance(this.getOWLEditorKit()).getActiveClient();
 		
-		
+		System.out.println("look");		
 		
 		Set<OWLAnnotationProperty> annProps = ontology.getAnnotationPropertiesInSignature();
 		
@@ -197,7 +206,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(annp.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
 	                .getRDFSLabel())) {
 				OWLAnnotationValue av = annotation.getValue();
-				Optional<OWLLiteral> ol = av.asLiteral();
+				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
 				if (ol.isPresent()) {
 					label_map.put(ol.get().getLiteral(), annp);
 					
@@ -259,13 +268,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(prop.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
 		                 .getRDFSLabel())) {
 			OWLAnnotationValue av = annotation.getValue();
-		    Optional<OWLLiteral> ol = av.asLiteral();
+		    com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
 		    if (ol.isPresent()) {
 		     return Optional.of(ol.get().getLiteral());
 		     
 		    }   
 		}
-		return Optional.absent();		  
+		return Optional.empty();		  
 		  
 	}
 	
