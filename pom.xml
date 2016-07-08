@@ -94,8 +94,6 @@
                         <Bundle-Vendor>Dionne Associates, LLC.</Bundle-Vendor>
                         <Embed-Dependency>protege-client</Embed-Dependency>
                         <Import-Package>
-                        	org.protege.editor.core.*;version="5.0", <!-- equivalent to [5.0,infinity) -->
-                        	org.protege.editor.owl.client.*;version="3.0", 
                         	okhttp3.*,                     	                                                    
                             *
                         </Import-Package>

@@ -46,6 +46,7 @@ import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLAnnotationValueVisitor;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
@@ -144,7 +145,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	// use undo/redo facility
 	private HistoryManager history;
 	
-	private static ClientSession clientSession = null;
+	private ClientSession clientSession = null;
 	
 	private OWLOntology ontology;
 	
@@ -306,10 +307,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	if (isPreMerged(merge_source)) {
     		
-    		Set<OWLAnnotationProperty> annp = merge_source.getAnnotationPropertiesInSignature();
-    		
-    		for (OWLAnnotationProperty p : annp) {
-    			System.out.println(p.getIRI());
+    		Set<OWLAnnotationAssertionAxiom> props = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) merge_source);    		
+    		for (OWLAnnotationAssertionAxiom p : props) {
+    			if (p.getProperty().equals(MERGE_TARGET)) {
+    				changes.add(new RemoveAxiom(ontology, p));
+    			}
+    			
+    		}
+    		props = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) merge_target);    		
+    		for (OWLAnnotationAssertionAxiom p : props) {
+    			if (p.getProperty().equals(MERGE_SOURCE)) {
+    				changes.add(new RemoveAxiom(ontology, p));
+    			}
     			
     		}
     		changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(),
@@ -327,7 +336,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
             editornote = "Merge into " + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")";
     		
     		
-    		    editornote += ", " + NCIEditTab.clientSession.getActiveClient().getUserInfo().getName();
+    		    editornote += ", " + clientSession.getActiveClient().getUserInfo().getName();
     		
     				
     		designnote = "See '" + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")" + "'";
