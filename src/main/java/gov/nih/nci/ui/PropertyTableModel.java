@@ -1,6 +1,7 @@
 package gov.nih.nci.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +20,8 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
+
+import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 
 
 public class PropertyTableModel extends AbstractTableModel {
@@ -75,29 +78,82 @@ public class PropertyTableModel extends AbstractTableModel {
 
     public int getColumnCount() {
     	if (this.requiredAnnotations != null) {
-    		return this.requiredAnnotations.size();
+    		return this.requiredAnnotations.size() + 1;
     	} else {
     		return 0;
     	}
     }
 
-
     public Object getValueAt(int rowIndex, int columnIndex) {
     	
-    	int i = 0;
+    	int index = rowIndex * getColumnCount() + columnIndex;
     	LiteralExtractor literalExtractor = new LiteralExtractor();
+    	
+    	OWLAnnotation annot = annotations.get(index);
+    	if (columnIndex == 0) {
+    		return literalExtractor.getLiteral(annot.getValue());
+    	}
     	for (OWLAnnotationProperty aprop : requiredAnnotations) {
-    		if (columnIndex == i) {
-    			for (OWLAnnotation annot : annotations) {
-    				if (annot.getProperty().equals(aprop)) {
-    					return literalExtractor.getLiteral(annot.getValue());
-    				}
-    			}
+    		
+			if ( annot.getProperty().equals(aprop)) {
+				return literalExtractor.getLiteral(annot.getValue());
+			}
+    			
+    	}
+    	return null;
+    }
+    
+    public HashMap<String, String> getSelectedPropertyType() {
+    	HashMap<String, String> propertyTypes = new HashMap<String, String>();
+    	propertyTypes.put("Value", "TextArea");
+    	int columnCount = getColumnCount();
+    	IRI dataType;
+    	String columnName;
+    	for (int i = 1; i < columnCount; i++) {
+    		dataType = NCIEditTab.currentTab().getDataType(requiredAnnotationsList.get(i -1));
+    		columnName = getColumnName(i);
+    		//propertyTypes.put(columnName, dataType.toString());
+    		if (columnName.equals("def-source")) {
+    			propertyTypes.put(columnName, "ComboBox");
     		} else {
-    			i++;
+    			propertyTypes.put(columnName, "TextField");
     		}
     	}
-    	return i;
+    	return propertyTypes;
+    }
+    
+    public HashMap<String, String> getSelectedPropertyValue(int row) {
+    	HashMap<String, String> propertyValues = new HashMap<String, String>();
+    	if ( row < 0 ) {
+    		//NCIClassCreationDialog.showDialog(this.ont,
+    				//"Please select a property row", OWLClass.class);
+    		return propertyValues;
+    	}
+    	int columnCount = getColumnCount();
+    	int startIndex = row * columnCount;
+    	LiteralExtractor literalExtractor = new LiteralExtractor();
+    	
+    	for (int i=0; i<columnCount; i++) {
+    		OWLAnnotation annot = annotations.get(startIndex + i);
+    		propertyValues.put(getColumnName(i), literalExtractor.getLiteral(annot.getValue()));
+    	}
+    	
+    	return propertyValues;
+    }
+    
+    public HashMap<String, ArrayList<String>> getSelectedPropertyOptions() {
+    	HashMap<String, ArrayList<String>> propertyOptions = new HashMap<String, ArrayList<String>>();
+    	for (OWLAnnotationProperty aprop : requiredAnnotationsList) {
+    		//if (NCIEditTab.currentTab().getDataType(aprop).toString().equals("ComboBox")) {
+    		if (NCIEditTab.currentTab().getRDFSLabel(aprop).get().equals("def-source")) {
+    			ArrayList<String> optionList = new ArrayList<String>(); //aprop.get
+    			optionList.add("FDA");
+    			optionList.add("NCI");
+    			optionList.add("NIH");
+    			propertyOptions.put(NCIEditTab.currentTab().getRDFSLabel(aprop).get(), optionList);
+    		}
+    	}
+    	return propertyOptions;
     }
 
     class LiteralExtractor implements OWLAnnotationValueVisitor {
@@ -127,7 +183,10 @@ public class PropertyTableModel extends AbstractTableModel {
 
     public String getColumnName(int column) {
     	
-    	return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column)).get();
+    	if (column == 0) {
+    		return "Value";
+    	}
+    	return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
     }
     
     public void setSelection(OWLClass cls) {
@@ -144,6 +203,10 @@ public class PropertyTableModel extends AbstractTableModel {
 	        	OWLAnnotation annot = ax.getAnnotation();
 	        	if (annot.getProperty().equals(this.complexProp)) {
 	        		//annotations.add(annot);
+	        		if (annot.getValue() != null) {
+	        			
+	        			annotations.add(annot);
+	        		}
 	        		Set<OWLAnnotation> annotSet = ax.getAnnotations();
 		        	Iterator<OWLAnnotation> iter = annotSet.iterator();
 		        	while (iter.hasNext()) {
@@ -159,4 +222,8 @@ public class PropertyTableModel extends AbstractTableModel {
     	
     }
     
+    public boolean hasAnnotation() {
+    	return !annotations.isEmpty();
+    }
+
 }

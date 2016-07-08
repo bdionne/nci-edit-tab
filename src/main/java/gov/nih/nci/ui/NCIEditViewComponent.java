@@ -3,11 +3,16 @@ package gov.nih.nci.ui;
 import java.awt.BorderLayout;
 import java.util.List;
 
+import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
+import org.protege.editor.owl.model.event.OWLModelManagerListener;
+import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.cls.OWLClassAnnotationsViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLObject;
 
 
-public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent {
+public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent implements OWLSelectionModelListener {
 	private static final long serialVersionUID = 1L;
 	private EditPanel editPanel;
 	
@@ -17,6 +22,7 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent {
     	
         setLayout(new BorderLayout());
         add(editPanel);
+        this.getOWLWorkspace().getOWLSelectionModel().addListener(this);
         
     }
 
@@ -32,18 +38,31 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent {
 
 	@Override
 	protected OWLClass updateView(OWLClass selectedClass) {
-		
-		List<PropertyTablePanel> tablePanelList = editPanel.getPropertyTablePanelList();
-		for (PropertyTablePanel tablePanel : tablePanelList) {
-			tablePanel.setSelectedCls(selectedClass);
-		}
+		editPanel.setSelectedClass(selectedClass);
         return selectedClass;
 	}
 
 	@Override
 	public void disposeView() {
+		editPanel.disposeView();		
+		this.getOWLWorkspace().getOWLSelectionModel().removeListener(this);
 		super.disposeView();
 		
+		
+	}
+
+	
+
+	@Override
+	public void selectionChanged() throws Exception {
+		if (this.isShowing()) {
+
+		} else {
+			if (NCIEditTab.currentTab().isRetiring()) {
+				getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
+		                "org.protege.editor.owl.client.EditView");
+			}
+		}
 	}
 
 }

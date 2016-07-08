@@ -166,6 +166,18 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
                 return null;
             }
     }
+    
+    public static <T extends OWLEntity> OWLEntityCreationSet<T> showPreviewDialog(OWLEditorKit owlEditorKit, String message, Class<T> type) {
+
+        NCIClassCreationDialog<T> panel = new NCIClassCreationDialog<>(owlEditorKit, message, type);
+        int ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), panel, panel.preferredNameField);
+        if (ret == JOptionPane.OK_OPTION) {
+            return panel.getOWLEntityCreationSet(EntityCreationMode.PREVIEW);
+        }
+        else {
+            return null;
+        }
+}
 
     public IRI getBaseIRI() {
         return null; // let this be managed by the EntityFactory for now - we could add a selector later

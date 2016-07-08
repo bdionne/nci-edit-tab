@@ -3,20 +3,18 @@
     <VSNode splits="0.375 0.625">
         <CNode>
             <Component label="Class hierarchy">
-                <Property id="pluginId" value="nci-edit-tab.NCIOWLAssertedClassHierarchy"/>
+                <Property id="pluginId" value="org.protege.editor.owl.client.NCIOWLAssertedClassHierarchy"/>
             </Component>            
         </CNode>        
-         <CNode>
-         <!-- 
-            <Component label="Properties">
-                <Property id="pluginId" value="nci-edit-tab.PropertyTableView"/>
-            </Component>
-             -->
+         <CNode>             
             <Component label="Edit">
-                <Property id="pluginId" value="nci-edit-tab.EditView"/>
+                <Property id="pluginId" value="org.protege.editor.owl.client.EditView"/>
             </Component>
         	<Component label="ComplexEdit">
-        		<Property id="pluginId" value="nci-edit-tab.ComplexEditView"/>
+        		<Property id="pluginId" value="org.protege.editor.owl.client.ComplexEditView"/>
+        	</Component>
+        	<Component label="Retire">
+        		<Property id="pluginId" value="org.protege.editor.owl.client.RetireView"/>
         	</Component>
         	      
         </CNode>         

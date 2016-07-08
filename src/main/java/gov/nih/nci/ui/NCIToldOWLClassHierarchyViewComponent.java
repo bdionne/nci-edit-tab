@@ -12,6 +12,7 @@ import javax.swing.Icon;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.entity.OWLEntityCreationException;
 import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
 import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
 import org.protege.editor.owl.ui.OWLIcons;
@@ -92,11 +93,13 @@ RetireClassTarget {
 	@Override
 	public boolean canRetireClass() {
 		return (getSelectedEntities().size() == 1 &&
-				NCIEditTab.currentTab().canRetire());
+				NCIEditTab.currentTab().canRetire(getSelectedEntity()));
 	}
 
 	@Override
 	public void retireClass() {
+		OWLClass selectedClass = getSelectedEntity();
+		NCIEditTab.currentTab().retire(selectedClass);
 		
 	}
 
@@ -114,7 +117,7 @@ RetireClassTarget {
 	@Override
 	public boolean canCloneClass() {
 		return (getSelectedEntities().size() == 1 &&
-				NCIEditTab.currentTab().canClone());
+				NCIEditTab.currentTab().canClone(getSelectedEntity()));
 	}
 
 	@Override
@@ -125,7 +128,7 @@ RetireClassTarget {
 	@Override
 	public boolean canSplitClass() {
 		return (getSelectedEntities().size() == 1 &&
-				NCIEditTab.currentTab().canSplit());
+				NCIEditTab.currentTab().canSplit(getSelectedEntity()));
 	}
 
 	@Override
@@ -133,124 +136,17 @@ RetireClassTarget {
 		OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class);
 		OWLClass selectedClass = getSelectedEntity();
-		
-		
-        if (set != null){
-            Map<IRI, IRI> replacementIRIMap = new HashMap<>();
-            replacementIRIMap.put(selectedClass.getIRI(), set.getOWLEntity().getIRI());
-            OWLModelManager mngr = getOWLModelManager();
-            OWLObjectDuplicator dup = new OWLObjectDuplicator(mngr.getOWLDataFactory(), replacementIRIMap);
-            List<OWLOntologyChange> changes = new ArrayList<>(set.getOntologyChanges());
 
-            changes.addAll(duplicateClassAxioms(selectedClass, dup));
-            
-            changes.addAll(duplicateAnnotations(selectedClass, dup));
 
-           
+		if (set != null){
 
-            
-            
-            OWLClass newClass = set.getOWLEntity();
-            
-            IRI codeIri = IRI.create("http://ncicb.nci.nih.gov/xml/owl/EVS/owl2lexevs.owl#C-00000029");
-            
-            String code = newClass.getIRI().getRemainder().or("NONE");
-            
-            OWLDataFactory df = mngr.getOWLDataFactory();
-            
-            OWLAnnotationProperty codeProp = df.getOWLAnnotationProperty(codeIri);
-            
-            OWLLiteral con = df.getOWLLiteral(code);
-            
-            OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(codeProp, newClass.getIRI(), con);
-            changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
-            
-            mngr.applyChanges(changes);
-            
-            NCIEditTab.currentTab().splitClass(selectedClass, newClass);
-            
-            getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(set.getOWLEntity());
-        }
-        
-		
-		
+			NCIEditTab.currentTab().splitClass(set, selectedClass);
+
+			getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(set.getOWLEntity());
+		}
 	}
 	
-	private List<OWLOntologyChange> duplicateClassAxioms(OWLClass selectedClass, OWLObjectDuplicator dup) {
-		List<OWLOntologyChange> changes = new ArrayList<>();
-
-		OWLOntology ont = getOWLModelManager().getActiveOntology();
-
-		for (OWLAxiom ax : ont.getAxioms(selectedClass)) {
-			if (ax.isLogicalAxiom() && !(ax instanceof OWLDisjointClassesAxiom)) {
-				OWLAxiom duplicatedAxiom = dup.duplicateObject(ax);
-				changes.add(new AddAxiom(ont, duplicatedAxiom));
-			}
-		}
-
-		return changes;
-	}
-
-    private List<OWLOntologyChange> duplicateAnnotations(OWLClass selectedClass, OWLObjectDuplicator dup) {
-        List<OWLOntologyChange> changes = new ArrayList<>();
-        OWLModelManagerEntityRenderer ren = getOWLModelManager().getOWLEntityRenderer();
-        List<IRI> annotIRIs = null;
-        String selectedClassName = null;
-        if (ren instanceof OWLEntityAnnotationValueRenderer){
-            selectedClassName = getOWLModelManager().getRendering(selectedClass);
-            annotIRIs = OWLRendererPreferences.getInstance().getAnnotationIRIs();
-        }
-
-        LiteralExtractor literalExtractor = new LiteralExtractor();
-
-        OWLOntology ont = getOWLModelManager().getActiveOntology();
-        
-        IRI codeIri = IRI.create("http://ncicb.nci.nih.gov/xml/owl/EVS/owl2lexevs.owl#C-00000029");
-        OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
-        
-        OWLAnnotationProperty codeProp = df.getOWLAnnotationProperty(codeIri);
-        
-        for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selectedClass, ont)) {
-        	final OWLAnnotation annot = ax.getAnnotation();
-        	if (annotIRIs == null || !annotIRIs.contains(annot.getProperty().getIRI())) {
-        		if (!annot.getProperty().equals(codeProp)) {
-        			String label = literalExtractor.getLiteral(annot.getValue());
-        			if (label == null || !label.equals(selectedClassName)){
-        				OWLAxiom duplicatedAxiom = dup.duplicateObject(ax);
-        				changes.add(new AddAxiom(ont, duplicatedAxiom));
-        			}
-        		}
-        	}
-        }
-        
-        return changes;
-    }
-
-
-    class LiteralExtractor implements OWLAnnotationValueVisitor {
-
-        private String label;
-
-        public String getLiteral(OWLAnnotationValue value){
-            label = null;
-            value.accept(this);
-            return label;
-        }
-
-        public void visit(IRI iri) {
-            // do nothing
-        }
-
-
-        public void visit(OWLAnonymousIndividual owlAnonymousIndividual) {
-            // do nothing
-        }
-
-
-        public void visit(OWLLiteral literal) {
-            label = literal.getLiteral();
-        }
-    }
+	
 
 	@Override
 	public boolean canCreateNewChild() {
@@ -262,43 +158,50 @@ RetireClassTarget {
 		OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class);
 		
-        if (set != null){
-            OWLClass newClass = set.getOWLEntity();
-            System.out.println(newClass.getIRI().getRemainder().or("NONE"));
+		OWLClass newClass = set.getOWLEntity();
+		String preferredName = newClass.getIRI().getRemainder().or("NONE");
+		
+		String gen_code = NCIEditTab.currentTab().generateCode();
+		
+		OWLEntityCreationSet<OWLClass> newSet = null;
+		
+		try {
+			newSet = getOWLEditorKit().getModelManager().getOWLEntityFactory().createOWLEntity(
+					OWLClass.class, gen_code, null);
+			
+			newClass = newSet.getOWLEntity();
+			
+			
             OWLClass selectedClass = getSelectedEntity();
             List<OWLOntologyChange> changes = new ArrayList<>();
-            changes.addAll(set.getOntologyChanges());
+            changes.addAll(newSet.getOntologyChanges());
             final OWLModelManager mngr = getOWLEditorKit().getModelManager();
             final OWLDataFactory df = mngr.getOWLDataFactory();
             if (!df.getOWLThing().equals(selectedClass)){
-                OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(set.getOWLEntity(), selectedClass);
+                OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(newSet.getOWLEntity(), selectedClass);
                 changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
             }
             
-            IRI brcal = IRI.create("&owl2lexevs;Brca1");
             
-            Set<OWLAxiom> refs = 
-            		getOWLEditorKit().getOWLModelManager().getActiveOntology().getReferencingAxioms(selectedClass);
+           
             
-            System.out.println("The refs are: " + refs.toString());
+            OWLLiteral con = df.getOWLLiteral(gen_code);
+            OWLLiteral pref_name_val = df.getOWLLiteral(preferredName);
             
-            
-            
-            IRI codeIri = IRI.create("http://ncicb.nci.nih.gov/xml/owl/EVS/owl2lexevs.owl#C-00000029");
-            
-            String code = newClass.getIRI().getRemainder().or("NONE");
-            
-            OWLAnnotationProperty codeProp = df.getOWLAnnotationProperty(codeIri);
-            
-            OWLLiteral con = df.getOWLLiteral(code);
-            
-            OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(codeProp, newClass.getIRI(), con);
+            OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.CODE_PROP, newClass.getIRI(), con);
             changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
+            OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.LABEL_PROP, newClass.getIRI(), pref_name_val);
+            OWLAxiom ax3 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.PREF_NAME, newClass.getIRI(), pref_name_val);
+            changes.add(new AddAxiom(mngr.getActiveOntology(), ax2));
+            changes.add(new AddAxiom(mngr.getActiveOntology(), ax3));
             
             mngr.applyChanges(changes);
             getTree().setSelectedOWLObject(newClass);
-        }
-		
+		} catch (OWLEntityCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
 	}
 	
 	 protected OWLObjectHierarchyProvider<OWLClass> getHierarchyProvider() {

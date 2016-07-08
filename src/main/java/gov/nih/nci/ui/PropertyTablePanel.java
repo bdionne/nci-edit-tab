@@ -1,13 +1,20 @@
 package gov.nih.nci.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -17,7 +24,9 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 
-public class PropertyTablePanel extends JPanel {
+import gov.nih.nci.ui.dialog.PropertyEditingDialog;
+
+public class PropertyTablePanel extends JPanel implements ActionListener {
 
     /**
 	 * 
@@ -30,10 +39,26 @@ public class PropertyTablePanel extends JPanel {
     
     private PropertyTableModel tableModel;
     
+    private JTable propertyTable;
+    
     private OWLAnnotationProperty complexProp;
     
     private String tableName;
+    
+    private JScrollPane sp;
+    
+    private JLabel tableNameLabel;
+    
+    private JPanel tableHeaderPanel;
+    
+    private JButton addButton;
+    
+    private JButton editButton;
+    
+    private JButton deleteButton;
 
+    //private ActionListener actionListener;
+    
     public PropertyTablePanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
         initialiseOWLView();
@@ -65,6 +90,7 @@ public class PropertyTablePanel extends JPanel {
 
     protected void initialiseOWLView() {
         tableModel = new PropertyTableModel(owlEditorKit, complexProp);
+        createButtons(this);
         createUI();
         
     }
@@ -74,28 +100,28 @@ public class PropertyTablePanel extends JPanel {
         //setLayout(new BorderLayout());
     	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         //Box box = new Box(BoxLayout.Y_AXIS);
-        JTable table = new JTable(tableModel);
+        propertyTable = new JTable(tableModel);
         
-        table.setGridColor(Color.LIGHT_GRAY);
-        table.setRowHeight(table.getRowHeight() + 4);
-        table.setShowGrid(true);       
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        table.getTableHeader().setReorderingAllowed(true);
-        table.setFillsViewportHeight(true);
+        propertyTable.setGridColor(Color.LIGHT_GRAY);
+        propertyTable.setRowHeight(propertyTable.getRowHeight() + 4);
+        propertyTable.setShowGrid(true);       
+        propertyTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        propertyTable.getTableHeader().setReorderingAllowed(true);
+        propertyTable.setFillsViewportHeight(true);
         
         
-        table.addMouseListener(new MouseAdapter() {
+        /*propertyTable.addMouseListener(new MouseAdapter() {
 
             public void mousePressed(MouseEvent e) {
                 if(e.isPopupTrigger()) {
-                    handleTablePopupRequest(table, e);
+                    handleTablePopupRequest(propertyTable, e);
                 }
             }
 
 
             public void mouseReleased(MouseEvent e) {
                 if(e.isPopupTrigger()) {
-                    handleTablePopupRequest(table, e);
+                    handleTablePopupRequest(propertyTable, e);
                 }
             }
 
@@ -108,60 +134,94 @@ public class PropertyTablePanel extends JPanel {
                 popupMenu.show(table, e.getX(), e.getY());
                 
 
-            }});
+            }});*/
         
         
 
-        JScrollPane sp = new JScrollPane(table);
-    
-        /*final JPanel tablePanel = new JPanel(new BorderLayout());
-          
-            tablePanel.addMouseListener(new MouseAdapter() {
-
-                public void mousePressed(MouseEvent e) {
-                    if(e.isPopupTrigger()) {
-                        showMenu(e);
-                    }
-                }
-
-
-                public void mouseReleased(MouseEvent e) {
-                    if(e.isPopupTrigger()) {
-                        showMenu(e);
-                    }
-                }
-
-                private void showMenu(MouseEvent e) {
-                    JPopupMenu menu = new JPopupMenu();
-                    menu.add(new AbstractAction("Copy metrics to clipboard") {
-
-                        public void actionPerformed(ActionEvent e) {
-                            //exportCSV();
-                        }
-                    });
-                    menu.show(tablePanel, e.getX(), e.getY());
-                }
-            });
-            tablePanel.add(sp);*/
-            //tablePanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(2, 2, 14, 2),
-                                                                   //ComponentFactory.createTitledBorder("TestBAR")));
-            //table.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-            //box.add(tablePanel);
+        sp = new JScrollPane(propertyTable);
+        createLabelHeader(tableName, addButton, editButton, deleteButton);
+        add(tableHeaderPanel);
+        tableHeaderPanel.setVisible(false);
+        //tableNameLabel = new Label(tableName);
+        //add(tableNameLabel);
+        //tableNameLabel.setVisible(false);
         
-        //sp.setOpaque(false);
-        add(new Label(tableName));
+        //add(new PropertyEditButton("Add"));
+        //TestButton btn = new TestButton();
+        //add(btn);
+        sp.setVisible(false);
         add(sp);
     }
 
     public void setSelectedCls(OWLClass cls) {
     	tableModel.setSelection(cls);
+
+    	if (tableModel.hasAnnotation()) {
+    		//tableNameLabel.setVisible(true);
+    		tableHeaderPanel.setVisible(true);
+    		sp.setVisible(true);
+    	} else {
+    		//tableNameLabel.setVisible(false);
+    		tableHeaderPanel.setVisible(false);
+    		sp.setVisible(false);
+    	}
     	repaint();
     }
 
-
-
+    private void createLabelHeader(String labeltext, JButton b1, JButton b2, JButton b3){
+    	
+    	tableHeaderPanel = new JPanel();
+        
+    	tableHeaderPanel.setLayout(new BorderLayout());
+       // panel.setLayout(new BorderLayout());
+      //  panel.setPreferredSize(new Dimension(f.getWidth(), 25));
+        
+        
+        tableNameLabel = new JLabel(labeltext);
+        tableNameLabel.setPreferredSize(new Dimension(100, 25));
+        
+        
+        JPanel panel2 = new JPanel();
+        
+        panel2.setPreferredSize(new Dimension(80,25));
+        panel2.add(b1);
+        panel2.add(b2);
+        panel2.add(b3);
+        
+        tableHeaderPanel.add(tableNameLabel, BorderLayout.WEST);
+        tableHeaderPanel.add(panel2, BorderLayout.EAST);
+        
+    }
     
-    
+    private void createButtons(ActionListener actionListener) {
+    	addButton = new IconButton(NCIEditTabConstants.ADD, "ButtonAddIcon.png", NCIEditTabConstants.ADD, actionListener);
+    	editButton = new IconButton(NCIEditTabConstants.EDIT, "ButtonEditIcon.png", NCIEditTabConstants.EDIT, actionListener);
+    	deleteButton = new IconButton(NCIEditTabConstants.DELETE, "ButtonDeleteIcon.png", NCIEditTabConstants.DELETE, actionListener);
+    }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		if(e.getSource() instanceof IconButton){
+			IconButton button = (IconButton)e.getSource();
+			
+			if(button.getType() == NCIEditTabConstants.ADD){
+				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), null, tableModel.getSelectedPropertyOptions());
+				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
+				//upade view
+			}		
+			else if(button.getType() == NCIEditTabConstants.EDIT){
+				int row = propertyTable.getSelectedRow();
+				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(row), tableModel.getSelectedPropertyOptions());
+			    HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
+				//update view
+			}
+			else if(button.getType() == NCIEditTabConstants.DELETE){
+				//todo - delete seleted table row from table, update view
+	
+			}
+		}
+	}
 
     
 
