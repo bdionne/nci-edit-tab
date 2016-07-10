@@ -52,11 +52,6 @@
             <artifactId>protege-editor-owl</artifactId>
             <version>${protege.version}</version>
         </dependency>
-        <dependency>
-			<groupId>edu.stanford.protege</groupId>
-			<artifactId>protege-server</artifactId>
-			<version>3.0.0-SNAPSHOT</version>			
-		</dependency>
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>protege-client</artifactId>
@@ -92,8 +87,8 @@
                         <Bundle-ClassPath>.</Bundle-ClassPath>
                         <Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
                         <Bundle-Vendor>Dionne Associates, LLC.</Bundle-Vendor>
-                        <Embed-Dependency>protege-client</Embed-Dependency>
                         <Import-Package>
+                        	org.protege.editor.owl.client.*;version="3.0",
                         	okhttp3.*,                     	                                                    
                             *
                         </Import-Package>

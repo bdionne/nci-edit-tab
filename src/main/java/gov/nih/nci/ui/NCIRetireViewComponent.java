@@ -23,7 +23,7 @@ EditTabChangeListener {
 			
 			retirePanel.setOWLClass(NCIEditTab.currentTab().getRetireClass());
 			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
-	                "org.protege.editor.owl.client.RetireView");
+	                "nci-edit-tab.RetireView");
 			
 			setHeaderText(NCIEditTab.currentTab().getRetireClass().asOWLClass().getIRI().getShortForm());
 		}

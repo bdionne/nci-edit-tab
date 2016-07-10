@@ -84,6 +84,7 @@ import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
+import gov.nih.nci.utils.ReferenceFinder;
 
 public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionListener, UndoManagerListener {
 	private static final Logger log = Logger.getLogger(NCIEditTab.class);
@@ -307,14 +308,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	if (isPreMerged(merge_source)) {
     		
-    		Set<OWLAnnotationAssertionAxiom> props = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) merge_source);    		
+    		Set<OWLAnnotationAssertionAxiom> props = ontology.getAnnotationAssertionAxioms(merge_source.getIRI());    		
     		for (OWLAnnotationAssertionAxiom p : props) {
     			if (p.getProperty().equals(MERGE_TARGET)) {
     				changes.add(new RemoveAxiom(ontology, p));
     			}
     			
     		}
-    		props = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) merge_target);    		
+    		props = ontology.getAnnotationAssertionAxioms(merge_target.getIRI());    		
     		for (OWLAnnotationAssertionAxiom p : props) {
     			if (p.getProperty().equals(MERGE_SOURCE)) {
     				changes.add(new RemoveAxiom(ontology, p));
@@ -420,7 +421,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	changes.add(new RemoveAxiom(ontology, ax1));
         	
         }
-    	
+        
+        changes.addAll((new ReferenceFinder(getOWLModelManager())).retargetRefs(merge_source, merge_target));    	
     	return changes;
     	
     }
@@ -561,7 +563,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     }
     
-    public void commitChanges(ComplexEditType type) {
+    public void commitChanges() {
+    	
+    	ComplexEditType type = this.getComplexEditType();
     	
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	for (List<OWLOntologyChange> cs : getOWLModelManager().getHistoryManager().getLoggedChanges()) {
@@ -595,6 +599,32 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}
     	}
         
+    }
+    
+    private ComplexEditType getComplexEditType() {
+    	ComplexEditType type = ComplexEditType.MODIFY;
+    	if (NCIEditTab.currentTab().isRetiring()) {
+    		if (NCIEditTab.currentTab().isWorkFlowManager()) {
+    			type = ComplexEditType.RETIRE;
+    		} else {
+    			type = ComplexEditType.PRERETIRE;
+
+    		}
+    	}
+    	if (NCIEditTab.currentTab().isMerging()) {
+    		if (NCIEditTab.currentTab().isWorkFlowManager()) {
+    			type = ComplexEditType.MERGE;
+    		} else {
+    			type = ComplexEditType.PREMERGE;
+
+    		}
+
+    	}
+    	if (NCIEditTab.currentTab().isSplitting()) {
+    		type = ComplexEditType.SPLIT;
+    	}
+    	return type;
+
     }
     
     public void splitClass(OWLEntityCreationSet<OWLClass> set, OWLClass selectedClass) {

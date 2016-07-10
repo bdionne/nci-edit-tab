@@ -136,31 +136,7 @@ public class ComplexEditPanel extends JPanel {
         
     }
     
-    private ComplexEditType getComplexEditType() {
-    	ComplexEditType type = ComplexEditType.MODIFY;
-    	if (NCIEditTab.currentTab().isRetiring()) {
-    		if (NCIEditTab.currentTab().isWorkFlowManager()) {
-    			type = ComplexEditType.RETIRE;
-    		} else {
-    			type = ComplexEditType.PRERETIRE;
-
-    		}
-    	}
-    	if (NCIEditTab.currentTab().isMerging()) {
-    		if (NCIEditTab.currentTab().isWorkFlowManager()) {
-    			type = ComplexEditType.MERGE;
-    		} else {
-    			type = ComplexEditType.PREMERGE;
-
-    		}
-
-    	}
-    	if (NCIEditTab.currentTab().isSplitting()) {
-    		type = ComplexEditType.SPLIT;
-    	}
-    	return type;
-
-    }
+    
 
     private JPanel createJButtonPanel() {
 		buttonPanel = new JPanel();
@@ -175,7 +151,7 @@ public class ComplexEditPanel extends JPanel {
             		NCIEditTab.currentTab().merge();
             		saveButton.setText("Save");
             	} else {
-            		NCIEditTab.currentTab().commitChanges(getComplexEditType());
+            		NCIEditTab.currentTab().commitChanges();
             	}
             	
             }

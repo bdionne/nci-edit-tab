@@ -39,7 +39,7 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 
 import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
-import gov.nih.nci.utils.AxiomSorter;
+import gov.nih.nci.utils.ReferenceFinder;
 
 
 
@@ -127,7 +127,7 @@ public class RetirePanel extends JPanel {
     		// either first time in or a new class
     		classToRetire = inst;
 			upperPanelList.setRootObject(inst.getIRI()); 
-			fixups = (new AxiomSorter(owlEditorKit.getModelManager())).computeAnnotations(inst);
+			fixups = (new ReferenceFinder(owlEditorKit.getModelManager())).computeAnnotations(inst);
 			if (NCIEditTab.currentTab().isPreRetired(classToRetire)) {
 				retireButton.setText("Approve");
 			} else {
@@ -150,7 +150,7 @@ public class RetirePanel extends JPanel {
     				warnUsages();
     			} else if (retireButton.getText().equals("Save")) {
     				// TODO: refactor and move type check to edit tab
-    				NCIEditTab.currentTab().commitChanges(ComplexEditType.RETIRE);
+    				NCIEditTab.currentTab().commitChanges();
     				upperPanelList.setRootObject(null);
         			usage_panel.setOWLEntity(null);
     			} else if (retireButton.getText().equals("Approve")) {

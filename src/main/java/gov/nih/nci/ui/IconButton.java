@@ -27,7 +27,7 @@ public class IconButton extends JButton {
             //super();
 		this.type = type;
     	
-        ClassLoader classLoader = GuiUtils.class.getClassLoader();
+        ClassLoader classLoader = IconButton.class.getClassLoader();
         try {
             icon = ImageIO.read(checkNotNull(classLoader.getResource(iconfilename)));
         } catch (IOException e) {

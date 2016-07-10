@@ -60,7 +60,7 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 		} else {
 			if (NCIEditTab.currentTab().isRetiring()) {
 				getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
-		                "org.protege.editor.owl.client.EditView");
+		                "nci-edit-tab.EditView");
 			}
 		}
 	}

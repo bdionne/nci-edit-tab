@@ -157,7 +157,7 @@ public class EditPanel extends JPanel {
             {
             	// Do the save
                 if (shouldSave()) {
-                	NCIEditTab.currentTab().commitChanges(ComplexEditType.MODIFY);
+                	NCIEditTab.currentTab().commitChanges();
                 }
             	
             }
