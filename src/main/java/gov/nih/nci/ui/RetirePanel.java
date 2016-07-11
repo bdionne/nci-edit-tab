@@ -157,7 +157,7 @@ public class RetirePanel extends JPanel {
     				approveRetire();
     			} else {
     				// proceed to retire
-    				completeRetire();
+    				NCIEditTab.currentTab().completeRetire(fixups);
     				retireButton.setText("Save");
     				
     			}
@@ -193,55 +193,6 @@ public class RetirePanel extends JPanel {
     	
     }
     
-    private List<OWLOntologyChange> addParentRoleAssertions(List<OWLOntologyChange> changes, OWLClassExpression exp) {
-    	if (exp instanceof OWLClass) {
-    		if (this.classToRetire.equals(exp)) {
-    			// noop
-    		} else {
-    			OWLClass ocl  = (OWLClass) exp;
-    			String name = ocl.getIRI().getShortForm();
-    			OWLLiteral val = df.getOWLLiteral(name);
-    			OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.DEP_PARENT, classToRetire.getIRI(), val);
-    			changes.add(new AddAxiom(ont, ax));  
-    		}
-    	} else if (exp instanceof OWLQuantifiedObjectRestriction) {
-    		OWLQuantifiedObjectRestriction qobj = (OWLQuantifiedObjectRestriction) exp;
-    		OWLClassExpression rexp = qobj.getFiller();
-
-    		String fval;
-    		if (rexp instanceof OWLClass) {
-    			fval = ((OWLClass) rexp).getIRI().getShortForm();
-    		} else {
-    			fval = mngr.getRendering(rexp);
-    		}
-
-    		String quant = "some";
-    		if (exp instanceof OWLObjectSomeValuesFrom) {
-    			quant = "some";
-    		} else if (exp instanceof OWLObjectAllValuesFrom) {
-    			quant = "only";
-    		}
-    		String val = qobj.getProperty().asOWLObjectProperty().getIRI().getShortForm() + "|"
-    				+ quant + "|" + fval;
-    		OWLLiteral lit = df.getOWLLiteral(val);
-    		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.DEP_ROLE, classToRetire.getIRI(), lit);
-    		changes.add(new AddAxiom(ont, ax));
-    	} else if (exp instanceof OWLObjectIntersectionOf) {
-    		OWLObjectIntersectionOf oio = (OWLObjectIntersectionOf) exp;
-    		Set<OWLClassExpression> conjs = oio.asConjunctSet();
-    		for (OWLClassExpression c : conjs) {
-    			changes = addParentRoleAssertions(changes, c);
-    		}
-    	} else if (exp instanceof OWLObjectUnionOf) {
-    		OWLObjectUnionOf oio = (OWLObjectUnionOf) exp;
-    		Set<OWLClassExpression> conjs = oio.asDisjunctSet();
-    		for (OWLClassExpression c : conjs) {
-    			changes = addParentRoleAssertions(changes, c);
-    		}
-    	}
-    	return changes;
-
-    }
     
     public void approveRetire() {
     	
@@ -264,75 +215,5 @@ public class RetirePanel extends JPanel {
     }
     
     
-    public void completeRetire() {
-    	
-    	String editornote = "";
-        String designnote = "";
-        String prefix = "preretire_annotation";
-
-        
-        NoteDialog dlg = new NoteDialog(NCIEditTab.currentTab(), editornote, designnote,
-                                        prefix);
-        
-        editornote = dlg.getEditorNote();
-        designnote = dlg.getDesignNote();
-        
-    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();  
-    	
-    	OWLLiteral val = df.getOWLLiteral(editornote);
-		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.EDITOR_NOTE, classToRetire.getIRI(), val);
-		changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
-		
-		val = df.getOWLLiteral(designnote);
-		ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.DESIGN_NOTE, classToRetire.getIRI(), val);
-		changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
-        
-        Set<OWLSubClassOfAxiom> sub_axioms = ont.getSubClassAxiomsForSubClass(classToRetire);
-        
-        for (OWLSubClassOfAxiom ax1 : sub_axioms) {
-        	OWLClassExpression exp = ax1.getSuperClass();
-        	changes = addParentRoleAssertions(changes, exp);
-        	changes.add(new RemoveAxiom(ont, ax1));
-        	
-        }
-        
-        Set<OWLEquivalentClassesAxiom> equiv_axioms = ont.getEquivalentClassesAxioms(classToRetire);
-        
-        for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
-        	Set<OWLClassExpression> exps = ax1.getClassExpressions();
-        	for (OWLClassExpression exp : exps) {
-        		changes = addParentRoleAssertions(changes, exp);
-        	}
-        	changes.add(new RemoveAxiom(ont, ax1));
-        	
-        }
-        
-        for (OWLAnnotationProperty p : fixups.keySet()) {
-        	for (String s : fixups.get(p)) {
-        		OWLLiteral val1 = df.getOWLLiteral(s);
-        		OWLAxiom ax1 = df.getOWLAnnotationAssertionAxiom(p, classToRetire.getIRI(), val1);
-        		changes.add(new AddAxiom(mngr.getActiveOntology(), ax1));
-        		
-        	}
-        	
-        }
-        if (NCIEditTab.currentTab().isWorkFlowManager()) {
-        	changes.add(new AddAxiom(mngr.getActiveOntology(),
-        			df.getOWLSubClassOfAxiom(classToRetire, NCIEditTab.RETIRE_ROOT)));
-
-        } else {
-        	changes.add(new AddAxiom(mngr.getActiveOntology(),
-        			df.getOWLSubClassOfAxiom(classToRetire, NCIEditTab.PRE_RETIRE_ROOT))); 
-        }
-        
-        mngr.applyChanges(changes);
-        
-        
-        
-        
-        
-        
-        
     
-    }
 }
