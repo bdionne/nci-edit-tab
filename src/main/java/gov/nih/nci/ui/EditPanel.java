@@ -158,6 +158,8 @@ public class EditPanel extends JPanel {
             	// Do the save
                 if (shouldSave()) {
                 	NCIEditTab.currentTab().commitChanges();
+                	submitHistory();
+                	
                 }
             	
             }
@@ -187,6 +189,15 @@ public class EditPanel extends JPanel {
     	} else {
     		return true;
     	}
+    }
+    
+    public void submitHistory() {
+    	OWLClass cls = list.getRootObject();
+    	String c = cls.getIRI().getShortForm();
+    	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
+    	String op = ComplexEditType.MODIFY.toString();
+    	String ref = "";
+    	NCIEditTab.currentTab().putHistory(c, n, op, ref);
     }
     
     public void disposeView() {

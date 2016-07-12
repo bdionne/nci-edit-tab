@@ -285,10 +285,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
      * and there is no need for a separate operation
      * 
      */
-    public boolean canMerge() {
+    public boolean readyMerge() {
     	return (this.merge_source != null) &&
     			(this.merge_target != null);
     }
+    
+    public boolean canMerge() {
+    	return true;
+    }
+    
     public boolean canMerge(OWLClass cls) {
     	boolean can = clientSession.getActiveClient().canPerformProjectOperation(Operations.MERGE.getId()); 
     	if (can) {
@@ -666,6 +671,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
     }
     
+    public void putHistory(String c, String n, String op, String ref) {
+    	try {
+			((LocalHttpClient) clientSession.getActiveClient()).putEVSHistory(c, n, op, ref);
+		} catch (ClientRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    }
+    
+    
+    
     private ComplexEditType getComplexEditType() {
     	ComplexEditType type = ComplexEditType.MODIFY;
     	if (NCIEditTab.currentTab().isRetiring()) {
@@ -955,13 +972,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public OWLClass getClass(String code) {
 		OWLClass cls = null;
-		/**		
-		Set<OWLClass> set = getOWLModelManager().getOWLEntityFinder().getMatchingOWLClasses(CODE_PROP.getIRI().getNamespace() + code);		
 		
-		for (OWLEntity et : set) {
-			cls = et.asOWLClass();
-		}
-		**/
 		IRI iri = IRI.create(CODE_PROP.getIRI().getNamespace() + code);
 		
 		Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);

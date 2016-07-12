@@ -300,7 +300,7 @@ public class ComplexEditPanel extends JPanel {
     }
     
     private void checkStatus() {
-    	if (NCIEditTab.currentTab().canMerge()) {
+    	if (NCIEditTab.currentTab().readyMerge()) {
     		saveButton.setText("Merge");
     	}
     }
