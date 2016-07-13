@@ -15,6 +15,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -204,24 +205,34 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 		// TODO Auto-generated method stub
 		if(e.getSource() instanceof IconButton){
 			IconButton button = (IconButton)e.getSource();
-			
+
 			if(button.getType() == NCIEditTabConstants.ADD){
 				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), null, tableModel.getSelectedPropertyOptions());
 				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
+				if (data != null) {
+					((PropertyTableModel)propertyTable.getModel()).addRow(data);
+				}
 				System.out.println("The data: " + data);
 				//upade view
 			}		
 			else if(button.getType() == NCIEditTabConstants.EDIT){
 				int row = propertyTable.getSelectedRow();
 				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(row), tableModel.getSelectedPropertyOptions());
-			    HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
-			    System.out.println("The data: " + data);
-			    			    
+				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
+				System.out.println("The data: " + data);
+
 				//update view
 			}
 			else if(button.getType() == NCIEditTabConstants.DELETE){
+				int row = propertyTable.getSelectedRow();
+				if (row >= 0) {
+					int ret = JOptionPane.showConfirmDialog(this, "Please confirm if you want to delete the selected property!", "Delete Confirmation", JOptionPane.OK_CANCEL_OPTION);
+					if (ret == JOptionPane.OK_OPTION) {
+						((PropertyTableModel)propertyTable.getModel()).removeRow(row);
+					}
+				}
 				//todo - delete seleted table row from table, update view
-	
+
 			}
 		}
 	}
