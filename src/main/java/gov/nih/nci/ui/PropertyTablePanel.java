@@ -215,6 +215,8 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				int row = propertyTable.getSelectedRow();
 				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(row), tableModel.getSelectedPropertyOptions());
 			    HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
+			    System.out.println("The data: " + data);
+			    			    
 				//update view
 			}
 			else if(button.getType() == NCIEditTabConstants.DELETE){

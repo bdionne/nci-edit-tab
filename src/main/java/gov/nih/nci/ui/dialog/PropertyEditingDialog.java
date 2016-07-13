@@ -102,6 +102,10 @@ public class PropertyEditingDialog extends JPanel {
     	areaPanel.add(new JScrollPane(area), BorderLayout.CENTER);
     	areaPanel.setPreferredSize(new Dimension(400, 100));
     	
+    	propcomponentmap.put(prop, area);
+    	
+    	
+    	
     	return areaPanel;
     }
     
@@ -123,6 +127,8 @@ public class PropertyEditingDialog extends JPanel {
     	
     	panel.setPreferredSize(new Dimension(400, 25));
     	
+    	propcomponentmap.put(prop, textfield);
+    	
     	return panel;
     }
     
@@ -142,6 +148,8 @@ public class PropertyEditingDialog extends JPanel {
     	panel.add(combobox, BorderLayout.EAST);
     	panel.setPreferredSize(new Dimension(400, 25));
     	
+    	propcomponentmap.put(prop, combobox);
+    	
     	return panel;
     }
     
@@ -158,21 +166,21 @@ public class PropertyEditingDialog extends JPanel {
     	for(int i =0; i < textAreaProps.size(); i++){
     		
     		JPanel areapanel = createTextAreaPanel(textAreaProps.get(i));
-    		propcomponentmap.put(textAreaProps.get(i), areapanel);
+    		
     		this.add(areapanel);
     	}
     	
        for(int i =0; i < textFieldProps.size(); i++){
     		
     		JPanel textfieldpanel = createTextFieldPanel(textFieldProps.get(i));
-    		propcomponentmap.put(textFieldProps.get(i), textfieldpanel);
+    		//propcomponentmap.put(textFieldProps.get(i), textfieldpanel);
     		this.add(textfieldpanel);
     	}
        
        for(int i =0; i < comboBoxProps.size(); i++){
    		
    		JPanel comboboxpanel = createComboBoxPanel(comboBoxProps.get(i), propoptions.get(comboBoxProps.get(i)).toArray(new String[propoptions.get(comboBoxProps.get(i)).size()]));
-   		propcomponentmap.put(comboBoxProps.get(i), comboboxpanel);
+   		//propcomponentmap.put(comboBoxProps.get(i), comboboxpanel);
    		this.add(comboboxpanel);
    	}
     }

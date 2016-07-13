@@ -1109,12 +1109,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		for (OWLAnnotationAssertionAxiom ax : props) {
     			
     			if (ax.getProperty().equals(complex_prop)) {
+    				
+    				changes.add(new RemoveAxiom(ontology, ax));
+    				OWLAnnotationAssertionAxiom new_ax = df.getOWLAnnotationAssertionAxiom(ax.getProperty(),
+    						cls.getIRI(), df.getOWLLiteral(ann_vals.get("Value")));
+    				changes.add(new AddAxiom(ontology, new_ax));
     				        			
         			for (OWLAnnotationAssertionAxiom annax : EntitySearcher.getAnnotationAssertionAxioms(ax.getProperty(), ontology)) {
         				changes.add(new RemoveAxiom(ontology, annax));
         				String new_val = ann_vals.get(annax.getProperty().getIRI().getShortForm());
         				OWLAnnotationAssertionAxiom new_annax = df.getOWLAnnotationAssertionAxiom(annax.getProperty(),
-        						ax.getProperty().getIRI(), df.getOWLLiteral(new_val));
+        						new_ax.getProperty().getIRI(), df.getOWLLiteral(new_val));
         				changes.add(new AddAxiom(ontology, new_annax));
         			}
         			
@@ -1123,6 +1128,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			
     		}
     	}
+    	getOWLModelManager().applyChanges(changes);
 	}
 	
 }
