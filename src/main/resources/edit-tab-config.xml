@@ -6,17 +6,15 @@
                 <Property id="pluginId" value="nci-edit-tab.NCIOWLAssertedClassHierarchy"/>
             </Component>            
         </CNode>        
-         <CNode>
-         <!-- 
-            <Component label="Properties">
-                <Property id="pluginId" value="nci-edit-tab.PropertyTableView"/>
-            </Component>
-             -->
+         <CNode>             
             <Component label="Edit">
                 <Property id="pluginId" value="nci-edit-tab.EditView"/>
             </Component>
         	<Component label="ComplexEdit">
         		<Property id="pluginId" value="nci-edit-tab.ComplexEditView"/>
+        	</Component>
+        	<Component label="Retire">
+        		<Property id="pluginId" value="nci-edit-tab.RetireView"/>
         	</Component>
         	      
         </CNode>         

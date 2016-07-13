@@ -11,10 +11,10 @@ import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.protege.editor.owl.ui.transfer.OWLObjectDataFlavor;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.ComplexEditPanel;
+import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 
 public class ListTransferHandler extends TransferHandler {
@@ -54,24 +54,29 @@ public class ListTransferHandler extends TransferHandler {
 			return false;
 		}
 		
-		if(complexEditPanel.isSplitBtnSelected() || complexEditPanel.isCloneBtnSelected()) {
-			OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(complexEditPanel.getEditorKit(),
-					"Please enter a class name", OWLClass.class);
-			
-			if (set != null) {
-				
-				OWLAnnotationSubject newObject = (OWLAnnotationSubject)data.get(0).getIRI();
-				complexEditPanel.getUpperPanelList().setRootObject(newObject);
-				complexEditPanel.getLowerPanelList().setRootObject(newObject);
-				complexEditPanel.setEnableUnselectedRadioButtons(false);
-	        }
-		} else if (complexEditPanel.isMergeBtnSelected()) {
-			OWLFrameList<IRI> list = (OWLFrameList<IRI>)support.getComponent();
-			list.setRootObject(data.get(0).getIRI());
+		if (complexEditPanel.isSplitBtnSelected() || complexEditPanel.isCloneBtnSelected()) {
+			if (NCIEditTab.currentTab().canSplit(data.get(0))) {
+				// if you can split you can clone
+				OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(complexEditPanel.getEditorKit(),
+						"Please enter a class name", OWLClass.class);
+
+				if (set != null) {
+
+					NCIEditTab.currentTab().splitClass(set, data.get(0));
+					complexEditPanel.setEnableUnselectedRadioButtons(false);
+					return true;
+				}
+				return false;
+			} else {
+				JOptionPane.showMessageDialog(complexEditPanel, 
+						"Can't split or clone a retired class.", "Warning", JOptionPane.WARNING_MESSAGE);
+				return false;
+			}
+		} else if (complexEditPanel.isMergeBtnSelected()) {	
+			// TODO: need check for canMerge here
+			complexEditPanel.dropOnComp(support.getComponent(), data.get(0));
 			complexEditPanel.setEnableUnselectedRadioButtons(false);
 			
-		} else if (complexEditPanel.isRetireBtnSelected()) {
-			//handleRetire();
 		} else {
 			JOptionPane.showMessageDialog(complexEditPanel, "One editing option has to be selected.", "Warning", JOptionPane.WARNING_MESSAGE);
 		}

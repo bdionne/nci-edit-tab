@@ -2,35 +2,98 @@ package gov.nih.nci.ui;
 
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.protege.editor.owl.client.ClientSession;
+import org.protege.editor.owl.client.ClientSessionChangeEvent;
+import org.protege.editor.owl.client.ClientSessionChangeEvent.EventCategory;
+import org.protege.editor.owl.client.ClientSessionListener;
+import org.protege.editor.owl.client.LocalHttpClient;
+import org.protege.editor.owl.client.api.exception.ClientRequestException;
+import org.protege.editor.owl.client.util.ClientUtils;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.OWLModelManagerImpl;
+import org.protege.editor.owl.model.entity.OWLEntityCreationException;
+import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.history.HistoryManager;
+import org.protege.editor.owl.model.history.HistoryManagerImpl;
+import org.protege.editor.owl.model.history.UndoManagerListener;
+import org.protege.editor.owl.server.api.CommitBundle;
+import org.protege.editor.owl.server.api.exception.AuthorizationException;
+import org.protege.editor.owl.server.api.exception.OutOfSyncException;
+import org.protege.editor.owl.server.policy.CommitBundleImpl;
+import org.protege.editor.owl.server.versioning.Commit;
+import org.protege.editor.owl.server.versioning.api.ChangeHistory;
+import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
+import org.protege.editor.owl.ui.renderer.OWLEntityAnnotationValueRenderer;
+import org.protege.editor.owl.ui.renderer.OWLModelManagerEntityRenderer;
+import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
+import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
+import org.semanticweb.owlapi.model.OWLAnnotationValueVisitor;
+import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataOneOf;
+import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
+import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedObject;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
+import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLQuantifiedObjectRestriction;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.search.EntitySearcher;
+import org.semanticweb.owlapi.util.OWLObjectDuplicator;
 
-import com.google.common.base.Optional;
-
+import edu.stanford.protege.metaproject.api.Operation;
+import edu.stanford.protege.metaproject.api.Project;
+import edu.stanford.protege.metaproject.api.ProjectOptions;
+import edu.stanford.protege.metaproject.api.Role;
+import edu.stanford.protege.metaproject.impl.Operations;
+import edu.stanford.protege.metaproject.impl.RoleIdImpl;
+import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
-import gov.nih.nci.utils.MetaprojectMock;
+import gov.nih.nci.utils.ReferenceFinder;
+import gov.nih.nci.utils.ReferenceReplace;
 
-public class NCIEditTab extends OWLWorkspaceViewsTab {
+public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionListener, UndoManagerListener {
 	private static final Logger log = Logger.getLogger(NCIEditTab.class);
 	private static final long serialVersionUID = -4896884982262745722L;
+	
+	private static final String COMPLEX_PROPS = "complex_properties";
+	private static final String IMMUTABLE_PROPS = "immutable_properties";
+	
 	
 	private static NCIEditTab tab;
 	
@@ -40,6 +103,26 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 	
 	private OWLClass split_source;
 	private OWLClass split_target;
+	private OWLClass merge_source;
+	private OWLClass merge_target;
+	private OWLClass retire_class;
+	
+	private boolean isRetiring = false;
+	
+	
+	public boolean isRetiring() {
+		return isRetiring;
+	}
+	
+	public boolean isMerging() {
+		return (merge_source != null) &&
+				(merge_target != null);
+	}
+	
+	public boolean isSplitting() {
+		return (split_source != null) &&
+				(split_target != null);
+	}
 	
 	public OWLClass getSplitSource() {
 		return split_source;
@@ -48,17 +131,31 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 	public OWLClass getSplitTarget() {
 		return split_target;
 	}
+	
+	public OWLClass getRetireClass() {
+		return retire_class;		
+	}
+	
+	public void setMergeSource(OWLClass cls) {
+		this.merge_source = cls;
+	}
+	
+	public void setMergeTarget(OWLClass cls) {
+		this.merge_target = cls;
+	}
 		
 	// use undo/redo facility
 	private HistoryManager history;
 	
-	private MetaprojectMock mock;
+	private ClientSession clientSession = null;
 	
 	private OWLOntology ontology;
 	
 	private OWLModelManagerListener ont_listen;
 	
 	private static ArrayList<EditTabChangeListener> event_listeners = new ArrayList<EditTabChangeListener>();
+	
+	
 	
 	public static void addListener(EditTabChangeListener l) {
 		event_listeners.add(l);
@@ -77,11 +174,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 	}
 	
 	
-	/** create a map of property names, .ie. their rdfs:labels, in order to look up properties
-	 * to populate specific collections
-	 * 
-	 */
-	private Map<String, OWLAnnotationProperty> label_map = new HashMap<String, OWLAnnotationProperty>();
+	
 	
 	private Set<OWLAnnotationProperty> complex_properties = new HashSet<OWLAnnotationProperty>();
 	
@@ -92,6 +185,30 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 			new HashMap<OWLAnnotationProperty, Set<OWLAnnotationProperty>>();
 	
 	private Set<OWLAnnotationProperty> immutable_properties = new HashSet<OWLAnnotationProperty>();
+	
+	private Set<OWLClass> required_entities = new HashSet<OWLClass>();
+	
+	public static OWLAnnotationProperty DEP_PARENT;
+	public static OWLAnnotationProperty DEP_CHILD;
+	public static OWLAnnotationProperty DEP_ROLE;
+	public static OWLAnnotationProperty DEP_ASSOC;
+	public static OWLAnnotationProperty DEP_IN_ROLE;
+	public static OWLAnnotationProperty DEP_IN_ASSOC;
+	
+	public static OWLAnnotationProperty MERGE_SOURCE;
+	public static OWLAnnotationProperty MERGE_TARGET;
+	public static OWLAnnotationProperty SPLIT_FROM;
+	
+	public static OWLAnnotationProperty DESIGN_NOTE;
+	public static OWLAnnotationProperty EDITOR_NOTE;
+	
+	public static OWLAnnotationProperty CODE_PROP;
+	public static OWLAnnotationProperty LABEL_PROP;
+	public static OWLAnnotationProperty PREF_NAME;
+	
+	public static OWLClass PRE_RETIRE_ROOT;
+	public static OWLClass PRE_MERGE_ROOT;
+	public static OWLClass RETIRE_ROOT;
 			
 
 	public NCIEditTab() {
@@ -99,8 +216,21 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 		tab = this;
 	}
 	
+	public String generateCode() {
+		LocalHttpClient cl = (LocalHttpClient) clientSession.getActiveClient();
+		return cl.getCode();
+	}
+	
+	public Set<OWLClass> getRequiredEntities() {
+		return required_entities;
+	}
+	
 	public Set<OWLAnnotationProperty> getComplexProperties() {
 		return complex_properties;
+	}
+	
+	public Set<OWLAnnotationProperty> getImmutableProperties() {
+		return immutable_properties;
 	}
 	
 	public Set<OWLAnnotationProperty> getRequiredAnnotationsForAnnotation(OWLAnnotationProperty annp) {
@@ -112,13 +242,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 		return optional_annotation_dependencies.get(annp);
 		
 	}
-	
-	
 
     @Override
 	public void initialise() {
 		super.initialise();
 		log.info("NCI Edit Tab initialized");
+		
+		
 		
 		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
 		 * of additional times when the app initializes.
@@ -128,30 +258,295 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
 			@Override
 			public void handleChange(OWLModelManagerChangeEvent event) {
 				if (event.getType() == EventType.ACTIVE_ONTOLOGY_CHANGED) {
+					if (clientSession == null) {
+						// only initialize the ClientSession once, it maintains the
+						// switches between ontologies
+						clientSession = ClientSession.getInstance(getOWLEditorKit());
+						addListener();
+				        
+					}
 					ontology = getOWLModelManager().getActiveOntology();
-					initProperties();
 				}				
 			}			
 		};
 		
-		this.getOWLModelManager().addListener(ont_listen);
-		
-		// assuming we can gain access to the metaproject at this point
-		// and the project will have been selected, etc...
-		mock = new MetaprojectMock();	
-				
-		history = this.getOWLModelManager().getHistoryManager();
-		
-		
+		this.getOWLEditorKit().getOWLModelManager().addListener(ont_listen);
+						
+		history = new HistoryManagerImpl(this.getOWLModelManager().getOWLOntologyManager());	
+		history.addUndoManagerListener(this);		
 	}
+    
+    public void logChanges(List<OWLOntologyChange> changes) {
+    	history.logChanges(changes);
+    }
     
     /** Anyone can pre-merge so there is no need for a separate operation. A pre-merged class exists
      * as a subclass of the pre-merged root, so we can readily distinguish a pre-merge from a merge
      * and there is no need for a separate operation
      * 
      */
+    public boolean readyMerge() {
+    	return (this.merge_source != null) &&
+    			(this.merge_target != null);
+    }
+    
     public boolean canMerge() {
     	return true;
+    }
+    
+    public boolean canMerge(OWLClass cls) {
+    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(Operations.MERGE.getId()); 
+    	if (can) {
+    		if (isPreMerged(cls)) {
+    			return isWorkFlowManager();    			
+    		} else if (isPreRetired(cls)) {
+    			return false;
+    		} else if (isRetired(cls)) {
+    			return false;
+    		}
+    	}
+    	return can;
+    }
+    
+    public void merge() {
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
+    	
+    	if (isPreMerged(merge_source)) {
+    		
+    		Set<OWLAnnotationAssertionAxiom> props = ontology.getAnnotationAssertionAxioms(merge_source.getIRI());    		
+    		for (OWLAnnotationAssertionAxiom p : props) {
+    			if (p.getProperty().equals(MERGE_TARGET)) {
+    				changes.add(new RemoveAxiom(ontology, p));
+    			}
+    			
+    		}
+    		props = ontology.getAnnotationAssertionAxioms(merge_target.getIRI());    		
+    		for (OWLAnnotationAssertionAxiom p : props) {
+    			if (p.getProperty().equals(MERGE_SOURCE)) {
+    				changes.add(new RemoveAxiom(ontology, p));
+    			}
+    			
+    		}
+    		changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(),
+					df.getOWLSubClassOfAxiom(merge_source, NCIEditTab.RETIRE_ROOT))); 
+			// finalize merge
+			// remove parents and roles, OLD_ROLE OLD_PARENT
+			// retarget inbound roles and children
+			// reuse retire logic for this
+			changes.addAll(finalizeMerge());
+    		
+    	} else {
+    		
+    		String editornote = "Merge into " + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")";
+    		editornote += ", " + clientSession.getActiveClient().getUserInfo().getName();
+    		
+    		String designnote = "See '" + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")" + "'";
+
+    		String prefix = "premerge_annotation";
+    		
+    		List<OWLOntologyChange> dcs = addNotes(editornote, designnote, prefix, merge_source);
+    		
+    		changes.addAll(dcs);
+
+            
+            
+    		// if workflow modeler, add MERGE_TARGET/SOURCE props and tree under pre-merged
+    		
+    		if (!isWorkFlowManager()) {
+
+    			OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.MERGE_TARGET, 
+    					merge_source.getIRI(), 
+    					df.getOWLLiteral(merge_target.getIRI().getShortForm()));
+    			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
+
+    			ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.MERGE_SOURCE, 
+    					merge_target.getIRI(), 
+    					df.getOWLLiteral(merge_source.getIRI().getShortForm()));
+    			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
+
+    			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(),
+    					df.getOWLSubClassOfAxiom(merge_source, NCIEditTab.PRE_MERGE_ROOT))); 
+    		} else {
+    			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(),
+    					df.getOWLSubClassOfAxiom(merge_source, NCIEditTab.RETIRE_ROOT))); 
+    			// finalize merge
+    			// remove parents and roles, OLD_ROLE OLD_PARENT
+    			// retarget inbound roles and children
+    			// reuse retire logic for this
+    			changes.addAll(finalizeMerge());
+    		}
+    		
+    		
+    		
+    	} 
+    	getOWLModelManager().applyChanges(changes);
+    	
+    }
+    
+    List<OWLOntologyChange> finalizeMerge() {
+    	
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	
+    	changes.addAll((new ReferenceReplace(getOWLModelManager())).retargetRefs(merge_source, merge_target)); 
+    	
+    	
+    	// from retire panel, refactor
+    	Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(merge_source);
+        
+        for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+        	OWLClassExpression exp = ax1.getSuperClass();
+        	changes = addParentRoleAssertions(changes, exp, merge_source);
+        	changes.add(new RemoveAxiom(ontology, ax1));
+        	
+        }
+        
+        Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(merge_source);
+        
+        for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+        	Set<OWLClassExpression> exps = ax1.getClassExpressions();
+        	for (OWLClassExpression exp : exps) {
+        		changes = addParentRoleAssertions(changes, exp, merge_source);
+        	}
+        	changes.add(new RemoveAxiom(ontology, ax1));
+        	
+        }
+        
+           	
+    	return changes;
+    	
+    }
+    
+    public List<OWLOntologyChange> addNotes(String editornote, String designnote, String prefix, OWLClass cls) {
+    	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	NoteDialog dlg = new NoteDialog(NCIEditTab.currentTab(), editornote, designnote,
+                prefix);
+
+    	editornote = dlg.getEditorNote();
+    	designnote = dlg.getDesignNote();       	
+
+
+    	OWLLiteral val = df.getOWLLiteral(editornote);
+    	OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.EDITOR_NOTE, cls.getIRI(), val);
+    	changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
+
+    	val = df.getOWLLiteral(designnote);
+    	ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.DESIGN_NOTE, cls.getIRI(), val);
+    	changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
+    	return changes;
+
+    }
+    
+    public void completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {		
+    	
+    	String editornote = "";
+        String designnote = "";
+        String prefix = "preretire_annotation";        
+        
+    	List<OWLOntologyChange> changes = addNotes(editornote, designnote, prefix, retire_class);
+    	
+    	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();    	
+        
+        Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(retire_class);
+        
+        for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+        	OWLClassExpression exp = ax1.getSuperClass();
+        	changes = addParentRoleAssertions(changes, exp, retire_class);
+        	changes.add(new RemoveAxiom(ontology, ax1));
+        	
+        }
+        
+        Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(retire_class);
+        
+        for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+        	Set<OWLClassExpression> exps = ax1.getClassExpressions();
+        	for (OWLClassExpression exp : exps) {
+        		changes = addParentRoleAssertions(changes, exp, retire_class);
+        	}
+        	changes.add(new RemoveAxiom(ontology, ax1));
+        	
+        }
+        
+        for (OWLAnnotationProperty p : fixups.keySet()) {
+        	for (String s : fixups.get(p)) {
+        		OWLLiteral val1 = df.getOWLLiteral(s);
+        		OWLAxiom ax1 = df.getOWLAnnotationAssertionAxiom(p, retire_class.getIRI(), val1);
+        		changes.add(new AddAxiom(ontology, ax1));
+        		
+        	}
+        	
+        }
+        if (NCIEditTab.currentTab().isWorkFlowManager()) {
+        	changes.add(new AddAxiom(ontology,
+        			df.getOWLSubClassOfAxiom(retire_class, NCIEditTab.RETIRE_ROOT)));
+
+        } else {
+        	changes.add(new AddAxiom(ontology,
+        			df.getOWLSubClassOfAxiom(retire_class, NCIEditTab.PRE_RETIRE_ROOT))); 
+        }
+        
+        getOWLModelManager().applyChanges(changes);
+        
+        
+        
+        
+        
+        
+        
+    
+    }
+    
+    private List<OWLOntologyChange> addParentRoleAssertions(List<OWLOntologyChange> changes, OWLClassExpression exp, OWLClass cls) {
+    	OWLModelManager mngr = getOWLModelManager();
+    	OWLDataFactory df = mngr.getOWLDataFactory();
+    	if (exp instanceof OWLClass) {
+    		if (cls.equals(exp)) {
+    			// noop
+    		} else {
+    			OWLClass ocl  = (OWLClass) exp;
+    			String name = ocl.getIRI().getShortForm();
+    			OWLLiteral val = df.getOWLLiteral(name);
+    			OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.DEP_PARENT, cls.getIRI(), val);
+    			changes.add(new AddAxiom(ontology, ax));  
+    		}
+    	} else if (exp instanceof OWLQuantifiedObjectRestriction) {
+    		OWLQuantifiedObjectRestriction qobj = (OWLQuantifiedObjectRestriction) exp;
+    		OWLClassExpression rexp = qobj.getFiller();
+
+    		String fval;
+    		if (rexp instanceof OWLClass) {
+    			fval = ((OWLClass) rexp).getIRI().getShortForm();
+    		} else {
+    			fval = mngr.getRendering(rexp);
+    		}
+
+    		String quant = "some";
+    		if (exp instanceof OWLObjectSomeValuesFrom) {
+    			quant = "some";
+    		} else if (exp instanceof OWLObjectAllValuesFrom) {
+    			quant = "only";
+    		}
+    		String val = qobj.getProperty().asOWLObjectProperty().getIRI().getShortForm() + "|"
+    				+ quant + "|" + fval;
+    		OWLLiteral lit = df.getOWLLiteral(val);
+    		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.DEP_ROLE, cls.getIRI(), lit);
+    		changes.add(new AddAxiom(ontology, ax));
+    	} else if (exp instanceof OWLObjectIntersectionOf) {
+    		OWLObjectIntersectionOf oio = (OWLObjectIntersectionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asConjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			changes = addParentRoleAssertions(changes, c, cls);
+    		}
+    	} else if (exp instanceof OWLObjectUnionOf) {
+    		OWLObjectUnionOf oio = (OWLObjectUnionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asDisjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			changes = addParentRoleAssertions(changes, c, cls);
+    		}
+    	}
+    	return changes;
+
     }
     
     /** Anyone can pre-retire so there is no need for a separate pre-retire step. There is just retire.
@@ -159,114 +554,581 @@ public class NCIEditTab extends OWLWorkspaceViewsTab {
      * review and only an admin user can do so. 
      * 
      */
-    public boolean canRetire() {
-    	return true;
+    public boolean canRetire(OWLClass cls) {
+    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(Operations.RETIRE.getId()); 
+    	if (can) {
+    		if (isPreRetired(cls)) {
+    			return isWorkFlowManager();    			
+    		} else if (isRetired(cls)) {
+    			return false;
+    		}
+    	}
+    	return can;
     }
     
-    public boolean canSplit() {
-    	return true;
-    }
-    
-    public void splitClass(OWLClass from, OWLClass newClass) {
-    	split_source = from;
-    	split_target = newClass;
-    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT));   	
+    public void retire(OWLClass selectedClass) {
+    	retire_class = selectedClass;
+    	isRetiring = true;
+    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE)); 
     	
     }
     
-    public boolean canClone() {
-    	return true;
+    public boolean isWorkFlowManager() {
+    	Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
+    	try {
+			return clientSession.getActiveClient().getActiveRoles().contains(wfm);
+		} catch (ClientRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return false;
+    }
+    
+    public boolean isPreRetired(OWLClass cls) {
+    	return isSubClass(cls, NCIEditTab.PRE_RETIRE_ROOT);    	
+    }
+    
+    public boolean isPreMerged(OWLClass cls) {
+    	return isSubClass(cls, NCIEditTab.PRE_MERGE_ROOT);    	
+    }
+    
+    public boolean isRetired(OWLClass cls) {
+    	return isSubClass(cls, NCIEditTab.RETIRE_ROOT);
+    }
+    
+    public boolean isSubClass(OWLClass sub, OWLClass sup) {
+    	    	
+    	Set<OWLSubClassOfAxiom> subs = ontology.getSubClassAxiomsForSubClass(sub);
+    	for (OWLSubClassOfAxiom s : subs) {
+    		if (!s.getSuperClass().isAnonymous()) {
+    			if (s.getSuperClass().asOWLClass().equals(sup)) {
+    				return true;
+    			}
+    		}    		
+    	}
+    	return false;    	
+    }
+    
+    public void updateRetire() {
+    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
+    	
+    }
+    
+    public void completeRetire() {
+    	this.isRetiring = false;
+    }
+    
+    public boolean canSplit(OWLClass cls) {
+    	return !(isPreRetired(cls) || isRetired(cls));
+    }
+    
+    public String getCode() {
+		LocalHttpClient cl = (LocalHttpClient) clientSession.getActiveClient();
+		return cl.getCode();
+	}
+    
+    public void undoChanges() {
+    	while (getOWLModelManager().getHistoryManager().canUndo()) {
+    		getOWLModelManager().getHistoryManager().undo();
+    	}
+    }
+    
+    public void commitChanges() {
+    	
+    	ComplexEditType type = this.getComplexEditType();
+    	
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	for (List<OWLOntologyChange> cs : getOWLModelManager().getHistoryManager().getLoggedChanges()) {
+    		changes.addAll(cs);
+    	}
+
+    	if (changes.size() > 0) {
+
+    		String comment = type.name();
+    		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
+
+    		DocumentRevision base;
+    		try {
+    			base = ((LocalHttpClient) clientSession.getActiveClient()).getRemoteHeadRevision(clientSession.getActiveVersionOntology());
+    			CommitBundle commitBundle = new CommitBundleImpl(base, commit);
+    			ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
+    			clientSession.getActiveVersionOntology().update(hist);
+    			resetHistory();
+    		} catch (ClientRequestException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (AuthorizationException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (OutOfSyncException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (RemoteException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+    	}
+        
+    }
+    
+    public void putHistory(String c, String n, String op, String ref) {
+    	try {
+			((LocalHttpClient) clientSession.getActiveClient()).putEVSHistory(c, n, op, ref);
+		} catch (ClientRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    }
+    
+    
+    
+    private ComplexEditType getComplexEditType() {
+    	ComplexEditType type = ComplexEditType.MODIFY;
+    	if (NCIEditTab.currentTab().isRetiring()) {
+    		if (NCIEditTab.currentTab().isWorkFlowManager()) {
+    			type = ComplexEditType.RETIRE;
+    		} else {
+    			type = ComplexEditType.PRERETIRE;
+
+    		}
+    	}
+    	if (NCIEditTab.currentTab().isMerging()) {
+    		if (NCIEditTab.currentTab().isWorkFlowManager()) {
+    			type = ComplexEditType.MERGE;
+    		} else {
+    			type = ComplexEditType.PREMERGE;
+
+    		}
+
+    	}
+    	if (NCIEditTab.currentTab().isSplitting()) {
+    		type = ComplexEditType.SPLIT;
+    	}
+    	return type;
+
+    }
+    
+    public void splitClass(OWLEntityCreationSet<OWLClass> set, OWLClass selectedClass) {
+    	
+		
+		OWLClass newClass = set.getOWLEntity();
+		String preferredName = newClass.getIRI().getRemainder().or("NONE");
+		
+		String gen_code = NCIEditTab.currentTab().generateCode();
+		
+		OWLEntityCreationSet<OWLClass> newSet = null;
+		
+		try {
+			newSet = getOWLEditorKit().getModelManager().getOWLEntityFactory().createOWLEntity(
+					OWLClass.class, gen_code, null);
+		} catch (OWLEntityCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+        if (set != null){
+            Map<IRI, IRI> replacementIRIMap = new HashMap<>();
+            replacementIRIMap.put(selectedClass.getIRI(), newSet.getOWLEntity().getIRI());
+            OWLModelManager mngr = getOWLModelManager();
+            OWLObjectDuplicator dup = new OWLObjectDuplicator(mngr.getOWLDataFactory(), replacementIRIMap);
+            List<OWLOntologyChange> changes = new ArrayList<>(newSet.getOntologyChanges());
+
+            changes.addAll(duplicateClassAxioms(selectedClass, dup));
+            
+            changes.addAll(duplicateAnnotations(selectedClass, dup));
+
+           
+            
+            
+            OWLClass newClass1 = newSet.getOWLEntity();
+            
+            
+            
+            
+            
+            
+            
+            
+            OWLDataFactory df = mngr.getOWLDataFactory();
+            
+            
+           
+            
+            OWLLiteral gen_code_val = df.getOWLLiteral(gen_code);
+            OWLLiteral pref_name_val = df.getOWLLiteral(preferredName);
+            
+            OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.CODE_PROP, newClass1.getIRI(), gen_code_val);
+            // note that Preferred_Name and rdfs:label are set to be the same
+            OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.LABEL_PROP, newClass1.getIRI(), pref_name_val);
+            OWLAxiom ax3 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.PREF_NAME, newClass1.getIRI(), pref_name_val);
+            changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
+            changes.add(new AddAxiom(mngr.getActiveOntology(), ax2));
+            changes.add(new AddAxiom(mngr.getActiveOntology(), ax3));
+            
+            mngr.applyChanges(changes);            
+            
+            split_source = selectedClass;
+        	split_target = newClass1;
+        	
+        	logChanges(changes);
+        	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
+        	
+        }
+        
+		
+    	 	
+    	
+    }
+    
+    public boolean canClone(OWLClass cls) {
+    	return canSplit(cls);
     }
 
 	@Override
 	public void dispose() {
 		this.getOWLModelManager().removeListener(ont_listen);
+		clientSession.removeListener(this);
 		super.dispose();
 		log.info("Disposed of NCI Edit Tab");
 	}
 	
-	private void initProperties() {
-		
-		
-		
-		Set<OWLAnnotationProperty> annProps = ontology.getAnnotationPropertiesInSignature();
-		
-		/** There must be an easier way to check the rdfs:labels of annotation properties 
-		 *  We'll be getting these from IRIs anyway. **/
-		for (OWLAnnotationProperty annp : annProps) {
-			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(annp.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
-	                .getRDFSLabel())) {
-				OWLAnnotationValue av = annotation.getValue();
-				Optional<OWLLiteral> ol = av.asLiteral();
-				if (ol.isPresent()) {
-					label_map.put(ol.get().getLiteral(), annp);
-					
-				}			
-			}
-		}
-		
-		Set<String> cprop_names = mock.getComplexAnnotationProperties();
-		populate_collection(cprop_names, complex_properties);
-		
-		Set<String> ro_pnames = mock.getImmutableAnnotationProperties();
-		populate_collection(ro_pnames, immutable_properties);
-		
-		
-		Map<String, Set<String>> ann_deps = mock.getRequiredAnnotationsForAnnotation();
-		initialize_dependencies(ann_deps, required_annotation_dependencies);
-		
-		ann_deps = mock.getOptionalAnnotationAnnotations();
-		initialize_dependencies(ann_deps, optional_annotation_dependencies);		
-		
+	public void addListener() {
+		clientSession.addListener(this);
 	}
 	
-	private void populate_collection(Set<String> names, Set<OWLAnnotationProperty> props) {
-		for (String name : names) {
-			OWLAnnotationProperty p = label_map.get(name);
-			if (p != null) {
-				props.add(p);
-			}		
+	public void handleChange(ClientSessionChangeEvent event) {
+		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
+			initProperties();
+			resetHistory();
 			
 		}
-		
 	}
 	
-	private void initialize_dependencies(Map<String, Set<String>> ann_deps, 
-			Map<OWLAnnotationProperty, Set<OWLAnnotationProperty>> dependency_map) {
+	public void resetHistory() {
+		((OWLModelManagerImpl) this.getOWLModelManager()).resetHistory();		
+	}
+	
+	
+	
+	private void initProperties() {
 		
-		for (String ads : ann_deps.keySet()) {
-			Set<OWLAnnotationProperty> ps = new HashSet<OWLAnnotationProperty>();
-			OWLAnnotationProperty p = label_map.get(ads);
-			if (p != null) {
-				Set<String> deps = ann_deps.get(ads);
-				for (String s : deps) {
-					OWLAnnotationProperty p1 = label_map.get(s);
-					if (p1 != null) {
-						ps.add(p1);
+		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
+		if (lhc != null) {
+			Project project = lhc.getCurrentProject();
 
+			if (project != null) {
+				// get all annotations from ontology to use for lookup
+				Set<OWLAnnotationProperty> annProps = ontology.getAnnotationPropertiesInSignature();
+
+				Optional<ProjectOptions> options = project.getOptions();
+
+				if (options.isPresent()) {
+					ProjectOptions opts = options.get();
+					Set<String> complex_props = opts.getOption(COMPLEX_PROPS);
+					if (complex_props != null) {						
+						for (String cp : complex_props) {
+							OWLAnnotationProperty p = lookup(cp, annProps);
+							if (p != null) {
+								complex_properties.add(p);
+							}						
+							
+							// now get dependencies
+							Set<OWLAnnotationProperty> dprops = new HashSet<OWLAnnotationProperty>();
+							Set<String> dependents = opts.getOption(cp);
+							if (dependents != null) {
+								for (String dp : dependents) {
+									OWLAnnotationProperty dpProp = lookup(dp, annProps);
+									if (dpProp != null) {
+										dprops.add(dpProp);
+									}								
+								}
+								required_annotation_dependencies.put(p, dprops);
+							}							
+						}
 					}
+					Set<String> imm_props = opts.getOption(IMMUTABLE_PROPS);
+					if (imm_props != null) {
+						for (String ip : imm_props) {
+							OWLAnnotationProperty p = lookup(ip, annProps);
+							if (p != null) {
+								immutable_properties.add(p);
+							}
+							
+						}
+					}
+					
+					// set constants for split/merge/retirement
+					MERGE_SOURCE = getSingleProperty("merge_source", opts, annProps);
+					MERGE_TARGET = getSingleProperty("merge_target", opts, annProps);
+					SPLIT_FROM = getSingleProperty("split_from", opts, annProps);
+					
+					DEP_PARENT = getSingleProperty("deprecated_parent", opts, annProps);
+					DEP_CHILD = getSingleProperty("deprecated_child", opts, annProps);
+					DEP_ROLE = getSingleProperty("deprecated_role", opts, annProps);
+					DEP_IN_ROLE = getSingleProperty("deprecated_in_role", opts, annProps);
+					DEP_ASSOC = getSingleProperty("deprecated_assoc", opts, annProps);
+					DEP_IN_ASSOC = getSingleProperty("deprecated_in_assoc", opts, annProps);
+					
+					PRE_MERGE_ROOT = findOWLClass("premerged_root", opts);
+					PRE_RETIRE_ROOT = findOWLClass("preretired_root", opts);
+					RETIRE_ROOT  = findOWLClass("retired_root", opts);
+					
+					DESIGN_NOTE = getSingleProperty("design_note", opts, annProps);
+					EDITOR_NOTE = getSingleProperty("editor_note", opts, annProps);	
+					
+					CODE_PROP = getSingleProperty("code_prop", opts, annProps);
+					LABEL_PROP = getSingleProperty("label_prop", opts, annProps);
+					PREF_NAME = getSingleProperty("pref_name", opts, annProps);
+					
+					
 				}
-				dependency_map.put(p, ps);
 
 			}
+			try {
+
+				for (Operation op : clientSession.getActiveClient().getActiveOperations()) {
+					System.out.println(op.toString());
+
+				}
+
+			} catch (ClientRequestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		
-		
 	}
 	
-	public Optional<String> getRDFSLabel(OWLAnnotationProperty prop) {
+	OWLClass findOWLClass(String opt, ProjectOptions opts) {
+		OWLClass cls = null;
+		Set<String> ss = opts.getOption(opt);
+		if (ss != null) {
+			IRI iri = IRI.create((String) ss.toArray()[0]);
+			Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
+			for (OWLEntity et : classes) {
+				cls = et.asOWLClass();
+			}
+		}
+		return cls;
+	}
+	
+	OWLAnnotationProperty getSingleProperty(String ps, ProjectOptions opts, Set<OWLAnnotationProperty> annProps) {
+		OWLAnnotationProperty prop = null;
+		Set<String> ss = opts.getOption(ps);
+		if (ss != null) {
+			prop = lookup((String) ss.toArray()[0], annProps);
+		}
+		return prop;
+	}
+	
+	OWLAnnotationProperty lookup(String iri, Set<OWLAnnotationProperty> annProps) {
+		IRI cpIRI = IRI.create(iri);
+		for (OWLAnnotationProperty ap : annProps) {
+			if (ap.getIRI().equals(cpIRI)) {
+				IRI dt = getDataType(ap);
+				if (dt != null) {
+					System.out.println(cpIRI + " it's type: " + dt);
+				} else {
+					System.out.println(cpIRI);
+
+				}
+				return ap;	
+			}
+		}
+		return null;
+	}
+	
+	public Optional<String> getRDFSLabel(OWLNamedObject oobj) {
 		  
-		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(prop.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
+		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
 		                 .getRDFSLabel())) {
 			OWLAnnotationValue av = annotation.getValue();
-		    Optional<OWLLiteral> ol = av.asLiteral();
+		    com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
 		    if (ol.isPresent()) {
 		     return Optional.of(ol.get().getLiteral());
 		     
 		    }   
 		}
-		return Optional.absent();		  
+		
+		return Optional.empty();		  
 		  
+	}
+	
+	public Optional<String> getProperty(OWLNamedObject oobj, OWLAnnotationProperty prop) {
+		  
+		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), prop)) {
+			OWLAnnotationValue av = annotation.getValue();
+		    com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+		    if (ol.isPresent()) {
+		     return Optional.of(ol.get().getLiteral());
+		     
+		    }   
+		}
+		
+		return Optional.empty();		  
+		  
+	}
+	
+	public OWLClass getClass(String code) {
+		OWLClass cls = null;
+		
+		IRI iri = IRI.create(CODE_PROP.getIRI().getNamespace() + code);
+		
+		Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
+		for (OWLEntity et : classes) {
+			cls = et.asOWLClass();
+		}
+		return cls;		
+	}
+	
+	public IRI getDataType(OWLAnnotationProperty prop) {
+		Set<OWLAnnotationPropertyRangeAxiom> types = ontology.getAnnotationPropertyRangeAxioms(prop);
+		
+		for (OWLAnnotationPropertyRangeAxiom ax : types) {
+			return ax.getRange();
+		}
+		return null;
+	}
+	
+	public List<String> getEnumValues(IRI enumtype) {
+
+		List<String> results = new ArrayList<String>();
+		OWLDatatype dt = getOWLModelManager().getOWLDataFactory().getOWLDatatype(enumtype);		
+		Set<OWLDatatypeDefinitionAxiom> dda = getOWLModelManager().getActiveOntology().getDatatypeDefinitions(dt);
+
+		for (OWLDatatypeDefinitionAxiom ax : dda) {
+			OWLDataOneOf done = (OWLDataOneOf) ax.getDataRange();
+			Set<OWLLiteral> vals = done.getValues();
+			for (OWLLiteral lit : vals) {
+				results.add(lit.getLiteral());
+			}
+
+		}
+		return results;
+	}
+	
+	
+	
+	private List<OWLOntologyChange> duplicateClassAxioms(OWLClass selectedClass, OWLObjectDuplicator dup) {
+		List<OWLOntologyChange> changes = new ArrayList<>();
+
+		OWLOntology ont = getOWLModelManager().getActiveOntology();
+
+		for (OWLAxiom ax : ont.getAxioms(selectedClass)) {
+			if (ax.isLogicalAxiom() && !(ax instanceof OWLDisjointClassesAxiom)) {
+				OWLAxiom duplicatedAxiom = dup.duplicateObject(ax);
+				changes.add(new AddAxiom(ont, duplicatedAxiom));
+			}
+		}
+
+		return changes;
+	}
+
+    private List<OWLOntologyChange> duplicateAnnotations(OWLClass selectedClass, OWLObjectDuplicator dup) {
+        List<OWLOntologyChange> changes = new ArrayList<>();
+        OWLModelManagerEntityRenderer ren = getOWLModelManager().getOWLEntityRenderer();
+        List<IRI> annotIRIs = null;
+        String selectedClassName = null;
+        if (ren instanceof OWLEntityAnnotationValueRenderer){
+            selectedClassName = getOWLModelManager().getRendering(selectedClass);
+            annotIRIs = OWLRendererPreferences.getInstance().getAnnotationIRIs();
+        }
+
+        LiteralExtractor literalExtractor = new LiteralExtractor();
+
+        OWLOntology ont = getOWLModelManager().getActiveOntology();
+        
+        for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selectedClass, ont)) {
+        	final OWLAnnotation annot = ax.getAnnotation();
+        	if (annotIRIs == null || !annotIRIs.contains(annot.getProperty().getIRI())) {
+        		if (okToCopy(annot.getProperty())) {
+        			String label = literalExtractor.getLiteral(annot.getValue());
+        			if (label == null || !label.equals(selectedClassName)){
+        				OWLAxiom duplicatedAxiom = dup.duplicateObject(ax);
+        				changes.add(new AddAxiom(ont, duplicatedAxiom));
+        			}
+        		}
+        	}
+        }
+        
+        return changes;
+    }
+    
+    private boolean okToCopy(OWLAnnotationProperty prop) {
+    	return !(prop.equals(NCIEditTab.CODE_PROP) ||
+    			 prop.equals(NCIEditTab.LABEL_PROP) ||
+    			 prop.equals(NCIEditTab.PREF_NAME));
+    }
+
+
+    class LiteralExtractor implements OWLAnnotationValueVisitor {
+
+        private String label;
+
+        public String getLiteral(OWLAnnotationValue value){
+            label = null;
+            value.accept(this);
+            return label;
+        }
+
+        public void visit(IRI iri) {
+            // do nothing
+        }
+
+
+        public void visit(OWLAnonymousIndividual owlAnonymousIndividual) {
+            // do nothing
+        }
+
+
+        public void visit(OWLLiteral literal) {
+            label = literal.getLiteral();
+        }
+    }
+
+
+	@Override
+	public void stateChanged(HistoryManager source) {
+		for (List<OWLOntologyChange> changes : source.getLoggedChanges()) {
+			System.out.println("A list of changes");
+			for (OWLOntologyChange change : changes) {
+				System.out.println("A change: " + change.toString());
+			}
+		}
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, HashMap<String, String> ann_vals) {
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
+    	
+    	if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT)) {
+    		Set<OWLAnnotationAssertionAxiom> props = ontology.getAnnotationAssertionAxioms(cls.getIRI());
+    		for (OWLAnnotationAssertionAxiom ax : props) {
+    			
+    			if (ax.getProperty().equals(complex_prop)) {
+    				
+    				changes.add(new RemoveAxiom(ontology, ax));
+    				OWLAnnotationAssertionAxiom new_ax = df.getOWLAnnotationAssertionAxiom(ax.getProperty(),
+    						cls.getIRI(), df.getOWLLiteral(ann_vals.get("Value")));
+    				changes.add(new AddAxiom(ontology, new_ax));
+    				        			
+        			for (OWLAnnotationAssertionAxiom annax : EntitySearcher.getAnnotationAssertionAxioms(ax.getProperty(), ontology)) {
+        				changes.add(new RemoveAxiom(ontology, annax));
+        				String new_val = ann_vals.get(annax.getProperty().getIRI().getShortForm());
+        				OWLAnnotationAssertionAxiom new_annax = df.getOWLAnnotationAssertionAxiom(annax.getProperty(),
+        						new_ax.getProperty().getIRI(), df.getOWLLiteral(new_val));
+        				changes.add(new AddAxiom(ontology, new_annax));
+        			}
+        			
+    				
+    			}
+    			
+    		}
+    	}
+    	getOWLModelManager().applyChanges(changes);
 	}
 	
 }

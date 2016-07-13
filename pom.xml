@@ -22,7 +22,7 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <protege.version>5.0.0-beta-24-SNAPSHOT</protege.version>
+        <protege.version>5.0.1-SNAPSHOT</protege.version>
     </properties>
     	
 	<dependencies>
@@ -52,6 +52,16 @@
             <artifactId>protege-editor-owl</artifactId>
             <version>${protege.version}</version>
         </dependency>
+		<dependency>
+			<groupId>edu.stanford.protege</groupId>
+			<artifactId>protege-client</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+		</dependency>		
+		<dependency>
+            <groupId>edu.stanford.protege</groupId>
+            <artifactId>metaproject</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
 	</dependencies>
 	
 	<build>
@@ -77,10 +87,9 @@
                         <Bundle-ClassPath>.</Bundle-ClassPath>
                         <Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
                         <Bundle-Vendor>Dionne Associates, LLC.</Bundle-Vendor>
-                        <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
-                            org.protege.editor.core.*;version="5.0",
-                            org.protege.editor.owl.*;version="5.0",
+                        	org.protege.editor.owl.client.*;version="3.0",
+                        	okhttp3.*,                     	                                                    
                             *
                         </Import-Package>
                         <Update-Url>https://raw.githubusercontent.com/bdionne/nci-edit-tab/master/src/main/resources/update.properties</Update-Url>
