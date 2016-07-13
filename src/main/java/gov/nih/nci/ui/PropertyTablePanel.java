@@ -44,6 +44,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     
     private OWLAnnotationProperty complexProp;
     
+    public OWLAnnotationProperty getComplexProp() {
+    	return complexProp;
+    }
+    
     private String tableName;
     
     private JScrollPane sp;
@@ -98,9 +102,9 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
 
     private void createUI() {
-        //setLayout(new BorderLayout());
+        
     	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        //Box box = new Box(BoxLayout.Y_AXIS);
+    	
         propertyTable = new JTable(tableModel);
         
         propertyTable.setGridColor(Color.LIGHT_GRAY);
@@ -108,48 +112,12 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         propertyTable.setShowGrid(true);       
         propertyTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         propertyTable.getTableHeader().setReorderingAllowed(true);
-        propertyTable.setFillsViewportHeight(true);
-        
-        
-        /*propertyTable.addMouseListener(new MouseAdapter() {
-
-            public void mousePressed(MouseEvent e) {
-                if(e.isPopupTrigger()) {
-                    handleTablePopupRequest(propertyTable, e);
-                }
-            }
-
-
-            public void mouseReleased(MouseEvent e) {
-                if(e.isPopupTrigger()) {
-                    handleTablePopupRequest(propertyTable, e);
-                }
-            }
-
-            private void handleTablePopupRequest(JTable table, MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
-                int col = table.columnAtPoint(e.getPoint());
-                if(row == -1 || col == -1) {
-                    return;
-                }
-                popupMenu.show(table, e.getX(), e.getY());
-                
-
-            }});*/
-        
-        
+        propertyTable.setFillsViewportHeight(true);       
 
         sp = new JScrollPane(propertyTable);
         createLabelHeader(tableName, addButton, editButton, deleteButton);
         add(tableHeaderPanel);
-        tableHeaderPanel.setVisible(false);
-        //tableNameLabel = new Label(tableName);
-        //add(tableNameLabel);
-        //tableNameLabel.setVisible(false);
-        
-        //add(new PropertyEditButton("Add"));
-        //TestButton btn = new TestButton();
-        //add(btn);
+        tableHeaderPanel.setVisible(false);        
         sp.setVisible(false);
         add(sp);
     }
@@ -158,11 +126,9 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     	tableModel.setSelection(cls);
 
     	if (tableModel.hasAnnotation()) {
-    		//tableNameLabel.setVisible(true);
     		tableHeaderPanel.setVisible(true);
     		sp.setVisible(true);
     	} else {
-    		//tableNameLabel.setVisible(false);
     		tableHeaderPanel.setVisible(false);
     		sp.setVisible(false);
     	}
@@ -174,9 +140,6 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     	tableHeaderPanel = new JPanel();
         
     	tableHeaderPanel.setLayout(new BorderLayout());
-       // panel.setLayout(new BorderLayout());
-      //  panel.setPreferredSize(new Dimension(f.getWidth(), 25));
-        
         
         tableNameLabel = new JLabel(labeltext);
         tableNameLabel.setPreferredSize(new Dimension(100, 25));
@@ -202,7 +165,6 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		if(e.getSource() instanceof IconButton){
 			IconButton button = (IconButton)e.getSource();
 
@@ -210,7 +172,9 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), null, tableModel.getSelectedPropertyOptions());
 				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
 				if (data != null) {
-					((PropertyTableModel)propertyTable.getModel()).addRow(data);
+					NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),
+							tableModel.getComplexProp(), null, data);
+					tableModel.setSelection(tableModel.getSelection());
 				}
 				System.out.println("The data: " + data);
 				//upade view
@@ -219,6 +183,12 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				int row = propertyTable.getSelectedRow();
 				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(row), tableModel.getSelectedPropertyOptions());
 				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
+				if (data != null) {
+					NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, tableModel.getSelection(),
+							tableModel.getComplexProp(), tableModel.getAssertion(row), data);
+					tableModel.setSelection(tableModel.getSelection());
+					
+				}
 				System.out.println("The data: " + data);
 
 				//update view
@@ -228,13 +198,31 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				if (row >= 0) {
 					int ret = JOptionPane.showConfirmDialog(this, "Please confirm if you want to delete the selected property!", "Delete Confirmation", JOptionPane.OK_CANCEL_OPTION);
 					if (ret == JOptionPane.OK_OPTION) {
-						((PropertyTableModel)propertyTable.getModel()).removeRow(row);
+						NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.DELETE, tableModel.getSelection(), 
+								tableModel.getComplexProp(), tableModel.getAssertion(row), null);
+						
+						
+						tableModel.setSelection(tableModel.getSelection());
 					}
 				}
 				//todo - delete seleted table row from table, update view
 
 			}
 		}
+	}
+	
+	public void createNewProp() {
+		
+		PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), null, tableModel.getSelectedPropertyOptions());
+		HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
+		if (data != null) {
+			NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),
+					tableModel.getComplexProp(), null, data);
+			tableModel.setSelection(tableModel.getSelection());
+		}
+		System.out.println("The data: " + data);
+		//upade view
+		
 	}
 
     

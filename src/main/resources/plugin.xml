@@ -99,6 +99,14 @@
         <path value="[NCIAssertedClassHierarchy]/SlotAA-D"/>
         <editorKitId value="OWLEditorKit"/>
     </extension>
+    <extension id="AddComplex"
+               point="org.protege.editor.core.application.EditorKitMenuAction">
+        <name value="Add Complex Property..."/>
+        <class value="gov.nih.nci.ui.action.AddComplexAction"/>
+        <toolTip value="Adds Property to class"/>
+        <path value="[NCIAssertedClassHierarchy]/SlotAA-E"/>
+        <editorKitId value="OWLEditorKit"/>
+    </extension>
 	
 
     

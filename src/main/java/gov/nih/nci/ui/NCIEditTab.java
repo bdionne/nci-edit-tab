@@ -573,6 +573,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
+    public void addComplex(OWLClass selectedClass) {
+    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.ADD_PROP));
+    	
+    }
+    
     public boolean isWorkFlowManager() {
     	Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
     	try {
@@ -1008,8 +1013,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return results;
 	}
 	
-	
-	
 	private List<OWLOntologyChange> duplicateClassAxioms(OWLClass selectedClass, OWLObjectDuplicator dup) {
 		List<OWLOntologyChange> changes = new ArrayList<>();
 
@@ -1100,35 +1103,59 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 	}
 	
-	public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, HashMap<String, String> ann_vals) {
+	public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
+			OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
-    	
-    	if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT)) {
-    		Set<OWLAnnotationAssertionAxiom> props = ontology.getAnnotationAssertionAxioms(cls.getIRI());
-    		for (OWLAnnotationAssertionAxiom ax : props) {
-    			
-    			if (ax.getProperty().equals(complex_prop)) {
-    				
-    				changes.add(new RemoveAxiom(ontology, ax));
-    				OWLAnnotationAssertionAxiom new_ax = df.getOWLAnnotationAssertionAxiom(ax.getProperty(),
-    						cls.getIRI(), df.getOWLLiteral(ann_vals.get("Value")));
-    				changes.add(new AddAxiom(ontology, new_ax));
-    				        			
-        			for (OWLAnnotationAssertionAxiom annax : EntitySearcher.getAnnotationAssertionAxioms(ax.getProperty(), ontology)) {
-        				changes.add(new RemoveAxiom(ontology, annax));
-        				String new_val = ann_vals.get(annax.getProperty().getIRI().getShortForm());
-        				OWLAnnotationAssertionAxiom new_annax = df.getOWLAnnotationAssertionAxiom(annax.getProperty(),
-        						new_ax.getProperty().getIRI(), df.getOWLLiteral(new_val));
-        				changes.add(new AddAxiom(ontology, new_annax));
-        			}
-        			
-    				
-    			}
-    			
-    		}
-    	}
-    	getOWLModelManager().applyChanges(changes);
+		OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
+
+		if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT)) {
+			
+			Set<OWLAnnotation> anns = old_axiom.getAnnotations();
+			Set<OWLAnnotation> new_anns = new HashSet<OWLAnnotation>(); 
+			
+			for (OWLAnnotation annax : anns) {
+				String cv = annax.getProperty().getIRI().getShortForm();
+				String new_val = ann_vals.get(cv);
+				if (new_val != null) {
+					
+					OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), df.getOWLLiteral(new_val));
+					new_anns.add(new_ann); 
+				}
+			}
+
+			OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(old_axiom.getProperty(), cls.getIRI(),
+					df.getOWLLiteral(ann_vals.get("Value")), new_anns);
+
+
+			changes.add(new RemoveAxiom(ontology, old_axiom));
+			changes.add(new AddAxiom(ontology, new_axiom));
+		} else if (operation.equalsIgnoreCase(NCIEditTabConstants.DELETE)) {
+			changes.add(new RemoveAxiom(ontology, old_axiom));
+			
+		} else if (operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
+			OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), df.getOWLLiteral(ann_vals.get("Value")));
+			
+			Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
+			Set<OWLAnnotationProperty> req_props = this.getRequiredAnnotationsForAnnotation(complex_prop);
+			
+			for (OWLAnnotationProperty prop : req_props) {
+				String val = ann_vals.get(prop.getIRI().getShortForm());
+				if (val != null) {
+					OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+					anns.add(new_ann);
+					
+				}
+			}
+			
+			OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
+			
+			
+			changes.add(new AddAxiom(ontology, new_new_axiom));
+			
+		}
+
+
+		getOWLModelManager().applyChanges(changes);
 	}
 	
 }

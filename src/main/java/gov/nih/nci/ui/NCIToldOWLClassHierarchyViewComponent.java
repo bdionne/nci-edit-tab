@@ -42,6 +42,7 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.OWLObjectDuplicator;
 
+import gov.nih.nci.ui.action.AddComplexTarget;
 import gov.nih.nci.ui.action.CloneClassTarget;
 import gov.nih.nci.ui.action.MergeClassTarget;
 import gov.nih.nci.ui.action.RetireClassTarget;
@@ -50,7 +51,7 @@ import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 
 public class NCIToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarchyViewComponent
 implements CreateNewChildTarget, SplitClassTarget, CloneClassTarget, MergeClassTarget,
-RetireClassTarget {
+RetireClassTarget, AddComplexTarget {
 	
 	private static final Icon ADD_SUB_ICON = OWLIcons.getIcon("class.add.sub.png");
 
@@ -212,6 +213,20 @@ RetireClassTarget {
 	    protected Optional<OWLObjectHierarchyProvider<OWLClass>> getInferredHierarchyProvider() {
 	        return Optional.of(getOWLModelManager().getOWLHierarchyManager().getInferredOWLClassHierarchyProvider());
 	    }
+
+		@Override
+		public boolean canAddComplex() {
+			// TODO Auto-generated method stub
+			return true;
+		}
+
+		@Override
+		public void addComplex() {
+			OWLClass selectedClass = getSelectedEntity();
+			NCIEditTab.currentTab().addComplex(selectedClass);
+			// TODO Auto-generated method stub
+			
+		}
 
 	
 }

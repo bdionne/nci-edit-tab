@@ -7,5 +7,6 @@ public enum ComplexEditType {
 	MERGE,
 	CLONE,
 	PRERETIRE,
-	RETIRE
+	RETIRE,
+	ADD_PROP
 }

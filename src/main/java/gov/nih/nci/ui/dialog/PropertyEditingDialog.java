@@ -91,7 +91,6 @@ public class PropertyEditingDialog extends JPanel {
     private JPanel createTextAreaPanel(String prop){
     	
     	JTextArea area = new JTextArea();
-    	//area.setPreferredSize(new Dimension(200, 100));
     	if(type == NCIEditTabConstants.EDIT && propvaluemap != null){
     	   area.setText(propvaluemap.get(prop));
     	}
@@ -102,9 +101,7 @@ public class PropertyEditingDialog extends JPanel {
     	areaPanel.add(new JScrollPane(area), BorderLayout.CENTER);
     	areaPanel.setPreferredSize(new Dimension(400, 100));
     	
-    	propcomponentmap.put(prop, area);
-    	
-    	
+    	propcomponentmap.put(prop, area);   	
     	
     	return areaPanel;
     }
@@ -160,10 +157,9 @@ public class PropertyEditingDialog extends JPanel {
     	ArrayList<String> textFieldProps = getTextFieldProperties();
     	ArrayList<String> comboBoxProps = getComboBoxProperties();
     	
-    	//JPanel panel = new JPanel();
     	this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     	
-    	for(int i =0; i < textAreaProps.size(); i++){
+    	for(int i = 0; i < textAreaProps.size(); i++){
     		
     		JPanel areapanel = createTextAreaPanel(textAreaProps.get(i));
     		
@@ -173,21 +169,17 @@ public class PropertyEditingDialog extends JPanel {
        for(int i =0; i < textFieldProps.size(); i++){
     		
     		JPanel textfieldpanel = createTextFieldPanel(textFieldProps.get(i));
-    		//propcomponentmap.put(textFieldProps.get(i), textfieldpanel);
     		this.add(textfieldpanel);
     	}
        
        for(int i =0; i < comboBoxProps.size(); i++){
    		
    		JPanel comboboxpanel = createComboBoxPanel(comboBoxProps.get(i), propoptions.get(comboBoxProps.get(i)).toArray(new String[propoptions.get(comboBoxProps.get(i)).size()]));
-   		//propcomponentmap.put(comboBoxProps.get(i), comboboxpanel);
    		this.add(comboboxpanel);
    	}
     }
     
-    public  HashMap<String, String> showDialog(OWLEditorKit owlEditorKit, String title) {
-
-    	//PropertyEditingDialog panel = new PropertyEditingDialog(type, proptypemap, propvaluemap, propoptions);
+    public  HashMap<String, String> showDialog(OWLEditorKit owlEditorKit, String title) {    	
         int ret = new UIHelper(owlEditorKit).showDialog(title, this, JOptionPane.OK_CANCEL_OPTION);
         if (ret == JOptionPane.OK_OPTION) {
             return this.getPropertyValueMap();
@@ -213,7 +205,7 @@ public class PropertyEditingDialog extends JPanel {
     			data.put(key, ((JTextArea)obj).getText());
     		}
     		else if(obj instanceof JComboBox){
-    			data.put(key,  (String)((JComboBox)obj).getSelectedItem());
+    			data.put(key,  (String)((JComboBox<?>)obj).getSelectedItem());
     		}
     	}
     	

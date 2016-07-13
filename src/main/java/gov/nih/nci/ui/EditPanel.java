@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
 
+import gov.nih.nci.ui.dialog.ComplexPropChooser;
 import gov.nih.nci.ui.event.ComplexEditType;
 
 public class EditPanel extends JPanel {
@@ -81,9 +82,9 @@ public class EditPanel extends JPanel {
         panel2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         tabbedPane.addTab("General", panel2);
         
-        Iterator it = complexProperties.iterator();
+        Iterator<OWLAnnotationProperty> it = complexProperties.iterator();
         while(it.hasNext()) {
-        	addComplexPropertyTable(complexPropertyPanel, (OWLAnnotationProperty)it.next());
+        	addComplexPropertyTable(complexPropertyPanel, (OWLAnnotationProperty) it.next());
         }
         
         upperPanel.add(tabbedPane);
@@ -119,6 +120,16 @@ public class EditPanel extends JPanel {
     		gen_props.setRootObject(cls.getIRI());
     	}
 		
+    }
+    
+    public void addNewComplexProp() {
+    	ComplexPropChooser chooser = new ComplexPropChooser(NCIEditTab.currentTab().getComplexProperties());
+    	OWLAnnotationProperty c_prop = chooser.showDialog(owlEditorKit, "Choosing Complex Property");
+    	for (PropertyTablePanel panel : tablePanelList) {
+    		if (panel.getComplexProp().equals(c_prop)) {
+    			panel.createNewProp();
+    		}
+    	}
     }
     
     private void addComplexPropertyTable(JPanel complexPropertyPanel, OWLAnnotationProperty complexProperty) {

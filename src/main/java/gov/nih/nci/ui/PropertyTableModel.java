@@ -31,11 +31,26 @@ public class PropertyTableModel extends AbstractTableModel {
 	OWLOntology ont;
 
 	private OWLClass selection = null;
+	
+	public OWLClass getSelection() {return selection;}
+	
 	//private List<OWLAnnotationProperty> complexProperties;
 	private OWLAnnotationProperty complexProp;
+	
+	public OWLAnnotationProperty getComplexProp() {
+		return complexProp;
+	}
 	private Set<OWLAnnotationProperty> requiredAnnotations;
 	private List<OWLAnnotationProperty> requiredAnnotationsList;
 	private List<OWLAnnotation> annotations = new ArrayList<>();
+	
+	
+	
+	private List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
+	
+	public OWLAnnotationAssertionAxiom getAssertion(int idx) {
+		return assertions.get(idx);
+	}
 
 	public PropertyTableModel(OWLEditorKit k) {
 		this.ont = k.getOWLModelManager().getActiveOntology();
@@ -120,7 +135,6 @@ public class PropertyTableModel extends AbstractTableModel {
 				propertyTypes.put(columnName, "TextField");
 			} else {
 				propertyTypes.put(columnName, "ComboBox");
-				propertyTypes.put(columnName, "TextField");
 			}
 		}
 		return propertyTypes;
@@ -226,9 +240,11 @@ public class PropertyTableModel extends AbstractTableModel {
 
 		if (selection != null) {
 			annotations.clear();
+			assertions.clear();
 			for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selection, ont)) {
 				OWLAnnotation annot = ax.getAnnotation();
 				if (annot.getProperty().equals(this.complexProp)) {
+					assertions.add(ax);
 					//annotations.add(annot);
 					if (annot.getValue() != null) {
 
