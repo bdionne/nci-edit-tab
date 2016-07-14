@@ -11,8 +11,13 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObject;
 
+import gov.nih.nci.ui.event.ComplexEditType;
+import gov.nih.nci.ui.event.EditTabChangeEvent;
+import gov.nih.nci.ui.event.EditTabChangeListener;
 
-public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent implements OWLSelectionModelListener {
+
+public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent implements OWLSelectionModelListener,
+EditTabChangeListener {
 	private static final long serialVersionUID = 1L;
 	private EditPanel editPanel;
 	
@@ -23,6 +28,7 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
         setLayout(new BorderLayout());
         add(editPanel);
         this.getOWLWorkspace().getOWLSelectionModel().addListener(this);
+        NCIEditTab.addListener(this);
         
     }
 
@@ -63,6 +69,15 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 		                "nci-edit-tab.EditView");
 			}
 		}
+	}
+
+	@Override
+	public void handleChange(EditTabChangeEvent event) {
+		if (event.isType(ComplexEditType.ADD_PROP)) {
+			editPanel.addNewComplexProp();
+		}
+		// TODO Auto-generated method stub
+		
 	}
 
 }
