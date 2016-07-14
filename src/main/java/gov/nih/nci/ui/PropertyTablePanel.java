@@ -174,7 +174,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				if (data != null) {
 					NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),
 							tableModel.getComplexProp(), null, data);
-					tableModel.setSelection(tableModel.getSelection());
+					this.setSelectedCls(tableModel.getSelection());
 				}
 				System.out.println("The data: " + data);
 				//upade view
@@ -186,7 +186,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				if (data != null) {
 					NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, tableModel.getSelection(),
 							tableModel.getComplexProp(), tableModel.getAssertion(row), data);
-					tableModel.setSelection(tableModel.getSelection());
+					setSelectedCls(tableModel.getSelection());
 					
 				}
 				System.out.println("The data: " + data);
@@ -202,7 +202,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 								tableModel.getComplexProp(), tableModel.getAssertion(row), null);
 						
 						
-						tableModel.setSelection(tableModel.getSelection());
+						setSelectedCls(tableModel.getSelection());
 					}
 				}
 				//todo - delete seleted table row from table, update view
@@ -218,7 +218,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 		if (data != null) {
 			NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),
 					tableModel.getComplexProp(), null, data);
-			tableModel.setSelection(tableModel.getSelection());
+			setSelectedCls(tableModel.getSelection());
 		}
 		System.out.println("The data: " + data);
 		//upade view
