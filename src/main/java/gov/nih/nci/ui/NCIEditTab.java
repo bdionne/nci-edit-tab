@@ -252,7 +252,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
 		 * of additional times when the app initializes.
+		 * 
 		 */
+		 
 		ont_listen = new OWLModelManagerListener() {
 
 			@Override
@@ -270,7 +272,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			}			
 		};
 		
+		
 		this.getOWLEditorKit().getOWLModelManager().addListener(ont_listen);
+		
 						
 		history = new HistoryManagerImpl(this.getOWLModelManager().getOWLOntologyManager());	
 		history.addUndoManagerListener(this);		
@@ -945,19 +949,19 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public Optional<String> getRDFSLabel(OWLNamedObject oobj) {
-		  
+
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
-		                 .getRDFSLabel())) {
+				.getRDFSLabel())) {
 			OWLAnnotationValue av = annotation.getValue();
-		    com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
-		    if (ol.isPresent()) {
-		     return Optional.of(ol.get().getLiteral());
-		     
-		    }   
+			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+			if (ol.isPresent()) {
+				return Optional.of(ol.get().getLiteral());
+
+			}   
 		}
-		
+
 		return Optional.empty();		  
-		  
+
 	}
 	
 	public Optional<String> getProperty(OWLNamedObject oobj, OWLAnnotationProperty prop) {
