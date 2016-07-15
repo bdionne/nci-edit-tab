@@ -353,6 +353,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		List<OWLOntologyChange> dcs = addNotes(editornote, designnote, prefix, merge_source);
     		
     		changes.addAll(dcs);
+    		
+    		changes.addAll(this.mergeAttrs());
 
             
             
@@ -415,11 +417,27 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	}
         	changes.add(new RemoveAxiom(ontology, ax1));
         	
-        }
+        }        
+        
         
            	
     	return changes;
     	
+    }
+    
+    public List<OWLOntologyChange> mergeAttrs() {
+
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+
+    	Map<IRI, IRI> replacementIRIMap = new HashMap<>();
+    	replacementIRIMap.put(merge_source.getIRI(), merge_target.getIRI());
+
+    	OWLObjectDuplicator dup = new OWLObjectDuplicator(getOWLModelManager().getOWLDataFactory(), replacementIRIMap);            
+
+    	changes.addAll(duplicateClassAxioms(merge_source, dup));            
+    	changes.addAll(duplicateAnnotations(merge_source, dup));
+    	
+    	return changes;
     }
     
     public List<OWLOntologyChange> addNotes(String editornote, String designnote, String prefix, OWLClass cls) {
@@ -719,14 +737,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
-    public void splitClass(OWLClass newClass, List<OWLOntologyChange> changes, OWLClass selectedClass) {    	
+    public void splitClass(OWLClass newClass, List<OWLOntologyChange> changes, OWLClass selectedClass, boolean clone_p) {    	
 
     	OWLModelManager mngr = getOWLModelManager();
     	OWLDataFactory df = mngr.getOWLDataFactory();
     	
-    	OWLLiteral fromCode = df.getOWLLiteral(selectedClass.getIRI().getShortForm());
-    	OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.SPLIT_FROM, newClass.getIRI(), fromCode);
-    	changes.add(new AddAxiom(ontology, ax));
+    	if (clone_p) {
+    		// do nothing
+    	} else {
+    		OWLLiteral fromCode = df.getOWLLiteral(selectedClass.getIRI().getShortForm());
+    		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.SPLIT_FROM, newClass.getIRI(), fromCode);
+    		changes.add(new AddAxiom(ontology, ax));
+    	}
     	
     	Map<IRI, IRI> replacementIRIMap = new HashMap<>();
     	replacementIRIMap.put(selectedClass.getIRI(), newClass.getIRI());
@@ -747,7 +769,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public OWLClass createNewChild(OWLClass selectedClass) {
 
-    	NCIClassCreationDialog dlg = new NCIClassCreationDialog(getOWLEditorKit(),
+    	NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class);
     	
     	if (dlg.showDialog()) {

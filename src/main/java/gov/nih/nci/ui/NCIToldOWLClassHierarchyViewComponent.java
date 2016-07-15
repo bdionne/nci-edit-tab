@@ -123,7 +123,7 @@ RetireClassTarget, AddComplexTarget {
 
 	@Override
 	public void cloneClass() {
-		
+		splitOrCloneClass(true);		
 	}
 
 	@Override
@@ -134,16 +134,18 @@ RetireClassTarget, AddComplexTarget {
 
 	@Override
 	public void splitClass() {
-		NCIClassCreationDialog dlg = new NCIClassCreationDialog(getOWLEditorKit(),
+		splitOrCloneClass(false);
+		
+	}
+	
+	private void splitOrCloneClass(boolean clone_p) {
+		NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class);
 		if (dlg.showDialog()) {
-			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), getSelectedEntity());
+			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), getSelectedEntity(), clone_p);
 			getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(dlg.getNewClass());
 			
-		}
-
-			
-		
+		}		
 	}
 	
 	
