@@ -80,6 +80,7 @@ import edu.stanford.protege.metaproject.api.ProjectOptions;
 import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.impl.Operations;
 import edu.stanford.protege.metaproject.impl.RoleIdImpl;
+import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
@@ -718,76 +719,66 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
-    public void splitClass(OWLEntityCreationSet<OWLClass> set, OWLClass selectedClass) {
+    public void splitClass(OWLClass newClass, List<OWLOntologyChange> changes, OWLClass selectedClass) {    	
+
+    	OWLModelManager mngr = getOWLModelManager();
+    	OWLDataFactory df = mngr.getOWLDataFactory();
     	
-		
-		OWLClass newClass = set.getOWLEntity();
-		String preferredName = newClass.getIRI().getRemainder().or("NONE");
-		
-		String gen_code = NCIEditTab.currentTab().generateCode();
-		
-		OWLEntityCreationSet<OWLClass> newSet = null;
-		
-		try {
-			newSet = getOWLEditorKit().getModelManager().getOWLEntityFactory().createOWLEntity(
-					OWLClass.class, gen_code, null);
-		} catch (OWLEntityCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
-        if (set != null){
-            Map<IRI, IRI> replacementIRIMap = new HashMap<>();
-            replacementIRIMap.put(selectedClass.getIRI(), newSet.getOWLEntity().getIRI());
-            OWLModelManager mngr = getOWLModelManager();
-            OWLObjectDuplicator dup = new OWLObjectDuplicator(mngr.getOWLDataFactory(), replacementIRIMap);
-            List<OWLOntologyChange> changes = new ArrayList<>(newSet.getOntologyChanges());
+    	OWLLiteral fromCode = df.getOWLLiteral(selectedClass.getIRI().getShortForm());
+    	OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.SPLIT_FROM, newClass.getIRI(), fromCode);
+    	changes.add(new AddAxiom(ontology, ax));
+    	
+    	Map<IRI, IRI> replacementIRIMap = new HashMap<>();
+    	replacementIRIMap.put(selectedClass.getIRI(), newClass.getIRI());
 
-            changes.addAll(duplicateClassAxioms(selectedClass, dup));
-            
-            changes.addAll(duplicateAnnotations(selectedClass, dup));
+    	OWLObjectDuplicator dup = new OWLObjectDuplicator(mngr.getOWLDataFactory(), replacementIRIMap);            
 
-           
-            
-            
-            OWLClass newClass1 = newSet.getOWLEntity();
-            
-            
-            
-            
-            
-            
-            
-            
-            OWLDataFactory df = mngr.getOWLDataFactory();
-            
-            
-           
-            
-            OWLLiteral gen_code_val = df.getOWLLiteral(gen_code);
-            OWLLiteral pref_name_val = df.getOWLLiteral(preferredName);
-            
-            OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.CODE_PROP, newClass1.getIRI(), gen_code_val);
-            // note that Preferred_Name and rdfs:label are set to be the same
-            OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.LABEL_PROP, newClass1.getIRI(), pref_name_val);
-            OWLAxiom ax3 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.PREF_NAME, newClass1.getIRI(), pref_name_val);
-            changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
-            changes.add(new AddAxiom(mngr.getActiveOntology(), ax2));
-            changes.add(new AddAxiom(mngr.getActiveOntology(), ax3));
-            
-            mngr.applyChanges(changes);            
-            
-            split_source = selectedClass;
-        	split_target = newClass1;
-        	
-        	logChanges(changes);
-        	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
-        	
-        }
-        
+    	changes.addAll(duplicateClassAxioms(selectedClass, dup));            
+    	changes.addAll(duplicateAnnotations(selectedClass, dup));
+
+    	mngr.applyChanges(changes);            
+
+    	split_source = selectedClass;
+    	split_target = newClass;
+
+    	logChanges(changes);
+    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
+    }
+    
+    public OWLClass createNewChild(OWLClass selectedClass) {
+
+    	NCIClassCreationDialog dlg = new NCIClassCreationDialog(getOWLEditorKit(),
+				"Please enter a class name", OWLClass.class);
+    	
+    	if (dlg.showDialog()) {
+    		OWLClass newClass = dlg.getNewClass();
+    		List<OWLOntologyChange> changes = dlg.getOntChanges();
+    		OWLModelManager mngr = getOWLModelManager();
+    		OWLDataFactory df = mngr.getOWLDataFactory();
+    		
+    		if (!df.getOWLThing().equals(selectedClass)){
+    			OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(newClass, selectedClass);
+    			changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
+    		}
+    		
+    		mngr.applyChanges(changes);
+    		
+    		return newClass;
+    	} else {
+    		return null;
+    	}
+
 		
-    	 	
+		
+		
+
+
+
+
+
+		
+
+
     	
     }
     

@@ -119,6 +119,7 @@ public class EditPanel extends JPanel {
     	if (cls != null) {
     		gen_props.setRootObject(cls.getIRI());
     	}
+    	splitPane.repaint();
 		
     }
     

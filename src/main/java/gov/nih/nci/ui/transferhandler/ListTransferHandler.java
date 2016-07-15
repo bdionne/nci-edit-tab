@@ -57,12 +57,12 @@ public class ListTransferHandler extends TransferHandler {
 		if (complexEditPanel.isSplitBtnSelected() || complexEditPanel.isCloneBtnSelected()) {
 			if (NCIEditTab.currentTab().canSplit(data.get(0))) {
 				// if you can split you can clone
-				OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(complexEditPanel.getEditorKit(),
+				NCIClassCreationDialog dlg = new NCIClassCreationDialog(complexEditPanel.getEditorKit(),
 						"Please enter a class name", OWLClass.class);
 
-				if (set != null) {
+				if (dlg.showDialog()) {
 
-					NCIEditTab.currentTab().splitClass(set, data.get(0));
+					NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), data.get(0));
 					complexEditPanel.setEnableUnselectedRadioButtons(false);
 					return true;
 				}

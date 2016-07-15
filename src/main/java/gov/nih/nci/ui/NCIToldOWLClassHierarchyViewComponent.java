@@ -134,17 +134,16 @@ RetireClassTarget, AddComplexTarget {
 
 	@Override
 	public void splitClass() {
-		OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(getOWLEditorKit(),
+		NCIClassCreationDialog dlg = new NCIClassCreationDialog(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class);
-		OWLClass selectedClass = getSelectedEntity();
-
-
-		if (set != null){
-
-			NCIEditTab.currentTab().splitClass(set, selectedClass);
-
-			getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(set.getOWLEntity());
+		if (dlg.showDialog()) {
+			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), getSelectedEntity());
+			getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(dlg.getNewClass());
+			
 		}
+
+			
+		
 	}
 	
 	
@@ -155,54 +154,14 @@ RetireClassTarget, AddComplexTarget {
 	}
 
 	@Override
-	public void createNewChild() {
-		OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(getOWLEditorKit(),
-				"Please enter a class name", OWLClass.class);
+	public void createNewChild() {	
+				
+		OWLClass selectedClass = getSelectedEntity();
 		
-		OWLClass newClass = set.getOWLEntity();
-		String preferredName = newClass.getIRI().getRemainder().or("NONE");
+		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass);
 		
-		String gen_code = NCIEditTab.currentTab().generateCode();
+		getTree().setSelectedOWLObject(newCls);
 		
-		OWLEntityCreationSet<OWLClass> newSet = null;
-		
-		try {
-			newSet = getOWLEditorKit().getModelManager().getOWLEntityFactory().createOWLEntity(
-					OWLClass.class, gen_code, null);
-			
-			newClass = newSet.getOWLEntity();
-			
-			
-            OWLClass selectedClass = getSelectedEntity();
-            List<OWLOntologyChange> changes = new ArrayList<>();
-            changes.addAll(newSet.getOntologyChanges());
-            final OWLModelManager mngr = getOWLEditorKit().getModelManager();
-            final OWLDataFactory df = mngr.getOWLDataFactory();
-            if (!df.getOWLThing().equals(selectedClass)){
-                OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(newSet.getOWLEntity(), selectedClass);
-                changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
-            }
-            
-            
-           
-            
-            OWLLiteral con = df.getOWLLiteral(gen_code);
-            OWLLiteral pref_name_val = df.getOWLLiteral(preferredName);
-            
-            OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.CODE_PROP, newClass.getIRI(), con);
-            changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
-            OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.LABEL_PROP, newClass.getIRI(), pref_name_val);
-            OWLAxiom ax3 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.PREF_NAME, newClass.getIRI(), pref_name_val);
-            changes.add(new AddAxiom(mngr.getActiveOntology(), ax2));
-            changes.add(new AddAxiom(mngr.getActiveOntology(), ax3));
-            
-            mngr.applyChanges(changes);
-            getTree().setSelectedOWLObject(newClass);
-		} catch (OWLEntityCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
 	}
 	
 	 protected OWLObjectHierarchyProvider<OWLClass> getHierarchyProvider() {
