@@ -9,7 +9,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -33,14 +37,21 @@ import org.protege.editor.owl.ui.clsdescriptioneditor.ExpressionEditorPreference
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.Namespaces;
+
+import gov.nih.nci.ui.NCIEditTab;
 
 public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 	
@@ -126,58 +137,20 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     }
 
 
-    /**
-     * Gets the entity creation set
-     * @return The entity creation set
-     * @throws RuntimeException which wraps an {@link OWLEntityCreationException} if there was a problem
-     */
-    public OWLEntityCreationSet<T> getOWLEntityCreationSet() throws RuntimeException {
-    	return getOWLEntityCreationSet(EntityCreationMode.CREATE);
-    }
-    
-	public OWLEntityCreationSet<T> getOWLEntityCreationSet(EntityCreationMode preview) throws RuntimeException {
-		try {
 
-			switch (preview) {
-			case CREATE:
-				return owlEditorKit.getModelManager().getOWLEntityFactory().createOWLEntity(type, getEntityName(),
-						getBaseIRI());
-			case PREVIEW:
-				return owlEditorKit.getModelManager().getOWLEntityFactory().preview(type, getEntityName(),
-						getBaseIRI());
-			default:
-				throw new IllegalStateException(
-						"Programmer error - report this (with stack trace) to the Protege 4 mailing list");
-			}
+    public <T extends OWLEntity> boolean showDialog() {
 
-		} catch (OWLEntityCreationException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-    public static <T extends OWLEntity> OWLEntityCreationSet<T> showDialog(OWLEditorKit owlEditorKit, String message, Class<T> type) {
-
-            NCIClassCreationDialog<T> panel = new NCIClassCreationDialog<>(owlEditorKit, message, type);
-            int ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), panel, panel.preferredNameField);
+            int ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), this, this.preferredNameField);
             if (ret == JOptionPane.OK_OPTION) {
-                return panel.getOWLEntityCreationSet();
+            	buildNewClass();            	
+                return true;
             }
             else {
-                return null;
+                return false;
             }
     }
     
-    public static <T extends OWLEntity> OWLEntityCreationSet<T> showPreviewDialog(OWLEditorKit owlEditorKit, String message, Class<T> type) {
-
-        NCIClassCreationDialog<T> panel = new NCIClassCreationDialog<>(owlEditorKit, message, type);
-        int ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), panel, panel.preferredNameField);
-        if (ret == JOptionPane.OK_OPTION) {
-            return panel.getOWLEntityCreationSet(EntityCreationMode.PREVIEW);
-        }
-        else {
-            return null;
-        }
-}
+ 
 
     public IRI getBaseIRI() {
         return null; // let this be managed by the EntityFactory for now - we could add a selector later
@@ -191,7 +164,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
             if (preferredNameField.getText().trim().isEmpty()) {
                 return;
             }
-            OWLEntityCreationSet<?> creationSet = getOWLEntityCreationSet(EntityCreationMode.PREVIEW);
+            OWLEntityCreationSet<?> creationSet = owlEditorKit.getModelManager().getOWLEntityFactory().preview(type, getEntityName(),
+					getBaseIRI());
             if(creationSet == null) {
             	return;
             }
@@ -199,7 +173,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
             String iriString = owlEntity.getIRI().toString();
             entityIRIField.setText(iriString);
         }
-        catch (RuntimeException e) {
+        catch (RuntimeException | OWLEntityCreationException e) {
             Throwable cause = e.getCause();
             if (cause != null) {
                 if(cause instanceof OWLOntologyCreationException) {
@@ -218,5 +192,92 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 
     public JComponent getFocusComponent() {
         return preferredNameField;
+    }
+    
+    private OWLClass newClass = null;
+    
+    public OWLClass getNewClass() {return newClass;}
+    
+    private List<OWLOntologyChange> ont_changes = null;
+    
+    public List<OWLOntologyChange> getOntChanges() {return ont_changes;}
+    		
+    
+    public void buildNewClass() {
+    	
+		String preferredName = this.getEntityName();
+
+		String gen_code = NCIEditTab.currentTab().generateCode();
+
+		OWLEntityCreationSet<OWLClass> newSet = null;
+
+		try {
+			newSet = owlEditorKit.getModelManager().getOWLEntityFactory().createOWLEntity(
+					OWLClass.class, gen_code, null);
+		} catch (OWLEntityCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		OWLClass newClass = newSet.getOWLEntity();
+
+		
+		List<OWLOntologyChange> changes = new ArrayList<>();
+		changes.addAll(newSet.getOntologyChanges());
+		final OWLModelManager mngr = owlEditorKit.getModelManager();
+		final OWLDataFactory df = mngr.getOWLDataFactory();
+		
+
+		OWLLiteral con = df.getOWLLiteral(gen_code);
+		OWLLiteral pref_name_val = df.getOWLLiteral(preferredName);
+
+		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.CODE_PROP, newClass.getIRI(), con);
+		changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
+		OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.LABEL_PROP, newClass.getIRI(), pref_name_val);
+		OWLAxiom ax3 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.PREF_NAME, newClass.getIRI(), pref_name_val);
+		changes.add(new AddAxiom(mngr.getActiveOntology(), ax2));
+		changes.add(new AddAxiom(mngr.getActiveOntology(), ax3));
+		
+		OWLAnnotationProperty full_syn = getFullSyn();
+		
+		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(full_syn, newClass.getIRI(), pref_name_val);
+		
+		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
+		Set<OWLAnnotationProperty> req_props = NCIEditTab.currentTab().getRequiredAnnotationsForAnnotation(full_syn);
+		
+		for (OWLAnnotationProperty prop : req_props) {
+			// TODO: get defaults?
+			String val = "DF";
+			if (val != null) {
+				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+				anns.add(new_ann);
+				
+			}
+		}
+		
+		OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
+		
+		
+		changes.add(new AddAxiom(mngr.getActiveOntology(), new_new_axiom));
+		
+		
+		
+		
+		
+		this.ont_changes = changes;
+		this.newClass = newClass;
+		
+		
+    }
+    
+    private OWLAnnotationProperty getFullSyn() {
+    	Set<OWLAnnotationProperty> comp_props = NCIEditTab.currentTab().getComplexProperties();
+		for (OWLAnnotationProperty p : comp_props) {
+			if (p.getIRI().getShortForm().equalsIgnoreCase("FULL_SYN")) {
+				return p;
+			}
+		}
+		return null;
+    	
     }
 }

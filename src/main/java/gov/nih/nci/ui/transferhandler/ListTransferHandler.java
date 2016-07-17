@@ -55,14 +55,14 @@ public class ListTransferHandler extends TransferHandler {
 		}
 		
 		if (complexEditPanel.isSplitBtnSelected() || complexEditPanel.isCloneBtnSelected()) {
+			boolean clone_p = complexEditPanel.isCloneBtnSelected(); 
 			if (NCIEditTab.currentTab().canSplit(data.get(0))) {
 				// if you can split you can clone
-				OWLEntityCreationSet<OWLClass> set = NCIClassCreationDialog.showDialog(complexEditPanel.getEditorKit(),
+				NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(complexEditPanel.getEditorKit(),
 						"Please enter a class name", OWLClass.class);
 
-				if (set != null) {
-
-					NCIEditTab.currentTab().splitClass(set, data.get(0));
+				if (dlg.showDialog()) {
+					NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), data.get(0), clone_p);
 					complexEditPanel.setEnableUnselectedRadioButtons(false);
 					return true;
 				}
