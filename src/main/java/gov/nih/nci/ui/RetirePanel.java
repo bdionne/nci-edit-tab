@@ -39,6 +39,7 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 
 import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
+import gov.nih.nci.ui.transferhandler.RetireTransferHandler;
 import gov.nih.nci.utils.ReferenceFinder;
 
 
@@ -92,6 +93,7 @@ public class RetirePanel extends JPanel {
         upperComp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         
         upperPanel.add(upperComp);
+        upperPanel.setTransferHandler(new RetireTransferHandler(this));
         
         JScrollPane lowerComp = new JScrollPane(usage_panel);
         lowerComp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
