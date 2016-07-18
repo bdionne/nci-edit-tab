@@ -75,11 +75,12 @@ public class ReferenceFinder implements OWLClassExpressionVisitor {
 				
 			} else if (ax instanceof OWLSubClassOfAxiom) {
 				OWLClassExpression par = ((OWLSubClassOfAxiom) ax).getSuperClass();
+				OWLClassExpression child = ((OWLSubClassOfAxiom) ax).getSubClass();
 				
 				if (par.isAnonymous()) {
+					setExpression(child);
 					par.accept(this);
 				} else if (par.asOWLClass().equals(entity)) {
-					OWLClassExpression child = ((OWLSubClassOfAxiom) ax).getSubClass();
 					String val = child.asOWLClass().getIRI().getShortForm();
 					fixups = addToFixups(fixups, NCIEditTab.DEP_CHILD, val);
 					System.out.println("OLD_CHILD:" + val );

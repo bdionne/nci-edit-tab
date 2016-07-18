@@ -52,7 +52,7 @@ public class RetireTransferHandler extends TransferHandler {
 		}
 		
 		if (NCIEditTab.currentTab().canRetire(data.get(0))) {
-			retirePanel.setOWLClass(data.get(0));
+			NCIEditTab.currentTab().retire(data.get(0));
 		} else {
 			JOptionPane.showMessageDialog(retirePanel, "Unable to retire", "Warning", JOptionPane.WARNING_MESSAGE);
 		}
