@@ -21,7 +21,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.event.ComplexEditType;
-import gov.nih.nci.ui.transferhandler.ListTransferHandler;
+import gov.nih.nci.ui.transferhandler.ComplexEditTransferHandler;
 
 
 
@@ -120,8 +120,8 @@ public class ComplexEditPanel extends JPanel {
         
         
         
-        upperSplitPane.setTransferHandler(new ListTransferHandler(this));
-    	lowerSplitPane.setTransferHandler(new ListTransferHandler(this));
+        upperSplitPane.setTransferHandler(new ComplexEditTransferHandler(this));
+    	lowerSplitPane.setTransferHandler(new ComplexEditTransferHandler(this));
         
         JSplitPane splitPane3 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upperPanel, lowerPanel);
         

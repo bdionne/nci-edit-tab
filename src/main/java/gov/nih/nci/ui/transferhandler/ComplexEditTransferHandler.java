@@ -7,17 +7,14 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.TransferHandler;
 
-import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
-import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.protege.editor.owl.ui.transfer.OWLObjectDataFlavor;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.ComplexEditPanel;
 import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 
-public class ListTransferHandler extends TransferHandler {
+public class ComplexEditTransferHandler extends TransferHandler {
 	
 	/**
 	 * 
@@ -25,7 +22,7 @@ public class ListTransferHandler extends TransferHandler {
 	private static final long serialVersionUID = 3809002388495775198L;
 	private ComplexEditPanel complexEditPanel;
 	
-	public ListTransferHandler(ComplexEditPanel complexEditPanel) {
+	public ComplexEditTransferHandler(ComplexEditPanel complexEditPanel) {
 		this.complexEditPanel = complexEditPanel;
 	}
 

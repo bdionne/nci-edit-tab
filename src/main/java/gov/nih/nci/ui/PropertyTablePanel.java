@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
@@ -20,6 +21,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -112,8 +117,9 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         propertyTable.setShowGrid(true);       
         propertyTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         propertyTable.getTableHeader().setReorderingAllowed(true);
-        propertyTable.setFillsViewportHeight(true);       
-
+        propertyTable.setFillsViewportHeight(true);   
+        propertyTable.setAutoCreateRowSorter(true);
+        
         sp = new JScrollPane(propertyTable);
         createLabelHeader(tableName, addButton, editButton, deleteButton);
         add(tableHeaderPanel);
@@ -128,11 +134,21 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     	if (tableModel.hasAnnotation()) {
     		tableHeaderPanel.setVisible(true);
     		sp.setVisible(true);
+    		tableModel.fireTableDataChanged();
+    		/*TableRowSorter<TableModel> sorter = new TableRowSorter<>(tableModel);
+            propertyTable.setRowSorter(sorter);
+            List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+             
+            int columnIndexToSort = 0;
+            sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
+             
+            sorter.setSortKeys(sortKeys);
+            sorter.sort();*/
     	} else {
     		tableHeaderPanel.setVisible(false);
     		sp.setVisible(false);
     	}
-    	repaint();
+    	
     }
 
     private void createLabelHeader(String labeltext, JButton b1, JButton b2, JButton b3){
@@ -180,12 +196,14 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				//upade view
 			}		
 			else if(button.getType() == NCIEditTabConstants.EDIT){
-				int row = propertyTable.getSelectedRow();
-				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(row), tableModel.getSelectedPropertyOptions());
+				int viewRow = propertyTable.getSelectedRow();
+				int modelRow = propertyTable.convertRowIndexToModel(viewRow);
+				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(modelRow), tableModel.getSelectedPropertyOptions());
 				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
 				if (data != null) {
 					NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, tableModel.getSelection(),
-							tableModel.getComplexProp(), tableModel.getAssertion(row), data);
+							tableModel.getComplexProp(), tableModel.getAssertion(modelRow), data);
+					
 					setSelectedCls(tableModel.getSelection());
 					
 				}
@@ -194,15 +212,16 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				//update view
 			}
 			else if(button.getType() == NCIEditTabConstants.DELETE){
-				int row = propertyTable.getSelectedRow();
-				if (row >= 0) {
+				int viewRow = propertyTable.getSelectedRow();
+				int modelRow = propertyTable.convertRowIndexToModel(viewRow);
+				if (modelRow >= 0) {
 					int ret = JOptionPane.showConfirmDialog(this, "Please confirm if you want to delete the selected property!", "Delete Confirmation", JOptionPane.OK_CANCEL_OPTION);
 					if (ret == JOptionPane.OK_OPTION) {
 						NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.DELETE, tableModel.getSelection(), 
-								tableModel.getComplexProp(), tableModel.getAssertion(row), null);
-						
+								tableModel.getComplexProp(), tableModel.getAssertion(modelRow), null);
 						
 						setSelectedCls(tableModel.getSelection());
+						
 					}
 				}
 				//todo - delete seleted table row from table, update view

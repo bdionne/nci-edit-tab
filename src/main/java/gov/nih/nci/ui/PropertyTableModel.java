@@ -101,19 +101,21 @@ public class PropertyTableModel extends AbstractTableModel {
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
 
-		int index = rowIndex * getColumnCount() + columnIndex;
+		int index = rowIndex * getColumnCount() + columnIndex; 
 		LiteralExtractor literalExtractor = new LiteralExtractor();
 
-		OWLAnnotation annot = annotations.get(index);
-		if (columnIndex == 0) {
-			return literalExtractor.getLiteral(annot.getValue());
-		}
-		for (OWLAnnotationProperty aprop : requiredAnnotations) {
-
-			if ( annot.getProperty().equals(aprop)) {
+		if ( index < annotations.size() ) {
+			OWLAnnotation annot = annotations.get(index);
+			if (columnIndex == 0) {
 				return literalExtractor.getLiteral(annot.getValue());
 			}
-
+			for (OWLAnnotationProperty aprop : requiredAnnotations) {
+	
+				if ( annot.getProperty().equals(aprop)) {
+					return literalExtractor.getLiteral(annot.getValue());
+				}
+	
+			}
 		}
 		return null;
 	}
