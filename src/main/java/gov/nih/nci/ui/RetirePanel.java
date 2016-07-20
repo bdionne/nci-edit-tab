@@ -180,6 +180,7 @@ public class RetirePanel extends JPanel {
     			upperPanelList.setRootObject(null);
     			usage_panel.setOWLEntity(null);
     			NCIEditTab.currentTab().undoChanges();
+    			NCIEditTab.currentTab().cancelRetire();
     			// TODO: What? lowerPanelList.setRootObject(null);
     		}
     	});     

@@ -116,6 +116,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return isRetiring;
 	}
 	
+	public void cancelRetire() {
+		retire_class = null;
+		isRetiring = false;
+	}
+	
 	public boolean isMerging() {
 		return (merge_source != null) &&
 				(merge_target != null);
@@ -511,6 +516,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         }
         
         getOWLModelManager().applyChanges(changes);
+        
+        retire_class = null;
+        isRetiring = false;
         
         
         
