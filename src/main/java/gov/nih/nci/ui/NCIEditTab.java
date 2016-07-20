@@ -3,6 +3,7 @@ package gov.nih.nci.ui;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
 import java.rmi.RemoteException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1011,6 +1012,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			return ax.getRange();
 		}
 		return null;
+	}
+	
+	public String getDefaultValue(IRI iri) {
+		String type = iri.getShortForm();
+		if (type.equalsIgnoreCase("date-time-system")) {
+			return LocalDateTime.now().toString();
+		} else if (type.equalsIgnoreCase("user-system")) {
+			return clientSession.getActiveClient().getUserInfo().getName().toString();
+		} else if (type.endsWith("enum")) {
+			return getEnumValues(iri).get(0);
+		}
+		return "";
 	}
 	
 	public List<String> getEnumValues(IRI enumtype) {
