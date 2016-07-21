@@ -255,8 +255,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		super.initialise();
 		log.info("NCI Edit Tab initialized");
 		
-		
-		
 		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
 		 * of additional times when the app initializes.
 		 * 
@@ -306,7 +304,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public boolean canMerge(OWLClass cls) {
-    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(Operations.MERGE.getId()); 
+    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(NCIEditTabConstants.MERGE.getId()); 
     	if (can) {
     		if (isPreMerged(cls)) {
     			return isWorkFlowManager();    			
@@ -587,7 +585,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
      * 
      */
     public boolean canRetire(OWLClass cls) {
-    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(Operations.RETIRE.getId()); 
+    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(NCIEditTabConstants.RETIRE.getId()); 
     	if (can) {
     		if (isPreRetired(cls)) {
     			return isWorkFlowManager();    			
