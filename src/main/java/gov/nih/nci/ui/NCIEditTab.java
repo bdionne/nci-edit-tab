@@ -11,14 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.client.ClientSession;
-import org.protege.editor.owl.client.ClientSessionChangeEvent;
-import org.protege.editor.owl.client.ClientSessionChangeEvent.EventCategory;
-import org.protege.editor.owl.client.ClientSessionListener;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
+import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
+import org.protege.editor.owl.client.event.ClientSessionListener;
+import org.protege.editor.owl.client.event.CommitOperationEvent;
+import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLModelManagerImpl;
@@ -689,6 +691,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
     			clientSession.getActiveVersionOntology().update(hist);
     			resetHistory();
+    			clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
+                        hist.getHeadRevision(),
+                        hist.getMetadataForRevision(hist.getHeadRevision()),
+                        hist.getChangesForRevision(hist.getHeadRevision())));
     		} catch (ClientRequestException e) {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
