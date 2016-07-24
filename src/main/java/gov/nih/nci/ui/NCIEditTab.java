@@ -3,6 +3,7 @@ package gov.nih.nci.ui;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
 import java.rmi.RemoteException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,14 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.client.ClientSession;
-import org.protege.editor.owl.client.ClientSessionChangeEvent;
-import org.protege.editor.owl.client.ClientSessionChangeEvent.EventCategory;
-import org.protege.editor.owl.client.ClientSessionListener;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
+import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
+import org.protege.editor.owl.client.event.ClientSessionListener;
+import org.protege.editor.owl.client.event.CommitOperationEvent;
+import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLModelManagerImpl;
@@ -113,6 +116,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public boolean isRetiring() {
 		return isRetiring;
+	}
+	
+	public void cancelRetire() {
+		retire_class = null;
+		isRetiring = false;
 	}
 	
 	public boolean isMerging() {
@@ -249,8 +257,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		super.initialise();
 		log.info("NCI Edit Tab initialized");
 		
-		
-		
 		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
 		 * of additional times when the app initializes.
 		 * 
@@ -300,7 +306,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public boolean canMerge(OWLClass cls) {
-    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(Operations.MERGE.getId()); 
+    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(NCIEditTabConstants.MERGE.getId()); 
     	if (can) {
     		if (isPreMerged(cls)) {
     			return isWorkFlowManager();    			
@@ -511,6 +517,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
         getOWLModelManager().applyChanges(changes);
         
+        retire_class = null;
+        isRetiring = false;
+        
         
         
         
@@ -578,7 +587,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
      * 
      */
     public boolean canRetire(OWLClass cls) {
-    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(Operations.RETIRE.getId()); 
+    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(NCIEditTabConstants.RETIRE.getId()); 
     	if (can) {
     		if (isPreRetired(cls)) {
     			return isWorkFlowManager();    			
@@ -682,6 +691,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
     			clientSession.getActiveVersionOntology().update(hist);
     			resetHistory();
+    			clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
+                        hist.getHeadRevision(),
+                        hist.getMetadataForRevision(hist.getHeadRevision()),
+                        hist.getChangesForRevision(hist.getHeadRevision())));
     		} catch (ClientRequestException e) {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
@@ -1011,6 +1024,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			return ax.getRange();
 		}
 		return null;
+	}
+	
+	public String getDefaultValue(IRI iri) {
+		String type = iri.getShortForm();
+		if (type.equalsIgnoreCase("date-time-system")) {
+			return LocalDateTime.now().toString();
+		} else if (type.equalsIgnoreCase("user-system")) {
+			return clientSession.getActiveClient().getUserInfo().getName().toString();
+		} else if (type.endsWith("enum")) {
+			return getEnumValues(iri).get(0);
+		}
+		return "";
 	}
 	
 	public List<String> getEnumValues(IRI enumtype) {
