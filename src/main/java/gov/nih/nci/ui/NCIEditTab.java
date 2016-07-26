@@ -227,7 +227,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public String generateCode() {
 		LocalHttpClient cl = (LocalHttpClient) clientSession.getActiveClient();
-		return cl.getCode();
+		String code = "NONE"; 
+		
+		try {
+			code = cl.getCode();
+		} catch (Exception e) {
+			code = UUID.randomUUID().toString();
+		}
+		return code;
 	}
 	
 	public Set<OWLClass> getRequiredEntities() {
@@ -658,11 +665,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public boolean canSplit(OWLClass cls) {
     	return !(isPreRetired(cls) || isRetired(cls));
     }
-    
-    public String getCode() {
-		LocalHttpClient cl = (LocalHttpClient) clientSession.getActiveClient();
-		return cl.getCode();
-	}
     
     public void undoChanges() {
     	while (getOWLModelManager().getHistoryManager().canUndo()) {
