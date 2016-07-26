@@ -16,12 +16,14 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
+import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
 import org.protege.editor.owl.client.event.ClientSessionListener;
 import org.protege.editor.owl.client.event.CommitOperationEvent;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.util.ClientUtils;
+import org.protege.editor.owl.model.ChangeListMinimizer;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLModelManagerImpl;
 import org.protege.editor.owl.model.entity.OWLEntityCreationException;
@@ -154,7 +156,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 		
 	// use undo/redo facility
-	private HistoryManager history;
+	private SessionRecorder history;
 	
 	private ClientSession clientSession = null;
 	
@@ -278,7 +280,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 						// only initialize the ClientSession once, it maintains the
 						// switches between ontologies
 						clientSession = ClientSession.getInstance(getOWLEditorKit());
-						addListener();
+						
+						history = SessionRecorder.getInstance(getOWLEditorKit());
+						addListeners();
 				        
 					}
 					ontology = getOWLModelManager().getActiveOntology();
@@ -288,15 +292,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		
 		this.getOWLEditorKit().getOWLModelManager().addListener(ont_listen);
-		
-						
-		history = new HistoryManagerImpl(this.getOWLModelManager().getOWLOntologyManager());	
-		history.addUndoManagerListener(this);		
+			
 	}
     
-    public void logChanges(List<OWLOntologyChange> changes) {
-    	history.logChanges(changes);
-    }
+   
     
     /** Anyone can pre-merge so there is no need for a separate operation. A pre-merged class exists
      * as a subclass of the pre-merged root, so we can readily distinguish a pre-merge from a merge
@@ -667,8 +666,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public void undoChanges() {
-    	while (getOWLModelManager().getHistoryManager().canUndo()) {
-    		getOWLModelManager().getHistoryManager().undo();
+    	while (history.canUndo()) {
+    		history.undo();
     	}
     }
     
@@ -676,12 +675,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	ComplexEditType type = this.getComplexEditType();
     	
-    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	for (List<OWLOntologyChange> cs : getOWLModelManager().getHistoryManager().getLoggedChanges()) {
-    		changes.addAll(cs);
-    	}
+    	List<OWLOntologyChange> changes = history.getUncommittedChanges();
 
     	if (changes.size() > 0) {
+    		
+    		
 
     		String comment = type.name();
     		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
@@ -778,7 +776,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	split_source = selectedClass;
     	split_target = newClass;
 
-    	logChanges(changes);
+    	//logChanges(changes);
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
     }
     
@@ -831,20 +829,21 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		log.info("Disposed of NCI Edit Tab");
 	}
 	
-	public void addListener() {
+	public void addListeners() {
 		clientSession.addListener(this);
+		history.addUndoManagerListener(this);
 	}
 	
 	public void handleChange(ClientSessionChangeEvent event) {
 		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
 			initProperties();
-			resetHistory();
+			//resetHistory();
 			
 		}
 	}
 	
 	public void resetHistory() {
-		((OWLModelManagerImpl) this.getOWLModelManager()).resetHistory();		
+		history.reset();		
 	}
 	
 	
