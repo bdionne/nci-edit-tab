@@ -1,46 +1,18 @@
 package gov.nih.nci.ui;
 
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.swing.Icon;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
-import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.entity.OWLEntityCreationException;
-import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
 import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
 import org.protege.editor.owl.ui.OWLIcons;
 import org.protege.editor.owl.ui.action.AbstractOWLTreeAction;
-import org.protege.editor.owl.ui.renderer.OWLEntityAnnotationValueRenderer;
-import org.protege.editor.owl.ui.renderer.OWLModelManagerEntityRenderer;
-import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.protege.editor.owl.ui.tree.OWLTreeDragAndDropHandler;
 import org.protege.editor.owl.ui.view.CreateNewChildTarget;
 import org.protege.editor.owl.ui.view.cls.AbstractOWLClassHierarchyViewComponent;
-import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLAnnotationValue;
-import org.semanticweb.owlapi.model.OWLAnnotationValueVisitor;
-import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.search.EntitySearcher;
-import org.semanticweb.owlapi.util.OWLObjectDuplicator;
 
 import gov.nih.nci.ui.action.AddComplexTarget;
 import gov.nih.nci.ui.action.CloneClassTarget;
@@ -87,6 +59,21 @@ RetireClassTarget, AddComplexTarget {
             public void add(OWLClass child, OWLClass parent) {}
         });
         getAssertedTree().setPopupMenuId(new PopupMenuId("[NCIAssertedClassHierarchy]")); 
+        
+        /**
+        JButton testDialog = new JButton("Test Popup Dialog");
+        testDialog.addActionListener(e -> {
+            Optional<OWLEntity> ent = LuceneQueryPanel.showDialog(getOWLEditorKit());
+            if(ent.isPresent()) {
+                System.out.println("[LucenePopupDialog]    Selected entity: " + ent.get().getIRI());
+            } else {
+                System.out.println("[LucenePopupDialog]    No entity selected");
+            }
+        });
+        add(testDialog, BorderLayout.SOUTH);
+        **/
+        
+        	
 		
 
     }

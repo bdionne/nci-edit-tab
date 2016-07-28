@@ -160,6 +160,17 @@ public class PropertyTableModel extends AbstractTableModel {
 
 		return propertyValues;
 	}
+	
+	public HashMap<String, String> getDefaultPropertyValues() {
+		HashMap<String, String> propertyValues = new HashMap<String, String>();
+		
+		for (OWLAnnotationProperty aprop : requiredAnnotationsList) {
+
+			propertyValues.put(NCIEditTab.currentTab().getRDFSLabel(aprop).get(),
+					NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(aprop)));
+		}
+		return propertyValues;
+	}
 
 	public HashMap<String, ArrayList<String>> getSelectedPropertyOptions() {
 		HashMap<String, ArrayList<String>> propertyOptions = new HashMap<String, ArrayList<String>>();
@@ -188,6 +199,10 @@ public class PropertyTableModel extends AbstractTableModel {
 		if (dataType.toString().contains("string")) {
 			result = true;
 		}
+		if (dataType.toString().endsWith("system")) {
+			return true;
+		}
+	
 		return result;
 	}
 

@@ -1,6 +1,9 @@
 package gov.nih.nci.utils;
 
 
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_CHILD;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ROLE;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,8 +36,6 @@ import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-
-import gov.nih.nci.ui.NCIEditTab;
 
 public class ReferenceFinder implements OWLClassExpressionVisitor {
 
@@ -82,7 +83,7 @@ public class ReferenceFinder implements OWLClassExpressionVisitor {
 					par.accept(this);
 				} else if (par.asOWLClass().equals(entity)) {
 					String val = child.asOWLClass().getIRI().getShortForm();
-					fixups = addToFixups(fixups, NCIEditTab.DEP_CHILD, val);
+					fixups = addToFixups(fixups, DEP_CHILD, val);
 					System.out.println("OLD_CHILD:" + val );
 				}
 			}
@@ -140,7 +141,7 @@ public class ReferenceFinder implements OWLClassExpressionVisitor {
 			System.out.println("OSVF: " + ce);
 			String val = ce.getProperty().asOWLObjectProperty().getIRI().getShortForm() + "|"
 					+ "some" + "|" + currentExpression.asOWLClass().getIRI().getShortForm();
-			fixups = addToFixups(fixups, NCIEditTab.DEP_IN_ROLE, val);
+			fixups = addToFixups(fixups, DEP_IN_ROLE, val);
 			
 			System.out.println("OLD_SOURCE_ROLE:" + val);
 			
@@ -154,7 +155,7 @@ public class ReferenceFinder implements OWLClassExpressionVisitor {
 			System.out.println("OSVF: " + ce);
 			String val = ce.getProperty().asOWLObjectProperty().getIRI().getShortForm() + "|"
 					+ "all" + "|" + currentExpression.asOWLClass().getIRI().getShortForm();
-			fixups = addToFixups(fixups, NCIEditTab.DEP_IN_ROLE, val);
+			fixups = addToFixups(fixups, DEP_IN_ROLE, val);
 			
 			System.out.println("OLD_SOURCE_ROLE:" + val);
 			

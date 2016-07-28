@@ -28,13 +28,18 @@ EditTabChangeListener {
 			setHeaderText(NCIEditTab.currentTab().getRetireClass().asOWLClass().getIRI().getShortForm());
 		}
 	}
+	
+	public NCIRetireViewComponent() {
+		NCIEditTab.addListener(this);
+		
+	}
 
 	@Override
 	public void initialiseClassView() throws Exception {
 		retirePanel = new RetirePanel(getOWLEditorKit());
     	setLayout(new BorderLayout());
         add(retirePanel);
-        NCIEditTab.addListener(this);
+        
 	}
 	
 	@Override

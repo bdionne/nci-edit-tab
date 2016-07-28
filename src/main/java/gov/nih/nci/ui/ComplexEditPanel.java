@@ -1,5 +1,7 @@
 package gov.nih.nci.ui;
 
+import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -20,7 +22,6 @@ import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
 
-import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.ComplexEditTransferHandler;
 
 
@@ -295,7 +296,7 @@ public class ComplexEditPanel extends JPanel {
     }
     
     private OWLClass findTarget(OWLClass cls) {
-    	String target_code = NCIEditTab.currentTab().getProperty(cls, NCIEditTab.MERGE_TARGET).get();
+    	String target_code = NCIEditTab.currentTab().getProperty(cls, MERGE_TARGET).get();
     	return NCIEditTab.currentTab().getClass(target_code);
     }
     
