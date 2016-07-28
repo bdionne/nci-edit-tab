@@ -183,9 +183,7 @@ public class RetirePanel extends JPanel {
     }
     
     public void warnUsages() {
-    	JOptionPane.showMessageDialog(this, "Can't retire until all usages are repaired", "Warning", JOptionPane.WARNING_MESSAGE);
-    	
-    	
+    	JOptionPane.showMessageDialog(this, "Can't retire until all usages are repaired", "Warning", JOptionPane.WARNING_MESSAGE);    	
     }
     
     

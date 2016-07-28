@@ -177,6 +177,7 @@ public class ComplexEditPanel extends JPanel {
             	lowerLabel.setText("Target");
             	
             	saveButton.setText("Save");
+            	NCIEditTab.currentTab().undoChanges();
             }
         });     
 		
