@@ -18,6 +18,7 @@ import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
+import org.protege.editor.owl.client.api.exception.SynchronizationException;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.event.ClientSessionListener;
@@ -30,7 +31,7 @@ import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.UndoManagerListener;
 import org.protege.editor.owl.server.api.CommitBundle;
-import org.protege.editor.owl.server.api.exception.AuthorizationException;
+import org.protege.editor.owl.client.api.exception.AuthorizationException;
 import org.protege.editor.owl.server.api.exception.OutOfSyncException;
 import org.protege.editor.owl.server.policy.CommitBundleImpl;
 import org.protege.editor.owl.server.versioning.Commit;
@@ -586,9 +587,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
-    public boolean isWorkFlowManager() {
-    	Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
+    public boolean isWorkFlowManager() {    	
     	try {
+    		Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
 			return clientSession.getActiveClient().getActiveRoles().contains(wfm);
 		} catch (ClientRequestException e) {
 			// TODO Auto-generated catch block
@@ -669,15 +670,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			// TODO Auto-generated catch block
     			e.printStackTrace();
     		} catch (AuthorizationException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		} catch (OutOfSyncException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		} catch (RemoteException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SynchronizationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     	}
         
     }
@@ -686,6 +684,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	try {
 			((LocalHttpClient) clientSession.getActiveClient()).putEVSHistory(c, n, op, ref);
 		} catch (ClientRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AuthorizationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
