@@ -112,7 +112,8 @@ public class PropertyEditingDialog extends JPanel {
     	
     	JTextField textfield= new JTextField();
     	textfield.setPreferredSize(new Dimension(180, 20));
-    	if(type == NCIEditTabConstants.EDIT && propvaluemap != null){
+    	if((type == NCIEditTabConstants.EDIT ||
+    			type == NCIEditTabConstants.ADD) && propvaluemap != null){
     		textfield.setText(propvaluemap.get(prop));
     	}
     	

@@ -1,5 +1,8 @@
 package gov.nih.nci.ui;
 
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLClass;
+
 import edu.stanford.protege.metaproject.Manager;
 import edu.stanford.protege.metaproject.api.MetaprojectFactory;
 import edu.stanford.protege.metaproject.api.Operation;
@@ -12,6 +15,33 @@ public class NCIEditTabConstants {
 	public static final String ADD = "Add";
 	public static final String EDIT = "Edit";
 	public static final String DELETE = "Delete";
+	
+	public static final String COMPLEX_PROPS = "complex_properties";
+	public static final String IMMUTABLE_PROPS = "immutable_properties";
+	
+	public static OWLAnnotationProperty DEP_PARENT;
+	public static OWLAnnotationProperty DEP_CHILD;
+	public static OWLAnnotationProperty DEP_ROLE;
+	public static OWLAnnotationProperty DEP_ASSOC;
+	public static OWLAnnotationProperty DEP_IN_ROLE;
+	public static OWLAnnotationProperty DEP_IN_ASSOC;
+	
+	public static OWLAnnotationProperty MERGE_SOURCE;
+	public static OWLAnnotationProperty MERGE_TARGET;
+	public static OWLAnnotationProperty SPLIT_FROM;
+	
+	public static OWLAnnotationProperty DESIGN_NOTE;
+	public static OWLAnnotationProperty EDITOR_NOTE;
+	
+	public static OWLAnnotationProperty CODE_PROP;
+	public static OWLAnnotationProperty LABEL_PROP;
+	public static OWLAnnotationProperty PREF_NAME;
+	
+	public static OWLClass PRE_RETIRE_ROOT;
+	public static OWLClass PRE_MERGE_ROOT;
+	public static OWLClass RETIRE_ROOT;
+	
+	
 	
 	public static final Operation MERGE = factory.getSystemOperation(
             factory.getOperationId("merge"), factory.getName("Merge"),

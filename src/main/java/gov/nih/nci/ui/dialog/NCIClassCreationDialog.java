@@ -52,6 +52,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.Namespaces;
 
 import gov.nih.nci.ui.NCIEditTab;
+import static gov.nih.nci.ui.NCIEditTabConstants.*;
 
 public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 	
@@ -231,10 +232,10 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		OWLLiteral con = df.getOWLLiteral(gen_code);
 		OWLLiteral pref_name_val = df.getOWLLiteral(preferredName);
 
-		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(NCIEditTab.CODE_PROP, newClass.getIRI(), con);
+		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(CODE_PROP, newClass.getIRI(), con);
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
-		OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.LABEL_PROP, newClass.getIRI(), pref_name_val);
-		OWLAxiom ax3 = df.getOWLAnnotationAssertionAxiom(NCIEditTab.PREF_NAME, newClass.getIRI(), pref_name_val);
+		OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(LABEL_PROP, newClass.getIRI(), pref_name_val);
+		OWLAxiom ax3 = df.getOWLAnnotationAssertionAxiom(PREF_NAME, newClass.getIRI(), pref_name_val);
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax2));
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax3));
 		

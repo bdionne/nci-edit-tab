@@ -1,5 +1,8 @@
 package gov.nih.nci.ui;
 
+import static gov.nih.nci.ui.NCIEditTabConstants.PRE_RETIRE_ROOT;
+import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,24 +24,13 @@ import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
-import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
-import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
-import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLQuantifiedObjectRestriction;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 
-import gov.nih.nci.ui.dialog.NoteDialog;
-import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.RetireTransferHandler;
 import gov.nih.nci.utils.ReferenceFinder;
 
@@ -191,9 +183,7 @@ public class RetirePanel extends JPanel {
     }
     
     public void warnUsages() {
-    	JOptionPane.showMessageDialog(this, "Can't retire until all usages are repaired", "Warning", JOptionPane.WARNING_MESSAGE);
-    	
-    	
+    	JOptionPane.showMessageDialog(this, "Can't retire until all usages are repaired", "Warning", JOptionPane.WARNING_MESSAGE);    	
     }
     
     
@@ -203,12 +193,12 @@ public class RetirePanel extends JPanel {
     	
     	Set<OWLSubClassOfAxiom> subs = ont.getSubClassAxiomsForSubClass(classToRetire);
     	for (OWLSubClassOfAxiom s : subs) {
-    		if (s.getSuperClass().asOWLClass().equals(NCIEditTab.PRE_RETIRE_ROOT)) {
+    		if (s.getSuperClass().asOWLClass().equals(PRE_RETIRE_ROOT)) {
     			changes.add(new RemoveAxiom(ont, s));
     		}
     	}
     	changes.add(new AddAxiom(mngr.getActiveOntology(),
-    			df.getOWLSubClassOfAxiom(classToRetire, NCIEditTab.RETIRE_ROOT)));
+    			df.getOWLSubClassOfAxiom(classToRetire, RETIRE_ROOT)));
     	
     	mngr.applyChanges(changes);
         
