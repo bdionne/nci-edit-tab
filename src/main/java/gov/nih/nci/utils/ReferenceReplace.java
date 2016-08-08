@@ -1,6 +1,9 @@
 package gov.nih.nci.utils;
 
 
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ASSOC;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ASSOC;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +12,12 @@ import java.util.Set;
 
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -23,6 +31,7 @@ import org.semanticweb.owlapi.model.OWLDataMinCardinality;
 import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
@@ -116,6 +125,22 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 				
 			}
 		}
+		
+		for (OWLAnnotationAssertionAxiom ax : ont.getAxioms(AxiomType.ANNOTATION_ASSERTION)) {
+            com.google.common.base.Optional<IRI> valueIRI = ax.getValue().asIRI();
+            if (valueIRI.isPresent()) {
+                if (valueIRI.get().equals(from.getIRI())) {
+                	OWLAnnotationAssertionAxiom oaax = (OWLAnnotationAssertionAxiom) ax;
+                	changes.add(new RemoveAxiom(ont, ax));
+                	OWLAnnotationAssertionAxiom newax = dataFact.getOWLAnnotationAssertionAxiom(ax.getProperty(), ax.getSubject(),
+                			to.getIRI());
+                	changes.add(new AddAxiom(ont, newax));
+                	
+                }
+            }
+        }
+		
+		
 
 		return changes;
 
