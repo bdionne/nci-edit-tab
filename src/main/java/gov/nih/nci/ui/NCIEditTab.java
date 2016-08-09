@@ -254,8 +254,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
 		 * of additional times when the app initializes.
 		 * 
-		 */
-		 
+		 */		 
 		ont_listen = new OWLModelManagerListener() {
 
 			@Override
@@ -866,7 +865,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public void handleChange(ClientSessionChangeEvent event) {
 		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
 			initProperties();
-			//resetHistory();
 			
 		}
 	}
@@ -907,7 +905,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 				if (options.isPresent()) {
 					ProjectOptions opts = options.get();
-					Set<String> complex_props = opts.getOption(COMPLEX_PROPS);
+					Set<String> complex_props = opts.getValues(COMPLEX_PROPS);
 					if (complex_props != null) {						
 						for (String cp : complex_props) {
 							OWLAnnotationProperty p = lookup(cp, annProps);
@@ -919,7 +917,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 							
 							// now get dependencies
 							Set<OWLAnnotationProperty> dprops = new HashSet<OWLAnnotationProperty>();
-							Set<String> dependents = opts.getOption(cp);
+							Set<String> dependents = opts.getValues(cp);
 							if (dependents != null) {
 								for (String dp : dependents) {
 									OWLAnnotationProperty dpProp = lookup(dp, annProps);
@@ -938,7 +936,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 							JOptionPane.showMessageDialog(this, msg, "Warning", JOptionPane.WARNING_MESSAGE);
 						}
 					}
-					Set<String> imm_props = opts.getOption(IMMUTABLE_PROPS);
+					Set<String> imm_props = opts.getValues(IMMUTABLE_PROPS);
 					if (imm_props != null) {
 						for (String ip : imm_props) {
 							OWLAnnotationProperty p = lookup(ip, annProps);
@@ -992,7 +990,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	OWLClass findOWLClass(String opt, ProjectOptions opts) {
 		OWLClass cls = null;
-		Set<String> ss = opts.getOption(opt);
+		Set<String> ss = opts.getValues(opt);
 		if (ss != null) {
 			IRI iri = IRI.create((String) ss.toArray()[0]);
 			Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
@@ -1005,7 +1003,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	OWLAnnotationProperty getSingleProperty(String ps, ProjectOptions opts, Set<OWLAnnotationProperty> annProps) {
 		OWLAnnotationProperty prop = null;
-		Set<String> ss = opts.getOption(ps);
+		Set<String> ss = opts.getValues(ps);
 		if (ss != null) {
 			prop = lookup((String) ss.toArray()[0], annProps);
 		}
@@ -1196,7 +1194,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				System.out.println("A change: " + change.toString());
 			}
 		}
-		// TODO Auto-generated method stub
 		
 	}
 	
