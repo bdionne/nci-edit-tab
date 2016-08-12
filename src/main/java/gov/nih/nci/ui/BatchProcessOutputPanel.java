@@ -40,7 +40,7 @@ public class BatchProcessOutputPanel extends JPanel implements ActionListener{
         
         JPanel buttonpanel = new JPanel();
         
-        batchbutton = new JButton("Launch Batch Process");
+        batchbutton = new JButton("Batch Load/Edit");
         batchbutton.addActionListener(this);
         
         buttonpanel.add(batchbutton);

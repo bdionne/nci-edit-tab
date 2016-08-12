@@ -103,13 +103,8 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	  field.setPreferredSize(new Dimension(200, 25));
 	  
 	  JButton btn = new JButton();
-	  if(type == "open"){
-		  btn.setText("Input");
-	  }
-	  else{
-		  
-		  btn.setText("Output");
-	  }
+	  btn.setText("browse");
+	  
 	  
 	  btn.addActionListener(new ActionListener(){
 		  
