@@ -729,9 +729,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		} catch (AuthorizationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (SynchronizationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
     	}
         
