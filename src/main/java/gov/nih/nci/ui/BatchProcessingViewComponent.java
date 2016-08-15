@@ -2,7 +2,6 @@ package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
 
-import org.protege.editor.owl.ui.view.cls.AbstractOWLClassViewComponent;
 import org.protege.editor.owl.ui.view.cls.OWLClassAnnotationsViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
 

@@ -1,19 +1,16 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 
 import org.protege.editor.owl.OWLEditorKit;
+
 import gov.nih.nci.ui.dialog.BatchProcessingDialog;
 
 public class BatchProcessOutputPanel extends JPanel implements ActionListener{
