@@ -2,7 +2,7 @@ package gov.nih.nci.ui.dialog;
 
 
 
-import gov.nih.nci.ui.BatchTask;
+import gov.nih.nci.utils.batch.BatchTask;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

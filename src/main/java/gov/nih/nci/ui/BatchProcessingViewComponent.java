@@ -10,7 +10,7 @@ public class BatchProcessingViewComponent extends OWLClassAnnotationsViewCompone
 	private BatchProcessOutputPanel batchPanel;
     
     public void initialiseClassView() throws Exception {
-    	batchPanel = new BatchProcessOutputPanel(getOWLEditorKit());
+    	batchPanel = new BatchProcessOutputPanel();
         setLayout(new BorderLayout());
         add(batchPanel);
         

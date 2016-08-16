@@ -9,20 +9,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.protege.editor.owl.OWLEditorKit;
+
 
 import gov.nih.nci.ui.dialog.BatchProcessingDialog;
 
 public class BatchProcessOutputPanel extends JPanel implements ActionListener{
 
 	private static final long serialVersionUID = 1L;
-	private OWLEditorKit owlEditorKit;
-	
 	private JTextArea textarea;
 	private JButton batchbutton;
 	
-	public BatchProcessOutputPanel(OWLEditorKit editorKit){
-		this.owlEditorKit = editorKit;
+	public BatchProcessOutputPanel(){
 		createUI();
 	}
 	
@@ -31,8 +28,7 @@ public class BatchProcessOutputPanel extends JPanel implements ActionListener{
     	setLayout(new BorderLayout());
     	
         textarea = new JTextArea();       
-        JScrollPane sp = new JScrollPane(textarea);  
-        //sp.setVisible(false);
+        JScrollPane sp = new JScrollPane(textarea);
         add(sp, BorderLayout.CENTER);
         
         JPanel buttonpanel = new JPanel();

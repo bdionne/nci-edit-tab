@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
@@ -40,7 +41,6 @@ import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.client.api.exception.AuthorizationException;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
-import org.protege.editor.owl.client.api.exception.SynchronizationException;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.event.ClientSessionListener;
@@ -649,7 +649,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
 			return clientSession.getActiveClient().getActiveRoles().contains(wfm);
 		} catch (ClientRequestException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	return false;
@@ -1249,4 +1248,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		getOWLModelManager().applyChanges(changes);
 	}
 	
+	// Methods needed by BatchEditTask
+	
+	public OWLClass getClassByName(String name) {
+		OWLClass cls = null;
+		return cls;
+	}
+	
+	public Vector<String> getSupportedRoles() {
+		return null;
+	}
+	
+	public Vector<String> getSupportedAnnotationProperties() {
+		return null;
+	}
+	
+	public Vector<String> getSupportedAssociations() {
+		return null;
+	}
 }

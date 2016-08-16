@@ -1,20 +1,5 @@
 package gov.nih.nci.ui.dialog;
 
-//import edu.stanford.smi.protege.model.KnowledgeBase;
-//import edu.stanford.smi.protege.util.FileField;
-//import edu.stanford.smi.protege.util.LabeledComponent;
-//import edu.stanford.smi.protege.util.Log;
-//import edu.stanford.smi.protegex.owl.model.OWLModel;
-//import gov.nih.nci.protegex.dialog.TaskProgressDialog;
-//import gov.nih.nci.protegex.panel.*;
-//import gov.nih.nci.protegex.edit.*;
-//import gov.nih.nci.protegex.util.MsgDialog;
-import gov.nih.nci.ui.BatchProcessOutputPanel;
-import gov.nih.nci.ui.BatchTask;
-import gov.nih.nci.ui.NCIEditTab;
-
-//import static gov.nih.nci.protegex.batch.BatchTask.TaskType.*;
-
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -27,11 +12,23 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
-import java.util.logging.Level;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
+
+import gov.nih.nci.ui.BatchProcessOutputPanel;
+import gov.nih.nci.ui.NCIEditTab;
+import gov.nih.nci.utils.batch.BatchEditTask;
+import gov.nih.nci.utils.batch.BatchLoadTask;
+import gov.nih.nci.utils.batch.BatchTask;
 
 /**
  * @Author: NGIT, Kim Ong; Iris Guo
@@ -45,19 +42,14 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 	JTextField fInputTf, fOutputTf;
 
-	JComboBox batchType = null;
+	JComboBox<String> batchType = null;
 
 	NCIEditTab tab;
 
-	BatchProcessOutputPanel be = null;
+	BatchProcessOutputPanel be = null;	
 
-	//OWLModel owlModel;
-
-	String infile;// = fInputTf.getText();
-
-	String outfile;// = fOutputTf.getText();
-
-	//OWLWrapper wrapper = null;
+	String infile;
+	String outfile;
 
 	public static final int BATCH_LOADER = 2;
 
@@ -65,26 +57,15 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 	int type = BATCH_EDITOR;
 
-	//FileField inputFileField;
-
-//	FileField outputFileField;
-
 	public BatchProcessingDialog(BatchProcessOutputPanel b, NCIEditTab tab) {
 		be = b;
 		this.tab = tab;
-		//this.owlModel = tab.getOWLModel();
-	//	this.wrapper = tab.getWrapper();
-
+		
 		this.infile = "";
 		this.outfile = "";
 
-		// this.type = type;
 		setModal(true);
 
-		/**
-		 * if (type == BATCH_LOADER) { this.setTitle("Batch Loader"); } else {
-		 * this.setTitle("Batch Editor"); }
-		 */
 		this.setTitle("Batch Processor");
 		init();
 	}
@@ -149,33 +130,18 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			JPanel filePanel = new JPanel();
 			filePanel.setLayout(new BorderLayout());
 
-			String label = "Input File";
-			String path = "";
-			String extension = "dat";
-			String description = "";
-			//inputFileField = new FileField(label, path, extension, description);
-
-			//filePanel.add(inputFileField, BorderLayout.NORTH);\
+			
 			filePanel.add(createFileField("Input File", "dat","open"), BorderLayout.NORTH);
-			label = "Log File";
-			path = "";
-			extension = "out";
-			description = "";
-			//outputFileField = new FileField(label, path, extension, description);
-			//filePanel.add(outputFileField, BorderLayout.CENTER);
+			
 			filePanel.add(createFileField("Output File", "out","save"), BorderLayout.CENTER);
 
 			container.add(filePanel, BorderLayout.NORTH);
 
 			String[] types = new String[] { "Edit", "Load" };
-			batchType = new JComboBox(types);
+			batchType = new JComboBox<String>(types);
 			batchType.setSelectedIndex(0);
 			batchType.addActionListener(this);
 
-			//LabeledComponent lc = new LabeledComponent("Processing Type",
-				//	batchType);
-
-			//container.add(lc, BorderLayout.CENTER);
 			
 			JPanel labelcombopanel = new JPanel();
 			labelcombopanel.setPreferredSize(new Dimension(350, 50));
@@ -190,7 +156,6 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			fCancelButton.addActionListener(this);
 
 			JPanel btnPanel = new JPanel();
-			// btnPanel.setLayout(new BorderLayout());
 			btnPanel.add(fStartButton);
 			btnPanel.add(fCancelButton);
 
@@ -206,18 +171,10 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	}
 
 	public String getInfile() {
-
-	//	if (inputFileField.getFilePath() == null)
-		//	return null;
-		//
-		//return inputFileField.getFilePath().getPath();
 		return  infile;
 	}
 
-	public String getOutfile() {
-		//if (outputFileField.getFilePath() == null)
-		//	return null;
-		//return outputFileField.getFilePath().getPath();
+	public String getOutfile() {		
 		return outfile;
 	}
 
@@ -228,7 +185,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 		return today;
 	}
 
-	public void outputErrors(String outputfile, Vector v) {
+	public void outputErrors(String outputfile, Vector<String> v) {
 		if (outputfile == null || v == null)
 			return;
 		PrintWriter writer = null;
@@ -271,49 +228,34 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			infile = getInfile();
 			outfile = getOutfile();
 
-			if (infile == null || infile.compareTo("") == 0) {
-				//MsgDialog.error((JFrame) tab.getTopLevelAncestor(),
-					//	"Please specify an input file.");
+			if (infile == null || infile.compareTo("") == 0) {				
 				return;
 			}
 
-			else if (outfile == null || outfile.compareTo("") == 0) {
-				//MsgDialog.error((JFrame) tab.getTopLevelAncestor(),
-				//		"Please specify an output file.");
+			else if (outfile == null || outfile.compareTo("") == 0) {				
 				return;
-			}
-
-			else if (infile.equalsIgnoreCase(outfile)) {
-				//MsgDialog.error((JFrame) tab.getTopLevelAncestor(),
-				//		"Invalid inputs.");
-			}
-
-			else {
+			} else {
 				setVisible(false);
 				TaskProgressDialog tpd = null;
 
 				BatchTask task = null;
 				if (type == BATCH_LOADER) {
-					//if (tab.byCode()) {
-						//task = new BatchLoadByCodeTask(tab, infile, outfile);
-					//} else {
-						//task = new BatchLoadByNameTask(tab, infile, outfile);
-				///	}
-					//task.setType(LOAD);
-					//tpd = new TaskProgressDialog((JFrame) tab
-					//		.getTopLevelAncestor(),
-					//		"Batch Load Progress Status", task);
+					
+					task = new BatchLoadTask(tab, infile, outfile);
+					
+					task.setType(BatchTask.TaskType.LOAD);
+					tpd = new TaskProgressDialog(new JFrame(), 
+							"Batch Load Progress Status", task);
 				} else if (type == BATCH_EDITOR) {
-					//task = new BatchEditTask(tab, infile, outfile);
-					//task.setType(EDIT);
-				//	tpd = new TaskProgressDialog((JFrame) tab
-				//			.getTopLevelAncestor(),
-				//			"Batch Edit Progress Status", task);
+					task = new BatchEditTask(tab, infile, outfile);
+					task.setType(BatchTask.TaskType.EDIT);
+					tpd = new TaskProgressDialog(new JFrame(),
+							"Batch Edit Progress Status", task);
 				}
 
 				task.openPrintWriter(outfile);
 
-				// task.validateData();
+				//task.validateData();
 				if (!task.canProceed()) {
 					//MsgDialog
 					//		.error(
@@ -331,8 +273,8 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 				if (tpd != null) {
 					//MsgDialog.ok((JFrame) tab.getTopLevelAncestor(),
-						//	getTitle(), "Completed actions: "
-						//			+ tpd.getNumCompleted());
+					//	getTitle(), "Completed actions: "
+					//			+ tpd.getNumCompleted());
 				}
 				try {
 					task.closePrintWriter();
@@ -343,9 +285,9 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				if (task.isCancelled()) {
 					//be.enableButton("clearButton", true);
 				} else {
-				//	be.enableButton("inputButton", false);
-				//	be.enableButton("saveButton", true);
-				//	be.enableButton("clearButton", true);
+					//	be.enableButton("inputButton", false);
+					//	be.enableButton("saveButton", true);
+					//	be.enableButton("clearButton", true);
 				}
 
 			}

@@ -130,7 +130,6 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
             com.google.common.base.Optional<IRI> valueIRI = ax.getValue().asIRI();
             if (valueIRI.isPresent()) {
                 if (valueIRI.get().equals(from.getIRI())) {
-                	OWLAnnotationAssertionAxiom oaax = (OWLAnnotationAssertionAxiom) ax;
                 	changes.add(new RemoveAxiom(ont, ax));
                 	OWLAnnotationAssertionAxiom newax = dataFact.getOWLAnnotationAssertionAxiom(ax.getProperty(), ax.getSubject(),
                 			to.getIRI());
