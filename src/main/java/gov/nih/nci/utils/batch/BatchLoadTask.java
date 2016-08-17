@@ -1,5 +1,6 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.Optional;
 import java.util.Vector;
 
 import gov.nih.nci.ui.NCIEditTab;
@@ -29,16 +30,22 @@ public class BatchLoadTask extends BatchTask {
 	public boolean processTask(int taskId) {
 		try {
 			String s = (String) data_vec.elementAt(taskId);
-			Vector<String> w = getTokenStr(s, 4);
+			Vector<String> w = getTokenStr(s, 2);
 			
 			String name = (String) w.elementAt(0);
-			String pt = (String) w.elementAt(1);
-			String sup = (String) w.elementAt(2);
+			//String pt = (String) w.elementAt(1);
+			String sup = (String) w.elementAt(1);
 			
+			tab.createNewChild(tab.getClass(sup), Optional.of(name));
+			tab.commitChanges();
+			
+			/**
 			String sem_type = "";
 			if (w.size() > 3) {
 				sem_type = (String) w.elementAt(3);
 			}
+			*/
+			Thread.sleep(2000);
 			
 
 			
@@ -117,8 +124,9 @@ public class BatchLoadTask extends BatchTask {
 			
 				
 				String name = (String) v.elementAt(0);
-				String sup = (String) v.elementAt(2);
+				String sup = (String) v.elementAt(1);
 				
+				/**
 				String sem_type = "";
 				if (v.size() > 3) {
 					sem_type = (String) v.elementAt(3);
@@ -136,9 +144,10 @@ public class BatchLoadTask extends BatchTask {
 						System.out.println(error_msg);
 						
 					}
-					*/
+					
 					
 				}
+				*/
 				
 				/**
 
