@@ -81,7 +81,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	  JLabel lb = new JLabel(label);
 	  JTextField field = new  JTextField();
 	  
-	  field.setPreferredSize(new Dimension(200, 25));
+	  field.setPreferredSize(new Dimension(250, 25));
 	  
 	  JButton btn = new JButton();
 	  btn.setText("browse");
@@ -90,7 +90,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	  btn.addActionListener(new ActionListener(){
 		  
 		  public void actionPerformed(ActionEvent e){
-			  if(type == "open"){
+			  if(type == "input"){
 				  JFileChooser fc = new JFileChooser();
 				  //to do - add file filter
 				  int select = fc.showOpenDialog(BatchProcessingDialog.this);
@@ -125,15 +125,15 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			Container container = this.getContentPane();
 			container.setLayout(new BorderLayout());
 
-			this.setLocation(450, 300);
+			this.setLocation(450, 450);
 
 			JPanel filePanel = new JPanel();
 			filePanel.setLayout(new BorderLayout());
 
 			
-			filePanel.add(createFileField("Input File", "dat","open"), BorderLayout.NORTH);
+			filePanel.add(createFileField("Input File", "dat","input"), BorderLayout.NORTH);
 			
-			filePanel.add(createFileField("Output File", "out","save"), BorderLayout.CENTER);
+			filePanel.add(createFileField("Output File", "out","output"), BorderLayout.CENTER);
 
 			container.add(filePanel, BorderLayout.NORTH);
 
