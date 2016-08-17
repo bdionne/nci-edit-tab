@@ -218,23 +218,16 @@ public class BatchTask {
 		return null;
 	}
 
-	public Vector<String> getTokenStr(String value, int length) {
+	public Vector<String> getTokenStr(String value, int no_tokens) {
 		Vector<String> tokenValues = new Vector<String>();
-		String s = value + "\t\t\t\t\t\t\t\t\t";
-		int n = s.indexOf("\t");
-		int i = 0;
-		while (n != -1 && i < length) {
-			String t = s.substring(0, n);
-			tokenValues.add(t);
-			s = s.substring(n + 1);
-			i++;
-			n = s.indexOf("\t");
-		}
-		for (i = 0; i < length; i++) {
-			s = (String) tokenValues.elementAt(i);
-			if (s.compareTo("") == 0) {
-				tokenValues.setElementAt("NA", i);
+		// make sure there are enough values, even if all empty
+		String[] toks = value.split("\t");
+		for (int i = 0; i < no_tokens; i++) {
+			String elem = "NA";
+			if ((i < toks.length) && !(toks[i].compareTo("") == 0)) {
+				elem = toks[i];
 			}
+			tokenValues.addElement(elem);
 		}
 		return tokenValues;
 	}
