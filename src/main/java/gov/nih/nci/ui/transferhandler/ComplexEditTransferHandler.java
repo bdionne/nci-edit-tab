@@ -3,6 +3,7 @@ package gov.nih.nci.ui.transferhandler;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JOptionPane;
 import javax.swing.TransferHandler;
@@ -56,7 +57,7 @@ public class ComplexEditTransferHandler extends TransferHandler {
 			if (NCIEditTab.currentTab().canSplit(data.get(0))) {
 				// if you can split you can clone
 				NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(complexEditPanel.getEditorKit(),
-						"Please enter a class name", OWLClass.class);
+						"Please enter a class name", OWLClass.class, Optional.empty());
 
 				if (dlg.showDialog()) {
 					NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), data.get(0), clone_p);

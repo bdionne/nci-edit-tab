@@ -804,43 +804,39 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
     }
     
-    public OWLClass createNewChild(OWLClass selectedClass) {
+    public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName) {
 
     	NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
-				"Please enter a class name", OWLClass.class);
-    	
-    	if (dlg.showDialog()) {
+    			"Please enter a class name", OWLClass.class, prefName);
+
+    	boolean proceed = false;
+
+    	if (prefName.isPresent()) {
+    		proceed = true;
+    	} else {
+    		proceed = dlg.showDialog();
+    	}
+
+    	if (proceed) {
     		OWLClass newClass = dlg.getNewClass();
     		List<OWLOntologyChange> changes = dlg.getOntChanges();
     		OWLModelManager mngr = getOWLModelManager();
     		OWLDataFactory df = mngr.getOWLDataFactory();
-    		
+
     		if (!df.getOWLThing().equals(selectedClass)){
     			OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(newClass, selectedClass);
     			changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
     		}
-    		
+
     		mngr.applyChanges(changes);
-    		
+
     		return newClass;
     	} else {
     		return null;
     	}
 
-		
-		
-		
-
-
-
-
-
-		
-
-
-    	
     }
-    
+        
     public boolean canClone(OWLClass cls) {
     	return canSplit(cls);
     }
