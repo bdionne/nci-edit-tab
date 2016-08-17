@@ -36,8 +36,7 @@ public class BatchLoadTask extends BatchTask {
 			//String pt = (String) w.elementAt(1);
 			String sup = (String) w.elementAt(1);
 			
-			tab.createNewChild(tab.getClass(sup), Optional.of(name));
-			tab.commitChanges();
+			
 			
 			/**
 			String sem_type = "";
@@ -50,7 +49,8 @@ public class BatchLoadTask extends BatchTask {
 
 			
 			if (super.checkNoErrors(w, taskId)) {
-				//ok
+				tab.createNewChild(tab.getClass(sup), Optional.of(name));
+				tab.commitChanges();
 			} else {
 				return false;
 			}
@@ -125,6 +125,12 @@ public class BatchLoadTask extends BatchTask {
 				
 				String name = (String) v.elementAt(0);
 				String sup = (String) v.elementAt(1);
+				
+				if (tab.getClass(sup) == null) {
+					String error_msg = " -- super class does not exist.";
+					w.add(error_msg);
+					System.out.println(error_msg);
+				}
 				
 				/**
 				String sem_type = "";
