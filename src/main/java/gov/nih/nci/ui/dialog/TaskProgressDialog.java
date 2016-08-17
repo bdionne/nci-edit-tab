@@ -242,7 +242,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
                 
                 // now sleep for a bit to let things settle
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     task.print("Sleeper interrupted " + e.getLocalizedMessage());
                 }
