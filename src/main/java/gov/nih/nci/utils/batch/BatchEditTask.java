@@ -1,14 +1,10 @@
 package gov.nih.nci.utils.batch;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Vector;
-import java.util.logging.Level;
 
 import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.NCIEditTab;
-import gov.nih.nci.ui.NCIEditTabConstants;
 
 /**
  * @Author: NGIT, Kim Ong; Iris Guo
