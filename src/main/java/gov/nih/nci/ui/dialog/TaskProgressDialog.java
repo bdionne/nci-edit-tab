@@ -273,7 +273,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent event)
 	{
 		Object action = event.getSource();
-
+		
 		if (action == cancelButton)
 		{
 			task.print("Interrupting proc thread...");

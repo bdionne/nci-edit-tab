@@ -33,9 +33,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
+import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
@@ -713,7 +715,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     		DocumentRevision base;
     		try {
-    			base = ((LocalHttpClient) clientSession.getActiveClient()).getRemoteHeadRevision(clientSession.getActiveVersionOntology());
+    			base = clientSession.getActiveVersionOntology().getHeadRevision();
     			CommitBundle commitBundle = new CommitBundleImpl(base, commit);
     			ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
     			clientSession.getActiveVersionOntology().update(hist);
@@ -723,14 +725,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
                         hist.getMetadataForRevision(hist.getHeadRevision()),
                         hist.getChangesForRevision(hist.getHeadRevision())));
     		} catch (ClientRequestException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
+    			showErrorDialog("Commit error", e.getMessage(), e);
     		} catch (AuthorizationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     	}
         
+    }
+    
+    private void showErrorDialog(String title, String message, Throwable t) {
+        JOptionPaneEx.showConfirmDialog(getOWLEditorKit().getWorkspace(), title, new JLabel(message),
+                JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null);
     }
     
     public void putHistory(String c, String n, String op, String ref) {
