@@ -3,6 +3,7 @@ package gov.nih.nci.utils;
 
 import static gov.nih.nci.ui.NCIEditTabConstants.DEP_CHILD;
 import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ROLE;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ASSOC;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +11,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -63,7 +67,7 @@ public class ReferenceFinder implements OWLClassExpressionVisitor {
 
 		ont = owlModelManager.getActiveOntology();
 
-		Set<OWLAxiom> axioms = ont.getReferencingAxioms(inst);
+		Set<OWLAxiom> axioms = ont.getReferencingAxioms(inst.getIRI());
 		for (OWLAxiom ax : axioms) {
 			if (ax instanceof OWLEquivalentClassesAxiom) {
 				for (OWLClassExpression desc : ((OWLEquivalentClassesAxiom) ax).getClassExpressions()) {
@@ -88,6 +92,18 @@ public class ReferenceFinder implements OWLClassExpressionVisitor {
 				}
 			}
 		}
+		
+		for (OWLAnnotationAssertionAxiom ax : ont.getAxioms(AxiomType.ANNOTATION_ASSERTION)) {			
+            com.google.common.base.Optional<IRI> valueIRI = ax.getValue().asIRI();
+            if (valueIRI.isPresent()) {
+                if (valueIRI.get().equals(entity.getIRI())) {
+                	OWLAnnotationAssertionAxiom oaax = (OWLAnnotationAssertionAxiom) ax;
+                	fixups = addToFixups(fixups, DEP_IN_ASSOC, oaax.getProperty().getIRI().getShortForm() + "|"
+    						+ ((IRI) oaax.getSubject()).getShortForm());
+    				System.out.println("DEP_IN_ASSOC:");
+                }
+            }
+        }
 		return fixups;
 	}
 	

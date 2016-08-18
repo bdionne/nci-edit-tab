@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.JComponent;
@@ -77,10 +78,14 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 
     private final JTextArea messageArea = new JTextArea(1, FIELD_WIDTH);
 
-    public NCIClassCreationDialog(OWLEditorKit owlEditorKit, String message, Class<T> type) {
+    public NCIClassCreationDialog(OWLEditorKit owlEditorKit, String message, Class<T> type, Optional<String> prefName) {
         this.owlEditorKit = owlEditorKit;
         this.type = type;
-        createUI(message);
+        if (prefName.isPresent()) {
+        	buildNewClass(prefName.get());        	
+        } else {
+        	createUI(message);        	
+        }        
     }
 
     private void createUI(String message) {
@@ -143,7 +148,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 
             int ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), this, this.preferredNameField);
             if (ret == JOptionPane.OK_OPTION) {
-            	buildNewClass();            	
+            	buildNewClass(getEntityName());            	
                 return true;
             }
             else {
@@ -204,10 +209,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     public List<OWLOntologyChange> getOntChanges() {return ont_changes;}
     		
     
-    public void buildNewClass() {
+    public void buildNewClass(String preferredName) {
     	
-		String preferredName = this.getEntityName();
-
 		String gen_code = NCIEditTab.currentTab().generateCode();
 
 		OWLEntityCreationSet<OWLClass> newSet = null;

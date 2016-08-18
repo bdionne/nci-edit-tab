@@ -91,7 +91,8 @@ public class PropertyEditingDialog extends JPanel {
     private JPanel createTextAreaPanel(String prop){
     	
     	JTextArea area = new JTextArea();
-    	if(type == NCIEditTabConstants.EDIT && propvaluemap != null){
+    	//if(type == NCIEditTabConstants.EDIT && propvaluemap != null){
+    	if(type != NCIEditTabConstants.DELETE && propvaluemap != null){
     	   area.setText(propvaluemap.get(prop));
     	}
     	
@@ -112,8 +113,9 @@ public class PropertyEditingDialog extends JPanel {
     	
     	JTextField textfield= new JTextField();
     	textfield.setPreferredSize(new Dimension(180, 20));
-    	if((type == NCIEditTabConstants.EDIT ||
-    			type == NCIEditTabConstants.ADD) && propvaluemap != null){
+    	//if((type == NCIEditTabConstants.EDIT ||
+    			//type == NCIEditTabConstants.ADD) && propvaluemap != null){
+    	if(type != NCIEditTabConstants.DELETE && propvaluemap != null){
     		textfield.setText(propvaluemap.get(prop));
     	}
     	
@@ -135,7 +137,8 @@ public class PropertyEditingDialog extends JPanel {
     	
     	JComboBox<String> combobox = new JComboBox<String>(options);   	
     	combobox.setPreferredSize(new Dimension(180, 20));
-    	if(type == NCIEditTabConstants.EDIT && propvaluemap != null){
+    	//if(type == NCIEditTabConstants.EDIT && propvaluemap != null){
+    	if(type != NCIEditTabConstants.DELETE && propvaluemap != null){
     		combobox.setSelectedItem(propvaluemap.get(prop));
     	}
     	

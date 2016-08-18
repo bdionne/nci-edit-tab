@@ -135,7 +135,7 @@ public class PropertyTableModel extends AbstractTableModel {
 				propertyTypes.put(columnName, "TextArea");
 			} else if (isDataTypeTextField(dataType)) {
 				propertyTypes.put(columnName, "TextField");
-			} else {
+			} else if (isDataTypeCombobox(dataType)) {
 				propertyTypes.put(columnName, "ComboBox");
 			}
 		}
@@ -208,7 +208,8 @@ public class PropertyTableModel extends AbstractTableModel {
 
 	private boolean isDataTypeCombobox( IRI dataType ) {
 		boolean result = false;
-		if (!isDataTypeTextArea(dataType) && !isDataTypeTextField(dataType)) {
+		//if (!isDataTypeTextArea(dataType) && !isDataTypeTextField(dataType)) {
+		if (dataType.toString().endsWith("enum")) {
 			result = true;
 		}
 		return result;

@@ -62,11 +62,11 @@
             <artifactId>metaproject</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <!-- dependency>
+        <dependency>
         	<groupId>edu.stanford.protege</groupId>
     	    <artifactId>lucene-search-plugin</artifactId>
             <version>1.0.0-SNAPSHOT</version>
-        </dependency -->
+        </dependency>
 	</dependencies>
 	
 	<build>
@@ -93,7 +93,8 @@
                         <Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
                         <Bundle-Vendor>Dionne Associates, LLC.</Bundle-Vendor>
                         <Import-Package>
-                        	org.protege.editor.owl.client.*;version="3.0",
+                        	org.protege.editor.search.*,
+                        	org.protege.editor.owl.client.*,                        	
                         	okhttp3.*,                     	                                                    
                             *
                         </Import-Package>

@@ -233,7 +233,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 	
 	public void createNewProp() {
 		
-		PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), null, tableModel.getSelectedPropertyOptions());
+		PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), tableModel.getDefaultPropertyValues(), tableModel.getSelectedPropertyOptions());
 		HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
 		if (data != null) {
 			NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),

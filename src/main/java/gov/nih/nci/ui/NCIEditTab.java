@@ -1,8 +1,27 @@
 package gov.nih.nci.ui;
 
+import static gov.nih.nci.ui.NCIEditTabConstants.CODE_PROP;
+import static gov.nih.nci.ui.NCIEditTabConstants.COMPLEX_PROPS;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ASSOC;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_CHILD;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ASSOC;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ROLE;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_PARENT;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ROLE;
+import static gov.nih.nci.ui.NCIEditTabConstants.DESIGN_NOTE;
+import static gov.nih.nci.ui.NCIEditTabConstants.EDITOR_NOTE;
+import static gov.nih.nci.ui.NCIEditTabConstants.IMMUTABLE_PROPS;
+import static gov.nih.nci.ui.NCIEditTabConstants.LABEL_PROP;
+import static gov.nih.nci.ui.NCIEditTabConstants.MERGE;
+import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_SOURCE;
+import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
+import static gov.nih.nci.ui.NCIEditTabConstants.PREF_NAME;
+import static gov.nih.nci.ui.NCIEditTabConstants.PRE_MERGE_ROOT;
+import static gov.nih.nci.ui.NCIEditTabConstants.PRE_RETIRE_ROOT;
+import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
+import static gov.nih.nci.ui.NCIEditTabConstants.SPLIT_FROM;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
-import java.rmi.RemoteException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,13 +31,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Vector;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
+import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
+import org.protege.editor.owl.client.api.exception.AuthorizationException;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
-import org.protege.editor.owl.client.api.exception.SynchronizationException;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.event.ClientSessionListener;
@@ -31,8 +55,6 @@ import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.UndoManagerListener;
 import org.protege.editor.owl.server.api.CommitBundle;
-import org.protege.editor.owl.client.api.exception.AuthorizationException;
-import org.protege.editor.owl.server.api.exception.OutOfSyncException;
 import org.protege.editor.owl.server.policy.CommitBundleImpl;
 import org.protege.editor.owl.server.versioning.Commit;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
@@ -47,6 +69,7 @@ import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLAnnotationValueVisitor;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
@@ -79,15 +102,12 @@ import edu.stanford.protege.metaproject.api.Project;
 import edu.stanford.protege.metaproject.api.ProjectOptions;
 import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.impl.RoleIdImpl;
-
-
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
 import gov.nih.nci.utils.ReferenceReplace;
-import static gov.nih.nci.ui.NCIEditTabConstants.*;
 
 public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionListener, UndoManagerListener {
 	private static final Logger log = Logger.getLogger(NCIEditTab.class);
@@ -172,12 +192,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		for (EditTabChangeListener l : event_listeners) {
 			l.handleChange(ev);
-		}
-		
-	}
-	
-	
-	
+		}		
+	}	
 	
 	private Set<OWLAnnotationProperty> complex_properties = new HashSet<OWLAnnotationProperty>();
 	
@@ -189,9 +205,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private Set<OWLAnnotationProperty> immutable_properties = new HashSet<OWLAnnotationProperty>();
 	
-	private Set<OWLClass> required_entities = new HashSet<OWLClass>();
+	private Set<OWLAnnotationProperty> associations = new HashSet<OWLAnnotationProperty>();
 	
-			
+	public boolean isAssociation(OWLAnnotationProperty p) {
+		return associations.contains(p);
+	}
+	
+				
 
 	public NCIEditTab() {
 		setToolTipText("Custom Editor for NCI");
@@ -208,10 +228,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			code = UUID.randomUUID().toString();
 		}
 		return code;
-	}
-	
-	public Set<OWLClass> getRequiredEntities() {
-		return required_entities;
 	}
 	
 	public Set<OWLAnnotationProperty> getComplexProperties() {
@@ -240,8 +256,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
 		 * of additional times when the app initializes.
 		 * 
-		 */
-		 
+		 */		 
 		ont_listen = new OWLModelManagerListener() {
 
 			@Override
@@ -378,6 +393,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	
+    	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
+    	
     	changes.addAll((new ReferenceReplace(getOWLModelManager())).retargetRefs(merge_source, merge_target)); 
     	
     	
@@ -400,12 +417,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	}
         	changes.add(new RemoveAxiom(ontology, ax1));
         	
-        }        
+        }  
         
+        Set<OWLAnnotationAssertionAxiom> assocs = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) merge_source.getIRI());
         
-           	
-    	return changes;
-    	
+        for (OWLAnnotationAssertionAxiom ax1 : assocs) {
+        	
+        	if (isAssociation(ax1.getProperty())) {
+        		String val = ax1.getProperty().getIRI().getShortForm() + "|"
+        				+ ax1.getValue().asIRI().get().getShortForm();
+        		OWLLiteral lit =  df.getOWLLiteral(val);
+        		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, merge_source.getIRI(), lit);
+        		changes.add(new AddAxiom(ontology, ax));
+        		changes.add(new RemoveAxiom(ontology, ax1));
+        	}
+        }
+    	return changes;    	
     }
     
     public List<OWLOntologyChange> mergeAttrs() {
@@ -472,6 +499,38 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	}
         	changes.add(new RemoveAxiom(ontology, ax1));
         	
+        }
+        
+        Set<OWLAnnotationAssertionAxiom> assocs = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) retire_class.getIRI());
+        
+        for (OWLAnnotationAssertionAxiom ax1 : assocs) {
+        	// TODO: check that annotation is an association
+        	System.out.println("The value of the annotation is: " + ax1.getValue());
+        	boolean found = false;
+
+        	if (ax1.getProperty().isOWLAnnotationProperty()) {
+        		Set<OWLAnnotationPropertyRangeAxiom> ranges = ontology.getAnnotationPropertyRangeAxioms(ax1.getProperty());
+        		for (OWLAnnotationPropertyRangeAxiom rax : ranges) {
+        			System.out.println("The range: " + rax.toString());
+        			if (rax.getRange().getShortForm().equals("anyURI")) {
+        				found = true;
+        			}
+        		}
+        	}
+
+
+        	if (found) {
+
+        		String val = ax1.getProperty().getIRI().getShortForm() + "|"
+        				+ ax1.getValue().asIRI().get().getShortForm();
+        		OWLLiteral lit = df.getOWLLiteral(val);
+        		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, retire_class.getIRI(), lit);
+        		changes.add(new AddAxiom(ontology, ax));
+
+        		changes.add(new RemoveAxiom(ontology, ax1));
+        	}
+
+
         }
         
         for (OWLAnnotationProperty p : fixups.keySet()) {
@@ -592,7 +651,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
 			return clientSession.getActiveClient().getActiveRoles().contains(wfm);
 		} catch (ClientRequestException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	return false;
@@ -657,7 +715,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     		DocumentRevision base;
     		try {
-    			base = ((LocalHttpClient) clientSession.getActiveClient()).getRemoteHeadRevision(clientSession.getActiveVersionOntology());
+    			base = clientSession.getActiveVersionOntology().getHeadRevision();
     			CommitBundle commitBundle = new CommitBundleImpl(base, commit);
     			ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
     			clientSession.getActiveVersionOntology().update(hist);
@@ -667,17 +725,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
                         hist.getMetadataForRevision(hist.getHeadRevision()),
                         hist.getChangesForRevision(hist.getHeadRevision())));
     		} catch (ClientRequestException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
+    			showErrorDialog("Commit error", e.getMessage(), e);
     		} catch (AuthorizationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SynchronizationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     	}
         
+    }
+    
+    private void showErrorDialog(String title, String message, Throwable t) {
+        JOptionPaneEx.showConfirmDialog(getOWLEditorKit().getWorkspace(), title, new JLabel(message),
+                JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null);
     }
     
     public void putHistory(String c, String n, String op, String ref) {
@@ -751,43 +810,39 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
     }
     
-    public OWLClass createNewChild(OWLClass selectedClass) {
+    public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName) {
 
     	NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
-				"Please enter a class name", OWLClass.class);
-    	
-    	if (dlg.showDialog()) {
+    			"Please enter a class name", OWLClass.class, prefName);
+
+    	boolean proceed = false;
+
+    	if (prefName.isPresent()) {
+    		proceed = true;
+    	} else {
+    		proceed = dlg.showDialog();
+    	}
+
+    	if (proceed) {
     		OWLClass newClass = dlg.getNewClass();
     		List<OWLOntologyChange> changes = dlg.getOntChanges();
     		OWLModelManager mngr = getOWLModelManager();
     		OWLDataFactory df = mngr.getOWLDataFactory();
-    		
+
     		if (!df.getOWLThing().equals(selectedClass)){
     			OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(newClass, selectedClass);
     			changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
     		}
-    		
+
     		mngr.applyChanges(changes);
-    		
+
     		return newClass;
     	} else {
     		return null;
     	}
 
-		
-		
-		
-
-
-
-
-
-		
-
-
-    	
     }
-    
+        
     public boolean canClone(OWLClass cls) {
     	return canSplit(cls);
     }
@@ -808,7 +863,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public void handleChange(ClientSessionChangeEvent event) {
 		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
 			initProperties();
-			//resetHistory();
 			
 		}
 	}
@@ -828,22 +882,40 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			if (project != null) {
 				// get all annotations from ontology to use for lookup
 				Set<OWLAnnotationProperty> annProps = ontology.getAnnotationPropertiesInSignature();
+				
+				// populate associations
+				for (OWLAnnotationProperty p : annProps) {
+					Set<OWLAnnotationPropertyRangeAxiom> ranges = ontology.getAnnotationPropertyRangeAxioms(p);
+	        		for (OWLAnnotationPropertyRangeAxiom rax : ranges) {
+	        			System.out.println("The range: " + rax.toString());
+	        			if (rax.getRange().getShortForm().equals("anyURI")) {
+	        				associations.add(p);
+	        			}
+	        		}
+					
+				}
+				
+				
 
 				Optional<ProjectOptions> options = project.getOptions();
+				
+				Set<String> not_found_props = new HashSet<String>();
 
 				if (options.isPresent()) {
 					ProjectOptions opts = options.get();
-					Set<String> complex_props = opts.getOption(COMPLEX_PROPS);
+					Set<String> complex_props = opts.getValues(COMPLEX_PROPS);
 					if (complex_props != null) {						
 						for (String cp : complex_props) {
 							OWLAnnotationProperty p = lookup(cp, annProps);
 							if (p != null) {
 								complex_properties.add(p);
-							}						
+							} else {
+								not_found_props.add(cp);
+							}
 							
 							// now get dependencies
 							Set<OWLAnnotationProperty> dprops = new HashSet<OWLAnnotationProperty>();
-							Set<String> dependents = opts.getOption(cp);
+							Set<String> dependents = opts.getValues(cp);
 							if (dependents != null) {
 								for (String dp : dependents) {
 									OWLAnnotationProperty dpProp = lookup(dp, annProps);
@@ -854,8 +926,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 								required_annotation_dependencies.put(p, dprops);
 							}							
 						}
+						if (not_found_props.size() > 0) {
+							String msg = "Missing Properties: \n";
+							for (String prop : not_found_props) {
+								msg += prop + "\n";
+							}
+							JOptionPane.showMessageDialog(this, msg, "Warning", JOptionPane.WARNING_MESSAGE);
+						}
 					}
-					Set<String> imm_props = opts.getOption(IMMUTABLE_PROPS);
+					Set<String> imm_props = opts.getValues(IMMUTABLE_PROPS);
 					if (imm_props != null) {
 						for (String ip : imm_props) {
 							OWLAnnotationProperty p = lookup(ip, annProps);
@@ -909,7 +988,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	OWLClass findOWLClass(String opt, ProjectOptions opts) {
 		OWLClass cls = null;
-		Set<String> ss = opts.getOption(opt);
+		Set<String> ss = opts.getValues(opt);
 		if (ss != null) {
 			IRI iri = IRI.create((String) ss.toArray()[0]);
 			Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
@@ -922,7 +1001,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	OWLAnnotationProperty getSingleProperty(String ps, ProjectOptions opts, Set<OWLAnnotationProperty> annProps) {
 		OWLAnnotationProperty prop = null;
-		Set<String> ss = opts.getOption(ps);
+		Set<String> ss = opts.getValues(ps);
 		if (ss != null) {
 			prop = lookup((String) ss.toArray()[0], annProps);
 		}
@@ -1113,7 +1192,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				System.out.println("A change: " + change.toString());
 			}
 		}
-		// TODO Auto-generated method stub
 		
 	}
 	
@@ -1172,4 +1250,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		getOWLModelManager().applyChanges(changes);
 	}
 	
+	// Methods needed by BatchEditTask
+	
+	public OWLClass getClassByName(String name) {
+		OWLClass cls = null;
+		return cls;
+	}
+	
+	public Vector<String> getSupportedRoles() {
+		return null;
+	}
+	
+	public Vector<String> getSupportedAnnotationProperties() {
+		return null;
+	}
+	
+	public Vector<String> getSupportedAssociations() {
+		return null;
+	}
 }

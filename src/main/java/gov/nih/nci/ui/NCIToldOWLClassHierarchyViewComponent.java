@@ -77,6 +77,26 @@ RetireClassTarget, AddComplexTarget {
 		
 
     }
+	
+
+	/**
+	public List<OWLClass> find(String match) {
+		
+		List<OWLClass> res = new ArrayList<OWLClass>();
+		
+            Optional<OWLEntity> ent = LuceneQueryPanel.showDialog(getOWLEditorKit());
+            if(ent.isPresent()) {
+                System.out.println("[LucenePopupDialog]    Selected entity: " + ent.get().getIRI());
+                res.add(ent.get().asOWLClass());
+            } else {
+                System.out.println("[LucenePopupDialog]    No entity selected");
+            }
+            
+            return res;
+       
+    }
+    **/
+    
 
 	@Override
 	public boolean canRetireClass() {
@@ -127,7 +147,7 @@ RetireClassTarget, AddComplexTarget {
 	
 	private void splitOrCloneClass(boolean clone_p) {
 		NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
-				"Please enter a class name", OWLClass.class);
+				"Please enter a class name", OWLClass.class, Optional.empty());
 		if (dlg.showDialog()) {
 			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), getSelectedEntity(), clone_p);
 			getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(dlg.getNewClass());
@@ -147,7 +167,7 @@ RetireClassTarget, AddComplexTarget {
 				
 		OWLClass selectedClass = getSelectedEntity();
 		
-		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass);
+		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty());
 		
 		getTree().setSelectedOWLObject(newCls);
 		

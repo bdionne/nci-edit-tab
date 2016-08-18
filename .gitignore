@@ -16,3 +16,4 @@ META-INF/
 
 samples/*.xml
 samples/thesaurus.owl
+samples/*.log

@@ -4,13 +4,13 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import edu.stanford.protege.metaproject.Manager;
-import edu.stanford.protege.metaproject.api.MetaprojectFactory;
 import edu.stanford.protege.metaproject.api.Operation;
 import edu.stanford.protege.metaproject.api.OperationType;
+import edu.stanford.protege.metaproject.api.PolicyFactory;
 
 public class NCIEditTabConstants {
 	
-	private static MetaprojectFactory factory = Manager.getFactory();
+	private static PolicyFactory factory = Manager.getFactory();
 	
 	public static final String ADD = "Add";
 	public static final String EDIT = "Edit";

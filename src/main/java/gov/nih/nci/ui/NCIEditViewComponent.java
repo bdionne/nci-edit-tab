@@ -76,7 +76,6 @@ EditTabChangeListener {
 		if (event.isType(ComplexEditType.ADD_PROP)) {
 			editPanel.addNewComplexProp();
 		}
-		// TODO Auto-generated method stub
 		
 	}
 
