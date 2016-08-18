@@ -241,13 +241,13 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				BatchTask task = null;
 				if (type == BATCH_LOADER) {
 					
-					task = new BatchLoadTask(tab, infile, outfile);
+					task = new BatchLoadTask(be, tab, infile, outfile);
 					
 					task.setType(BatchTask.TaskType.LOAD);
 					tpd = new TaskProgressDialog(new JFrame(), 
 							"Batch Load Progress Status", task);
 				} else if (type == BATCH_EDITOR) {
-					task = new BatchEditTask(tab, infile, outfile);
+					task = new BatchEditTask(be, tab, infile, outfile);
 					task.setType(BatchTask.TaskType.EDIT);
 					tpd = new TaskProgressDialog(new JFrame(),
 							"Batch Edit Progress Status", task);

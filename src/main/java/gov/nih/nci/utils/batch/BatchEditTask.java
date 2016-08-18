@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLClass;
 
+import gov.nih.nci.ui.BatchProcessOutputPanel;
 import gov.nih.nci.ui.NCIEditTab;
 
 /**
@@ -22,8 +23,8 @@ public class BatchEditTask extends BatchTask {
 	Vector<String> supportedProperties = null;
 	Vector<String> supportedAssociations = null;
 
-	public BatchEditTask(NCIEditTab tab, String infile, String outfile) {
-		super();
+	public BatchEditTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile, String outfile) {
+		super(be);
 		this.tab = tab;
 		this.infile = infile;
 		this.outfile = outfile;

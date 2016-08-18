@@ -12,6 +12,7 @@ import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
 
+import gov.nih.nci.ui.BatchProcessOutputPanel;
 import gov.nih.nci.ui.NCIEditTab;
 
 /**
@@ -45,11 +46,14 @@ public class BatchTask {
 	boolean cancelled = false;
 	boolean canCancel = true;
 	String title = null;
+	
+	BatchProcessOutputPanel bp = null;
 
 	PrintWriter pw = null;
 	TaskType batchtype = TaskType.LOAD;
 
-	public BatchTask() {
+	public BatchTask(BatchProcessOutputPanel be) {
+		bp = be;
 		setMax(10000);
 		cancelled = false;
 		String title = "Batch Processing";
@@ -112,6 +116,7 @@ public class BatchTask {
 		if (pw != null) {
 			pw.println(msg);
 		}
+		bp.getTextArea().append(msg + "\n");
 
 	}
 

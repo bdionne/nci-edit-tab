@@ -3,6 +3,7 @@ package gov.nih.nci.utils.batch;
 import java.util.Optional;
 import java.util.Vector;
 
+import gov.nih.nci.ui.BatchProcessOutputPanel;
 import gov.nih.nci.ui.NCIEditTab;
 
 /**
@@ -13,9 +14,9 @@ public class BatchLoadTask extends BatchTask {
 
 	NCIEditTab tab = null;
 
-	public BatchLoadTask(NCIEditTab tab, String infile,
+	public BatchLoadTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile,
 			String outfile) {
-		super();
+		super(be);
 		this.tab = tab;
 		this.infile = infile;
 		this.outfile = outfile;
