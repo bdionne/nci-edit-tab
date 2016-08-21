@@ -29,6 +29,7 @@ import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.utils.batch.BatchEditTask;
 import gov.nih.nci.utils.batch.BatchLoadTask;
 import gov.nih.nci.utils.batch.BatchTask;
+import javafx.scene.shape.Box;
 
 /**
  * @Author: NGIT, Kim Ong; Iris Guo
@@ -50,6 +51,8 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 	String infile;
 	String outfile;
+	
+	File inputFolder;
 
 	public static final int BATCH_LOADER = 2;
 
@@ -77,12 +80,20 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	private JPanel createFileField(String label, String extension, String type){
 		
 	  JPanel panel = new JPanel();
-	  panel.setPreferredSize(new Dimension(350, 30));
+	  panel.setPreferredSize(new Dimension(420, 30));
 	  JLabel lb = new JLabel(label);
-	  JTextField field = new  JTextField();
 	  
-	  field.setPreferredSize(new Dimension(250, 25));
+	  if(type == "input"){
+		  fInputTf = new  JTextField();
 	  
+		  fInputTf.setPreferredSize(new Dimension(250, 25));
+	  }
+	  else{
+		  
+		  fOutputTf = new  JTextField();
+		  
+		  fOutputTf.setPreferredSize(new Dimension(250, 25));
+	  }
 	  JButton btn = new JButton();
 	  btn.setText("browse");
 	  
@@ -97,24 +108,39 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				  if (select == JFileChooser.APPROVE_OPTION) {
 			            File file = fc.getSelectedFile();
 			            infile = file.getAbsolutePath();
-			            field.setText(infile);
+			            fInputTf.setText(infile);
+			            
+			            String filename = file.getName();
+			            String filedir = infile.replaceFirst(filename, "");
+			            
+			            inputFolder = new File(filedir);
 				  }
 			  }
 			  else{
 				  JFileChooser fc = new JFileChooser();
+				  if(inputFolder != null){
+					  fc.setCurrentDirectory(inputFolder);
+				  }
 				  //todo - add file extension filter
 				  int select = fc.showSaveDialog(BatchProcessingDialog.this);
-				  
+				  			  
 				  if (select == JFileChooser.APPROVE_OPTION) {
 			            File file = fc.getSelectedFile();
 			            outfile = file.getAbsolutePath();
-			            field.setText(outfile);
+			            fOutputTf.setText(outfile);
 				  }
 			  }
 		  }
 	  });
 	  panel.add(lb);
-	  panel.add(field);
+	  if(type == "input"){
+		  panel.add(fInputTf);
+		  
+	  }
+	  else{
+		  panel.add(fOutputTf);
+	  }
+	 // panel.add(field);
 	  panel.add(btn);
 	  
 	  return panel;
@@ -131,7 +157,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			filePanel.setLayout(new BorderLayout());
 
 			
-			filePanel.add(createFileField("Input File", "dat","input"), BorderLayout.NORTH);
+			filePanel.add(createFileField("Input  File  ", "dat","input"), BorderLayout.NORTH);
 			
 			filePanel.add(createFileField("Output File", "out","output"), BorderLayout.CENTER);
 
@@ -144,7 +170,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 			
 			JPanel labelcombopanel = new JPanel();
-			labelcombopanel.setPreferredSize(new Dimension(350, 50));
+			labelcombopanel.setPreferredSize(new Dimension(420, 50));
 			labelcombopanel.add(new JLabel("Batch Type"));
 			labelcombopanel.add(batchType, BorderLayout.CENTER);
 			container.add(labelcombopanel, BorderLayout.CENTER);
@@ -160,7 +186,8 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			btnPanel.add(fCancelButton);
 
 			container.add(btnPanel, BorderLayout.SOUTH);
-
+            
+			//setSize(400, 400);
 			pack();
 			this.setVisible(true);
 
@@ -171,11 +198,19 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	}
 
 	public String getInfile() {
-		return  infile;
+		if(fInputTf != null){
+		   return  fInputTf.getText();
+		}
+		
+		return "";
 	}
 
 	public String getOutfile() {		
-		return outfile;
+		if(fOutputTf != null){
+			return fOutputTf.getText();
+		}
+		
+		return "";
 	}
 
 	public String getToday() {
