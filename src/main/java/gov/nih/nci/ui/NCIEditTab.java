@@ -1042,6 +1042,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 	}
 	
+	public Set<OWLAnnotation> getAnnotations(OWLClass cls) {
+		Set<OWLAnnotation> res = new HashSet<OWLAnnotation>();
+
+		for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(cls, ontology)) {
+			res.add(ax.getAnnotation());
+		}
+		
+		return res;
+			
+	}
+	
 	public Optional<String> getProperty(OWLNamedObject oobj, OWLAnnotationProperty prop) {
 		  
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), prop)) {
