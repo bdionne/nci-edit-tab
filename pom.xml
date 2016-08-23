@@ -94,6 +94,7 @@
                         <Bundle-Vendor>Dionne Associates, LLC.</Bundle-Vendor>
                         <Import-Package>
                         	org.protege.editor.search.*,
+                        	org.protege.owlapi.inference.cls.*,
                         	org.protege.editor.owl.client.*,                        	
                         	okhttp3.*,                     	                                                    
                             *

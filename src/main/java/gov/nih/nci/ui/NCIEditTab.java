@@ -63,6 +63,7 @@ import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 import org.protege.editor.owl.ui.renderer.OWLEntityAnnotationValueRenderer;
 import org.protege.editor.owl.ui.renderer.OWLModelManagerEntityRenderer;
 import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
+import org.protege.owlapi.inference.cls.ChildClassExtractor;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -1267,5 +1268,25 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Vector<String> getSupportedAssociations() {
 		return null;
+	}
+	
+	public List<OWLClass> getDirectSubClasses(OWLClass cls) {
+		ChildClassExtractor childClassExtractor = new ChildClassExtractor();
+		
+		childClassExtractor.setCurrentParentClass(cls);
+		for (OWLAxiom ax : ontology.getReferencingAxioms(cls)) {
+            if (ax.isLogicalAxiom()) {
+                ax.accept(childClassExtractor);
+            }
+        }
+        Set<OWLClass> cset = childClassExtractor.getResult();
+       
+		List<OWLClass> res = new ArrayList<OWLClass>();
+		
+		for (OWLClass c : cset) {
+			res.add(c);
+		}
+		
+		return res;
 	}
 }
