@@ -27,7 +27,6 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
     private JProgressBar progressBar;
 
     JButton cancelButton;
-  //  JButton startButton;
 
     private BatchTask task;
 
@@ -242,7 +241,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
                 
                 // now sleep for a bit to let things settle
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     task.print("Sleeper interrupted " + e.getLocalizedMessage());
                 }

@@ -45,12 +45,13 @@ public class BatchLoadTask extends BatchTask {
 				sem_type = (String) w.elementAt(3);
 			}
 			*/
-			Thread.sleep(2000);
+			//
 			
 
 			
 			if (super.checkNoErrors(w, taskId)) {
 				tab.createNewChild(tab.getClass(sup), Optional.of(name));
+				Thread.sleep(1000);
 				tab.commitChanges();
 			} else {
 				return false;
