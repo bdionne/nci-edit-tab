@@ -72,6 +72,14 @@
         <headerColor value="@org.protege.ontologycolor"/>
         <category value="@org.protege.ontologycategory"/>
     </extension>
+    
+    <extension id="ReportWriter"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="ReportWriter"/>
+        <class value="gov.nih.nci.ui.ReportWriterViewComponent"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="@org.protege.ontologycategory"/>
+    </extension>
 	
 	
 	<extension id="Split"
