@@ -47,8 +47,12 @@ import org.protege.editor.search.ui.ExportDialogPanel;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.model.RemoveAxiom;
 
 import gov.nih.nci.ui.dialog.RepWriterConfigDialog;
 import gov.nih.nci.utils.QuickSortVecStrings;
@@ -115,8 +119,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 	private int max;
 
-	private String newline = System.getProperty("line.separator");
-		
 	private Vector<String> classList;
 
 	boolean completed = false;
@@ -129,11 +131,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 	String attrsId = null;
 
-	Vector messages;
-
 	QuickSortVecStrings sort = null;
-
-	HashSet<String> hset = null;
 
 	HashSet<String> complexProps = null;
 
@@ -170,8 +168,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		}
 	}
 	
-	// TODO: NOTE!!!! This is just a sketch to see how the approach looks in the
-	// UI
 	protected boolean onInputFileExport() {
 		
 		JFileChooser chooser = new JFileChooser("Enter file of identifiers");
@@ -211,9 +207,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 				e.printStackTrace();
 			}
 
-			//ExportToCsvUtil.setExportBrowserText(false);
-			//ExportToCsvUtil.setExportMetadata(true);
-			//ExportToCsvUtil.setExportSuperclass(true);
 /**
 			NCIExportToCsvAction exportAction = new NCIExportToCsvAction(tab
 					.getKnowledgeBase(), configPanel, true) {
@@ -384,17 +377,11 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 	
 	private void init() {
 
-		hset = new HashSet<String>();
 		complexProps = new HashSet<String>();
 		Set<OWLAnnotationProperty> cprops = tab.getComplexProperties();
 		for (OWLAnnotationProperty p : cprops) {
-			hset.add(p.getIRI().getShortForm());
 			complexProps.add(p.getIRI().getShortForm());
 		}
-
-		//hset.add("ID");
-
-		//sort = new QuickSortVecStrings();
 
 		this.classList = new Vector<String>();
 
@@ -465,9 +452,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 			for (int i = 0; i < length; i++) {
 				line = (String) classList.elementAt(i);
-				if (printable(line)) {
-					pw.println(line);
-				}
+				pw.println(line);
 			}
 			pw.flush();
 		} catch (Exception e) {
@@ -475,18 +460,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		}
 	}
 	
-	public boolean printable(String line) {
-		if (line.contains(":DIRECT-SUPERCLASSES"))
-			return false;
-		if (line.contains(":DIRECT-TYPE"))
-			return false;
-		if (line.contains("@_"))
-			return false;
-		if (line.contains("rdf:type"))
-			return false;
-
-		return true;
-	}
 	
 	private HashMap<OWLClass, OWLClass> alreadySeen = new HashMap<OWLClass, OWLClass>();
 
@@ -534,10 +507,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 			
 			if (withAttributes && (alreadySeen.get(superCls) == null)) {
-				// output slot data
-				getSlots(superCls, level, tabString);
-				// getEquivalentClasses((RDFSClass) superCls, tabString);
-				//getAnonymousSuperclasses((RDFSClass) superCls, tabString);
+				getSlots(superCls, tabString);				
 			}
 			
 
@@ -613,10 +583,8 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 	}
 
 	
-	private void getSlots(OWLClass cls, int level, String tabString) {
+	private void getSlots(OWLClass cls, String tabString) {
 		Set<OWLAnnotation> annotations = tab.getAnnotations(cls);
-		//Vector<String> slotname_vec = new Vector<String>();
-		//Vector<String> slotvalue_vec = new Vector<String>();
 		for (OWLAnnotation ann : annotations) {
 			OWLAnnotationProperty ap = ann.getProperty();
 			String slotname = "";
@@ -639,17 +607,23 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 				}
 				classList.add("\t" + tabString + slotname + ": " + entry);
 			}
-			
+
 		}
-		
+
 		classList.add("");
-		
+
 		for (OWLAnnotation ann : annotations) {
 			OWLAnnotationProperty ap = ann.getProperty();
 			String slotname = ann.getProperty().getIRI().getShortForm();			
 			if (this.complexProps.contains(slotname)) {
 				// more to do
-			} else {				
+			} else {
+				if (ap.equals(NCIEditTabConstants.CODE_PROP)) {
+					Optional<String> lab = tab.getRDFSLabel(ap);
+					if (lab.isPresent()) {
+						slotname = lab.get();
+					}					
+				}
 				String entry = "";
 				com.google.common.base.Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
 				if (strentry.isPresent()) {
@@ -659,9 +633,9 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			}
 
 		}
-		
+
 		classList.add("");
-		
+
 		for (OWLAnnotation ann : annotations) {
 			OWLAnnotationProperty ap = ann.getProperty();
 			String slotname = ap.getIRI().getShortForm();
@@ -672,7 +646,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 					entry = strentry.get().getLiteral();
 				}
 				classList.add("\t" + tabString + slotname + ": " + entry);
-				
+
 				Set<OWLAnnotation> quals = tab.getDependentAnnotations(cls,ap);
 				for (OWLAnnotation qualAnn : quals) {
 					OWLAnnotationProperty qap = qualAnn.getProperty();
@@ -683,308 +657,28 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 						qentry = qstrentry.get().getLiteral();
 					}
 					classList.add("\t\t" + tabString + qslotname + ": " + qentry);
-					
 				}
-				// more to do
 			}
-			
 		}
-		/**
 		
-		Collection ownslots = cls.getOwnSlots();
+		classList.add("");
 
+		Set<String> parents = tab.getLogicalRes(cls, "parents");
+		for (String par : parents) {
+			String value = "Named Superclass: " + par;
+			classList.add("\t" + tabString + value);
+		}
 		
-
-		RDFProperty property = tab.getOWLModel().getRDFProperty(
-				RDFSNames.Slot.COMMENT);
-		OWLNamedClass owlCls = (OWLNamedClass) cls;
-		Collection c2 = owlCls.getPropertyValues(property);
-		if (c2.size() == 0) {
-			slotname_vec.add("comment");
-			slotvalue_vec.add("");
-		} else {
-			for (Iterator it = c2.iterator(); it.hasNext();) {
-				Object value = it.next();
-				slotname_vec.add("comment");
-				slotvalue_vec.add((String) value);
-			}
-		}
-
-		if (ownslots != null) {
-			Iterator j = ownslots.iterator();
-			while (j.hasNext()) {
-				Slot slot = (Slot) j.next();
-				Collection slotColl = cls.getOwnSlotValues(slot);
-
-				if (slotColl == null || slotColl.isEmpty())
-					continue;
-				String slotName = slot.getBrowserText();
-				if (slotName.equalsIgnoreCase("owl:equivalentClass")) {
-					continue;
-				}
-				if (slotName.equals(Model.Slot.NAME)) {
-					continue;
-				} else if (slotName.equals(Model.Slot.DIRECT_SUBCLASSES))
-					continue;
-				else if (slotName.equals(Model.Slot.DIRECT_INSTANCES))
-					continue;
-				else if (slotName.equalsIgnoreCase("protege.classificationStatus"))
-					continue;
-				else if (slotName.equalsIgnoreCase("protege.inferredSubclassOf"))
-					continue;
-				else if (slotName.equalsIgnoreCase("protege.inferredSuperclassOf"))
-					continue;
-				else {
-
-					if (slotColl != null) {
-						Iterator i = slotColl.iterator();
-						while (i.hasNext()) {
-							Object obj = i.next();
-							ValueType type = wrapper.getObjectValueType(obj);
-							String entry = wrapper.convertObjecttoString(obj,
-									type);
-							try {
-								if (slotName.compareTo(NCIEditTab.SUBCLASSOF) != 0) {
-									// classList.add("\t" + tabString + slotname
-									// + ": " + entry);
-									slotname_vec.add(slotName);
-									slotvalue_vec.add(entry);
-								}
-							} catch (Exception e) {
-								Log.getLogger().log(Level.WARNING,
-										"Exception caught", e);
-								;
-							}
-						}
-					}
-					// getOwnslot(slotName, slotColl, tabString);
-				}
-			}
-			sort(slotname_vec, slotvalue_vec, tabString);
-
-		}
-		*/
-	}
-	/**
-
-	private void sort(Vector v1, Vector v2, String tabString) {
-
-		// code
-		for (int i = 0; i < v1.size(); i++) {
-			String slotname = (String) v1.elementAt(i);
-			if (slotname.compareTo("code") == 0) {
-				String entry = (String) v2.elementAt(i);
-				classList.add("\t" + tabString + slotname + ": " + entry);
-				break;
-			}
-		}
-		for (int i = 0; i < v1.size(); i++) {
-			String slotname = (String) v1.elementAt(i);
-			if (slotname.compareTo("Preferred_Name") == 0) {
-				String entry = (String) v2.elementAt(i);
-				classList.add("\t" + tabString + slotname + ": " + entry);
-				break;
-			}
-		}
 		classList.add("");
 
-		Vector<String> w = new Vector<String>();
-		for (int i = 0; i < v1.size(); i++) {
-			String slotname = (String) v1.elementAt(i);
-			if (!hset.contains(slotname)) {
-				// this guy is not complex prop
-				String entry = (String) v2.elementAt(i);
-				w.add("\t" + tabString + slotname + ": " + entry);
-			}
+		Set<String> roles = tab.getLogicalRes(cls, "roles");
+		for (String rol : roles) {
+			String value = "Restriction: " + rol;
+			classList.add("\t" + tabString + value);
 		}
-		try {
-			sort.sort(w);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		for (int i = 0; i < w.size(); i++) {
-			String s = (String) w.elementAt(i);
-			classList.add(s);
-		}
-		classList.add("");
-
-		// ALTLABEL
-		w = new Vector<String>();
-		for (int i = 0; i < v1.size(); i++) {
-			String slotname = (String) v1.elementAt(i);
-			if (slotname.equals("ALTLABEL")) {
-				String entry = (String) v2.elementAt(i);
-				w.add("\t" + tabString + slotname + ": " + entry);
-			}
-		}
-		try {
-			sort.sort(w);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		for (int i = 0; i < w.size(); i++) {
-			String s = (String) w.elementAt(i);
-			classList.add(s);
-		}
-		classList.add("");
-
-		// DEFINITION
-		w = new Vector<String>();
-		for (int i = 0; i < v1.size(); i++) {
-			String slotname = (String) v1.elementAt(i);
-			if (slotname.compareTo("ID") != 0
-					&& complexProps.contains(slotname)) {
-				String entry = (String) v2.elementAt(i);
-				w.add(slotname + ": " + entry);
-			}
-		}
-
-		sortAnnotationData(w, tabString);
-		classList.add(newline);
 
 	}
-
-	private void sortAnnotationData(Vector v, String tabString) {
-		try {
-			sort.sort(v);
-			for (int i = 0; i < v.size(); i++) {
-				String s = (String) v.elementAt(i);
-				int pos = s.indexOf(":");
-				String name = s.substring(0, pos);
-				String value = s.substring(pos + 1, s.length());
-
-				HashMap<String, String> map = ComplexPropertyParser
-						.parseXML(value);
-				String text = "";
-				if (map.containsKey("def-definition")) {
-					text = (String) map.get("def-definition");
-					classList.add("\t" + tabString + name + ": " + text);
-					Iterator it = map.keySet().iterator();
-					while (it.hasNext()) {
-						String qName = (String) it.next();
-						if (qName.compareTo("def-definition") != 0
-								&& qName.compareTo("root") != 0) {
-							String qValue = (String) map.get(qName);
-							classList.add("\t\t" + tabString + qName + ": "
-									+ qValue);
-						}
-					}
-
-				} else if (map.containsKey("go-term")) {
-					text = (String) map.get("go-term");
-					classList.add("\t" + tabString + name + ": " + text);
-
-					Iterator it = map.keySet().iterator();
-					while (it.hasNext()) {
-						String qName = (String) it.next();
-						if (qName.compareTo("go-term") != 0
-								&& qName.compareTo("root") != 0) {
-							String qValue = (String) map.get(qName);
-							classList.add("\t\t" + tabString + qName + ": "
-									+ qValue);
-						}
-					}
-				} else if (map.containsKey("def-definition")) {
-					text = (String) map.get("def-definition");
-					classList.add("\t" + tabString + name + ": " + text);
-
-					Iterator it = map.keySet().iterator();
-					while (it.hasNext()) {
-						String qName = (String) it.next();
-						if (qName.compareTo("def-definition") != 0
-								&& qName.compareTo("root") != 0) {
-							String qValue = (String) map.get(qName);
-							classList.add("\t\t" + tabString + qName + ": "
-									+ qValue);
-						}
-					}
-				} else if (map.containsKey("term-name")) {
-					text = (String) map.get("term-name");
-					classList.add("\t" + tabString + name + ": " + text);
-
-					Iterator it = map.keySet().iterator();
-					while (it.hasNext()) {
-						String qName = (String) it.next();
-						if (qName.compareTo("term-name") != 0
-								&& qName.compareTo("root") != 0) {
-							String qValue = (String) map.get(qName);
-							classList.add("\t\t" + tabString + qName + ": "
-									+ qValue);
-						}
-					}
-				}
-			}
-			// classList.add(newline);
-		} catch (Exception e) {
-			Log.getLogger().log(Level.WARNING, "Exception caught", e);
-		}
-	}
-	*/
 	
-	
-	/**
-
-	private void getAnonymousSuperclasses(RDFSClass cls, String tabString) {
-		HashSet<String> hset = new HashSet<String>();
-		ArrayList<RDFSClass> v = wrapper.getDirectSuperclassItems(cls,
-				NCIConditionsTableModel.SET_SUPERCLASS);
-		for (RDFSClass c : v) {
-			String value = "Named Superclass: " + c.getPrefixedName();
-
-			if (!hset.contains(value)) {
-				classList.add("\t" + tabString + value);
-				hset.add(value);
-			}
-
-		}
-
-		classList.add(newline);
-		v = wrapper.getDirectSuperclassItems(cls,
-				NCIConditionsTableModel.SET_RESTRICTION);
-
-		for (RDFSClass c : v) {
-			String value = c.getBrowserText();
-			if (!hset.contains(value)) {
-				// classList.add("\t" + tabString + value );
-				classList.add("\t" + tabString + "Restricton: " + value);
-				hset.add(value);
-			}
-		}
-
-		classList.add(newline);
-		v = wrapper.getDefinitionItems(cls,
-				NCIConditionsTableModel.SET_SUPERCLASS);
-
-		for (RDFSClass c : v) {
-
-			String value = "Named Superclass: " + c.getLocalName();
-
-			if (!hset.contains(value)) {
-				classList.add("\t" + tabString + value);
-				hset.add(value);
-			}
-
-		}
-
-		classList.add(newline);
-		v = wrapper.getDefinitionItems(cls,
-				NCIConditionsTableModel.SET_RESTRICTION);
-
-		for (RDFSClass c : v) {
-
-			String value = c.getBrowserText();
-			if (!hset.contains(value)) {
-				// classList.add("\t" + tabString + value);
-				classList.add("\t" + tabString + "Restricton: " + value
-						+ " [defined]");
-				hset.add(value);
-			}
-
-		}
-
-	}
-	*/
-
 	void updateStatus(final int i) {
 		Runnable doSetProgressBarValue = new Runnable() {
 			public void run() {
@@ -1214,6 +908,8 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		// TODO Auto-generated method stub
 		
 	}
+	
+	 
 
 	
 

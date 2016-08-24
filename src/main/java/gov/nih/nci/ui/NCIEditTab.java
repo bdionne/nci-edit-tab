@@ -1312,4 +1312,91 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		return res;
 	}
+	
+	Set<String> getLogicalRes(OWLClass cls, String type) {
+		Set<String> res = new HashSet<String>();
+		Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
+	    
+	    for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+	    	OWLClassExpression exp = ax1.getSuperClass();
+	    	res = getParentRoleExps(res, exp, type, false, cls);
+	    		    	
+	    }
+	    
+	    Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
+	    
+	    for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+	    	Set<OWLClassExpression> exps = ax1.getClassExpressions();
+	    	for (OWLClassExpression exp : exps) {
+	    		res = getParentRoleExps(res, exp, type, true, cls);
+	    		}
+	    }
+	    return res;
+		
+	}
+	
+	private boolean isParentType(String type) {
+		return type.equalsIgnoreCase("parents");
+	}
+	
+	private boolean isRoleType(String type) {
+		return type.equalsIgnoreCase("roles");
+	}
+	
+    
+    private Set<String> getParentRoleExps(Set<String> res, OWLClassExpression exp, String type,
+    		boolean defined, OWLClass cls) {
+    	
+    	if ((exp instanceof OWLClass) && (isParentType(type)) &&
+    			!(exp.asOWLClass().equals(cls))) {
+    		Optional<String> label = getRDFSLabel(exp.asOWLClass());
+    		if (label.isPresent()) {
+    			res.add(label.get());
+    		} else {
+    			res.add(exp.asOWLClass().getIRI().getShortForm());
+    		}
+    	} else if ((exp instanceof OWLQuantifiedObjectRestriction) &&
+    			(isRoleType(type))) {
+
+    		OWLQuantifiedObjectRestriction qobj = (OWLQuantifiedObjectRestriction) exp;
+    		OWLClassExpression rexp = qobj.getFiller();
+
+    		String fval;
+    		if (rexp instanceof OWLClass) {
+    			fval = ((OWLClass) rexp).getIRI().getShortForm();
+    		} else {
+    			fval = rexp.toString();
+    		}
+
+    		String quant = "some";
+    		if (exp instanceof OWLObjectSomeValuesFrom) {
+    			quant = "some";
+    		} else if (exp instanceof OWLObjectAllValuesFrom) {
+    			quant = "only";
+    		}
+    		String val = quant + " " + qobj.getProperty().asOWLObjectProperty().getIRI().getShortForm() + " "
+    				+ fval;
+    		
+    		if (defined) {
+    			val += " [defined]";
+    		}
+
+    		res.add(val);
+
+    	} else if (exp instanceof OWLObjectIntersectionOf) {
+    		OWLObjectIntersectionOf oio = (OWLObjectIntersectionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asConjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			res = getParentRoleExps(res, c, type, defined, cls);
+    		}
+    	} else if (exp instanceof OWLObjectUnionOf) {
+    		OWLObjectUnionOf oio = (OWLObjectUnionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asDisjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			res = getParentRoleExps(res, c, type, defined, cls);
+    		}
+    	}
+    	return res;
+
+    }
 }
