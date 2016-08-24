@@ -1,11 +1,15 @@
 package gov.nih.nci.ui;
 
+import java.awt.BorderLayout;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.util.Optional;
 
 import javax.swing.Icon;
+import javax.swing.JButton;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
+import org.protege.editor.core.ui.view.DisposableAction;
 import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
 import org.protege.editor.owl.ui.OWLIcons;
 import org.protege.editor.owl.ui.action.AbstractOWLTreeAction;
@@ -19,6 +23,7 @@ import gov.nih.nci.ui.action.CloneClassTarget;
 import gov.nih.nci.ui.action.MergeClassTarget;
 import gov.nih.nci.ui.action.RetireClassTarget;
 import gov.nih.nci.ui.action.SplitClassTarget;
+import gov.nih.nci.ui.dialog.BatchProcessingDialog;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 
 public class NCIToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarchyViewComponent
@@ -26,6 +31,8 @@ implements CreateNewChildTarget, SplitClassTarget, CloneClassTarget, MergeClassT
 RetireClassTarget, AddComplexTarget {
 	
 	private static final Icon ADD_SUB_ICON = OWLIcons.getIcon("class.add.sub.png");
+	private static final JButton batchbutton = new JButton("Batch Load/Edit");
+	private static final BatchProcessOutputPanel batchProcessPanel = new BatchProcessOutputPanel();
 
 	/**
 	 * 
@@ -36,6 +43,9 @@ RetireClassTarget, AddComplexTarget {
 
 	public void performExtraInitialisation() throws Exception {
 
+		batchProcessPanel.setVisible(false);
+		add(batchProcessPanel, BorderLayout.SOUTH);
+		
 		addAction(new AbstractOWLTreeAction<OWLClass>("Add subclass", ADD_SUB_ICON, getTree().getSelectionModel()) {
 			/**
 			 * 
@@ -50,6 +60,26 @@ RetireClassTarget, AddComplexTarget {
 				return canCreateNewChild();
 			}
 		}, "A", "A");
+		
+		addAction(new DisposableAction("Batch Load/Edit", batchbutton.getIcon()) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent event) {
+				batchProcessPanel.setVisible(true);
+				BatchProcessingDialog dl = new BatchProcessingDialog(batchProcessPanel, NCIEditTab.currentTab());
+			}
+
+			protected boolean canPerform(OWLClass cls) {
+				return canCreateNewChild();
+			}
+			
+			public void dispose() {
+				
+			}
+		}, "B", "B");
 		
 		getTree().setDragAndDropHandler(new OWLTreeDragAndDropHandler<OWLClass>() {
             public boolean canDrop(Object child, Object parent) {
