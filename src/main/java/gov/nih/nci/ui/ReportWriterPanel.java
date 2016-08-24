@@ -153,7 +153,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 	public void showConfigDialog() {
 		configPanel = new ReportWriterConfigPanel();
-		int ret = new UIHelper(oek).showValidatingDialog("Report Type", configPanel, configPanel.classicRadioButton);
+		int ret = new UIHelper(oek).showDialog("Report Type", configPanel, configPanel.classicRadioButton);
 		if (ret == JOptionPane.OK_OPTION) {
 			switch (configPanel.getSelection()) {
 			case CLASSIC:
@@ -646,17 +646,48 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		
 		for (OWLAnnotation ann : annotations) {
 			OWLAnnotationProperty ap = ann.getProperty();
-			String slotname = ann.getProperty().getIRI().getShortForm();
-			String entry = "";
+			String slotname = ann.getProperty().getIRI().getShortForm();			
 			if (this.complexProps.contains(slotname)) {
 				// more to do
-			} else {
+			} else {				
+				String entry = "";
 				com.google.common.base.Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
 				if (strentry.isPresent()) {
 					entry = strentry.get().getLiteral();
 				}
+				classList.add("\t" + tabString + slotname + ": " + entry);
 			}
-			classList.add("\t" + tabString + slotname + ": " + entry);
+
+		}
+		
+		classList.add("");
+		
+		for (OWLAnnotation ann : annotations) {
+			OWLAnnotationProperty ap = ann.getProperty();
+			String slotname = ap.getIRI().getShortForm();
+			String entry = "";
+			if (this.complexProps.contains(slotname)) {
+				com.google.common.base.Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
+				if (strentry.isPresent()) {
+					entry = strentry.get().getLiteral();
+				}
+				classList.add("\t" + tabString + slotname + ": " + entry);
+				
+				Set<OWLAnnotation> quals = tab.getDependentAnnotations(cls,ap);
+				for (OWLAnnotation qualAnn : quals) {
+					OWLAnnotationProperty qap = qualAnn.getProperty();
+					String qslotname = qap.getIRI().getShortForm();
+					String qentry = "";
+					com.google.common.base.Optional<OWLLiteral> qstrentry = qualAnn.getValue().asLiteral();
+					if (qstrentry.isPresent()) {
+						qentry = qstrentry.get().getLiteral();
+					}
+					classList.add("\t\t" + tabString + qslotname + ": " + qentry);
+					
+				}
+				// more to do
+			}
+			
 		}
 		/**
 		

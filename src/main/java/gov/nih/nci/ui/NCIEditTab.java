@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1051,6 +1052,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		return res;
 			
+	}
+	
+	public Set<OWLAnnotation> getDependentAnnotations(OWLClass cls, OWLAnnotationProperty prop) {
+		
+		for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(cls, ontology)) {
+			OWLAnnotation annot = ax.getAnnotation();
+			if (annot.getProperty().equals(prop)) {
+				return ax.getAnnotations();				
+			}
+		}
+		return new HashSet<OWLAnnotation>();
 	}
 	
 	public Optional<String> getProperty(OWLNamedObject oobj, OWLAnnotationProperty prop) {
