@@ -177,7 +177,7 @@ RetireClassTarget, AddComplexTarget {
 	
 	private void splitOrCloneClass(boolean clone_p) {
 		NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
-				"Please enter a class name", OWLClass.class, Optional.empty());
+				"Please enter a class name", OWLClass.class, Optional.empty(), Optional.empty());
 		if (dlg.showDialog()) {
 			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), getSelectedEntity(), clone_p);
 			getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(dlg.getNewClass());
@@ -197,7 +197,7 @@ RetireClassTarget, AddComplexTarget {
 				
 		OWLClass selectedClass = getSelectedEntity();
 		
-		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty());
+		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty(), Optional.empty());
 		
 		getTree().setSelectedOWLObject(newCls);
 		

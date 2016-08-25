@@ -219,6 +219,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 			//BatchLoadByNameTask.evs_time = 0;
 			long beg = System.currentTimeMillis();
 			//task.print("Processing:");
+			task.begin();
 			while (!cancelled && i < tpd.getTask().getProgressMax())
 			{
 				//owlModel = NCIEditTab.getActiveOWLModel();
@@ -241,12 +242,13 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
                 
                 // now sleep for a bit to let things settle
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     task.print("Sleeper interrupted " + e.getLocalizedMessage());
                 }
 
 			}
+			task.complete();
 			long total = System.currentTimeMillis() - beg;
 			task.print("Total run time was: " + total + " ms");
 			//task.print("Time spent in create was: " + BatchLoadTask.create_time + " ms");

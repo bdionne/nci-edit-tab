@@ -1,5 +1,7 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
 
@@ -13,6 +15,8 @@ import gov.nih.nci.ui.NCIEditTab;
 public class BatchLoadTask extends BatchTask {	
 
 	NCIEditTab tab = null;
+	
+	List<String> codes = new ArrayList<String>();
 
 	public BatchLoadTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile,
 			String outfile) {
@@ -48,11 +52,11 @@ public class BatchLoadTask extends BatchTask {
 			//
 			
 
-			
+			// TODO: Batch these all up and do a single commit
 			if (super.checkNoErrors(w, taskId)) {
-				tab.createNewChild(tab.getClass(sup), Optional.of(name));
-				Thread.sleep(1000);
-				tab.commitChanges();
+				tab.createNewChild(tab.getClass(sup), Optional.of(name), Optional.of(codes.get(taskId)));
+				Thread.sleep(100);
+				//tab.commitChanges();
 			} else {
 				return false;
 			}
@@ -105,6 +109,16 @@ public class BatchLoadTask extends BatchTask {
 			return false;
 		}
 
+		return true;
+	}
+	
+	public boolean complete() {
+		tab.commitChanges();
+		return true;
+	}
+	
+	public boolean begin() {
+		codes = tab.generateCodes(max);
 		return true;
 	}
 

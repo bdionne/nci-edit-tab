@@ -220,16 +220,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		tab = this;
 	}
 	
-	public String generateCode() {
+	public List<String> generateCodes(int no) {
 		LocalHttpClient cl = (LocalHttpClient) clientSession.getActiveClient();
-		String code = "NONE"; 
+		List<String> codes = new ArrayList<String>(); 
 		
 		try {
-			code = cl.getCode();
+			codes = cl.getCodes(no);
 		} catch (Exception e) {
-			code = UUID.randomUUID().toString();
+			codes.add(UUID.randomUUID().toString());
 		}
-		return code;
+		return codes;
 	}
 	
 	public Set<OWLAnnotationProperty> getComplexProperties() {
@@ -812,10 +812,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
     }
     
-    public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName) {
+    public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName, Optional<String> code) {
 
     	NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
-    			"Please enter a class name", OWLClass.class, prefName);
+    			"Please enter a class name", OWLClass.class, prefName, code);
 
     	boolean proceed = false;
 

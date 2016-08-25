@@ -33,6 +33,10 @@ public class BatchTask {
 	public boolean canProceed() {
 		return canProceed;
 	}
+	
+	public boolean begin() {return true;}
+	
+	public boolean complete() {return true;}
 
 	String infile = null;
 

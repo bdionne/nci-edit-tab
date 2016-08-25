@@ -78,11 +78,12 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 
     private final JTextArea messageArea = new JTextArea(1, FIELD_WIDTH);
 
-    public NCIClassCreationDialog(OWLEditorKit owlEditorKit, String message, Class<T> type, Optional<String> prefName) {
+    public NCIClassCreationDialog(OWLEditorKit owlEditorKit, String message, Class<T> type, Optional<String> prefName,
+    		Optional<String> code) {
         this.owlEditorKit = owlEditorKit;
         this.type = type;
         if (prefName.isPresent()) {
-        	buildNewClass(prefName.get());        	
+        	buildNewClass(prefName.get(), code);        	
         } else {
         	createUI(message);        	
         }        
@@ -148,7 +149,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 
             int ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), this, this.preferredNameField);
             if (ret == JOptionPane.OK_OPTION) {
-            	buildNewClass(getEntityName());            	
+            	buildNewClass(getEntityName(), Optional.empty());            	
                 return true;
             }
             else {
@@ -209,9 +210,16 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     public List<OWLOntologyChange> getOntChanges() {return ont_changes;}
     		
     
-    public void buildNewClass(String preferredName) {
+    public void buildNewClass(String preferredName, Optional<String> code) {
     	
-		String gen_code = NCIEditTab.currentTab().generateCode();
+    	String gen_code = "";
+    	
+    	if (code.isPresent()) {
+    		gen_code = code.get();
+    	} else {
+    		List<String> codes = NCIEditTab.currentTab().generateCodes(1);
+    		gen_code = codes.get(0);
+    	}
 
 		OWLEntityCreationSet<OWLClass> newSet = null;
 
