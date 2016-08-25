@@ -859,7 +859,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void addListeners() {
 		clientSession.addListener(this);
-		history.addUndoManagerListener(this);
+		//history.addUndoManagerListener(this);
 	}
 	
 	public void handleChange(ClientSessionChangeEvent event) {
