@@ -255,6 +255,12 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 	}
 
 	protected boolean onLQTExport() {
+		if ((selected == null) || selected.isTopEntity()) {
+			JOptionPane.showMessageDialog(this, "Please select a root concept for the report \n", "Warning", JOptionPane.WARNING_MESSAGE);
+			return false;
+		}
+		List<OWLEntity> ocl = new ArrayList<OWLEntity>();
+		ocl.add(selected);
 		/**
 		ExportToCsvUtil.setExportBrowserText(false);
 		ExportToCsvUtil.setExportMetadata(true);
@@ -311,18 +317,25 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 		exportAction.actionPerformed(null);
 		boolean success = exportAction.exportCompletedSuccessful();
+		*/
+		boolean success = false;
+		try {
+			success = ExportDialogPanel.showDialog(oek, "", ocl);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (!success) {
 			reportTextArea
 					.append("\nExport with LQT configuration did not complete.");
 		} else {
 			reportTextArea
 					.append("\nExported using the LQT configuration finished successfully.\n");
-			reportTextArea.append("Exported file: "
-					+ exportAction.getExportFile().getAbsolutePath() + "\n");
+			reportTextArea
+					.append("Exported file: HOW TO ADD THE NAME? \n");
 		}
 		return success;
-		*/
-		return true;
+		
 	}
 
 	protected boolean onReportWriterClassicExport() {
