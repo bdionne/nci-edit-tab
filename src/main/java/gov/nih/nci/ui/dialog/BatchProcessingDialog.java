@@ -80,7 +80,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	private JPanel createFileField(String label, String extension, String type){
 		
 	  JPanel panel = new JPanel();
-	  panel.setPreferredSize(new Dimension(420, 30));
+	  panel.setPreferredSize(new Dimension(470, 30));
 	  JLabel lb = new JLabel(label);
 	  
 	  if(type == "input"){
