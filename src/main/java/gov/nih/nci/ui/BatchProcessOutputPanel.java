@@ -3,21 +3,20 @@ package gov.nih.nci.ui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-
-
-import gov.nih.nci.ui.dialog.BatchProcessingDialog;
-
 public class BatchProcessOutputPanel extends JPanel implements ActionListener{
 
 	private static final long serialVersionUID = 1L;
 	private JTextArea textarea;
-	private JButton batchbutton;
+	private JButton savebutton;
+	private JButton clearbutton;
+	private JButton closebutton;
 	
 	public BatchProcessOutputPanel(){
 		createUI();
@@ -33,22 +32,30 @@ public class BatchProcessOutputPanel extends JPanel implements ActionListener{
         
         JPanel buttonpanel = new JPanel();
         
-        batchbutton = new JButton("Batch Load/Edit");
-        batchbutton.addActionListener(this);
+        savebutton = new JButton("Save");
+        savebutton.addActionListener(this);
+        clearbutton = new JButton("Clear");
+        clearbutton.addActionListener(this);
+        closebutton = new JButton("Close");
+        closebutton.addActionListener(this);
         
-        buttonpanel.add(batchbutton);
+        buttonpanel.add(savebutton);
+        buttonpanel.add(clearbutton);
+        buttonpanel.add(closebutton);
         
         add(buttonpanel, BorderLayout.SOUTH);
+        this.setPreferredSize(new Dimension(200, 250));
         setVisible(true);
         
     }
 
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == batchbutton){
-			BatchProcessingDialog dl = new BatchProcessingDialog(this, NCIEditTab.currentTab());
-			//dl.setPreferredSize(new Dimension(400, 400));
-			//dl.pack();
-			//dl.setVisible(true);
+		if(e.getSource() == savebutton){
+			
+		} else if (e.getSource() == clearbutton){
+			textarea.setText(null);
+		} else if (e.getSource() == closebutton){
+			this.setVisible(false);
 		}
 	}
 	

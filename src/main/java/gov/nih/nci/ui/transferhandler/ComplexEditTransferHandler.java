@@ -57,7 +57,7 @@ public class ComplexEditTransferHandler extends TransferHandler {
 			if (NCIEditTab.currentTab().canSplit(data.get(0))) {
 				// if you can split you can clone
 				NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(complexEditPanel.getEditorKit(),
-						"Please enter a class name", OWLClass.class, Optional.empty());
+						"Please enter a class name", OWLClass.class, Optional.empty(), Optional.empty());
 
 				if (dlg.showDialog()) {
 					NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), data.get(0), clone_p);

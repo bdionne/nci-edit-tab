@@ -34,13 +34,6 @@
         <navigates value="@org.protege.classcategory"/>
     </extension>
     
-    <extension id="BatchProcessing" point="org.protege.editor.core.application.ViewComponent">
-    	<label value="Batch Processing"/>
-        <class value="gov.nih.nci.ui.BatchProcessingViewComponent"/>
-        <headerColor value="@org.protege.ontologycolor"/>
-        <category value="@org.protege.ontologycategory"/>
-    </extension>
-    
      <extension id="PropertyTableView"
                point="org.protege.editor.core.application.ViewComponent">
         <label value="Ontology metrics"/>
@@ -69,6 +62,14 @@
                point="org.protege.editor.core.application.ViewComponent">
         <label value="Retirement"/>
         <class value="gov.nih.nci.ui.NCIRetireViewComponent"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="@org.protege.ontologycategory"/>
+    </extension>
+    
+    <extension id="ReportWriter"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="ReportWriter"/>
+        <class value="gov.nih.nci.ui.ReportWriterViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
         <category value="@org.protege.ontologycategory"/>
     </extension>

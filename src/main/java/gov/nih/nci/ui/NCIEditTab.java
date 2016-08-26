@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,6 +64,7 @@ import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 import org.protege.editor.owl.ui.renderer.OWLEntityAnnotationValueRenderer;
 import org.protege.editor.owl.ui.renderer.OWLModelManagerEntityRenderer;
 import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
+import org.protege.owlapi.inference.cls.ChildClassExtractor;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -218,16 +220,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		tab = this;
 	}
 	
-	public String generateCode() {
+	public List<String> generateCodes(int no) {
 		LocalHttpClient cl = (LocalHttpClient) clientSession.getActiveClient();
-		String code = "NONE"; 
+		List<String> codes = new ArrayList<String>(); 
 		
 		try {
-			code = cl.getCode();
+			codes = cl.getCodes(no);
 		} catch (Exception e) {
-			code = UUID.randomUUID().toString();
+			codes.add(UUID.randomUUID().toString());
 		}
-		return code;
+		return codes;
 	}
 	
 	public Set<OWLAnnotationProperty> getComplexProperties() {
@@ -810,10 +812,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
     }
     
-    public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName) {
+    public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName, Optional<String> code) {
 
     	NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
-    			"Please enter a class name", OWLClass.class, prefName);
+    			"Please enter a class name", OWLClass.class, prefName, code);
 
     	boolean proceed = false;
 
@@ -857,7 +859,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void addListeners() {
 		clientSession.addListener(this);
-		history.addUndoManagerListener(this);
+		//history.addUndoManagerListener(this);
 	}
 	
 	public void handleChange(ClientSessionChangeEvent event) {
@@ -1039,6 +1041,28 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 		return Optional.empty();		  
 
+	}
+	
+	public Set<OWLAnnotation> getAnnotations(OWLClass cls) {
+		Set<OWLAnnotation> res = new HashSet<OWLAnnotation>();
+
+		for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(cls, ontology)) {
+			res.add(ax.getAnnotation());
+		}
+		
+		return res;
+			
+	}
+	
+	public Set<OWLAnnotation> getDependentAnnotations(OWLClass cls, OWLAnnotationProperty prop) {
+		
+		for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(cls, ontology)) {
+			OWLAnnotation annot = ax.getAnnotation();
+			if (annot.getProperty().equals(prop)) {
+				return ax.getAnnotations();				
+			}
+		}
+		return new HashSet<OWLAnnotation>();
 	}
 	
 	public Optional<String> getProperty(OWLNamedObject oobj, OWLAnnotationProperty prop) {
@@ -1268,4 +1292,111 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public Vector<String> getSupportedAssociations() {
 		return null;
 	}
+	
+	public List<OWLClass> getDirectSubClasses(OWLClass cls) {
+		ChildClassExtractor childClassExtractor = new ChildClassExtractor();
+		
+		childClassExtractor.setCurrentParentClass(cls);
+		for (OWLAxiom ax : ontology.getReferencingAxioms(cls)) {
+            if (ax.isLogicalAxiom()) {
+                ax.accept(childClassExtractor);
+            }
+        }
+        Set<OWLClass> cset = childClassExtractor.getResult();
+       
+		List<OWLClass> res = new ArrayList<OWLClass>();
+		
+		for (OWLClass c : cset) {
+			res.add(c);
+		}
+		
+		return res;
+	}
+	
+	Set<String> getLogicalRes(OWLClass cls, String type) {
+		Set<String> res = new HashSet<String>();
+		Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
+	    
+	    for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+	    	OWLClassExpression exp = ax1.getSuperClass();
+	    	res = getParentRoleExps(res, exp, type, false, cls);
+	    		    	
+	    }
+	    
+	    Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
+	    
+	    for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+	    	Set<OWLClassExpression> exps = ax1.getClassExpressions();
+	    	for (OWLClassExpression exp : exps) {
+	    		res = getParentRoleExps(res, exp, type, true, cls);
+	    		}
+	    }
+	    return res;
+		
+	}
+	
+	private boolean isParentType(String type) {
+		return type.equalsIgnoreCase("parents");
+	}
+	
+	private boolean isRoleType(String type) {
+		return type.equalsIgnoreCase("roles");
+	}
+	
+    
+    private Set<String> getParentRoleExps(Set<String> res, OWLClassExpression exp, String type,
+    		boolean defined, OWLClass cls) {
+    	
+    	if ((exp instanceof OWLClass) && (isParentType(type)) &&
+    			!(exp.asOWLClass().equals(cls))) {
+    		Optional<String> label = getRDFSLabel(exp.asOWLClass());
+    		if (label.isPresent()) {
+    			res.add(label.get());
+    		} else {
+    			res.add(exp.asOWLClass().getIRI().getShortForm());
+    		}
+    	} else if ((exp instanceof OWLQuantifiedObjectRestriction) &&
+    			(isRoleType(type))) {
+
+    		OWLQuantifiedObjectRestriction qobj = (OWLQuantifiedObjectRestriction) exp;
+    		OWLClassExpression rexp = qobj.getFiller();
+
+    		String fval;
+    		if (rexp instanceof OWLClass) {
+    			fval = ((OWLClass) rexp).getIRI().getShortForm();
+    		} else {
+    			fval = rexp.toString();
+    		}
+
+    		String quant = "some";
+    		if (exp instanceof OWLObjectSomeValuesFrom) {
+    			quant = "some";
+    		} else if (exp instanceof OWLObjectAllValuesFrom) {
+    			quant = "only";
+    		}
+    		String val = quant + " " + qobj.getProperty().asOWLObjectProperty().getIRI().getShortForm() + " "
+    				+ fval;
+    		
+    		if (defined) {
+    			val += " [defined]";
+    		}
+
+    		res.add(val);
+
+    	} else if (exp instanceof OWLObjectIntersectionOf) {
+    		OWLObjectIntersectionOf oio = (OWLObjectIntersectionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asConjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			res = getParentRoleExps(res, c, type, defined, cls);
+    		}
+    	} else if (exp instanceof OWLObjectUnionOf) {
+    		OWLObjectUnionOf oio = (OWLObjectUnionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asDisjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			res = getParentRoleExps(res, c, type, defined, cls);
+    		}
+    	}
+    	return res;
+
+    }
 }
