@@ -201,7 +201,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			
 			boolean success = false;
 			try {
-				success = ExportDialogPanel.showDialog(oek, "", ocl);
+				success = ExportDialogPanel.showDialog(oek, "", ocl, true);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -320,7 +320,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		*/
 		boolean success = false;
 		try {
-			success = ExportDialogPanel.showDialog(oek, "", ocl);
+			success = ExportDialogPanel.showDialog(oek, "", ocl, true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

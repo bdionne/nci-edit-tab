@@ -923,6 +923,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 									OWLAnnotationProperty dpProp = lookup(dp, annProps);
 									if (dpProp != null) {
 										dprops.add(dpProp);
+									} else {
+										not_found_props.add(dp);
 									}								
 								}
 								required_annotation_dependencies.put(p, dprops);
