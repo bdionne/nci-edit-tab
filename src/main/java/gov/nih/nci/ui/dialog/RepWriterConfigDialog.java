@@ -8,7 +8,7 @@
 package gov.nih.nci.ui.dialog;
 import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.NCIEditTabConstants;
-//import gov.nih.nci.ui.NCIEditTab;
+
 /**
 import edu.stanford.smi.protege.util.FileField;
 import edu.stanford.smi.protege.util.LabeledComponent;
@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -73,7 +74,7 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 	JRadioButton noAttrs;
 	JRadioButton attrsWithId;
 
-	JTextField attrTF;
+	JLabel attrTF;
 
 	boolean withAttributes = true;
 	boolean withoutAttrsWithId = false;
@@ -102,6 +103,7 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 		this.infile = "";
 		this.outfile = "";
 
+		this.setResizable(false);
 		initialize();
 	}
 
@@ -133,17 +135,25 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 
 	public void initialize() {
 		Container container = this.getContentPane();
-		// setLocation(360,300);
 		setLocation(450, 300);
-		setSize(new Dimension(450, 240));
-		container.setLayout(new BorderLayout());
+		setSize(new Dimension(450, 280));
+		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
-		JPanel inputPanel = new JPanel();
-		inputPanel.setLayout(new BorderLayout());
-
+		JPanel rootPanel = new JPanel(new BorderLayout());
+		rootPanel.setPreferredSize(new Dimension(300, 40));
+		//rootPanel.setLayout(new BoxLayout(rootPanel, BoxLayout.X_AXIS));
+		String labeltext = "";
+		if (selectedCls != null) {
+			labeltext = "  Root Concept: " + selectedCls.getIRI().getShortForm();
+		}
+		JLabel rc = new JLabel(labeltext);
+		rootPanel.add(rc, BorderLayout.WEST);
+		container.add(rootPanel);
+		
 		JPanel ofp = new JPanel();
 		JLabel label = new JLabel("Output File");
 		fileLocationTxtField = new JTextField("report.log");
+		fileLocationTxtField.setPreferredSize(new Dimension(200, 25));
 		JButton browseBtn = new JButton("Browse");
 	    browseBtn.addActionListener(browseBtnListener);
 	    
@@ -151,25 +161,9 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 	    ofp.add(fileLocationTxtField);
 	    ofp.add(browseBtn);
 		
-		
-
-		inputPanel.add(ofp, BorderLayout.NORTH);
-
-		JPanel rootPanel = new JPanel();
-		rootPanel.setLayout(new BorderLayout());
-		JTextField rootConcept = new JTextField();
-		rootConcept.setEditable(false);
-		if (selectedCls != null) {
-			rootConcept.setText(selectedCls.getIRI().getShortForm());
-		}
-		rootPanel.add(rootConcept, BorderLayout.CENTER);
-		
-		JPanel rp = new JPanel();
-		JLabel rc = new JLabel("Root Concept");
-		rp.add(rc);
-		rp.add(rootPanel);
-
-		inputPanel.add(rp, BorderLayout.CENTER);
+	    JPanel cp1 = new JPanel(new BorderLayout());
+	    cp1.add(ofp, BorderLayout.WEST);
+	    container.add(cp1);
 
 		String[] levels = new String[12];
 		levels[0] = "All";
@@ -179,21 +173,20 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 		}
 
 		levelComboBox = new JComboBox(levels);
+		levelComboBox.setPreferredSize(new Dimension(80, 25));
 		levelComboBox.setSelectedIndex(0);
 
 		JPanel lc3 = new JPanel();
+		lc3.setPreferredSize(new Dimension(180, 30));
 		lc3.add(new JLabel("Hierarchy Level"));
 		lc3.add(levelComboBox);
 
-		inputPanel.add(lc3, BorderLayout.SOUTH);
-
-		container.add(inputPanel, BorderLayout.NORTH);
-
-		JPanel attrsPlusId = new JPanel();
-		attrsPlusId.setLayout(new BorderLayout());
+		JPanel cp2 = new JPanel(new BorderLayout());
+		cp2.add(lc3, BorderLayout.WEST);
+		container.add(cp2);
+		
 		ButtonGroup yesnoGroup = new ButtonGroup();
-		JPanel yesnoPanel = new JPanel();
-
+		
 		allAttrs = new JRadioButton("Attributes");
 		allAttrs.setSelected(true);
 		allAttrs.addActionListener(this);
@@ -208,38 +201,41 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 		yesnoGroup.add(noAttrs);
 		yesnoGroup.add(attrsWithId);
 
-		yesnoPanel.add(allAttrs);
-		yesnoPanel.add(noAttrs);
-		yesnoPanel.add(attrsWithId);
-		
 		JPanel lc4 = new JPanel();
+		lc4.setPreferredSize(new Dimension(390, 30));
 		lc4.add(new JLabel("Select Attriburtes"));
-		lc4.add(yesnoPanel);
+		lc4.add(allAttrs);
+		lc4.add(noAttrs);
+		lc4.add(attrsWithId);
+		
+		JPanel cp3 = new JPanel(new BorderLayout());
+		cp3.add(lc4, BorderLayout.WEST);
+		
+		container.add(cp3);
 
-		attrsPlusId.add(lc4, BorderLayout.NORTH);
+		JPanel attrsPlusId = new JPanel(new BorderLayout());
+		attrsPlusId.setPreferredSize(new Dimension(390, 30));
+		attrTF = new JLabel();
+		attrsPlusId.add(attrTF, BorderLayout.EAST);
 
-		attrTF = new JTextField();
-		attrTF.setBorder(null);
-		attrTF.setEditable(false);
-		attrsPlusId.add(attrTF, BorderLayout.CENTER);
-
-		container.add(attrsPlusId, BorderLayout.CENTER);
+		container.add(attrsPlusId);
 
 		continueButton = new JButton("Continue");
 		continueButton.addActionListener(this);
 		cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(this);
 		JPanel okcancelPanel = new JPanel();
+		okcancelPanel.setPreferredSize(new Dimension(300, 40));
 		okcancelPanel.add(continueButton);
 		okcancelPanel.add(cancelButton);
 
-		container.add(okcancelPanel, BorderLayout.SOUTH);
+		container.add(okcancelPanel);
 
 		pack();
 
 		repPanel.enableReportButton(false);
 		setVisible(true);
-
+		
 	}
 
 	public boolean getOKBtnPressed() {
@@ -271,17 +267,18 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 			dispose();
 		} else if (action == allAttrs) {
 			withAttributes = true;
+			attrTF.setText("");
 		} else if (action == noAttrs) {
 			withAttributes = false;
-			
+			attrTF.setText("");
 		} else if (action == attrsWithId) {
 			withAttributes = false;
 			withoutAttrsWithId = true;
 
 			if (attrsId != null) {
-				attrTF.setText("ID: " + attrsId);
+				attrTF.setText("ID: " + attrsId + "   ");
 			} else {
-				attrTF.setText("ID: rdf:ID");
+				attrTF.setText("ID: rdf:ID   ");
 			}
 
 		}
