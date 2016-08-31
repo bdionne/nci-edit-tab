@@ -64,7 +64,7 @@
         </dependency>
         <dependency>
         	<groupId>edu.stanford.protege</groupId>
-    	    <artifactId>lucene-search-plugin</artifactId>
+    	    <artifactId>lucene-search-tab</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
 	</dependencies>
@@ -93,7 +93,8 @@
                         <Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
                         <Bundle-Vendor>Dionne Associates, LLC.</Bundle-Vendor>
                         <Import-Package>
-                        	org.protege.editor.search.*,
+                            edu.stanford.protege.search.*,
+                        	edu.stanford.protege.csv.export.*,
                         	org.protege.owlapi.inference.cls.*,
                         	org.protege.editor.owl.client.*,                        	
                         	okhttp3.*,                     	                                                    

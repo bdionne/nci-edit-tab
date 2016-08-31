@@ -75,7 +75,16 @@ EditTabChangeListener {
 	public void handleChange(EditTabChangeEvent event) {
 		if (event.isType(ComplexEditType.ADD_PROP)) {
 			editPanel.addNewComplexProp();
-		}
+		} else if (event.isType(ComplexEditType.INIT_PROPS)) {
+			editPanel.disposeView();
+			this.remove(editPanel);			
+			editPanel = new EditPanel(getOWLEditorKit());
+	    	
+	        setLayout(new BorderLayout());
+	        add(editPanel);
+			
+		}  
+		
 		
 	}
 

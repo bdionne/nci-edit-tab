@@ -240,6 +240,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return immutable_properties;
 	}
 	
+	public boolean isReadOnlyProperty(String propName) {
+		
+		Set<OWLAnnotationProperty> props = getImmutableProperties();
+		for (OWLAnnotationProperty prop : props) {
+			if (prop.getIRI().getShortForm().equalsIgnoreCase(propName)) {
+				return true;
+			}
+		}
+		return false;
+		
+	}
+	
 	public Set<OWLAnnotationProperty> getRequiredAnnotationsForAnnotation(OWLAnnotationProperty annp) {
 		return required_annotation_dependencies.get(annp);
 		
@@ -863,7 +875,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public void handleChange(ClientSessionChangeEvent event) {
-		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
+		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY) ||
+				event.hasCategory(EventCategory.USER_LOGIN)) {
 			initProperties();
 			
 		}
@@ -987,7 +1000,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			this.fireChange(new EditTabChangeEvent(this, ComplexEditType.INIT_PROPS));
 		}
+		
 	}
 	
 	OWLClass findOWLClass(String opt, ProjectOptions opts) {
@@ -1091,6 +1106,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		for (OWLEntity et : classes) {
 			cls = et.asOWLClass();
 		}
+		
 		return cls;		
 	}
 	
@@ -1314,6 +1330,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		return res;
 	}
+	
+	public List<OWLClass> getDirectSuperClasses(OWLClass cls) {
+		Set<OWLSubClassOfAxiom> sups = ontology.getSubClassAxiomsForSubClass(cls);
+		List<OWLClass> res = new ArrayList<OWLClass>();
+		for (OWLSubClassOfAxiom ax : sups) {
+			if (!ax.getSuperClass().isAnonymous()) {
+				res.add(ax.getSuperClass().asOWLClass());
+			}
+		}
+		return res;
+	}
+	
 	
 	Set<String> getLogicalRes(OWLClass cls, String type) {
 		Set<String> res = new HashSet<String>();

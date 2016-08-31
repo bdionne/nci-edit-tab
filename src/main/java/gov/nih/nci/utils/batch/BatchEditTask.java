@@ -22,8 +22,30 @@ public class BatchEditTask extends BatchTask {
 	Vector<String> supportedRoles = null;
 	Vector<String> supportedProperties = null;
 	Vector<String> supportedAssociations = null;
+	
+	private boolean hasRole(OWLClass cls, String roleName, OWLClass filler) {
+		return true;
+	}
+	
+	private boolean hasAssociation(OWLClass cls, String assocName, OWLClass value) {
+		return true;
+	}
+	
+	private boolean hasProperty(OWLClass cls, String propName, String value) {
+		return true;
+	}
+	
+	private boolean checkBatchProperty(String propName, String value) {
+		return true;
+	}
+	
+	private boolean  checkBatchPropertyNotFullSynPT(String propName, String value) {
+		return true;
+	}
+	
 
 	public BatchEditTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile, String outfile) {
+		
 		super(be);
 		this.tab = tab;
 		this.infile = infile;
@@ -285,21 +307,20 @@ public class BatchEditTask extends BatchTask {
 			String attributevalue_1 = (String) v.elementAt(4);
 			String attributevalue_2 = (String) v.elementAt(5);
 
-			//OWLNamedClass hostClass = wrapper.getOWLNamedClass(cls_name);
-			OWLClass hostClass = null;
+			OWLClass hostClass = tab.getClass(cls_name);
 
-			Vector superclasses = new Vector();
-			/**
 			if (hostClass == null) {
 				String error_msg = " -- concept " + cls_name
 						+ " does not exist.";
 				w.add(error_msg);
 
-			} else if (wrapper.isRetired(hostClass)) {
+			} else if (tab.isRetired(hostClass)) {
 				w.add(" -- concept " + cls_name + " is retired, cannot edit");
 			}
-			*/
+			
 
+			Vector superclasses = new Vector();
+			
 			if (action.compareToIgnoreCase("new") != 0
 					&& action.compareToIgnoreCase("edit") != 0
 					&& action.compareToIgnoreCase("delete") != 0) {
@@ -318,7 +339,7 @@ public class BatchEditTask extends BatchTask {
 			}
 
 			if (action.compareToIgnoreCase("new") == 0) {
-				/**
+				
 				if (hostClass != null) {
 					if (attribute.compareToIgnoreCase("role") == 0) {
 					
@@ -334,11 +355,8 @@ public class BatchEditTask extends BatchTask {
 							} else {
 								String filler = attributevalue_1.substring(
 										pos + 1, attributevalue_1.length());
-
 								
-								//OWLNamedClass targetClass = (OWLNamedClass) owlModel
-										//.getRDFSNamedClass(filler);
-								OWLClass targetClass = null;
+								OWLClass targetClass = tab.getClass(filler);
 										
 								if (targetClass == null) {
 									String error_msg = " -- concept " + filler
@@ -346,8 +364,8 @@ public class BatchEditTask extends BatchTask {
 									w.add(error_msg);
 								} else {
 									
-									if (wrapper.hasRole(hostClass,
-											attributename, filler)) {
+									if (hasRole(hostClass,
+											attributename, targetClass)) {
 										String error_msg = " -- role already exists.";
 										w.add(error_msg);
 									}
@@ -362,17 +380,16 @@ public class BatchEditTask extends BatchTask {
 
 					else if (attribute.compareToIgnoreCase("parent") == 0) {
 						
-						OWLNamedClass superClass = (OWLNamedClass) owlModel
-								.getRDFSNamedClass(attributename);
+						OWLClass superClass = tab.getClass(attributename);
 						if (superClass == null) {
 							String error_msg = " -- superconcept does not exist.";
 							w.add(error_msg);
 
 						} else {
 
-							if (wrapper.isPremerged(superClass)
-									|| wrapper.isPreretired(superClass)
-									|| wrapper.isRetired(superClass)) {
+							if (tab.isPreMerged(superClass)
+									|| tab.isPreRetired(superClass)
+									|| tab.isRetired(superClass)) {
 								String error_msg = "superconcept cannot be premerged, preretired, or retired.";
 								w.add(error_msg);
 
@@ -390,7 +407,7 @@ public class BatchEditTask extends BatchTask {
 							w.add(error_msg);
 						} else {
 							
-							if (wrapper.hasProperty(hostClass, attributename,
+							if (hasProperty(hostClass, attributename,
 									attributevalue_1)) {
 								String error_msg = " -- property already exists.";
 								w.add(error_msg);
@@ -399,15 +416,14 @@ public class BatchEditTask extends BatchTask {
 
 						}
 						
-						if (this.tab.getFilter().checkBatchProperty(
+						if (checkBatchProperty(
 								attributename, attributevalue_1)
-								&& this.tab
-										.getFilter()
-										.checkBatchPropertyNotFullSynPT(
+								&& checkBatchPropertyNotFullSynPT(
 												attributename, attributevalue_1)) {
 
 						} else {
-							w.add(tab.getFilter().getErrorMessage());
+							// TODO: add some error messages here
+							//w.add(tab.getFilter().getErrorMessage());
 						}
 						
 					} else if (attribute.compareToIgnoreCase("association") == 0) {
@@ -417,15 +433,17 @@ public class BatchEditTask extends BatchTask {
 							w.add(error_msg);
 						} else {
 							
-							OWLNamedClass targetClass = (OWLNamedClass) owlModel
-									.getRDFSNamedClass(attributevalue_1);
+							OWLClass targetClass = tab.getClass(attributevalue_1);
+							
 							if (targetClass == null) {
+								
 								String error_msg = " -- concept "
 										+ attributevalue_1 + " does not exist.";
 								w.add(error_msg);
+								
 							} else {
-								if (wrapper.hasAssociation(hostClass,
-										attributename, attributevalue_1)) {
+								if (hasAssociation(hostClass,
+										attributename, targetClass)) {
 									String error_msg = " -- association already exists.";
 									w.add(error_msg);
 								}
@@ -434,23 +452,21 @@ public class BatchEditTask extends BatchTask {
 						}
 					}
 				}
-				*/
+				
 			}
 
 			else if (action.compareToIgnoreCase("edit") == 0
 					|| action.compareToIgnoreCase("delete") == 0) {
-				/**
 				if (hostClass != null) {
 					if (attribute.compareToIgnoreCase("parent") == 0) {
 						if (action.compareToIgnoreCase("delete") == 0) {
 							
-							OWLNamedClass superClass = (OWLNamedClass) owlModel
-									.getRDFSNamedClass(attributename);
+							OWLClass superClass = tab.getClass(attributename);
 							if (superClass == null) {
 								String error_msg = " -- superconcept "
 										+ attributename + " does not exist.";
 								w.add(error_msg);
-							} else if (wrapper.getDirectSuperclassNames(
+							} else if (tab.getDirectSuperClasses(
 									hostClass).size() == 1) {
 								String error_msg = " -- can't delete last superconcept "
 										+ attributename;
@@ -479,15 +495,15 @@ public class BatchEditTask extends BatchTask {
 								String filler = attributevalue_1.substring(
 										pos + 1, attributevalue_1.length());
 								
-								OWLNamedClass targetClass = (OWLNamedClass) owlModel
-										.getRDFSNamedClass(filler);
+								OWLClass targetClass = tab.getClass(filler);
+								
 								if (targetClass == null) {
 									String error_msg = " -- concept " + filler
 											+ " does not exist.";
 									w.add(error_msg);
 								} else {
-									if (!wrapper.hasRole(hostClass,
-											attributename, filler)) {
+									if (!hasRole(hostClass,
+											attributename, targetClass)) {
 										String error_msg = " -- role does not exist.";
 										w.add(error_msg);
 
@@ -504,8 +520,7 @@ public class BatchEditTask extends BatchTask {
 															attributevalue_2
 																	.length());
 
-											targetClass = (OWLNamedClass) owlModel
-													.getRDFSNamedClass(filler);
+											targetClass = tab.getClass(filler);
 											if (targetClass == null) {
 												String error_msg = " -- concept "
 														+ filler
@@ -525,15 +540,14 @@ public class BatchEditTask extends BatchTask {
 							w.add(error_msg);
 						} else {
 							
-							Boolean editable = wrapper
-									.isReadOnlyProperty(attributename);
+							Boolean editable = tab.isReadOnlyProperty(attributename);
 							if (editable.equals(Boolean.TRUE)) {
 								String error_msg = " -- property "
 										+ attributename + ", it is read-only.";
 								w.add(error_msg);
 							}
 
-							if (!wrapper.hasProperty(hostClass, attributename,
+							if (!hasProperty(hostClass, attributename,
 									attributevalue_1)) {
 
 								String error_msg = " -- property " + "("
@@ -547,7 +561,7 @@ public class BatchEditTask extends BatchTask {
 
 							if (action.compareToIgnoreCase("edit") == 0) {
 								
-								if (wrapper.hasProperty(hostClass,
+								if (hasProperty(hostClass,
 										attributename, attributevalue_2)) {
 									String error_msg = " -- property " + "("
 											+ attributename + ", "
@@ -560,24 +574,24 @@ public class BatchEditTask extends BatchTask {
 											+ attributename
 											+ ") new value is not specified.";
 									w.add(error_msg);
-								} else if (this.tab.getFilter().checkBatchProperty(
+								} else if (checkBatchProperty(
 										attributename, attributevalue_2)
-										&& this.tab
-												.getFilter()
-												.checkBatchPropertyNotFullSynPT(
+										&& checkBatchPropertyNotFullSynPT(
 														attributename, attributevalue_2)) {
 
 								} else {
-									w.add(tab.getFilter().getErrorMessage());
+									// TODO: sme eror messages here
+									//w.add(tab.getFilter().getErrorMessage());
 								}
 								
 							} else {
 								
-								if (this.tab.getFilter().checkBatchProperty(
+								if (checkBatchProperty(
 										attributename, attributevalue_1)) {
 
 								} else {
-									w.add(tab.getFilter().getErrorMessage());
+									// TODO: error messages here
+									//w.add(tab.getFilter().getErrorMessage());
 								}
 								
 
@@ -592,15 +606,14 @@ public class BatchEditTask extends BatchTask {
 
 						if (action.compareToIgnoreCase("delete") == 0) {
 							
-							OWLNamedClass targetClass = (OWLNamedClass) owlModel
-									.getRDFSNamedClass(attributevalue_1);
+							OWLClass targetClass = tab.getClass(attributevalue_1);
 							if (targetClass == null) {
 								String error_msg = " -- concept "
 										+ attributevalue_1 + " does not exist.";
 								w.add(error_msg);
 							} else {
-								if (!wrapper.hasAssociation(hostClass,
-										attributename, attributevalue_1)) {
+								if (!hasAssociation(hostClass,
+										attributename, targetClass)) {
 									String error_msg = " -- association does not exist.";
 									w.add(error_msg);
 								}
@@ -611,11 +624,8 @@ public class BatchEditTask extends BatchTask {
 							w.add(error_msg);
 						}
 					}
-				}
-				*/
+				}				
 			}
-			
-
 		} catch (Exception e) {
 			w.add("Exception caught" + e.toString());
 		}
