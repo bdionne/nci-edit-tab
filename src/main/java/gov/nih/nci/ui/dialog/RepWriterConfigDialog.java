@@ -6,7 +6,6 @@
  *****************************************************************************/
 
 package gov.nih.nci.ui.dialog;
-import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.NCIEditTabConstants;
 
 /**
@@ -68,7 +67,7 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 	OWLClass selectedCls;
 
 	//FileField outputFileField = null;
-	JComboBox levelComboBox;
+	JComboBox<String> levelComboBox;
 
 	JRadioButton allAttrs;
 	JRadioButton noAttrs;
@@ -137,6 +136,7 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 		Container container = this.getContentPane();
 		setLocation(450, 300);
 		setSize(new Dimension(450, 280));
+		this.setResizable(true);
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
 		JPanel rootPanel = new JPanel(new BorderLayout());
@@ -172,7 +172,7 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 			levels[i] = int_obj.toString();
 		}
 
-		levelComboBox = new JComboBox(levels);
+		levelComboBox = new JComboBox<String>(levels);
 		levelComboBox.setPreferredSize(new Dimension(80, 25));
 		levelComboBox.setSelectedIndex(0);
 
