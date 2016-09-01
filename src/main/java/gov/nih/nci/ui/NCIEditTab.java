@@ -44,8 +44,11 @@ import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.client.api.exception.AuthorizationException;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
+import org.protege.editor.owl.client.api.exception.LoginTimeoutException;
+import org.protege.editor.owl.client.api.exception.SynchronizationException;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
+import org.protege.editor.owl.client.ui.UserLoginPanel;
 import org.protege.editor.owl.client.event.ClientSessionListener;
 import org.protege.editor.owl.client.event.CommitOperationEvent;
 import org.protege.editor.owl.client.util.ClientUtils;
@@ -99,6 +102,7 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.OWLObjectDuplicator;
 
+import edu.stanford.protege.metaproject.api.AuthToken;
 import edu.stanford.protege.metaproject.api.Operation;
 import edu.stanford.protege.metaproject.api.Project;
 import edu.stanford.protege.metaproject.api.ProjectOptions;
@@ -720,32 +724,49 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
 
-    	if (changes.size() > 0) {
-    		
-    		
-
-    		String comment = type.name();
-    		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
-
-    		DocumentRevision base;
+    	if (changes.size() > 0) {    		
     		try {
-    			base = clientSession.getActiveVersionOntology().getHeadRevision();
-    			CommitBundle commitBundle = new CommitBundleImpl(base, commit);
-    			ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
-    			clientSession.getActiveVersionOntology().update(hist);
-    			resetHistory();
-    			clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
-                        hist.getHeadRevision(),
-                        hist.getMetadataForRevision(hist.getHeadRevision()),
-                        hist.getChangesForRevision(hist.getHeadRevision())));
+    			
+    			doCommit(changes, type);
+    			
     		} catch (ClientRequestException e) {
-    			showErrorDialog("Commit error", e.getMessage(), e);
+    			if (e instanceof LoginTimeoutException) {
+                    showErrorDialog("Commit error", e.getMessage(), e);
+                    Optional<AuthToken> authToken = UserLoginPanel.showDialog(getOWLEditorKit(), getOWLEditorKit().getWorkspace());
+                    if (authToken.isPresent() && authToken.get().isAuthorized()) {
+                    	try {
+							doCommit(changes, type);
+						} catch (Exception e1) {
+							
+							showErrorDialog("Retry of commit failed", e1.getMessage(), e1);
+						}
+                        
+                    }
+                }
+                else {
+                    showErrorDialog("Commit error", e.getMessage(), e);
+                }
+    			
     		} catch (AuthorizationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+    			showErrorDialog("This should not occur", e.getMessage(), e);
 			}
     	}
         
+    }
+    
+    private void doCommit(List<OWLOntologyChange> changes, ComplexEditType type) throws ClientRequestException, 
+    AuthorizationException, ClientRequestException {
+    	String comment = type.name();
+		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
+		DocumentRevision base = clientSession.getActiveVersionOntology().getHeadRevision();
+		CommitBundle commitBundle = new CommitBundleImpl(base, commit);
+		ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
+		clientSession.getActiveVersionOntology().update(hist);
+		resetHistory();
+		clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
+                hist.getHeadRevision(),
+                hist.getMetadataForRevision(hist.getHeadRevision()),
+                hist.getChangesForRevision(hist.getHeadRevision())));
     }
     
     private void showErrorDialog(String title, String message, Throwable t) {
