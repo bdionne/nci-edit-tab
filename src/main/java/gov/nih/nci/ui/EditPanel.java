@@ -19,7 +19,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.frame.OWLAnnotationsFrame;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -56,11 +55,13 @@ public class EditPanel extends JPanel {
     private JButton cancelButton;
     
     public EditPanel(OWLEditorKit editorKit) {
+    	
         this.owlEditorKit = editorKit;
         
         complexProperties = NCIEditTab.currentTab().getComplexProperties();
         
         createUI();
+        
     }
     
     private void createUI() {
@@ -78,6 +79,7 @@ public class EditPanel extends JPanel {
         
         gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, new FilteredAnnotationsFrame(owlEditorKit, complexProperties));
 
+                
         JScrollPane panel2 = new JScrollPane(gen_props);//will add tree or list to it
         panel2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         tabbedPane.addTab("General", panel2);
@@ -161,7 +163,7 @@ public class EditPanel extends JPanel {
     private JPanel createJButtonPanel() {
 		buttonPanel = new JPanel();
 		saveButton = new JButton("Save");
-		saveButton.setEnabled(true);
+		saveButton.setEnabled(false);
 		
 		saveButton.addActionListener(new ActionListener() {
 			 
@@ -178,13 +180,14 @@ public class EditPanel extends JPanel {
         });     
 		
 		cancelButton = new JButton("Clear");
-		cancelButton.setEnabled(true);
+		cancelButton.setEnabled(false);
 		
 		cancelButton.addActionListener(new ActionListener() {
 			 
             public void actionPerformed(ActionEvent e)
             {
             	NCIEditTab.currentTab().undoChanges();
+            	disableButtons();
             	
             }
         });     
@@ -216,5 +219,21 @@ public class EditPanel extends JPanel {
     	list.dispose();
     	gen_props.dispose();
     }
+    
+    public void enableButtons() {
+    	saveButton.setEnabled(true);
+    	cancelButton.setEnabled(true);
+    	
+    }
+    
+    public void disableButtons() {
+    	saveButton.setEnabled(false);
+    	cancelButton.setEnabled(false);
+    	
+    }
+
+	
+
+	
 
 }

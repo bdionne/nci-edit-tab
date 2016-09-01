@@ -44,8 +44,11 @@ import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.client.api.exception.AuthorizationException;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
+import org.protege.editor.owl.client.api.exception.LoginTimeoutException;
+import org.protege.editor.owl.client.api.exception.SynchronizationException;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
+import org.protege.editor.owl.client.ui.UserLoginPanel;
 import org.protege.editor.owl.client.event.ClientSessionListener;
 import org.protege.editor.owl.client.event.CommitOperationEvent;
 import org.protege.editor.owl.client.util.ClientUtils;
@@ -99,6 +102,7 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.OWLObjectDuplicator;
 
+import edu.stanford.protege.metaproject.api.AuthToken;
 import edu.stanford.protege.metaproject.api.Operation;
 import edu.stanford.protege.metaproject.api.Project;
 import edu.stanford.protege.metaproject.api.ProjectOptions;
@@ -238,6 +242,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Set<OWLAnnotationProperty> getImmutableProperties() {
 		return immutable_properties;
+	}
+	
+	public boolean isReadOnlyProperty(String propName) {
+		
+		Set<OWLAnnotationProperty> props = getImmutableProperties();
+		for (OWLAnnotationProperty prop : props) {
+			if (prop.getIRI().getShortForm().equalsIgnoreCase(propName)) {
+				return true;
+			}
+		}
+		return false;
+		
 	}
 	
 	public Set<OWLAnnotationProperty> getRequiredAnnotationsForAnnotation(OWLAnnotationProperty annp) {
@@ -700,6 +716,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	while (history.canUndo()) {
     		history.undo();
     	}
+    	
     }
     
     public void commitChanges() {
@@ -708,32 +725,52 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
 
-    	if (changes.size() > 0) {
-    		
-    		
-
-    		String comment = type.name();
-    		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
-
-    		DocumentRevision base;
+    	if (changes.size() > 0) {    		
     		try {
-    			base = clientSession.getActiveVersionOntology().getHeadRevision();
-    			CommitBundle commitBundle = new CommitBundleImpl(base, commit);
-    			ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
-    			clientSession.getActiveVersionOntology().update(hist);
-    			resetHistory();
-    			clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
-                        hist.getHeadRevision(),
-                        hist.getMetadataForRevision(hist.getHeadRevision()),
-                        hist.getChangesForRevision(hist.getHeadRevision())));
+    			
+    			doCommit(changes, type);
+    			
     		} catch (ClientRequestException e) {
-    			showErrorDialog("Commit error", e.getMessage(), e);
+    			if (e instanceof LoginTimeoutException) {
+                    showErrorDialog("Commit error", e.getMessage(), e);
+                    Optional<AuthToken> authToken = UserLoginPanel.showDialog(getOWLEditorKit(), getOWLEditorKit().getWorkspace());
+                    if (authToken.isPresent() && authToken.get().isAuthorized()) {
+                    	try {
+							doCommit(changes, type);
+						} catch (Exception e1) {
+							
+							showErrorDialog("Retry of commit failed", e1.getMessage(), e1);
+						}
+                        
+                    }
+                }
+                else {
+                    showErrorDialog("Commit error", e.getMessage(), e);
+                }
+    			
     		} catch (AuthorizationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+    			showErrorDialog("This should not occur", e.getMessage(), e);
 			}
     	}
         
+    }
+    
+    private void doCommit(List<OWLOntologyChange> changes, ComplexEditType type) throws ClientRequestException, 
+    AuthorizationException, ClientRequestException {
+    	String comment = type.name();
+		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
+		DocumentRevision base = clientSession.getActiveVersionOntology().getHeadRevision();
+		CommitBundle commitBundle = new CommitBundleImpl(base, commit);
+		ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
+		clientSession.getActiveVersionOntology().update(hist);
+		resetHistory();
+		clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
+                hist.getHeadRevision(),
+                hist.getMetadataForRevision(hist.getHeadRevision()),
+                hist.getChangesForRevision(hist.getHeadRevision())));
+		JOptionPane.showMessageDialog(this, "Class saved successfully", "Class Save", JOptionPane.INFORMATION_MESSAGE);
+		fireChange(new EditTabChangeEvent(this, ComplexEditType.COMMIT));
+		
     }
     
     private void showErrorDialog(String title, String message, Throwable t) {
@@ -859,11 +896,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void addListeners() {
 		clientSession.addListener(this);
-		//history.addUndoManagerListener(this);
+		history.addUndoManagerListener(this);
 	}
 	
 	public void handleChange(ClientSessionChangeEvent event) {
-		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
+		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY) ||
+				event.hasCategory(EventCategory.USER_LOGIN)) {
 			initProperties();
 			
 		}
@@ -987,7 +1025,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			this.fireChange(new EditTabChangeEvent(this, ComplexEditType.INIT_PROPS));
 		}
+		
 	}
 	
 	OWLClass findOWLClass(String opt, ProjectOptions opts) {
@@ -1091,6 +1131,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		for (OWLEntity et : classes) {
 			cls = et.asOWLClass();
 		}
+		
 		return cls;		
 	}
 	
@@ -1210,16 +1251,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
 
 
-	@Override
-	public void stateChanged(HistoryManager source) {
-		for (List<OWLOntologyChange> changes : source.getLoggedChanges()) {
-			System.out.println("A list of changes");
-			for (OWLOntologyChange change : changes) {
-				System.out.println("A change: " + change.toString());
-			}
-		}
-		
-	}
+    @Override
+    public void stateChanged(HistoryManager source) {
+    	if (history.getLoggedChanges().isEmpty()) {
+
+    	} else {
+    		fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
+    	}
+    }
 	
 	public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
 			OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {
@@ -1314,6 +1353,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		return res;
 	}
+	
+	public List<OWLClass> getDirectSuperClasses(OWLClass cls) {
+		Set<OWLSubClassOfAxiom> sups = ontology.getSubClassAxiomsForSubClass(cls);
+		List<OWLClass> res = new ArrayList<OWLClass>();
+		for (OWLSubClassOfAxiom ax : sups) {
+			if (!ax.getSuperClass().isAnonymous()) {
+				res.add(ax.getSuperClass().asOWLClass());
+			}
+		}
+		return res;
+	}
+	
 	
 	Set<String> getLogicalRes(OWLClass cls, String type) {
 		Set<String> res = new HashSet<String>();

@@ -69,7 +69,7 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
 
 
     public OWLObjectEditor<OWLAnnotation> getObjectEditor() {
-        return new OWLAnnotationEditor(getOWLEditorKit());
+        return new NCIOWLAnnotationEditor(getOWLEditorKit(), NCIEditTab.currentTab().getComplexProperties());
     }
 
 
