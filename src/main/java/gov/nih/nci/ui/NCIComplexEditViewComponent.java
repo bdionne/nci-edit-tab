@@ -53,6 +53,7 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 					NCIEditTab.currentTab().getSplitTarget());
 			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
 	                "nci-edit-tab.ComplexEditView");
+			complexEditPanel.setSplit();
 		}
 	}
 	

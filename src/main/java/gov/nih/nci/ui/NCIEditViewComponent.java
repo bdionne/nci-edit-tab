@@ -1,15 +1,10 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
-import java.util.List;
 
-import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
-import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.cls.OWLClassAnnotationsViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLObject;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
@@ -83,9 +78,11 @@ EditTabChangeListener {
 	        setLayout(new BorderLayout());
 	        add(editPanel);
 			
-		}  
-		
-		
+		} else if (event.isType(ComplexEditType.MODIFY)) { 
+			editPanel.enableButtons();
+		} else if (event.isType(ComplexEditType.COMMIT)) { 
+			editPanel.disableButtons();
+		}		
 	}
 
 }

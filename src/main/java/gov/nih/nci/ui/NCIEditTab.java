@@ -716,6 +716,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	while (history.canUndo()) {
     		history.undo();
     	}
+    	
     }
     
     public void commitChanges() {
@@ -768,6 +769,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
                 hist.getMetadataForRevision(hist.getHeadRevision()),
                 hist.getChangesForRevision(hist.getHeadRevision())));
 		JOptionPane.showMessageDialog(this, "Class saved successfully", "Class Save", JOptionPane.INFORMATION_MESSAGE);
+		fireChange(new EditTabChangeEvent(this, ComplexEditType.COMMIT));
 		
     }
     
@@ -894,7 +896,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void addListeners() {
 		clientSession.addListener(this);
-		//history.addUndoManagerListener(this);
+		history.addUndoManagerListener(this);
 	}
 	
 	public void handleChange(ClientSessionChangeEvent event) {
@@ -1249,16 +1251,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
 
 
-	@Override
-	public void stateChanged(HistoryManager source) {
-		for (List<OWLOntologyChange> changes : source.getLoggedChanges()) {
-			System.out.println("A list of changes");
-			for (OWLOntologyChange change : changes) {
-				System.out.println("A change: " + change.toString());
-			}
-		}
-		
-	}
+    @Override
+    public void stateChanged(HistoryManager source) {
+    	if (history.getLoggedChanges().isEmpty()) {
+
+    	} else {
+    		fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
+    	}
+    }
 	
 	public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
 			OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {
