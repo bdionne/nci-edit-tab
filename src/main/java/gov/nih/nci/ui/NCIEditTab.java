@@ -767,6 +767,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
                 hist.getHeadRevision(),
                 hist.getMetadataForRevision(hist.getHeadRevision()),
                 hist.getChangesForRevision(hist.getHeadRevision())));
+		JOptionPane.showMessageDialog(this, "Class saved successfully", "Class Save", JOptionPane.INFORMATION_MESSAGE);
+		
     }
     
     private void showErrorDialog(String title, String message, Throwable t) {
