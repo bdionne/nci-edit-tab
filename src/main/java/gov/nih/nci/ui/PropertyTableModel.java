@@ -1,6 +1,7 @@
 package gov.nih.nci.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -62,6 +63,7 @@ public class PropertyTableModel extends AbstractTableModel {
 		this.complexProp = complexProperty;
 		this.requiredAnnotations = NCIEditTab.currentTab().getRequiredAnnotationsForAnnotation(complexProp);
 		this.requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(this.requiredAnnotations);
+		Collections.sort(this.requiredAnnotationsList);
 	}
 
 
@@ -270,15 +272,19 @@ public class PropertyTableModel extends AbstractTableModel {
 					}
 					Set<OWLAnnotation> annotSet = ax.getAnnotations();
 					Iterator<OWLAnnotation> iter = annotSet.iterator();
+					List<OWLAnnotation> tempList = new ArrayList<OWLAnnotation>();
 					while (iter.hasNext()) {
 						annot = iter.next();
 						if (this.requiredAnnotations.contains(annot.getProperty())) {
-							annotations.add(annot);
+							tempList.add(annot);
 						}
 					}
+					Collections.sort(tempList);
+					annotations.addAll(tempList);
 				}
 
-			}   
+			}  
+			
 		}
 
 	}
