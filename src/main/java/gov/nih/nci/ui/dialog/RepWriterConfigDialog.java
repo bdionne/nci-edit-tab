@@ -135,7 +135,7 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 	public void initialize() {
 		Container container = this.getContentPane();
 		setLocation(450, 300);
-		setSize(new Dimension(450, 280));
+		setSize(new Dimension(470, 280));
 		this.setResizable(true);
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
@@ -177,7 +177,7 @@ public class RepWriterConfigDialog extends JDialog implements ActionListener {
 		levelComboBox.setSelectedIndex(0);
 
 		JPanel lc3 = new JPanel();
-		lc3.setPreferredSize(new Dimension(180, 30));
+		lc3.setPreferredSize(new Dimension(280, 30));
 		lc3.add(new JLabel("Hierarchy Level"));
 		lc3.add(levelComboBox);
 

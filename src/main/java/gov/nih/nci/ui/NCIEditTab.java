@@ -271,6 +271,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		super.initialise();
 		log.info("NCI Edit Tab initialized");
 		
+		
+		
 		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
 		 * of additional times when the app initializes.
 		 * 
@@ -358,7 +360,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			changes.addAll(finalizeMerge());
     		
     	} else {
-    		
+    		// TODO:
     		String editornote = "Merge into " + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")";
     		editornote += ", " + clientSession.getActiveClient().getUserInfo().getName();
     		
@@ -1070,18 +1072,19 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public Optional<String> getRDFSLabel(OWLNamedObject oobj) {
-
+		// TODO: fall back to IRI if no label
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
 				.getRDFSLabel())) {
 			OWLAnnotationValue av = annotation.getValue();
 			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
 			if (ol.isPresent()) {
 				return Optional.of(ol.get().getLiteral());
-
-			}   
+			}
 		}
 
-		return Optional.empty();		  
+		JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " requires an rdfs:label, using IRI short form instead",
+				"Warning", JOptionPane.WARNING_MESSAGE);
+		return Optional.of(oobj.getIRI().getShortForm());
 
 	}
 	
