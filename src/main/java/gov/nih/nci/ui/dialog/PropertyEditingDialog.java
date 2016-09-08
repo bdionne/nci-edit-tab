@@ -203,10 +203,10 @@ public class PropertyEditingDialog extends JPanel {
     		String key = itor.next();
     		Object obj = propcomponentmap.get(key);
     		if(obj instanceof JTextField){
-    			data.put(key, ((JTextField)obj).getText());
+    			data.put(key, ((JTextField)obj).getText().trim());
     		}
     		else if(obj instanceof JTextArea){
-    			data.put(key, ((JTextArea)obj).getText());
+    			data.put(key, ((JTextArea)obj).getText().trim());
     		}
     		else if(obj instanceof JComboBox){
     			data.put(key,  (String)((JComboBox<?>)obj).getSelectedItem());
