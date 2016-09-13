@@ -2,6 +2,7 @@ package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
@@ -21,8 +22,21 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -31,6 +45,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.dialog.PropertyEditingDialog;
+
 
 public class PropertyTablePanel extends JPanel implements ActionListener {
 
@@ -105,6 +120,105 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         
     }
 
+    public static void updateRowHeights(int column, int width, JTable table){
+        for (int row = 0; row < table.getRowCount(); row++) {
+            int rowHeight = table.getRowHeight();
+            Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
+            Dimension d = comp.getPreferredSize();
+            comp.setSize(new Dimension(width, d.height));
+            d = comp.getPreferredSize();
+            rowHeight = Math.max(rowHeight, d.height);
+            table.setRowHeight(row, rowHeight);
+        }
+    }
+
+    abstract class ColumnListener extends MouseAdapter implements TableColumnModelListener {
+
+        private int oldIndex = -1;
+        private int newIndex = -1;
+        private boolean dragging = false;
+
+        private boolean resizing = false;
+        private int resizingColumn = -1;
+        private int oldWidth = -1;
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            // capture start of resize
+            if(e.getSource() instanceof JTableHeader) {
+                JTableHeader header = (JTableHeader)e.getSource();
+                TableColumn tc = header.getResizingColumn();
+                if(tc != null) {
+                    resizing = true;
+                    JTable table = header.getTable();
+                    resizingColumn = table.convertColumnIndexToView( tc.getModelIndex());
+                    oldWidth = tc.getPreferredWidth();
+                } else {
+                    resizingColumn = -1;
+                    oldWidth = -1;
+                }
+            }   
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            // column moved
+            if(dragging && oldIndex != newIndex) {
+                columnMoved(oldIndex, newIndex);
+            }
+            dragging = false;
+            oldIndex = -1;
+            newIndex = -1;
+
+            // column resized
+            if(resizing) {
+                if(e.getSource() instanceof JTableHeader) {
+                    JTableHeader header = (JTableHeader)e.getSource();
+                    TableColumn tc = header.getColumnModel().getColumn(resizingColumn);
+                    if(tc != null) {
+                        int newWidth = tc.getPreferredWidth();
+                        if(newWidth != oldWidth) {
+                            columnResized(resizingColumn, newWidth);
+                        }
+                    }
+                }   
+            }
+            resizing = false;
+            resizingColumn = -1;
+            oldWidth = -1;
+        }
+
+        @Override
+        public void columnAdded(TableColumnModelEvent e) {      
+        }
+
+        @Override
+        public void columnRemoved(TableColumnModelEvent e) {        
+        }
+
+        @Override
+        public void columnMoved(TableColumnModelEvent e) {
+            // capture dragging
+            dragging = true;
+            if(oldIndex == -1){
+                oldIndex = e.getFromIndex();
+            }
+
+            newIndex = e.getToIndex();  
+        }
+
+        @Override
+        public void columnMarginChanged(ChangeEvent e) {
+        }
+
+        @Override
+        public void columnSelectionChanged(ListSelectionEvent e) {
+        }
+
+        public abstract void columnMoved(int oldLocation, int newLocation);
+        public abstract void columnResized(int column, int newWidth);
+    }
+
 
     private void createUI() {
         
@@ -119,6 +233,39 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         propertyTable.getTableHeader().setReorderingAllowed(true);
         propertyTable.setFillsViewportHeight(true);   
         propertyTable.setAutoCreateRowSorter(true);
+        
+        //set value column renderer
+        TableColumnModel tcm = propertyTable.getColumnModel();
+        TableColumn tc = tcm.getColumn(0);  //first column is Value column that requires multiline renderer
+        tc.setCellRenderer(new MultiLineCellRenderer()); 
+        ColumnListener cl = new ColumnListener(){
+
+            @Override
+            public void columnMoved(int oldLocation, int newLocation) {
+            }
+
+            @Override
+            public void columnResized(int column, int newWidth) {
+                updateRowHeights(column, newWidth, propertyTable);
+            }
+
+        };
+
+        propertyTable.getColumnModel().addColumnModelListener(cl);
+        propertyTable.getTableHeader().addMouseListener(cl);
+
+        propertyTable.getModel().addTableModelListener(new TableModelListener() {
+
+            public void tableChanged(TableModelEvent e) {
+            	if(e.getColumn() == 0){
+            		TableColumn c = propertyTable.getColumnModel().getColumn(0);
+            		updateRowHeights(0, c.getWidth(), propertyTable);
+            	}
+            }
+          });
+
+
+
         
         sp = new JScrollPane(propertyTable);
         createLabelHeader(tableName, addButton, editButton, deleteButton);
@@ -135,6 +282,9 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     		tableHeaderPanel.setVisible(true);
     		sp.setVisible(true);
     		tableModel.fireTableDataChanged();
+    		//TableColumn c = propertyTable.getColumnModel().getColumn(0);
+	       // updateRowHeights(0, c.getWidth(), propertyTable);
+    		//propertyTable.getColumn(0).setWidth(propertyTable.getColumn(0).getWidth() + 1);
     		/*TableRowSorter<TableModel> sorter = new TableRowSorter<>(tableModel);
             propertyTable.setRowSorter(sorter);
             List<RowSorter.SortKey> sortKeys = new ArrayList<>();
@@ -193,6 +343,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 							tableModel.getComplexProp(), null, data);
 					this.setSelectedCls(tableModel.getSelection());
 				}
+				
+				TableColumn c = propertyTable.getColumnModel().getColumn(0);
+		        updateRowHeights(0, c.getWidth(), propertyTable);
+
 				System.out.println("The data: " + data);
 				//upade view
 			}		
@@ -208,6 +362,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 					setSelectedCls(tableModel.getSelection());
 					
 				}
+				
+				TableColumn c = propertyTable.getColumnModel().getColumn(0);
+		        updateRowHeights(0, c.getWidth(), propertyTable);
+
 				System.out.println("The data: " + data);
 
 				//update view
@@ -244,8 +402,5 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 		//upade view
 		
 	}
-
-    
-
-   
+ 
 }
