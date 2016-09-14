@@ -77,7 +77,8 @@ public class EditPanel extends JPanel {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Complex Properties", complexPropertyPanel);
         
-        gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, new FilteredAnnotationsFrame(owlEditorKit, complexProperties));
+        gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, new FilteredAnnotationsFrame(owlEditorKit, complexProperties)
+        		, true);
 
                 
         JScrollPane panel2 = new JScrollPane(gen_props);//will add tree or list to it
