@@ -199,7 +199,10 @@ RetireClassTarget, AddComplexTarget {
 		
 		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty(), Optional.empty());
 		
+		
+		
 		getTree().setSelectedOWLObject(newCls);
+		this.getTree().refreshComponent();
 		
 	}
 	
