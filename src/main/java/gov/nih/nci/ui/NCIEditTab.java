@@ -41,6 +41,7 @@ import org.apache.log4j.Logger;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
+import org.protege.editor.owl.client.LocalHttpClient.UserType;
 import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.client.api.exception.AuthorizationException;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
@@ -132,6 +133,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private OWLClass retire_class;
 	
 	private boolean isRetiring = false;
+	
+	public boolean isProtegeDefaultTab() { return true; }
 	
 	
 	public boolean isRetiring() {
@@ -676,6 +679,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return false;
     }
     
+    public boolean isWorkFlowModeler() {
+    	return !isSysAdmin();
+    }
+    
+    public boolean isSysAdmin() {
+    	return (((LocalHttpClient) clientSession.getActiveClient()).getClientType() == UserType.ADMIN);
+    	
+    }
+    
     public boolean isPreRetired(OWLClass cls) {
     	return isSubClass(cls, PRE_RETIRE_ROOT);    	
     }
@@ -902,10 +914,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public void handleChange(ClientSessionChangeEvent event) {
-		if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY) ||
-				event.hasCategory(EventCategory.USER_LOGIN)) {
+		
+		if (event.hasCategory(EventCategory.OPEN_PROJECT)) {
+			ontology = getOWLModelManager().getActiveOntology();
 			initProperties();
-			
+		}
+
+		if ( event.hasCategory(EventCategory.USER_LOGIN) ||
+				event.hasCategory(EventCategory.USER_LOGOUT)) {
+			//this.getWorkspace().recheckPlugins();
+
 		}
 	}
 	

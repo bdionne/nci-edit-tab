@@ -10,6 +10,10 @@
 		<class value="gov.nih.nci.ui.NCIEditTab"/>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
+		<!--
+		<protegeDefaultTab value="true"/>
+		-->
+		<permissionLevel value="workflow_modeler"/>
 		<defaultViewConfigFileName value="edit-tab-config.xml"/>
    </extension>
 
