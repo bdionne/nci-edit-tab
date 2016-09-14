@@ -122,6 +122,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private static NCIEditTab tab;
 	
+	
 	public static NCIEditTab currentTab() {
 		return tab;
 	}
@@ -182,8 +183,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private ClientSession clientSession = null;
 	
 	private OWLOntology ontology;
-	
-	private OWLModelManagerListener ont_listen;
 	
 	private static ArrayList<EditTabChangeListener> event_listeners = new ArrayList<EditTabChangeListener>();
 	
@@ -268,40 +267,20 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return optional_annotation_dependencies.get(annp);
 		
 	}
-
+	
+	
     @Override
 	public void initialise() {
+    	
 		super.initialise();
 		log.info("NCI Edit Tab initialized");
+				
+		clientSession = ClientSession.getInstance(getOWLEditorKit());
 		
+		history = SessionRecorder.getInstance(getOWLEditorKit());
 		
+		addListeners();
 		
-		/** NOTE: We'd like to see this called once when the ontology is opened, currently it's called a couple
-		 * of additional times when the app initializes.
-		 * 
-		 */		 
-		ont_listen = new OWLModelManagerListener() {
-
-			@Override
-			public void handleChange(OWLModelManagerChangeEvent event) {
-				if (event.getType() == EventType.ACTIVE_ONTOLOGY_CHANGED) {
-					if (clientSession == null) {
-						// only initialize the ClientSession once, it maintains the
-						// switches between ontologies
-						clientSession = ClientSession.getInstance(getOWLEditorKit());
-						
-						history = SessionRecorder.getInstance(getOWLEditorKit());
-						addListeners();
-				        
-					}
-					ontology = getOWLModelManager().getActiveOntology();
-				}				
-			}			
-		};
-		
-		
-		this.getOWLEditorKit().getOWLModelManager().addListener(ont_listen);
-			
 	}
     
    
@@ -577,9 +556,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         getOWLModelManager().applyChanges(changes);
         
         retire_class = null;
-        isRetiring = false;
-        
-        
+        isRetiring = false;        
         
         
         
@@ -902,7 +879,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 	@Override
 	public void dispose() {
-		this.getOWLModelManager().removeListener(ont_listen);
 		clientSession.removeListener(this);
 		super.dispose();
 		log.info("Disposed of NCI Edit Tab");
@@ -919,12 +895,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			ontology = getOWLModelManager().getActiveOntology();
 			initProperties();
 		}
-
-		if ( event.hasCategory(EventCategory.USER_LOGIN) ||
-				event.hasCategory(EventCategory.USER_LOGOUT)) {
-			//this.getWorkspace().recheckPlugins();
-
-		}
 	}
 	
 	public void resetHistory() {
@@ -934,7 +904,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	
 	private void initProperties() {
-		
+				
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {
 			Project project = lhc.getCurrentProject();
