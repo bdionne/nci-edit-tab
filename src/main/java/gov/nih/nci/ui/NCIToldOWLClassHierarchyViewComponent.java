@@ -1,10 +1,11 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
-import java.awt.LayoutManager;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.Optional;
 
+import javax.swing.FocusManager;
 import javax.swing.Icon;
 import javax.swing.JButton;
 
@@ -32,6 +33,7 @@ RetireClassTarget, AddComplexTarget {
 	
 	private static final Icon ADD_SUB_ICON = OWLIcons.getIcon("class.add.sub.png");
 	private static final JButton batchbutton = new JButton("Batch Load/Edit");
+	private static final JButton searchbutton = new JButton("Search");
 	private static final BatchProcessOutputPanel batchProcessPanel = new BatchProcessOutputPanel();
 
 	/**
@@ -70,16 +72,37 @@ RetireClassTarget, AddComplexTarget {
 			public void actionPerformed(ActionEvent event) {
 				batchProcessPanel.setVisible(true);
 				BatchProcessingDialog dl = new BatchProcessingDialog(batchProcessPanel, NCIEditTab.currentTab());
-			}
-
-			protected boolean canPerform(OWLClass cls) {
-				return canCreateNewChild();
-			}
+			}			
 			
 			public void dispose() {
 				
 			}
 		}, "B", "B");
+		
+		addAction(new DisposableAction("Search", searchbutton.getIcon()) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent event) {
+				
+				Component focusOwner = FocusManager.getCurrentManager().getFocusOwner();
+		        if(focusOwner == null) {
+		            return;
+		        }
+		        
+		        OWLClass cls = getOWLWorkspace().searchForClass(focusOwner);
+		        if (cls != null) {
+				setSelectedEntity(cls);
+		        }			
+				
+			}
+
+			public void dispose() {
+				
+			}
+		}, "C", "C");
 		
 		getTree().setDragAndDropHandler(new OWLTreeDragAndDropHandler<OWLClass>() {
             public boolean canDrop(Object child, Object parent) {
@@ -90,44 +113,8 @@ RetireClassTarget, AddComplexTarget {
         });
         getAssertedTree().setPopupMenuId(new PopupMenuId("[NCIAssertedClassHierarchy]")); 
         
-        /**
-        JButton testDialog = new JButton("Test Popup Dialog");
-        testDialog.addActionListener(e -> {
-            Optional<OWLEntity> ent = LuceneQueryPanel.showDialog(getOWLEditorKit());
-            if(ent.isPresent()) {
-                System.out.println("[LucenePopupDialog]    Selected entity: " + ent.get().getIRI());
-            } else {
-                System.out.println("[LucenePopupDialog]    No entity selected");
-            }
-        });
-        add(testDialog, BorderLayout.SOUTH);
-        **/
-        
-        	
-		
-
     }
 	
-
-	/**
-	public List<OWLClass> find(String match) {
-		
-		List<OWLClass> res = new ArrayList<OWLClass>();
-		
-            Optional<OWLEntity> ent = LuceneQueryPanel.showDialog(getOWLEditorKit());
-            if(ent.isPresent()) {
-                System.out.println("[LucenePopupDialog]    Selected entity: " + ent.get().getIRI());
-                res.add(ent.get().asOWLClass());
-            } else {
-                System.out.println("[LucenePopupDialog]    No entity selected");
-            }
-            
-            return res;
-       
-    }
-    **/
-    
-
 	@Override
 	public boolean canRetireClass() {
 		return (getSelectedEntities().size() == 1 &&

@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,17 +45,13 @@ import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.client.api.exception.AuthorizationException;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
 import org.protege.editor.owl.client.api.exception.LoginTimeoutException;
-import org.protege.editor.owl.client.api.exception.SynchronizationException;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
-import org.protege.editor.owl.client.ui.UserLoginPanel;
 import org.protege.editor.owl.client.event.ClientSessionListener;
 import org.protege.editor.owl.client.event.CommitOperationEvent;
+import org.protege.editor.owl.client.ui.UserLoginPanel;
 import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.event.EventType;
-import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
-import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.UndoManagerListener;
 import org.protege.editor.owl.server.api.CommitBundle;
@@ -114,6 +109,7 @@ import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
+import gov.nih.nci.utils.NCIClassSearcher;
 import gov.nih.nci.utils.ReferenceReplace;
 
 public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionListener, UndoManagerListener {
@@ -280,6 +276,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		history = SessionRecorder.getInstance(getOWLEditorKit());
 		
 		addListeners();
+		
+		this.getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(this.getOWLEditorKit()));
+		
 		
 	}
     
@@ -1443,4 +1442,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return res;
 
     }
+    
+    
+    
 }
