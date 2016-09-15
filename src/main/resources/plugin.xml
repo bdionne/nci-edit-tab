@@ -10,10 +10,6 @@
 		<class value="gov.nih.nci.ui.NCIEditTab"/>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
-		<!--
-		<protegeDefaultTab value="true"/>
-		-->
-		<permissionLevel value="workflow_modeler"/>
 		<defaultViewConfigFileName value="edit-tab-config.xml"/>
    </extension>
 
@@ -26,48 +22,48 @@
 		<label value="Example view component" />
 		<class value="gov.nih.nci.ui.ConceptView" />
 		<headerColor value="@org.protege.ontologycolor"/>
-		<category value="@org.protege.ontologycategory" />
+		<category value="NCI Edit Tab" />
 	</extension>
 	
 	<extension id="NCIOWLAssertedClassHierarchy"
                point="org.protege.editor.core.application.ViewComponent">
-        <label value="Class  Foo hierarchy"/>
+        <label value="Navigation Hierachy"/>
         <class value="gov.nih.nci.ui.NCIToldOWLClassHierarchyViewComponent"/>
         <headerColor value="@org.protege.classcolor"/>
         <category value="@org.protege.classcategory"/>
-        <navigates value="@org.protege.classcategory"/>
+        <navigates value="NCI Edit Tab"/>
     </extension>
     
      <extension id="PropertyTableView"
                point="org.protege.editor.core.application.ViewComponent">
-        <label value="Ontology metrics"/>
+        <label value="Complex Properties"/>
         <class value="gov.nih.nci.ui.NCIPropertyViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
-        <category value="@org.protege.ontologycategory"/>
+        <category value="NCI Edit Tab"/>
     </extension>
 	
 	<extension id="EditView"
                point="org.protege.editor.core.application.ViewComponent">
-        <label value="Edit"/>
+        <label value="Basic Editing"/>
         <class value="gov.nih.nci.ui.NCIEditViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
-        <category value="@org.protege.ontologycategory"/>
+        <category value="NCI Edit Tab"/>
     </extension>
     
 	<extension id="ComplexEditView"
                point="org.protege.editor.core.application.ViewComponent">
-        <label value="Complex Edit"/>
+        <label value="Complex Operations"/>
         <class value="gov.nih.nci.ui.NCIComplexEditViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
-        <category value="@org.protege.ontologycategory"/>
+        <category value="NCI Edit Tab"/>
     </extension>
     
     <extension id="RetireView"
                point="org.protege.editor.core.application.ViewComponent">
-        <label value="Retirement"/>
+        <label value="Retirements"/>
         <class value="gov.nih.nci.ui.NCIRetireViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
-        <category value="@org.protege.ontologycategory"/>
+        <category value="NCI Edit Tab"/>
     </extension>
     
     <extension id="ReportWriter"
@@ -75,7 +71,7 @@
         <label value="ReportWriter"/>
         <class value="gov.nih.nci.ui.ReportWriterViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
-        <category value="@org.protege.ontologycategory"/>
+        <category value="NCI Edit Tab"/>
     </extension>
 	
 	
