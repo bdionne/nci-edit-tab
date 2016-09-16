@@ -351,22 +351,25 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				//upade view
 			}		
 			else if(button.getType() == NCIEditTabConstants.EDIT){
-				int viewRow = propertyTable.getSelectedRow();
-				int modelRow = propertyTable.convertRowIndexToModel(viewRow);
-				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(modelRow), tableModel.getSelectedPropertyOptions());
-				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
-				if (data != null) {
-					NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, tableModel.getSelection(),
-							tableModel.getComplexProp(), tableModel.getAssertion(modelRow), data);
-					
-					setSelectedCls(tableModel.getSelection());
-					
-				}
-				
-				TableColumn c = propertyTable.getColumnModel().getColumn(0);
-		        updateRowHeights(0, c.getWidth(), propertyTable);
 
-				System.out.println("The data: " + data);
+				int viewRow = propertyTable.getSelectedRow();
+				if (viewRow != -1) {
+					int modelRow = propertyTable.convertRowIndexToModel(viewRow);
+					PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(modelRow), tableModel.getSelectedPropertyOptions());
+					HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
+					if (data != null) {
+						NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, tableModel.getSelection(),
+								tableModel.getComplexProp(), tableModel.getAssertion(modelRow), data);
+
+						setSelectedCls(tableModel.getSelection());
+
+					}
+
+					TableColumn c = propertyTable.getColumnModel().getColumn(0);
+					updateRowHeights(0, c.getWidth(), propertyTable);
+
+					System.out.println("The data: " + data);
+				}
 
 				//update view
 			}
