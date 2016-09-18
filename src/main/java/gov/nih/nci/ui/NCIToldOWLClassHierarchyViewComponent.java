@@ -113,8 +113,8 @@ RetireClassTarget, AddComplexTarget {
         });
         getAssertedTree().setPopupMenuId(new PopupMenuId("[NCIAssertedClassHierarchy]")); 
         
-    }
-	
+    }	
+	 
 	@Override
 	public boolean canRetireClass() {
 		return (getSelectedEntities().size() == 1 &&
@@ -197,10 +197,12 @@ RetireClassTarget, AddComplexTarget {
 	        return getOWLModelManager().getOWLHierarchyManager().getOWLClassHierarchyProvider();
 	    }
 
-	    @Override
-	    protected Optional<OWLObjectHierarchyProvider<OWLClass>> getInferredHierarchyProvider() {
-	        return Optional.of(getOWLModelManager().getOWLHierarchyManager().getInferredOWLClassHierarchyProvider());
-	    }
+	    
+	 @Override
+	 protected Optional<OWLObjectHierarchyProvider<OWLClass>> getInferredHierarchyProvider() {
+		 return Optional.of(getOWLModelManager().getOWLHierarchyManager().getInferredOWLClassHierarchyProvider());
+	 }
+	    
 
 		@Override
 		public boolean canAddComplex() {

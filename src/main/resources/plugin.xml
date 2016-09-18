@@ -17,14 +17,6 @@
 	<!-- View -->
 	
 	
-
-	<extension id="ConceptView" point="org.protege.editor.core.application.ViewComponent">
-		<label value="Example view component" />
-		<class value="gov.nih.nci.ui.ConceptView" />
-		<headerColor value="@org.protege.ontologycolor"/>
-		<category value="NCI Edit Tab" />
-	</extension>
-	
 	<extension id="NCIOWLAssertedClassHierarchy"
                point="org.protege.editor.core.application.ViewComponent">
         <label value="Navigation Hierachy"/>

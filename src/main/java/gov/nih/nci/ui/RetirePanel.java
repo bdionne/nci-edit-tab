@@ -145,6 +145,7 @@ public class RetirePanel extends JPanel {
     			} else if (retireButton.getText().equals("Save")) {
     				// TODO: refactor and move type check to edit tab
     				NCIEditTab.currentTab().commitChanges();
+    				// TODO: put EVS history
     				upperPanelList.setRootObject(null);
         			usage_panel.setOWLEntity(null);
     			} else if (retireButton.getText().equals("Approve")) {

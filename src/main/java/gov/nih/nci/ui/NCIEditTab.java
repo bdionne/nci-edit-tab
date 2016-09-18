@@ -299,7 +299,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public boolean canMerge(OWLClass cls) {
-    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(MERGE.getId()); 
+    	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(MERGE.getId()); 
     	if (can) {
     		if (isPreMerged(cls)) {
     			return isWorkFlowManager();    			
@@ -622,7 +622,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
      * 
      */
     public boolean canRetire(OWLClass cls) {
-    	boolean can = clientSession.getActiveClient().canPerformProjectOperation(NCIEditTabConstants.RETIRE.getId()); 
+    	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(NCIEditTabConstants.RETIRE.getId()); 
     	if (can) {
     		if (isPreRetired(cls)) {
     			return isWorkFlowManager();    			
