@@ -37,6 +37,8 @@ public class NCIEditTabConstants {
 	public static OWLAnnotationProperty LABEL_PROP;
 	public static OWLAnnotationProperty PREF_NAME;
 	
+	public static OWLAnnotationProperty SEMANTIC_TYPE;
+	
 	public static OWLClass PRE_RETIRE_ROOT;
 	public static OWLClass PRE_MERGE_ROOT;
 	public static OWLClass RETIRE_ROOT;

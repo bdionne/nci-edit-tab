@@ -12,6 +12,7 @@ import static gov.nih.nci.ui.NCIEditTabConstants.DESIGN_NOTE;
 import static gov.nih.nci.ui.NCIEditTabConstants.EDITOR_NOTE;
 import static gov.nih.nci.ui.NCIEditTabConstants.IMMUTABLE_PROPS;
 import static gov.nih.nci.ui.NCIEditTabConstants.LABEL_PROP;
+import static gov.nih.nci.ui.NCIEditTabConstants.SEMANTIC_TYPE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_SOURCE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
@@ -861,6 +862,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		if (!df.getOWLThing().equals(selectedClass)){
     			OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(newClass, selectedClass);
     			changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
+    			
+    			Optional<OWLLiteral> sem_typ = this.getSemanticType(selectedClass);
+    			if (sem_typ.isPresent()) {
+    				OWLLiteral sem_typ_val = sem_typ.get();
+    				OWLAxiom sem_typ_ax = 
+    						df.getOWLAnnotationAssertionAxiom(SEMANTIC_TYPE, newClass.getIRI(), sem_typ_val);
+    				changes.add(new AddAxiom(mngr.getActiveOntology(), sem_typ_ax));
+    			}
     		}
 
     		mngr.applyChanges(changes);
@@ -999,6 +1008,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					LABEL_PROP = getSingleProperty("label_prop", opts, annProps);
 					PREF_NAME = getSingleProperty("pref_name", opts, annProps);
 					
+					SEMANTIC_TYPE = getSingleProperty("semantic_type", opts, annProps); 
+					
 					
 				}
 
@@ -1072,6 +1083,21 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " requires an rdfs:label, using IRI short form instead",
 				"Warning", JOptionPane.WARNING_MESSAGE);
 		return Optional.of(oobj.getIRI().getShortForm());
+
+	}
+	
+	public Optional<OWLLiteral> getSemanticType(OWLClass cls) {
+		
+		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(cls.getIRI()), SEMANTIC_TYPE)) {
+			OWLAnnotationValue av = annotation.getValue();
+			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+			if (ol.isPresent()) {
+				return Optional.of(ol.get());
+			}
+		}
+		return Optional.empty();
+
+		
 
 	}
 	
