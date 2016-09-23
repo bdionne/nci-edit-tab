@@ -863,9 +863,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(newClass, selectedClass);
     			changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
     			
-    			Optional<OWLLiteral> sem_typ = this.getSemanticType(selectedClass);
+    			Optional<OWLAnnotationValue> sem_typ = this.getSemanticType(selectedClass);
     			if (sem_typ.isPresent()) {
-    				OWLLiteral sem_typ_val = sem_typ.get();
+    				OWLAnnotationValue sem_typ_val = sem_typ.get();
     				OWLAxiom sem_typ_ax = 
     						df.getOWLAnnotationAssertionAxiom(SEMANTIC_TYPE, newClass.getIRI(), sem_typ_val);
     				changes.add(new AddAxiom(mngr.getActiveOntology(), sem_typ_ax));
@@ -925,7 +925,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				for (OWLAnnotationProperty p : annProps) {
 					Set<OWLAnnotationPropertyRangeAxiom> ranges = ontology.getAnnotationPropertyRangeAxioms(p);
 	        		for (OWLAnnotationPropertyRangeAxiom rax : ranges) {
-	        			System.out.println("The range: " + rax.toString());
+	        			//System.out.println("The range: " + rax.toString());
 	        			if (rax.getRange().getShortForm().equals("anyURI")) {
 	        				associations.add(p);
 	        			}
@@ -1017,7 +1017,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			try {
 
 				for (Operation op : clientSession.getActiveClient().getActiveOperations()) {
-					System.out.println(op.toString());
+					//System.out.println(op.toString());
 
 				}
 
@@ -1058,9 +1058,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			if (ap.getIRI().equals(cpIRI)) {
 				IRI dt = getDataType(ap);
 				if (dt != null) {
-					System.out.println(cpIRI + " it's type: " + dt);
+					//System.out.println(cpIRI + " it's type: " + dt);
 				} else {
-					System.out.println(cpIRI);
+					//System.out.println(cpIRI);
 
 				}
 				return ap;	
@@ -1086,14 +1086,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 	}
 	
-	public Optional<OWLLiteral> getSemanticType(OWLClass cls) {
+	public Optional<OWLAnnotationValue> getSemanticType(OWLClass cls) {
 		
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(cls.getIRI()), SEMANTIC_TYPE)) {
 			OWLAnnotationValue av = annotation.getValue();
-			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
-			if (ol.isPresent()) {
-				return Optional.of(ol.get());
-			}
+			return Optional.of(av);
+			
 		}
 		return Optional.empty();
 
