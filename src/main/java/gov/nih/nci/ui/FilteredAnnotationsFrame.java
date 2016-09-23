@@ -9,9 +9,9 @@ import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 
 public class FilteredAnnotationsFrame extends AbstractOWLFrame<OWLAnnotationSubject> {
 	
-	public FilteredAnnotationsFrame(OWLEditorKit man, Set<OWLAnnotationProperty> props) {
+	public FilteredAnnotationsFrame(OWLEditorKit man, Set<OWLAnnotationProperty> props, Set<OWLAnnotationProperty> read_only_props) {
         super(man.getModelManager().getOWLOntologyManager());
-        addSection(new NCIAnnotationFrameSection(man, this, props));
+        addSection(new NCIAnnotationFrameSection(man, this, props, read_only_props));
     }
 
 }

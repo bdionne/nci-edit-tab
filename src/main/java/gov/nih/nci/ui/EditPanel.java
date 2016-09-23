@@ -38,6 +38,8 @@ public class EditPanel extends JPanel {
 	
 	private Set<OWLAnnotationProperty> complexProperties;
 	
+	private Set<OWLAnnotationProperty> readOnlyProperties;
+	
 	private OWLFrameList<OWLClass> list;
 	
 	private OWLFrameList<OWLAnnotationSubject> gen_props;
@@ -60,6 +62,8 @@ public class EditPanel extends JPanel {
         
         complexProperties = NCIEditTab.currentTab().getComplexProperties();
         
+        readOnlyProperties = NCIEditTab.currentTab().getImmutableProperties();
+        
         createUI();
         
     }
@@ -78,7 +82,7 @@ public class EditPanel extends JPanel {
         tabbedPane.addTab("Complex Properties", complexPropertyPanel);
         
         gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, 
-        		new FilteredAnnotationsFrame(owlEditorKit, complexProperties));
+        		new FilteredAnnotationsFrame(owlEditorKit, complexProperties, readOnlyProperties));
 
                 
         JScrollPane panel2 = new JScrollPane(gen_props);//will add tree or list to it

@@ -31,12 +31,15 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
     private static OWLAnnotationSectionRowComparator comparator;
     
     private Set<OWLAnnotationProperty> propsToExclude;
+    private Set<OWLAnnotationProperty> readOnlyProps;
 
 
-    public NCIAnnotationFrameSection(OWLEditorKit editorKit, OWLFrame<? extends OWLAnnotationSubject> frame, Set<OWLAnnotationProperty> props) {
+    public NCIAnnotationFrameSection(OWLEditorKit editorKit, OWLFrame<? extends OWLAnnotationSubject> frame, Set<OWLAnnotationProperty> props,
+    		Set<OWLAnnotationProperty> read_only_props) {
         super(editorKit, LABEL, "Entity annotation", frame);
         comparator = new OWLAnnotationSectionRowComparator(editorKit.getModelManager());
         propsToExclude = props;
+        readOnlyProps = read_only_props;
     }
 
 
@@ -48,18 +51,24 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
         boolean hidden = false;
         final OWLAnnotationSubject annotationSubject = getRootObject();
         for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(annotationSubject)) {
-            if (!getOWLEditorKit().getWorkspace().isHiddenAnnotationURI(ax.getAnnotation().getProperty().getIRI().toURI()) &&
-            		!propsToExclude.contains(ax.getProperty())) {
-                addRow(new OWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, ax));
-            } else {
-                hidden = true;
-            }
+        	if (!getOWLEditorKit().getWorkspace().isHiddenAnnotationURI(ax.getAnnotation().getProperty().getIRI().toURI()) &&
+        			!propsToExclude.contains(ax.getProperty())) {
+        		if (!readOnlyProps.contains(ax.getProperty())) {
+        			addRow(new OWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, ax));
+        		} else {
+        			addRow(new OWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, ax, false));
+
+        		}
+        	} else {
+        		hidden = true;
+        	}
         }
         if (hidden) {
             setLabel(LABEL + " (some annotations are hidden)");
         } else {
             setLabel(LABEL);
         }
+        
     }
 
 
