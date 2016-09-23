@@ -8,16 +8,23 @@ import java.util.Optional;
 import javax.swing.FocusManager;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
 import org.protege.editor.core.ui.view.DisposableAction;
 import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
+import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
+import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.ui.OWLIcons;
 import org.protege.editor.owl.ui.action.AbstractOWLTreeAction;
+import org.protege.editor.owl.ui.tree.UserRendering;
 import org.protege.editor.owl.ui.tree.OWLTreeDragAndDropHandler;
 import org.protege.editor.owl.ui.view.CreateNewChildTarget;
 import org.protege.editor.owl.ui.view.cls.AbstractOWLClassHierarchyViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLObject;
 
 import gov.nih.nci.ui.action.AddComplexTarget;
 import gov.nih.nci.ui.action.CloneClassTarget;
@@ -29,7 +36,7 @@ import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 
 public class NCIToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarchyViewComponent
 implements CreateNewChildTarget, SplitClassTarget, CloneClassTarget, MergeClassTarget,
-RetireClassTarget, AddComplexTarget {
+RetireClassTarget, AddComplexTarget, SelectionDriver {
 	
 	private static final Icon ADD_SUB_ICON = OWLIcons.getIcon("class.add.sub.png");
 	private static final JButton batchbutton = new JButton("Batch Load/Edit");
@@ -113,7 +120,56 @@ RetireClassTarget, AddComplexTarget {
         });
         getAssertedTree().setPopupMenuId(new PopupMenuId("[NCIAssertedClassHierarchy]")); 
         
-    }	
+        getAssertedTree().addTreeSelectionListener(new TreeSelectionListener() {
+
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+				if (NCIEditTab.currentTab().isRetiring()) {
+					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getRetireClass());	
+				}
+				
+				// TODO Auto-generated method stub
+				
+			}
+        	
+        });
+        
+               
+    }
+	
+	@Override
+	public void setSelectedEntity(OWLClass entity) {
+		if (NCIEditTab.currentTab().isRetiring()) {
+			
+		} else {
+			getTree().setSelectedOWLObject(entity);			
+		}        
+    }
+
+	
+
+	@Override
+	protected OWLClass updateView() {
+		OWLClass selEntity = getSelectedEntity();
+        if (getTree().getSelectedOWLObject() == null) {
+            if (selEntity != null) {
+                getTree().setSelectedOWLObject(selEntity);
+            }
+        }
+        else {
+            if (!getTree().getSelectedOWLObject().equals(selEntity)) {
+                getTree().setSelectedOWLObject(selEntity);
+            }
+        }
+        return selEntity;
+    }
+	
+	@Override
+	protected OWLClass updateView(OWLClass selectedClass) {
+		setSelectedEntity(selectedClass);
+        return selectedClass;
+	}
+    
 	 
 	@Override
 	public boolean canRetireClass() {
@@ -125,6 +181,7 @@ RetireClassTarget, AddComplexTarget {
 	public void retireClass() {
 		OWLClass selectedClass = getSelectedEntity();
 		NCIEditTab.currentTab().retire(selectedClass);
+		this.getTree().refreshComponent();
 		
 	}
 
@@ -185,9 +242,7 @@ RetireClassTarget, AddComplexTarget {
 		OWLClass selectedClass = getSelectedEntity();
 		
 		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty(), Optional.empty());
-		
-		
-		
+				
 		getTree().setSelectedOWLObject(newCls);
 		this.getTree().refreshComponent();
 		
@@ -217,6 +272,40 @@ RetireClassTarget, AddComplexTarget {
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		protected UserRendering getUserRenderer() {
+			// TODO Auto-generated method stub
+			return new UserRendering() {
+
+				@Override
+				public String render(String in) {
+
+					if (NCIEditTab.currentTab().isRetiring()) {
+						OWLClass cls = NCIEditTab.currentTab().getRetireClass(); 
+						String orig = 
+								getOWLEditorKit().getOWLModelManager().getRendering(cls);
+						if (in.equals(orig)) {
+							return in + "(retiring...)";
+						}
+					}
+					return in;
+				}
+
+			};
+		}
+
+		@Override
+		    public Component asComponent() {
+		        return this;
+		    }
+
+		    @Override
+		    public Optional<OWLObject> getSelection() {
+		        return Optional.ofNullable(getSelectedEntity());
+		    }
+
+		
 
 	
 }
