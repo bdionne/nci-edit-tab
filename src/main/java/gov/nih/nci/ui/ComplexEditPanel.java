@@ -210,8 +210,8 @@ public class ComplexEditPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				JRadioButton sb = (JRadioButton) e.getSource();
 				if (sb.equals(mergeButton)) {
-					upperLabel.setText("Merge From");
-					lowerLabel.setText("Merge To");
+					upperLabel.setText("Retiring Concept");
+					lowerLabel.setText("Surviving Concept");
 					
 				} else if (sb.equals(splitButton)) {
 					upperLabel.setText("Split From");
