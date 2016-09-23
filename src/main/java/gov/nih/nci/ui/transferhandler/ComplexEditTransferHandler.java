@@ -29,6 +29,11 @@ public class ComplexEditTransferHandler extends TransferHandler {
 
 	public boolean canImport(TransferSupport support) {
 		if(!support.isDrop()) {
+			
+			return false;
+		}
+		if (NCIEditTab.currentTab().isRetiring() ||
+				NCIEditTab.currentTab().isEditing()) {
 			return false;
 		}
 		

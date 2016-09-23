@@ -2,8 +2,10 @@ package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
 
+//import org.protege.editor.owl.ui.view.AbstractOWLSelectionViewComponent.AcceptableEntityVisitor;
 import org.protege.editor.owl.ui.view.cls.OWLClassAnnotationsViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLEntity;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
@@ -45,6 +47,17 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 		complexEditPanel.dispose();	
 		
 	}
+	
+	
+	public boolean canShowEntity(OWLEntity owlEntity){
+		if (super.canShowEntity(owlEntity)) {
+			return !NCIEditTab.currentTab().isEditing();
+			
+		}
+		return false;
+        
+    }
+    
 
 	@Override
 	public void handleChange(EditTabChangeEvent event) {

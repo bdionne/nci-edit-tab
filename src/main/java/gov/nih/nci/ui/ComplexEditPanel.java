@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -72,8 +73,12 @@ public class ComplexEditPanel extends JPanel {
     
     public ComplexEditPanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
-        this.upperPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit, new OWLAnnotationsFrame(owlEditorKit));        
-        this.lowerPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit, new OWLAnnotationsFrame(owlEditorKit));
+        this.upperPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit,
+        		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
+        				NCIEditTab.currentTab().getImmutableProperties()));        
+        this.lowerPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit,
+        		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
+        				NCIEditTab.currentTab().getImmutableProperties()));
         this.lowerPanelClass = new OWLFrameList<>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
         this.upperPanelClass = new OWLFrameList<>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
         
@@ -146,7 +151,7 @@ public class ComplexEditPanel extends JPanel {
     private JPanel createJButtonPanel() {
 		buttonPanel = new JPanel();
 		saveButton = new JButton("Save");
-		saveButton.setEnabled(true);
+		saveButton.setEnabled(false);
 		
 		saveButton.addActionListener(new ActionListener() {
 			 
@@ -163,7 +168,7 @@ public class ComplexEditPanel extends JPanel {
         });     
 		
 		clearButton = new JButton("Clear");
-		clearButton.setEnabled(true);
+		clearButton.setEnabled(false);
 		
 		clearButton.addActionListener(new ActionListener() {
 			 
@@ -319,6 +324,18 @@ public class ComplexEditPanel extends JPanel {
 		this.lowerPanelClass.setRootObject(bot);
 		
 	}
+	
+	public void enableButtons() {
+    	saveButton.setEnabled(true);
+    	clearButton.setEnabled(true);
+    	
+    }
+    
+    public void disableButtons() {
+    	saveButton.setEnabled(false);
+    	clearButton.setEnabled(false);
+    	
+    }
 	
 	
 }

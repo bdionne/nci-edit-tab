@@ -39,6 +39,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
+import org.protege.editor.core.ui.workspace.WorkspaceTab;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.LocalHttpClient.UserType;
@@ -117,11 +118,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private static final Logger log = Logger.getLogger(NCIEditTab.class);
 	private static final long serialVersionUID = -4896884982262745722L;
 	
-	private static NCIEditTab tab;
-	
+	private static NCIEditTab tab;	
 	
 	public static NCIEditTab currentTab() {
 		return tab;
+	}
+	
+	private static NCIToldOWLClassHierarchyViewComponent navTree = null;
+	
+	public static void setNavTree(NCIToldOWLClassHierarchyViewComponent t) { navTree = t;}
+	
+	public void refreshNavTree() {
+		navTree.refreshTree();
 	}
 	
 	private OWLClass split_source;
@@ -130,18 +138,39 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private OWLClass merge_target;
 	private OWLClass retire_class;
 	
+	private boolean editInProgress = false;
+	private OWLClass currentlyEditing = null;
+	
+	
+	public boolean isEditing() {
+		return editInProgress;
+	}
+	
+	public void setEditInProgress(boolean b) {
+		editInProgress = b;
+		currentlyEditing = null;
+		refreshNavTree();
+	}
+	
+	public void setCurrentlyEditing(OWLClass cls) { currentlyEditing = cls; }
+	
+	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
+	
 	private boolean isRetiring = false;
-	
-	public boolean isProtegeDefaultTab() { return true; }
-	
 	
 	public boolean isRetiring() {
 		return isRetiring;
 	}
 	
+	public boolean isFree() {
+		return (!isRetiring() && !isEditing());
+	}
+	
 	public void cancelRetire() {
 		retire_class = null;
 		isRetiring = false;
+		editInProgress = false;
+		refreshNavTree();
 	}
 	
 	public boolean isMerging() {
@@ -256,13 +285,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public Set<OWLAnnotationProperty> getRequiredAnnotationsForAnnotation(OWLAnnotationProperty annp) {
-		return required_annotation_dependencies.get(annp);
-		
+		return required_annotation_dependencies.get(annp);		
 	}
 	
 	public Set<OWLAnnotationProperty> getOptionalAnnotationsForAnnotation(OWLAnnotationProperty annp) {
-		return optional_annotation_dependencies.get(annp);
-		
+		return optional_annotation_dependencies.get(annp);		
 	}
 	
 	
@@ -280,7 +307,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		this.getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(this.getOWLEditorKit()));
 		
-		
+		// initialize views that are declared eager		
+		fireUpViews();
 	}
     
    
@@ -348,9 +376,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		
     		String designnote = "See '" + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")" + "'";
 
-    		String prefix = "premerge_annotation";
+    		//String prefix = "premerge_annotation";
     		
-    		List<OWLOntologyChange> dcs = addNotes(editornote, designnote, prefix, merge_source);
+    		List<OWLOntologyChange> dcs = addNotes(editornote, designnote, merge_source);
     		
     		changes.addAll(dcs);
     		
@@ -452,11 +480,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return changes;
     }
     
-    public List<OWLOntologyChange> addNotes(String editornote, String designnote, String prefix, OWLClass cls) {
+    public List<OWLOntologyChange> addNotes(String editornote, String designnote, OWLClass cls) {
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	NoteDialog dlg = new NoteDialog(currentTab(), editornote, designnote,
-                prefix);
+    	NoteDialog dlg = new NoteDialog(currentTab(), editornote, designnote);
 
     	editornote = dlg.getEditorNote();
     	designnote = dlg.getDesignNote();       	
@@ -477,9 +504,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	String editornote = "";
         String designnote = "";
-        String prefix = "preretire_annotation";        
+        // TODO: removing prefix, discuss with Gilberto, I think it's unnecessary
+        //String prefix = "preretire_annotation";        
         
-    	List<OWLOntologyChange> changes = addNotes(editornote, designnote, prefix, retire_class);
+    	List<OWLOntologyChange> changes = addNotes(editornote, designnote, retire_class);
     	
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();    	
         
@@ -646,6 +674,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
+    public void editClass() {
+    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.EDIT));
+    	
+    }
+    
+    
+    
     public boolean isWorkFlowManager() {    	
     	try {
     		Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
@@ -692,6 +727,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void updateRetire() {
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
+    	editInProgress = false;
+		refreshNavTree();
     	
     }
     
@@ -836,7 +873,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	split_source = selectedClass;
     	split_target = newClass;
 
-    	//logChanges(changes);
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
     }
     
@@ -1006,6 +1042,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					
 					CODE_PROP = getSingleProperty("code_prop", opts, annProps);
 					LABEL_PROP = getSingleProperty("label_prop", opts, annProps);
+					immutable_properties.add(LABEL_PROP);
 					PREF_NAME = getSingleProperty("pref_name", opts, annProps);
 					
 					SEMANTIC_TYPE = getSingleProperty("semantic_type", opts, annProps); 

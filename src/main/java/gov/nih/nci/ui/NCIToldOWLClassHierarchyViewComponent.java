@@ -8,16 +8,23 @@ import java.util.Optional;
 import javax.swing.FocusManager;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
 import org.protege.editor.core.ui.view.DisposableAction;
 import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
+import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
+import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.ui.OWLIcons;
 import org.protege.editor.owl.ui.action.AbstractOWLTreeAction;
+import org.protege.editor.owl.ui.tree.UserRendering;
 import org.protege.editor.owl.ui.tree.OWLTreeDragAndDropHandler;
 import org.protege.editor.owl.ui.view.CreateNewChildTarget;
 import org.protege.editor.owl.ui.view.cls.AbstractOWLClassHierarchyViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLObject;
 
 import gov.nih.nci.ui.action.AddComplexTarget;
 import gov.nih.nci.ui.action.CloneClassTarget;
@@ -29,7 +36,7 @@ import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 
 public class NCIToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarchyViewComponent
 implements CreateNewChildTarget, SplitClassTarget, CloneClassTarget, MergeClassTarget,
-RetireClassTarget, AddComplexTarget {
+RetireClassTarget, AddComplexTarget, SelectionDriver {
 	
 	private static final Icon ADD_SUB_ICON = OWLIcons.getIcon("class.add.sub.png");
 	private static final JButton batchbutton = new JButton("Batch Load/Edit");
@@ -113,19 +120,74 @@ RetireClassTarget, AddComplexTarget {
         });
         getAssertedTree().setPopupMenuId(new PopupMenuId("[NCIAssertedClassHierarchy]")); 
         
-    }	
+        getAssertedTree().addTreeSelectionListener(new TreeSelectionListener() {
+
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+
+				if (NCIEditTab.currentTab().isRetiring()) {
+					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getRetireClass());	
+				} else if (NCIEditTab.currentTab().isEditing()) {
+					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getCurrentlyEditing());
+				} else if (NCIEditTab.currentTab().isSplitting()) {
+					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getSplitSource());
+				} else {
+					NCIEditTab.currentTab().editClass();
+				}
+				
+				
+				// TODO Auto-generated method stub
+				
+			}
+        	
+        });
+        
+        NCIEditTab.setNavTree(this);
+        
+               
+    }
+	
+	@Override
+	protected OWLClass updateView(OWLClass selectedClass) {
+		if (NCIEditTab.currentTab().isRetiring() ||
+				NCIEditTab.currentTab().isEditing()) {
+			
+		} else {
+			setSelectedEntity(selectedClass);
+			NCIEditTab.currentTab().editClass();
+		}   
+		
+        return selectedClass;
+	}
+	
+	@Override
+	public void setSelectedEntity(OWLClass entity) {
+		if (NCIEditTab.currentTab().isRetiring() ||
+				NCIEditTab.currentTab().isEditing()) {
+			
+		} else {
+			getTree().setSelectedOWLObject(entity);
+			NCIEditTab.currentTab().editClass();
+		}        
+    }   
 	 
 	@Override
 	public boolean canRetireClass() {
 		return (getSelectedEntities().size() == 1 &&
-				NCIEditTab.currentTab().canRetire(getSelectedEntity()));
+				NCIEditTab.currentTab().canRetire(getSelectedEntity()) &&
+				NCIEditTab.currentTab().isFree());
 	}
 
 	@Override
 	public void retireClass() {
 		OWLClass selectedClass = getSelectedEntity();
 		NCIEditTab.currentTab().retire(selectedClass);
+		refreshTree();
 		
+	}
+	
+	public void refreshTree() {
+		this.getTree().refreshComponent();	
 	}
 
 	@Override
@@ -185,9 +247,7 @@ RetireClassTarget, AddComplexTarget {
 		OWLClass selectedClass = getSelectedEntity();
 		
 		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty(), Optional.empty());
-		
-		
-		
+				
 		getTree().setSelectedOWLObject(newCls);
 		this.getTree().refreshComponent();
 		
@@ -206,7 +266,6 @@ RetireClassTarget, AddComplexTarget {
 
 		@Override
 		public boolean canAddComplex() {
-			// TODO Auto-generated method stub
 			return true;
 		}
 
@@ -214,9 +273,65 @@ RetireClassTarget, AddComplexTarget {
 		public void addComplex() {
 			OWLClass selectedClass = getSelectedEntity();
 			NCIEditTab.currentTab().addComplex(selectedClass);
-			// TODO Auto-generated method stub
-			
 		}
+
+		@Override
+		protected UserRendering getUserRenderer() {
+			return new UserRendering() {
+
+				@Override
+				public String render(String in) {
+
+					if (NCIEditTab.currentTab().isRetiring()) {
+						OWLClass cls = NCIEditTab.currentTab().getRetireClass();
+						if (cls != null) {
+							String orig = 
+									getOWLEditorKit().getOWLModelManager().getRendering(cls);
+							if (in.equals(orig)) {
+								return in + "(retiring...)";
+							}
+						}
+					};
+
+					if (NCIEditTab.currentTab().isEditing()) {
+						OWLClass cls = NCIEditTab.currentTab().getCurrentlyEditing(); 
+						if (cls != null) {
+							String orig = 
+									getOWLEditorKit().getOWLModelManager().getRendering(cls);
+							if (in.equals(orig)) {
+								return in + "(editing...)";
+							}
+						}
+
+					}
+					if (NCIEditTab.currentTab().isSplitting()) {
+						OWLClass cls = NCIEditTab.currentTab().getSplitSource(); 
+						if (cls != null) {
+							String orig = 
+									getOWLEditorKit().getOWLModelManager().getRendering(cls);
+							if (in.equals(orig)) {
+								return in + "(splitting...)";
+							}
+						}
+
+					}
+					return in;
+				}
+
+			};
+		}
+
+		@Override
+		public Component asComponent() {
+			return this;
+		}
+
+		    @Override
+		    public Optional<OWLObject> getSelection() {
+		        return Optional.ofNullable(getSelectedEntity());
+		    }
+
+		
 
 	
 }

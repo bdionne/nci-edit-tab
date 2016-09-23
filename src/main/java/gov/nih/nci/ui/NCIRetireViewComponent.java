@@ -1,9 +1,11 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+
+import javax.swing.JTabbedPane;
 
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
-import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.cls.OWLClassAnnotationsViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
 
@@ -15,19 +17,23 @@ public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent imp
 EditTabChangeListener {
 
     private static final long serialVersionUID = 1L;
-	private RetirePanel retirePanel;	
+	private RetirePanel retirePanel;
 
 	@Override
 	public void handleChange(EditTabChangeEvent event) {
 		if (event.isType(ComplexEditType.RETIRE)) {
 			
 			retirePanel.setOWLClass(NCIEditTab.currentTab().getRetireClass());
+			
+			
 			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
-	                "nci-edit-tab.RetireView");
+	               "nci-edit-tab.RetireView");
 			
 			setHeaderText(NCIEditTab.currentTab().getRetireClass().asOWLClass().getIRI().getShortForm());
 		}
 	}
+
+	
 	
 	public NCIRetireViewComponent() {
 		NCIEditTab.addListener(this);
@@ -43,8 +49,19 @@ EditTabChangeListener {
 	}
 	
 	@Override
-	protected OWLClass updateView(OWLClass selectedClass) {		
-        return selectedClass;
+	protected OWLClass updateView(OWLClass selectedClass) {	
+		if (retirePanel.getRetiringClass() != null) {
+			if (!selectedClass.equals(retirePanel.getRetiringClass())) {
+				if (NCIEditTab.currentTab().isRetiring()) {
+					NCIEditTab.currentTab().editClass();
+					getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
+							"nci-edit-tab.EditView");
+				}
+
+			}
+		}
+		return selectedClass;
+
 	}
 
 	@Override
@@ -52,11 +69,11 @@ EditTabChangeListener {
 		retirePanel.dispose();
 	}
 
+
+
 	@Override
 	public void selectionChanged() throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
-	
-	
 }

@@ -44,6 +44,8 @@ public class EditPanel extends JPanel {
 	
 	private OWLFrameList<OWLAnnotationSubject> gen_props;
 	
+	private OWLClass currentClass = null;
+	
 	;
     
     private List<PropertyTablePanel> tablePanelList = new ArrayList<PropertyTablePanel>();
@@ -117,6 +119,8 @@ public class EditPanel extends JPanel {
     }
     
     public void setSelectedClass(OWLClass cls) {
+    	
+    	this.currentClass = cls;
 
     	List<PropertyTablePanel> tablePanelList = getPropertyTablePanelList();
     	for (PropertyTablePanel tablePanel : tablePanelList) {
@@ -128,6 +132,10 @@ public class EditPanel extends JPanel {
     	}
     	splitPane.repaint();
 		
+    }
+    
+    public OWLClass getSelectedClass() {
+    	return this.currentClass;
     }
     
     public void addNewComplexProp() {
@@ -178,6 +186,7 @@ public class EditPanel extends JPanel {
                 if (shouldSave()) {
                 	NCIEditTab.currentTab().commitChanges();
                 	submitHistory();
+                	NCIEditTab.currentTab().setEditInProgress(false);
                 	
                 }
             	
@@ -191,7 +200,8 @@ public class EditPanel extends JPanel {
 			 
             public void actionPerformed(ActionEvent e)
             {
-            	NCIEditTab.currentTab().undoChanges();
+            	NCIEditTab.currentTab().undoChanges();            	
+            	NCIEditTab.currentTab().setEditInProgress(false);
             	disableButtons();
             	
             }

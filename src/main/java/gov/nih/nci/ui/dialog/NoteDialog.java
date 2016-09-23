@@ -31,7 +31,6 @@ public class NoteDialog extends JDialog implements ActionListener
 	JTextField fEditorNote, fDesignNote;
 	String editornote, designnote;
 	NCIEditTab tab;
-	String prefix;
 
 	boolean btnPressed;
 
@@ -39,12 +38,11 @@ public class NoteDialog extends JDialog implements ActionListener
 //    premerge: premerge_annotation
 //    preretire: preretire_annotation
 
-	public NoteDialog(NCIEditTab tab, String editornote, String designnote, String prefix){
+	public NoteDialog(NCIEditTab tab, String editornote, String designnote){
 		super((JFrame)tab.getTopLevelAncestor(), "Enter Notes", true);
 		this.editornote = editornote;
 		this.designnote = designnote;
 		this.tab = tab;
-		this.prefix = prefix;
 		init();
 	}
 
@@ -112,8 +110,8 @@ public class NoteDialog extends JDialog implements ActionListener
 				JOptionPane.showMessageDialog(this, "Editor's Note and Design Note are required.", "Warning", JOptionPane.WARNING_MESSAGE);
 				return;
 			}
-			editornote = prefix + "|" + (new Date()).toString() + " - " + fEditorNote.getText().trim();
-			designnote = prefix + "|" + (new Date()).toString() + " - " + fDesignNote.getText().trim();
+			editornote = (new Date()).toString() + " - " + fEditorNote.getText().trim();
+			designnote = (new Date()).toString() + " - " + fDesignNote.getText().trim();
 
 			btnPressed = true;
 			dispose();

@@ -16,6 +16,8 @@ EditTabChangeListener {
 	private static final long serialVersionUID = 1L;
 	private EditPanel editPanel;
 	
+	private OWLClass currentSelectedClass = null;
+	
     public void initialiseClassView() throws Exception {
     	
     	editPanel = new EditPanel(getOWLEditorKit());
@@ -39,7 +41,14 @@ EditTabChangeListener {
 
 	@Override
 	protected OWLClass updateView(OWLClass selectedClass) {
-		editPanel.setSelectedClass(selectedClass);
+		/**
+		if (NCIEditTab.currentTab().getEditInProgress()) {
+			
+		} else {
+			editPanel.setSelectedClass(selectedClass);
+		}
+		**/
+		currentSelectedClass = selectedClass;
         return selectedClass;
 	}
 
@@ -56,6 +65,7 @@ EditTabChangeListener {
 
 	@Override
 	public void selectionChanged() throws Exception {
+		/**
 		if (this.isShowing()) {
 
 		} else {
@@ -64,6 +74,7 @@ EditTabChangeListener {
 		                "nci-edit-tab.EditView");
 			}
 		}
+		**/
 	}
 
 	@Override
@@ -80,7 +91,19 @@ EditTabChangeListener {
 			
 		} else if (event.isType(ComplexEditType.MODIFY)) { 
 			editPanel.enableButtons();
+			NCIEditTab.currentTab().setEditInProgress(true);
+			NCIEditTab.currentTab().setCurrentlyEditing(editPanel.getSelectedClass());
+			NCIEditTab.currentTab().refreshNavTree();
+			
+		} else if (event.isType(ComplexEditType.EDIT)) {
+			editPanel.setSelectedClass(getSelectedOWLClass());
+			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
+	                "nci-edit-tab.EditView");
+			
 		} else if (event.isType(ComplexEditType.COMMIT)) { 
+			NCIEditTab.currentTab().setEditInProgress(false);
+			NCIEditTab.currentTab().setCurrentlyEditing(null);
+			NCIEditTab.currentTab().refreshNavTree();
 			editPanel.disableButtons();
 		}		
 	}

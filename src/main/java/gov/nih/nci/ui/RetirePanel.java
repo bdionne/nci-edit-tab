@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +49,10 @@ public class RetirePanel extends JPanel {
     private OWLModelManager mngr; 
     private OWLDataFactory df;    	
 	private OWLOntology ont;	
-	private OWLClass classToRetire = null;    
+	private OWLClass classToRetire = null; 
+	
+	public OWLClass getRetiringClass() { return classToRetire; }
+	
     private Map<OWLAnnotationProperty, Set<String>> fixups;
     
     
@@ -67,10 +71,13 @@ public class RetirePanel extends JPanel {
         mngr = owlEditorKit.getOWLModelManager();
         df = mngr.getOWLDataFactory();    	
     	ont = mngr.getActiveOntology();
-        upperPanelList = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, new OWLAnnotationsFrame(owlEditorKit));
+        
+        upperPanelList = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, 
+        		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(), 
+        				NCIEditTab.currentTab().getImmutableProperties()));
+        
         usage_panel = new UsagePanel(owlEditorKit);
         createUI();
-        // initialize UsagePanel with a blank
         this.setOWLClass(null);
     }
 
@@ -101,8 +108,7 @@ public class RetirePanel extends JPanel {
     }
     
     public void dispose() {
-		upperPanelList.dispose();
-		
+		upperPanelList.dispose();		
 	}
     
     
@@ -127,6 +133,7 @@ public class RetirePanel extends JPanel {
 			} else {
 				retireButton.setText("Retire");
 			}
+			this.enableButtons();
     		
     	}
     }  
@@ -134,7 +141,7 @@ public class RetirePanel extends JPanel {
     private JPanel createJButtonPanel() {
     	buttonPanel = new JPanel();
     	retireButton = new JButton("Retire");
-    	retireButton.setEnabled(true);
+    	retireButton.setEnabled(false);
 
     	retireButton.addActionListener(new ActionListener() {
 
@@ -148,13 +155,13 @@ public class RetirePanel extends JPanel {
     				// TODO: put EVS history
     				upperPanelList.setRootObject(null);
         			usage_panel.setOWLEntity(null);
+        			disableButtons();
     			} else if (retireButton.getText().equals("Approve")) {
     				approveRetire();
     			} else {
     				// proceed to retire
     				NCIEditTab.currentTab().completeRetire(fixups);
-    				retireButton.setText("Save");
-    				
+    				retireButton.setText("Save");    				
     			}
 
 
@@ -162,18 +169,18 @@ public class RetirePanel extends JPanel {
     	});     
 
     	cancelButton = new JButton("Cancel");
-    	cancelButton.setEnabled(true);
+    	cancelButton.setEnabled(false);
 
     	cancelButton.addActionListener(new ActionListener() {
 
     		public void actionPerformed(ActionEvent e)
     		{
-    			//setEnableUnselectedRadioButtons(true);
-    			//Execute when button is pressed
     			upperPanelList.setRootObject(null);
     			usage_panel.setOWLEntity(null);
+    		    classToRetire = null;
     			NCIEditTab.currentTab().undoChanges();
     			NCIEditTab.currentTab().cancelRetire();
+    			disableButtons();
     			// TODO: What? lowerPanelList.setRootObject(null);
     		}
     	});     
@@ -205,6 +212,18 @@ public class RetirePanel extends JPanel {
         
         this.retireButton.setText("Save");
     	
+    	
+    }
+    
+    public void enableButtons() {
+    	retireButton.setEnabled(true);
+    	cancelButton.setEnabled(true);
+    	
+    }
+    
+    public void disableButtons() {
+    	retireButton.setEnabled(false);
+    	cancelButton.setEnabled(false);
     	
     }
     

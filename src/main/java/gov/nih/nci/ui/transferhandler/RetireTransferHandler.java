@@ -30,6 +30,10 @@ public class RetireTransferHandler extends TransferHandler {
 		if(!support.isDrop()) {
 			return false;
 		}
+		if (NCIEditTab.currentTab().isRetiring() ||
+				NCIEditTab.currentTab().isEditing()) {
+			return false;
+		}
 		
 		return true;
 	}
@@ -53,6 +57,7 @@ public class RetireTransferHandler extends TransferHandler {
 		
 		if (NCIEditTab.currentTab().canRetire(data.get(0))) {
 			NCIEditTab.currentTab().retire(data.get(0));
+			NCIEditTab.currentTab().refreshNavTree();
 		} else {
 			JOptionPane.showMessageDialog(retirePanel, "Unable to retire", "Warning", JOptionPane.WARNING_MESSAGE);
 		}
