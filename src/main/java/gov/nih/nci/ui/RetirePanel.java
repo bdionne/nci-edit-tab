@@ -198,6 +198,8 @@ public class RetirePanel extends JPanel {
     
     public void approveRetire() {
     	
+    	ont = NCIEditTab.currentTab().getOWLModelManager().getActiveOntology();
+    	
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	
     	Set<OWLSubClassOfAxiom> subs = ont.getSubClassAxiomsForSubClass(classToRetire);
