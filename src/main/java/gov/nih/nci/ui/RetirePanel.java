@@ -20,7 +20,6 @@ import javax.swing.JSplitPane;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.ui.frame.OWLAnnotationsFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -158,6 +157,8 @@ public class RetirePanel extends JPanel {
         			disableButtons();
     			} else if (retireButton.getText().equals("Approve")) {
     				approveRetire();
+    				
+    				
     			} else {
     				// proceed to retire
     				NCIEditTab.currentTab().completeRetire(fixups);

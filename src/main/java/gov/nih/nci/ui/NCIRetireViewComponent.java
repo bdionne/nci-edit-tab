@@ -1,9 +1,6 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-
-import javax.swing.JTabbedPane;
 
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.cls.OWLClassAnnotationsViewComponent;
