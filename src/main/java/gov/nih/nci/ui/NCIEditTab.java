@@ -182,7 +182,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return (split_source != null) &&
 				(split_target != null);
 	}
-	
+		
 	public OWLClass getSplitSource() {
 		return split_source;
 	}
@@ -243,9 +243,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public boolean isAssociation(OWLAnnotationProperty p) {
 		return associations.contains(p);
-	}
-	
-				
+	}				
 
 	public NCIEditTab() {
 		setToolTipText("Custom Editor for NCI");
@@ -308,7 +306,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		this.getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(this.getOWLEditorKit()));
 		
 		// initialize views that are declared eager		
-		fireUpViews();
+		
 	}
     
    
@@ -938,6 +936,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		if (event.hasCategory(EventCategory.OPEN_PROJECT)) {
 			ontology = getOWLModelManager().getActiveOntology();
 			initProperties();
+			fireUpViews();
 		}
 	}
 	

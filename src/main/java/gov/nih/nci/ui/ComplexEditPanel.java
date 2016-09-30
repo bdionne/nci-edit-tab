@@ -221,6 +221,7 @@ public class ComplexEditPanel extends JPanel {
 				} else if (sb.equals(splitButton)) {
 					upperLabel.setText("Split From");
 					lowerLabel.setText("Split To");
+					//NCIEditTab.currentTab().setSplitBegin(true);
 					
 				} else if (sb.equals(cloneButton)) {
 					upperLabel.setText("Clone From");

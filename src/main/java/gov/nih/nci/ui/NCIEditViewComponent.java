@@ -16,7 +16,7 @@ EditTabChangeListener {
 	private static final long serialVersionUID = 1L;
 	private EditPanel editPanel;
 	
-	private OWLClass currentSelectedClass = null;
+	
 	
     public void initialiseClassView() throws Exception {
     	
@@ -34,21 +34,13 @@ EditTabChangeListener {
     }
 
     protected void disposeOntologyView() {
-        // do nothing
+       
     }
 
     
 
 	@Override
 	protected OWLClass updateView(OWLClass selectedClass) {
-		/**
-		if (NCIEditTab.currentTab().getEditInProgress()) {
-			
-		} else {
-			editPanel.setSelectedClass(selectedClass);
-		}
-		**/
-		currentSelectedClass = selectedClass;
         return selectedClass;
 	}
 
@@ -56,25 +48,14 @@ EditTabChangeListener {
 	public void disposeView() {
 		editPanel.disposeView();		
 		this.getOWLWorkspace().getOWLSelectionModel().removeListener(this);
-		super.disposeView();
-		
-		
+		super.disposeView();		
 	}
 
 	
 
 	@Override
 	public void selectionChanged() throws Exception {
-		/**
-		if (this.isShowing()) {
-
-		} else {
-			if (NCIEditTab.currentTab().isRetiring()) {
-				getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
-		                "nci-edit-tab.EditView");
-			}
-		}
-		**/
+		
 	}
 
 	@Override
