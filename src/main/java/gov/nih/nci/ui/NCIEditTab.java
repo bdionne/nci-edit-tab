@@ -149,7 +149,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public void setEditInProgress(boolean b) {
 		editInProgress = b;
 		currentlyEditing = null;
-		refreshNavTree();
+		//refreshNavTree();
 	}
 	
 	public void setCurrentlyEditing(OWLClass cls) { currentlyEditing = cls; }
@@ -173,14 +173,36 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		refreshNavTree();
 	}
 	
+	public void cancelSplit() {		
+		editInProgress = false;
+		// go back to previous selected class
+		setCurrentlyEditing(split_source);
+		//refreshNavTree();
+		undoChanges();
+		navTree.setSelectedEntity(split_source);
+		split_source = null;
+		split_target = null;
+		
+	}
+	
+	public void completeSplit() {
+		setEditInProgress(false);
+		navTree.setSelectedEntity(split_source);
+		split_source = null;
+		split_target = null;		
+	}
+	
 	public boolean isMerging() {
-		return (merge_source != null) &&
-				(merge_target != null);
+		return isSplitting();
 	}
 	
 	public boolean isSplitting() {
 		return (split_source != null) &&
 				(split_target != null);
+	}
+	
+	public boolean isCloning() {
+		return isSplitting();
 	}
 		
 	public OWLClass getSplitSource() {
@@ -201,6 +223,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void setMergeTarget(OWLClass cls) {
 		this.merge_target = cls;
+	}
+	
+	public boolean inComplexOp() {
+		return isSplitting() ||
+				isRetiring() ||
+				isMerging() ||
+				isCloning();
 	}
 		
 	// use undo/redo facility
@@ -864,14 +893,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	OWLObjectDuplicator dup = new OWLObjectDuplicator(mngr.getOWLDataFactory(), replacementIRIMap);            
 
     	changes.addAll(duplicateClassAxioms(selectedClass, dup));            
-    	changes.addAll(duplicateAnnotations(selectedClass, dup));
-
-    	mngr.applyChanges(changes);            
+    	changes.addAll(duplicateAnnotations(selectedClass, dup));    	           
 
     	split_source = selectedClass;
     	split_target = newClass;
 
-    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT)); 
+    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT));
+    	
+    	setEditInProgress(true);
+		setCurrentlyEditing(split_target);
+		refreshNavTree();
+    	
+    	mngr.applyChanges(changes); 
     }
     
     public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName, Optional<String> code) {
@@ -939,6 +972,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			fireUpViews();
 		}
 	}
+
+    @Override
+    public void stateChanged(HistoryManager source) {
+    	if (history.getLoggedChanges().isEmpty()) {
+
+    	} else {
+    		fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
+    	}
+    }
 	
 	public void resetHistory() {
 		history.reset();		
@@ -1301,14 +1343,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
 
 
-    @Override
-    public void stateChanged(HistoryManager source) {
-    	if (history.getLoggedChanges().isEmpty()) {
-
-    	} else {
-    		fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
-    	}
-    }
 	
 	public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
 			OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {

@@ -14,16 +14,14 @@ import javax.swing.event.TreeSelectionListener;
 import org.protege.editor.core.ui.menu.PopupMenuId;
 import org.protege.editor.core.ui.view.DisposableAction;
 import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
-import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.ui.OWLIcons;
 import org.protege.editor.owl.ui.action.AbstractOWLTreeAction;
-import org.protege.editor.owl.ui.tree.UserRendering;
 import org.protege.editor.owl.ui.tree.OWLTreeDragAndDropHandler;
+import org.protege.editor.owl.ui.tree.UserRendering;
 import org.protege.editor.owl.ui.view.CreateNewChildTarget;
 import org.protege.editor.owl.ui.view.cls.AbstractOWLClassHierarchyViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObject;
 
 import gov.nih.nci.ui.action.AddComplexTarget;
@@ -130,31 +128,24 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 				} else if (NCIEditTab.currentTab().isEditing()) {
 					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getCurrentlyEditing());
 				} else if (NCIEditTab.currentTab().isSplitting()) {
+					// if merging or cloning splitting returns the same result
 					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getSplitSource());
 				} else {
 					NCIEditTab.currentTab().editClass();
 				}
-				
-				
-				// TODO Auto-generated method stub
-				
-			}
-        	
+				//getTree().expandPath(e.getPath());
+			}        	
         });
         
-        NCIEditTab.setNavTree(this);
-        
-               
+        NCIEditTab.setNavTree(this);               
     }
 	
 	@Override
 	protected OWLClass updateView(OWLClass selectedClass) {
-		if (NCIEditTab.currentTab().isRetiring() ||
-				NCIEditTab.currentTab().isEditing()) {
+		if (NCIEditTab.currentTab().inComplexOp()) {
 			
 		} else {
 			setSelectedEntity(selectedClass);
-			NCIEditTab.currentTab().editClass();
 		}   
 		
         return selectedClass;
@@ -162,11 +153,12 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	
 	@Override
 	public void setSelectedEntity(OWLClass entity) {
-		if (NCIEditTab.currentTab().isRetiring() ||
-				NCIEditTab.currentTab().isEditing()) {
+		if (NCIEditTab.currentTab().inComplexOp()) {
 			
 		} else {
 			getTree().setSelectedOWLObject(entity);
+			
+		
 			NCIEditTab.currentTab().editClass();
 		}        
     }   
@@ -229,7 +221,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 				"Please enter a class name", OWLClass.class, Optional.empty(), Optional.empty());
 		if (dlg.showDialog()) {
 			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), getSelectedEntity(), clone_p);
-			getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(dlg.getNewClass());
+			//getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(dlg.getNewClass());
 			
 		}		
 	}

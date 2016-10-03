@@ -57,6 +57,7 @@ public class ComplexEditPanel extends JPanel {
     
     public void setSplit() {
     	splitButton.setSelected(true);
+    	enableButtons();
     }
 
     private JRadioButton cloneButton;
@@ -162,6 +163,7 @@ public class ComplexEditPanel extends JPanel {
             		saveButton.setText("Save");
             	} else {
             		NCIEditTab.currentTab().commitChanges();
+            		NCIEditTab.currentTab().completeSplit();
             	}
             	
             }
@@ -186,7 +188,7 @@ public class ComplexEditPanel extends JPanel {
             	lowerLabel.setText("Target");
             	
             	saveButton.setText("Save");
-            	NCIEditTab.currentTab().undoChanges();
+            	NCIEditTab.currentTab().cancelSplit();
             }
         });     
 		
