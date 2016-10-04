@@ -1358,13 +1358,27 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			Set<OWLAnnotation> anns = old_axiom.getAnnotations();
 			Set<OWLAnnotation> new_anns = new HashSet<OWLAnnotation>(); 
 			
-			for (OWLAnnotation annax : anns) {
+			
+			 for (OWLAnnotation annax : anns) {
 				String cv = annax.getProperty().getIRI().getShortForm();
 				String new_val = ann_vals.get(cv);
 				if (new_val != null) {
 					
 					OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), df.getOWLLiteral(new_val));
 					new_anns.add(new_ann); 
+				}
+			}
+			
+			
+			Set<OWLAnnotationProperty> req_props = this.getRequiredAnnotationsForAnnotation(complex_prop);
+			
+			for (OWLAnnotationProperty prop : req_props) {
+				String new_val = ann_vals.get(prop.getIRI().getShortForm());
+				
+				if (new_val != null) {
+					OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(new_val));
+					new_anns.add(new_ann);
+					
 				}
 			}
 

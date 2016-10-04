@@ -186,7 +186,7 @@ public class PropertyEditingDialog extends JPanel {
     public  HashMap<String, String> showDialog(OWLEditorKit owlEditorKit, String title) {    	
         int ret = new UIHelper(owlEditorKit).showDialog(title, this, JOptionPane.OK_CANCEL_OPTION);
         if (ret == JOptionPane.OK_OPTION) {
-            return this.getPropertyValueMap();
+            return getPropertyValueMap();
         }
         else {
             return null;

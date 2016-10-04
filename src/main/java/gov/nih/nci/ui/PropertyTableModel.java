@@ -53,43 +53,20 @@ public class PropertyTableModel extends AbstractTableModel {
 		return assertions.get(idx);
 	}
 
-	public PropertyTableModel(OWLEditorKit k) {
-		this.ont = k.getOWLModelManager().getActiveOntology();
-		//complexProperties = new ArrayList<OWLAnnotationProperty>(NCIEditTab.currentTab().getComplexProperties());
-	}
-
 	public PropertyTableModel(OWLEditorKit k, OWLAnnotationProperty complexProperty) {
-		this.ont = k.getOWLModelManager().getActiveOntology();
-		this.complexProp = complexProperty;
-		this.requiredAnnotations = NCIEditTab.currentTab().getRequiredAnnotationsForAnnotation(complexProp);
-		this.requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(this.requiredAnnotations);
-		Collections.sort(this.requiredAnnotationsList);
+		ont = k.getOWLModelManager().getActiveOntology();
+		complexProp = complexProperty;
+		requiredAnnotations = NCIEditTab.currentTab().getRequiredAnnotationsForAnnotation(complexProp);
+		requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(requiredAnnotations);
 	}
 
 
 	public int getRowCount() {
-		int i = 0;
-
-		if (selection != null) {
-			//return ont.getAnnotationAssertionAxioms(selection.getIRI()).size();
-			for (OWLAnnotation annot : annotations) {
-				int j = 0;
-				OWLAnnotationProperty annotProp = annot.getProperty();
-				Iterator<OWLAnnotation> iter = annotations.iterator();
-				while (iter.hasNext()) {
-					OWLAnnotationProperty temp = iter.next().getProperty();
-					if (temp.equals(annotProp)) {
-						j++;
-					}
-				}
-				if (j > i) {
-					i=j;
-				}
-			}
-			return i;
-		} else {
-			return 0;
+		if (annotations.size() > 0) {
+			return annotations.size() / getColumnCount();
 		}
+		return 0;
+		
 	}
 
 
@@ -108,15 +85,19 @@ public class PropertyTableModel extends AbstractTableModel {
 
 		if ( index < annotations.size() ) {
 			OWLAnnotation annot = annotations.get(index);
-			if (columnIndex == 0) {
-				return literalExtractor.getLiteral(annot.getValue());
-			}
-			for (OWLAnnotationProperty aprop : requiredAnnotations) {
-	
-				if ( annot.getProperty().equals(aprop)) {
+			if (annot == null) {
+				return null;
+			} else {
+				if (columnIndex == 0) {
 					return literalExtractor.getLiteral(annot.getValue());
 				}
-	
+				for (OWLAnnotationProperty aprop : requiredAnnotations) {
+
+					if ( annot.getProperty().equals(aprop)) {
+						return literalExtractor.getLiteral(annot.getValue());
+					}
+
+				}
 			}
 		}
 		return null;
@@ -147,8 +128,6 @@ public class PropertyTableModel extends AbstractTableModel {
 	public HashMap<String, String> getSelectedPropertyValue(int row) {
 		HashMap<String, String> propertyValues = new HashMap<String, String>();
 		if ( row < 0 ) {
-			//NCIClassCreationDialog.showDialog(this.ont,
-			//"Please select a property row", OWLClass.class);
 			return propertyValues;
 		}
 		int columnCount = getColumnCount();
@@ -157,7 +136,9 @@ public class PropertyTableModel extends AbstractTableModel {
 
 		for (int i=0; i<columnCount; i++) {
 			OWLAnnotation annot = annotations.get(startIndex + i);
-			propertyValues.put(getColumnName(i), literalExtractor.getLiteral(annot.getValue()));
+			if (annot != null) {
+				propertyValues.put(getColumnName(i), literalExtractor.getLiteral(annot.getValue()));
+			}
 		}
 
 		return propertyValues;
@@ -271,16 +252,15 @@ public class PropertyTableModel extends AbstractTableModel {
 						annotations.add(annot);
 					}
 					Set<OWLAnnotation> annotSet = ax.getAnnotations();
-					Iterator<OWLAnnotation> iter = annotSet.iterator();
-					List<OWLAnnotation> tempList = new ArrayList<OWLAnnotation>();
-					while (iter.hasNext()) {
-						annot = iter.next();
-						if (this.requiredAnnotations.contains(annot.getProperty())) {
-							tempList.add(annot);
+					for (OWLAnnotationProperty req_a : requiredAnnotations) {
+						OWLAnnotation found = null;
+						for (OWLAnnotation owl_a : annotSet) {
+							if (req_a.equals(owl_a.getProperty())) {
+								found = owl_a;
+							}
 						}
+						annotations.add(found);
 					}
-					Collections.sort(tempList);
-					annotations.addAll(tempList);
 				}
 
 			}  
@@ -293,34 +273,4 @@ public class PropertyTableModel extends AbstractTableModel {
 		return !annotations.isEmpty();
 	}
 	
-	public void addRow(HashMap<String, String> data) {
-		         // remove a row from your internal data structure
-		     	int columnCount = getColumnCount();
-		     	for (int i = 0; i < columnCount; i++) {
-		     		String columnName = getColumnName(i);
-		     		String value = data.get(columnName);
-		     		//OWLAnnotation annot = new OWLAnnotation()
-		     		//OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
-		     		
-		     	}
-		      		
-		     	int row = getRowCount();
-		         fireTableRowsInserted(row, row);
-		     }
-		     
-		     /*public void updateRow(int row) {
-		         // remove a row from your internal data structure
-		         fireTableRowsUpdated(row, row);
-		     }*/
-		      
-		     public void removeRow(int row) {
-		         int columnCount = getColumnCount();
-		         int minIndex = row * columnCount;
-		         int maxIndex = (row + 1) * columnCount;
-		         annotations.subList(minIndex, maxIndex).clear();
-		         fireTableRowsDeleted(row, row);
-		     }
-
-
-
 }
