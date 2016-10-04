@@ -61,7 +61,8 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 
 	@Override
 	public void handleChange(EditTabChangeEvent event) {
-		if (event.isType(ComplexEditType.SPLIT)) {
+		if (event.isType(ComplexEditType.SPLIT) ||
+				event.isType(ComplexEditType.CLONE)) {
 			complexEditPanel.setRootObjects(NCIEditTab.currentTab().getSplitSource(),
 					NCIEditTab.currentTab().getSplitTarget());
 			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(

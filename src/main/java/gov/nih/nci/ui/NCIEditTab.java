@@ -140,6 +140,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private boolean editInProgress = false;
 	private OWLClass currentlyEditing = null;
+	private boolean beginMerge = false;
+	
+	public void setMergeBegin(Boolean b) { beginMerge = b; }
+	public boolean beginningMerge() { return beginMerge; }
 	
 	
 	public boolean isEditing() {

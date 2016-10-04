@@ -77,21 +77,23 @@ EditTabChangeListener {
 				editPanel.enableButtons();
 				NCIEditTab.currentTab().setEditInProgress(true);
 				NCIEditTab.currentTab().setCurrentlyEditing(editPanel.getSelectedClass());
-				NCIEditTab.currentTab().refreshNavTree();
+				//NCIEditTab.currentTab().refreshNavTree();
 			}
 
 		} else if (event.isType(ComplexEditType.EDIT)) {
 			editPanel.setSelectedClass(getSelectedOWLClass());
-			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
-	                "nci-edit-tab.EditView");
-			
+			if (!NCIEditTab.currentTab().beginningMerge()) {
+				getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
+						"nci-edit-tab.EditView");
+			}
+
 		} else if (event.isType(ComplexEditType.COMMIT)) { 
 			if (NCIEditTab.currentTab().isSplitting()) {
 
 			} else {
 				NCIEditTab.currentTab().setEditInProgress(false);
 				NCIEditTab.currentTab().setCurrentlyEditing(null);
-				NCIEditTab.currentTab().refreshNavTree();
+				//NCIEditTab.currentTab().refreshNavTree();
 				editPanel.disableButtons();
 			}
 		}		

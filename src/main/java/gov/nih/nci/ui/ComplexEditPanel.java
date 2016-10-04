@@ -164,6 +164,19 @@ public class ComplexEditPanel extends JPanel {
             	} else {
             		NCIEditTab.currentTab().commitChanges();
             		NCIEditTab.currentTab().completeSplit();
+            		
+            		setEnableUnselectedRadioButtons(true);
+                	//Execute when button is pressed
+                	upperPanelAnn.setRootObject(null);
+                	lowerPanelAnn.setRootObject(null);
+                	upperPanelClass.setRootObject(null);
+                	lowerPanelClass.setRootObject(null);
+                	radioButtonGroup.clearSelection();
+                	
+                	upperLabel.setText("Source");
+                	lowerLabel.setText("Target");
+                	
+            		disableButtons();
             	}
             	
             }
@@ -189,6 +202,7 @@ public class ComplexEditPanel extends JPanel {
             	
             	saveButton.setText("Save");
             	NCIEditTab.currentTab().cancelSplit();
+            	disableButtons();
             }
         });     
 		
@@ -219,6 +233,7 @@ public class ComplexEditPanel extends JPanel {
 				if (sb.equals(mergeButton)) {
 					upperLabel.setText("Retiring Concept");
 					lowerLabel.setText("Surviving Concept");
+					NCIEditTab.currentTab().setMergeBegin(true);
 					
 				} else if (sb.equals(splitButton)) {
 					upperLabel.setText("Split From");
@@ -316,6 +331,7 @@ public class ComplexEditPanel extends JPanel {
     private void checkStatus() {
     	if (NCIEditTab.currentTab().readyMerge()) {
     		saveButton.setText("Merge");
+    		enableButtons();
     	}
     }
 
