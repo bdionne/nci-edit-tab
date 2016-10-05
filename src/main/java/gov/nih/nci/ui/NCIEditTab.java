@@ -25,6 +25,7 @@ import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +57,8 @@ import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.UndoManagerListener;
+import org.protege.editor.owl.model.search.SearchResult;
+import org.protege.editor.owl.model.search.SearchResultHandler;
 import org.protege.editor.owl.server.api.CommitBundle;
 import org.protege.editor.owl.server.policy.CommitBundleImpl;
 import org.protege.editor.owl.server.versioning.Commit;
@@ -106,6 +109,7 @@ import edu.stanford.protege.metaproject.api.Project;
 import edu.stanford.protege.metaproject.api.ProjectOptions;
 import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.impl.RoleIdImpl;
+import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
@@ -1034,10 +1038,24 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		history.reset();		
 	}
 	
+	private class MySearchResultHandler implements SearchResultHandler {
+
+		@Override
+		public void searchFinished(Collection<SearchResult> searchResults) {
+			System.out.println("Found a topos " + searchResults.size());
+			
+		}
+	}
+	
+	
 	
 	
 	private void initProperties() {
-				
+		
+	
+		
+		getOWLEditorKit().getSearchManager().performSearch("topos", new MySearchResultHandler());
+		
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {
 			Project project = lhc.getCurrentProject();
