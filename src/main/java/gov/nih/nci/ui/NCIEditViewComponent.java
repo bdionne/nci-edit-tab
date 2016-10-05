@@ -29,17 +29,7 @@ EditTabChangeListener {
         
     }
 
-    protected void initialiseOntologyView() throws Exception {
-        
-    }
-
-    protected void disposeOntologyView() {
-       
-    }
-
-    
-
-	@Override
+    @Override
 	protected OWLClass updateView(OWLClass selectedClass) {
         return selectedClass;
 	}
