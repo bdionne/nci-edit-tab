@@ -141,10 +141,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private boolean editInProgress = false;
 	private OWLClass currentlyEditing = null;
 	private boolean beginMerge = false;
+	private boolean endMerge = false;
 	
 	public void setMergeBegin(Boolean b) { beginMerge = b; }
 	public boolean beginningMerge() { return beginMerge; }
 	
+	public void setMergeEnd(Boolean e) { endMerge = e; }
+	public boolean getMergeEnd() { return endMerge; }
 	
 	public boolean isEditing() {
 		return editInProgress;
@@ -219,6 +222,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public OWLClass getRetireClass() {
 		return retire_class;		
+	}
+	
+	public OWLClass getMergeSource() {
+		return merge_source;
+	}
+	
+	public OWLClass getMergeTarget() {
+		return merge_target;
 	}
 	
 	public void setMergeSource(OWLClass cls) {
@@ -401,6 +412,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			changes.addAll(finalizeMerge());
     		
     	} else {
+    		if (switchMergeSourceTarget()) {
+    			int result = JOptionPane.showOptionDialog(null, "Retiring Concept is created after the Surviving Concept. Do you want to switch them?", 
+						"Switch Retiring and Surviving Concept", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+				if (result == JOptionPane.OK_OPTION) {
+					OWLClass temp = merge_target;
+	    			setMergeTarget(merge_source);
+	    			setMergeSource(temp);
+	    			this.fireChange(new EditTabChangeEvent(this, ComplexEditType.MERGE)); 
+				} 
+				setMergeEnd(false);
+				return;
+    		} 
     		// TODO:
     		String editornote = "Merge into " + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")";
     		editornote += ", " + clientSession.getActiveClient().getUserInfo().getName();
@@ -447,7 +470,28 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		
     	} 
     	getOWLModelManager().applyChanges(changes);
+    	setMergeEnd(true);
     	
+    }
+    
+    private boolean switchMergeSourceTarget() {
+    	boolean switchMergeSourceTarget = false;
+    	String delims = "-";
+    	String mergeSourceCode = merge_source.getIRI().getShortForm();
+    	String mergeTargetCode = merge_target.getIRI().getShortForm();
+    	String[] sourceCdSplit = mergeSourceCode.split(delims);
+    	String[] targetCdSplit = mergeTargetCode.split(delims);
+    	
+    	if (sourceCdSplit.length == 3 && targetCdSplit.length == 3) {
+    		if (sourceCdSplit[0].equals(targetCdSplit[0]) && sourceCdSplit[2].equals(targetCdSplit[2])) {
+    			int sourceCdNum = Integer.parseInt(sourceCdSplit[1]);
+    			int targetCdNum = Integer.parseInt(targetCdSplit[1]);
+    			if (sourceCdNum > targetCdNum) {
+    				switchMergeSourceTarget = true;
+    			}
+    		}
+    	}
+    	return switchMergeSourceTarget;
     }
     
     List<OWLOntologyChange> finalizeMerge() {

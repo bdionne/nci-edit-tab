@@ -160,7 +160,9 @@ public class ComplexEditPanel extends JPanel {
             {
             	if (saveButton.getText().equals("Merge")) {
             		NCIEditTab.currentTab().merge();
-            		saveButton.setText("Save");
+            		if (NCIEditTab.currentTab().getMergeEnd()) {
+            			saveButton.setText("Save");
+            		}
             	} else {
             		NCIEditTab.currentTab().commitChanges();
             		NCIEditTab.currentTab().completeSplit();
