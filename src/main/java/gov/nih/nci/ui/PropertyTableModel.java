@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
@@ -103,66 +104,82 @@ public class PropertyTableModel extends AbstractTableModel {
 		return null;
 	}
 
-	public HashMap<String, String> getSelectedPropertyType() {
-		HashMap<String, String> propertyTypes = new HashMap<String, String>();
+	public Map<String, String> getSelectedPropertyLabel() {
+		Map<String, String> propertyLabels = new HashMap<String, String>();
+		propertyLabels.put("Value", "Value");
+		int columnCount = getColumnCount();
+		
+		for (int i = 1; i < columnCount; i++) {
+			String propShortForm = requiredAnnotationsList.get(i -1).getIRI().getShortForm();
+			propertyLabels.put(propShortForm, getColumnName(i));
+		}
+		return propertyLabels;
+	}
+	
+	public Map<String, String> getSelectedPropertyType() {
+		Map<String, String> propertyTypes = new HashMap<String, String>();
 		propertyTypes.put("Value", "TextArea");
 		int columnCount = getColumnCount();
 		IRI dataType;
-		String columnName;
+		
 		for (int i = 1; i < columnCount; i++) {
+			String propShortForm = requiredAnnotationsList.get(i -1).getIRI().getShortForm();
 			dataType = NCIEditTab.currentTab().getDataType(requiredAnnotationsList.get(i -1));
-			columnName = getColumnName(i);
-
 
 			if (isDataTypeTextArea(dataType)) {
-				propertyTypes.put(columnName, "TextArea");
+				propertyTypes.put(propShortForm, "TextArea");
 			} else if (isDataTypeTextField(dataType)) {
-				propertyTypes.put(columnName, "TextField");
+				propertyTypes.put(propShortForm, "TextField");
 			} else if (isDataTypeCombobox(dataType)) {
-				propertyTypes.put(columnName, "ComboBox");
+				propertyTypes.put(propShortForm, "ComboBox");
 			}
 		}
 		return propertyTypes;
 	}
 
-	public HashMap<String, String> getSelectedPropertyValue(int row) {
-		HashMap<String, String> propertyValues = new HashMap<String, String>();
+	public Map<String, String> getSelectedPropertyValue(int row) {
+		Map<String, String> propertyValues = new HashMap<String, String>();
 		if ( row < 0 ) {
 			return propertyValues;
 		}
 		int columnCount = getColumnCount();
 		int startIndex = row * columnCount;
 		LiteralExtractor literalExtractor = new LiteralExtractor();
-
+		String propShortForm;
 		for (int i=0; i<columnCount; i++) {
+			if (i==0) {
+				propShortForm = "Value";
+			} else {
+				propShortForm = requiredAnnotationsList.get(i-1).getIRI().getShortForm();
+			}
 			OWLAnnotation annot = annotations.get(startIndex + i);
 			if (annot != null) {
-				propertyValues.put(getColumnName(i), literalExtractor.getLiteral(annot.getValue()));
+				propertyValues.put(propShortForm, literalExtractor.getLiteral(annot.getValue()));
 			}
 		}
 
 		return propertyValues;
 	}
 	
-	public HashMap<String, String> getDefaultPropertyValues() {
-		HashMap<String, String> propertyValues = new HashMap<String, String>();
+	public Map<String, String> getDefaultPropertyValues() {
+		Map<String, String> propertyValues = new HashMap<String, String>();
 		
 		for (OWLAnnotationProperty aprop : requiredAnnotationsList) {
-
-			propertyValues.put(NCIEditTab.currentTab().getRDFSLabel(aprop).get(),
+			String propShortForm = aprop.getIRI().getShortForm();
+			propertyValues.put(propShortForm,
 					NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(aprop)));
 		}
 		return propertyValues;
 	}
 
-	public HashMap<String, ArrayList<String>> getSelectedPropertyOptions() {
-		HashMap<String, ArrayList<String>> propertyOptions = new HashMap<String, ArrayList<String>>();
+	public Map<String, ArrayList<String>> getSelectedPropertyOptions() {
+		Map<String, ArrayList<String>> propertyOptions = new HashMap<String, ArrayList<String>>();
 		for (OWLAnnotationProperty aprop : requiredAnnotationsList) {
-
+			String propShortForm = aprop.getIRI().getShortForm();
 			if (isDataTypeCombobox(NCIEditTab.currentTab().getDataType(aprop))) {
 				ArrayList<String> optionList = new ArrayList<String>();
 				optionList.addAll(NCIEditTab.currentTab().getEnumValues(NCIEditTab.currentTab().getDataType(aprop)));
-				propertyOptions.put(NCIEditTab.currentTab().getRDFSLabel(aprop).get(), optionList);
+				propertyOptions.put(propShortForm, optionList);
 			}
 		}
 		return propertyOptions;

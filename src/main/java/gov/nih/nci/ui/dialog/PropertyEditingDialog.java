@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
@@ -28,18 +29,20 @@ public class PropertyEditingDialog extends JPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private HashMap<String, String> proptypemap;
-	private HashMap<String, String> propvaluemap;
-	private HashMap<String, Object> propcomponentmap;
-	private HashMap<String, ArrayList<String>> propoptions;
+	private Map<String, String> proptypemap;
+	private Map<String, String> propvaluemap;
+	private Map<String, Object> propcomponentmap;
+	private Map<String, ArrayList<String>> propoptions;
+	private Map<String, String> proplabelmap;
 	
 	private String type;
 	
-    public PropertyEditingDialog(String type, HashMap<String, String> proptype, HashMap<String, String> propvalue, HashMap<String, ArrayList<String>> propoptions){
+    public PropertyEditingDialog(String type, Map<String, String> proptype, Map<String, String> propvalue, Map<String, ArrayList<String>> propoptions, Map<String, String> proplabel){
     	
       this.proptypemap = proptype;
       this.propvaluemap = propvalue;
       this.propoptions = propoptions;
+      this.proplabelmap = proplabel;
       this.type = type;
       
       createUI();
@@ -98,7 +101,7 @@ public class PropertyEditingDialog extends JPanel {
     	
     	JPanel areaPanel = new JPanel(new BorderLayout());
     	
-    	areaPanel.add(new JLabel(prop), BorderLayout.NORTH);
+    	areaPanel.add(new JLabel(proplabelmap.get(prop)), BorderLayout.NORTH);
     	areaPanel.add(new JScrollPane(area), BorderLayout.CENTER);
     	areaPanel.setPreferredSize(new Dimension(400, 100));
     	
@@ -119,7 +122,8 @@ public class PropertyEditingDialog extends JPanel {
     		textfield.setText(propvaluemap.get(prop));
     	}
     	
-    	JLabel label = new JLabel(prop);  	   	
+    	//JLabel label = new JLabel(prop); 
+    	JLabel label = new JLabel(proplabelmap.get(prop));
     	label.setPreferredSize(new Dimension(180, 20));
     	
     	panel.add(label, BorderLayout.WEST);
@@ -142,7 +146,7 @@ public class PropertyEditingDialog extends JPanel {
     		combobox.setSelectedItem(propvaluemap.get(prop));
     	}
     	
-    	JLabel label = new JLabel(prop);  	   	
+    	JLabel label = new JLabel(proplabelmap.get(prop));  	   	
     	label.setPreferredSize(new Dimension(180, 20));
     	
     	panel.add(label, BorderLayout.WEST);

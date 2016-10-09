@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
@@ -336,7 +337,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
 			if(button.getType() == NCIEditTabConstants.ADD){
 				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), 
-						tableModel.getDefaultPropertyValues(), tableModel.getSelectedPropertyOptions());
+						tableModel.getDefaultPropertyValues(), tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
 				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
 				if (data != null) {
 					NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),
@@ -355,7 +356,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				int viewRow = propertyTable.getSelectedRow();
 				if (viewRow != -1) {
 					int modelRow = propertyTable.convertRowIndexToModel(viewRow);
-					PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(modelRow), tableModel.getSelectedPropertyOptions());
+					Map selectedPropertyMap = new HashMap();
+					
+					PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(modelRow), 
+							tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
 					HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
 					if (data != null) {
 						NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, tableModel.getSelection(),
@@ -394,7 +398,8 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 	
 	public void createNewProp() {
 		
-		PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), tableModel.getDefaultPropertyValues(), tableModel.getSelectedPropertyOptions());
+		PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), tableModel.getDefaultPropertyValues(), 
+				tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
 		HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
 		if (data != null) {
 			NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),
