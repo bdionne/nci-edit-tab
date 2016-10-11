@@ -991,7 +991,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			}
     		}
     		
-    		//mngr.applyChanges(changes);
+    		mngr.applyChanges(changes);
 
     		return newClass;
     	} else {
@@ -1055,6 +1055,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 		
 		getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
+		
+		getOWLEditorKit().getSearchManager().performSearch("topos", new MySearchResultHandler());
 		
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {
