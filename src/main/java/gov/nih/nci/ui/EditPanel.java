@@ -4,19 +4,21 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
@@ -36,7 +38,9 @@ public class EditPanel extends JPanel {
 
 	private OWLEditorKit owlEditorKit;
 	
-	private Set<OWLAnnotationProperty> complexProperties;
+	private Set<OWLAnnotationProperty> complexProps;
+	
+	private Set<OWLAnnotationProperty> propsToExclude;
 	
 	private Set<OWLAnnotationProperty> readOnlyProperties;
 	
@@ -50,7 +54,16 @@ public class EditPanel extends JPanel {
     
     private List<PropertyTablePanel> tablePanelList = new ArrayList<PropertyTablePanel>();
     
-	private JSplitPane splitPane;
+	//private JSplitPane splitPane;
+    //private JPanel upperPanel;
+    
+    JTabbedPane tabbedPane;
+    
+    JScrollPane descrPane;
+    
+    private JTextField prefNameText;
+    private String origPref = "";
+    private JTextField codeText;
 	
 	private JPanel buttonPanel;
 	
@@ -62,7 +75,11 @@ public class EditPanel extends JPanel {
     	
         this.owlEditorKit = editorKit;
         
-        complexProperties = NCIEditTab.currentTab().getComplexProperties();
+        complexProps = NCIEditTab.currentTab().getComplexProperties();
+        propsToExclude = new HashSet<OWLAnnotationProperty>();
+        propsToExclude.addAll(complexProps);
+        propsToExclude.add(NCIEditTabConstants.PREF_NAME);
+        
         
         readOnlyProperties = NCIEditTab.currentTab().getImmutableProperties();
         
@@ -73,65 +90,160 @@ public class EditPanel extends JPanel {
     private void createUI() {
         setLayout(new BorderLayout());
         
-        JPanel upperPanel = new JPanel(new BorderLayout());
-        JPanel lowerPanel = new JPanel(new BorderLayout());
-        lowerPanel.setBorder(BorderFactory.createTitledBorder("Description:"));
+        tabbedPane = new JTabbedPane();
         
         JPanel complexPropertyPanel = new JPanel();
         complexPropertyPanel.setLayout(new BoxLayout(complexPropertyPanel, BoxLayout.Y_AXIS));
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+       
         tabbedPane.addTab("Complex Properties", complexPropertyPanel);
         
+        JPanel genPropPanel = new JPanel();
+        genPropPanel.setLayout(new BorderLayout());
+        
+        JLabel prefNamLabel = new JLabel("Preferred Name");        
+        prefNameText = new JTextField("preferred name");
+        prefNameText.setVisible(true);
+        
+        prefNameText.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				if (prefNameText.getText().equals(origPref)) {
+					if (!NCIEditTab.currentTab().isEditing()) {
+						disableButtons();
+					}
+
+				} else {
+					if (!NCIEditTab.currentTab().isEditing()) {
+						enableButtons();
+					}
+				}
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				if (prefNameText.getText().equals(origPref)) {
+					if (!NCIEditTab.currentTab().isEditing()) {
+						disableButtons();
+					}
+
+				} else {
+					if (!NCIEditTab.currentTab().isEditing()) {
+						enableButtons();
+					}
+				}
+
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {}
+        	
+        });
+        
+        JPanel prefTxt = new JPanel();
+        prefTxt.setLayout(new BorderLayout());
+        
+        prefTxt.add(prefNamLabel, BorderLayout.WEST);
+        prefTxt.add(prefNameText, BorderLayout.CENTER);
+        
+        JLabel classCode = new JLabel("Code");
+        codeText = new JTextField("code");
+        codeText.setVisible(true);
+        codeText.setEditable(false);
+        
+        JPanel codeTxt = new JPanel();
+        codeTxt.setLayout(new BorderLayout());
+        
+        codeTxt.add(classCode, BorderLayout.WEST);
+        codeTxt.add(codeText, BorderLayout.EAST);
+        
+        prefTxt.add(codeTxt, BorderLayout.EAST);
+        /**
+        JPanel head = new JPanel();
+        head.setLayout(new BorderLayout());
+        
+        
+        head.add(prefTxt, BorderLayout.NORTH);
+        head.add(codeTxt, BorderLayout.CENTER);
+        **/
+        
+        genPropPanel.add(prefTxt, BorderLayout.NORTH);
+        
         gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, 
-        		new FilteredAnnotationsFrame(owlEditorKit, complexProperties, readOnlyProperties));
+        		new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties));
 
                 
         JScrollPane panel2 = new JScrollPane(gen_props);//will add tree or list to it
         panel2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        tabbedPane.addTab("General", panel2);
+        /**
+        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, prefTxt, gen_props);
+		splitPane.setOneTouchExpandable(false);
+		splitPane.setResizeWeight(1.0);
+		splitPane.setDividerLocation(0.2);
+		**/
         
-        Iterator<OWLAnnotationProperty> it = complexProperties.iterator();
+        genPropPanel.add(panel2, BorderLayout.CENTER);
+        
+        tabbedPane.addTab("General", genPropPanel);
+        
+        Iterator<OWLAnnotationProperty> it = complexProps.iterator();
         while(it.hasNext()) {
         	addComplexPropertyTable(complexPropertyPanel, (OWLAnnotationProperty) it.next());
-        }
-        
-        upperPanel.add(tabbedPane);
+        }        
         
         list = new OWLFrameList<>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
         
-        JScrollPane lowerComp = new JScrollPane(list);// will add description list to it
-        lowerComp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        lowerPanel.add(lowerComp);
-        
-        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperPanel, lowerPanel);
-		splitPane.setOneTouchExpandable(true);
-		splitPane.setDividerLocation(0.6);
-
-		add(splitPane, BorderLayout.CENTER);
+        descrPane = new JScrollPane(list);// will add description list to it
+        descrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+                
+        tabbedPane.addTab("Description", descrPane);
+                
+        add(tabbedPane, BorderLayout.CENTER);
 		
 		add(createJButtonPanel(), BorderLayout.SOUTH);
 		
 		setVisible(true);
-		restoreDefaults();
-
-        
     }
     
     public void setSelectedClass(OWLClass cls) {
-    	
-    	this.currentClass = cls;
-
-    	List<PropertyTablePanel> tablePanelList = getPropertyTablePanelList();
-    	for (PropertyTablePanel tablePanel : tablePanelList) {
-    		tablePanel.setSelectedCls(cls);
-    	}
-    	list.setRootObject(cls);
     	if (cls != null) {
-    		gen_props.setRootObject(cls.getIRI());
+
+    		this.currentClass = cls;
+
+    		Optional<String> ps = NCIEditTab.currentTab().getRDFSLabel(cls);
+
+    		if (ps.isPresent()) {
+    			origPref = ps.get();
+    			prefNameText.setText(ps.get());    	     
+    		} else {
+    			prefNameText.setText("Missing");
+    		}
+
+    		Optional<String> cps = NCIEditTab.currentTab().getCode(cls);
+
+    		if (cps.isPresent()) {
+    			codeText.setText(cps.get());
+    		} else {
+    			codeText.setText("nocode");
+    		}
+
+
+
+    		List<PropertyTablePanel> tablePanelList = getPropertyTablePanelList();
+    		for (PropertyTablePanel tablePanel : tablePanelList) {
+    			tablePanel.setSelectedCls(cls);
+    		}
+    		list.setRootObject(cls);
+    		if (cls != null) {
+    			gen_props.setRootObject(cls.getIRI());
+    		}
+
+    		if (NCIEditTab.currentTab().isRetiring()) {
+    			tabbedPane.setSelectedComponent(descrPane);
+
+    		}
     	}
-    	splitPane.repaint();
-		
     }
     
     public OWLClass getSelectedClass() {
@@ -155,6 +267,8 @@ public class EditPanel extends JPanel {
     	tablePanelList.add(tablePanel);
     }
     
+    /**
+    
     private void restoreDefaults() {
         SwingUtilities.invokeLater(new Runnable() {
 
@@ -163,7 +277,9 @@ public class EditPanel extends JPanel {
             	splitPane.setDividerLocation(splitPane.getSize().height /2);
             }
         });
-    }    
+    } 
+    
+       **/
 
     public OWLEditorKit getEditorKit() {
     	return owlEditorKit;

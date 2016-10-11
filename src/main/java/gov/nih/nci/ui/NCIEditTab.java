@@ -12,7 +12,6 @@ import static gov.nih.nci.ui.NCIEditTabConstants.DESIGN_NOTE;
 import static gov.nih.nci.ui.NCIEditTabConstants.EDITOR_NOTE;
 import static gov.nih.nci.ui.NCIEditTabConstants.IMMUTABLE_PROPS;
 import static gov.nih.nci.ui.NCIEditTabConstants.LABEL_PROP;
-import static gov.nih.nci.ui.NCIEditTabConstants.SEMANTIC_TYPE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_SOURCE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
@@ -20,6 +19,7 @@ import static gov.nih.nci.ui.NCIEditTabConstants.PREF_NAME;
 import static gov.nih.nci.ui.NCIEditTabConstants.PRE_MERGE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.PRE_RETIRE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
+import static gov.nih.nci.ui.NCIEditTabConstants.SEMANTIC_TYPE;
 import static gov.nih.nci.ui.NCIEditTabConstants.SPLIT_FROM;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
@@ -40,7 +40,6 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
-import org.protege.editor.core.ui.workspace.WorkspaceTab;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.LocalHttpClient.UserType;
@@ -109,7 +108,6 @@ import edu.stanford.protege.metaproject.api.Project;
 import edu.stanford.protege.metaproject.api.ProjectOptions;
 import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.impl.RoleIdImpl;
-import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
@@ -837,6 +835,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			
     			doCommit(changes, type);
     			
+    			getOWLEditorKit().getSearchManager().updateIndex(changes);
+    			
     		} catch (ClientRequestException e) {
     			if (e instanceof LoginTimeoutException) {
                     showErrorDialog("Commit error", e.getMessage(), e);
@@ -990,8 +990,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     				changes.add(new AddAxiom(mngr.getActiveOntology(), sem_typ_ax));
     			}
     		}
-
-    		mngr.applyChanges(changes);
+    		
+    		//mngr.applyChanges(changes);
 
     		return newClass;
     	} else {
@@ -1054,7 +1054,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 	
 		
-		getOWLEditorKit().getSearchManager().performSearch("topos", new MySearchResultHandler());
+		getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
 		
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {
@@ -1225,6 +1225,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		}
 
 		JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " requires an rdfs:label, using IRI short form instead",
+				"Warning", JOptionPane.WARNING_MESSAGE);
+		return Optional.of(oobj.getIRI().getShortForm());
+
+	}
+	
+	public Optional<String> getCode(OWLNamedObject oobj) {
+		// TODO: fall back to IRI if no label
+		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP)) {
+			OWLAnnotationValue av = annotation.getValue();
+			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+			if (ol.isPresent()) {
+				return Optional.of(ol.get().getLiteral());
+			}
+		}
+
+		JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " should have a code property, using IRI short form instead",
 				"Warning", JOptionPane.WARNING_MESSAGE);
 		return Optional.of(oobj.getIRI().getShortForm());
 

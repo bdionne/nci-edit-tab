@@ -64,6 +64,7 @@ EditTabChangeListener {
 			if (NCIEditTab.currentTab().isSplitting()) {
 
 			} else {
+				// TODO: need to make sure edit occurs in EditTab
 				editPanel.enableButtons();
 				NCIEditTab.currentTab().setEditInProgress(true);
 				NCIEditTab.currentTab().setCurrentlyEditing(editPanel.getSelectedClass());
