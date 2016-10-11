@@ -79,6 +79,7 @@ public class EditPanel extends JPanel {
         propsToExclude = new HashSet<OWLAnnotationProperty>();
         propsToExclude.addAll(complexProps);
         propsToExclude.add(NCIEditTabConstants.PREF_NAME);
+        propsToExclude.add(NCIEditTabConstants.CODE_PROP);
         
         
         readOnlyProperties = NCIEditTab.currentTab().getImmutableProperties();
