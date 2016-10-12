@@ -160,15 +160,7 @@ public class EditPanel extends JPanel {
         codeTxt.add(codeText, BorderLayout.EAST);
         
         prefTxt.add(codeTxt, BorderLayout.EAST);
-        /**
-        JPanel head = new JPanel();
-        head.setLayout(new BorderLayout());
-        
-        
-        head.add(prefTxt, BorderLayout.NORTH);
-        head.add(codeTxt, BorderLayout.CENTER);
-        **/
-        
+                
         genPropPanel.add(prefTxt, BorderLayout.NORTH);
         
         gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, 
@@ -177,12 +169,6 @@ public class EditPanel extends JPanel {
                 
         JScrollPane panel2 = new JScrollPane(gen_props);//will add tree or list to it
         panel2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        /**
-        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, prefTxt, gen_props);
-		splitPane.setOneTouchExpandable(false);
-		splitPane.setResizeWeight(1.0);
-		splitPane.setDividerLocation(0.2);
-		**/
         
         genPropPanel.add(panel2, BorderLayout.CENTER);
         
@@ -229,8 +215,6 @@ public class EditPanel extends JPanel {
     			codeText.setText("nocode");
     		}
 
-
-
     		List<PropertyTablePanel> tablePanelList = getPropertyTablePanelList();
     		for (PropertyTablePanel tablePanel : tablePanelList) {
     			tablePanel.setSelectedCls(cls);
@@ -268,20 +252,6 @@ public class EditPanel extends JPanel {
     	tablePanelList.add(tablePanel);
     }
     
-    /**
-    
-    private void restoreDefaults() {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-            	splitPane.setDividerLocation(splitPane.getSize().height /2);
-            }
-        });
-    } 
-    
-       **/
-
     public OWLEditorKit getEditorKit() {
     	return owlEditorKit;
     }
@@ -354,18 +324,11 @@ public class EditPanel extends JPanel {
     
     public void enableButtons() {
     	saveButton.setEnabled(true);
-    	cancelButton.setEnabled(true);
-    	
+    	cancelButton.setEnabled(true);    	
     }
     
     public void disableButtons() {
     	saveButton.setEnabled(false);
-    	cancelButton.setEnabled(false);
-    	
+    	cancelButton.setEnabled(false);    	
     }
-
-	
-
-	
-
 }
