@@ -338,8 +338,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	
     @Override
-	public void initialise() {
-    	
+	public void initialise() {    	
 		super.initialise();
 		log.info("NCI Edit Tab initialized");
 				
@@ -349,10 +348,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		addListeners();
 		
-		this.getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(this.getOWLEditorKit()));
-		
-		// initialize views that are declared eager		
-		
+		this.getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(this.getOWLEditorKit()));		
 	}
     
    
