@@ -201,6 +201,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 
 		public void run()
 		{
+			
 			num_completed = 0;
 			
             int i = 0;
@@ -241,14 +242,12 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 				if (cancelled) break;
                 
                 // now sleep for a bit to let things settle
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    task.print("Sleeper interrupted " + e.getLocalizedMessage());
-                }
+                
 
 			}
+			if (!cancelled) {
 			task.complete();
+			}
 			long total = System.currentTimeMillis() - beg;
 			task.print("Total run time was: " + total + " ms");
 			//task.print("Time spent in create was: " + BatchLoadTask.create_time + " ms");
@@ -260,6 +259,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 			if (cancelled)
 			{
 				task.print("Process interrupted by the user.");
+				task.cancelTask();
 			}
 
 			//task.print("run completion at: " + i);

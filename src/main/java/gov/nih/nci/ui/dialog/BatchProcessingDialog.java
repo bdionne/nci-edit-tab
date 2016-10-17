@@ -299,12 +299,13 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 					//						+ "Please correct all errors and try again.");
 					return;
 				}
+				dispose();
 
 				if (tpd != null) {
 					tpd.run();
 				}
 
-				dispose();
+				
 
 				if (tpd != null) {
 					//MsgDialog.ok((JFrame) tab.getTopLevelAncestor(),

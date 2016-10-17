@@ -55,7 +55,7 @@ public class BatchLoadTask extends BatchTask {
 			// TODO: Batch these all up and do a single commit
 			if (super.checkNoErrors(w, taskId)) {
 				tab.createNewChild(tab.getClass(sup), Optional.of(name), Optional.of(codes.get(taskId)));
-				Thread.sleep(100);
+				//Thread.sleep(1);
 				//tab.commitChanges();
 			} else {
 				return false;
@@ -114,11 +114,19 @@ public class BatchLoadTask extends BatchTask {
 	
 	public boolean complete() {
 		tab.commitChanges();
+		tab.disableBatchMode();
 		return true;
+	}
+	
+	public void cancelTask() {
+		super.cancelTask();
+		tab.undoChanges();
+		tab.disableBatchMode();
 	}
 	
 	public boolean begin() {
 		codes = tab.generateCodes(max);
+		tab.enableBatchMode();
 		return true;
 	}
 

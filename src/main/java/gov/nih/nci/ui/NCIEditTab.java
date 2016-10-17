@@ -145,6 +145,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private boolean beginMerge = false;
 	private boolean endMerge = false;
 	
+	private boolean inBatchMode = false;
+	
+	public void enableBatchMode() { 
+		inBatchMode = true;
+		history.stopTalking();
+	}
+	
+	public void disableBatchMode() { 
+		inBatchMode = false;
+		history.startTalking();
+	}
+	
 	public void setMergeBegin(Boolean b) { beginMerge = b; }
 	public boolean beginningMerge() { return beginMerge; }
 	
@@ -1026,7 +1038,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	if (history.getLoggedChanges().isEmpty()) {
 
     	} else {
-    		fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
+    		if (!inBatchMode) {
+    			fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
+    		}
     	}
     }
 	
