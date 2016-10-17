@@ -68,7 +68,6 @@ EditTabChangeListener {
 				editPanel.enableButtons();
 				NCIEditTab.currentTab().setEditInProgress(true);
 				NCIEditTab.currentTab().setCurrentlyEditing(editPanel.getSelectedClass());
-				//NCIEditTab.currentTab().refreshNavTree();
 			}
 
 		} else if (event.isType(ComplexEditType.EDIT)) {

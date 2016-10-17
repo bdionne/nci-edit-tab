@@ -31,6 +31,8 @@ import gov.nih.nci.ui.action.RetireClassTarget;
 import gov.nih.nci.ui.action.SplitClassTarget;
 import gov.nih.nci.ui.dialog.BatchProcessingDialog;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
+import gov.nih.nci.ui.event.ComplexEditType;
+import gov.nih.nci.ui.event.EditTabChangeEvent;
 
 public class NCIToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarchyViewComponent
 implements CreateNewChildTarget, SplitClassTarget, CloneClassTarget, MergeClassTarget,
@@ -237,10 +239,15 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	public void createNewChild() {	
 				
 		OWLClass selectedClass = getSelectedEntity();
-		
+		NCIEditTab.currentTab().enableBatchMode();
 		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty(), Optional.empty());
+		NCIEditTab.currentTab().enableBatchMode();	
 				
 		getTree().setSelectedOWLObject(newCls);
+		
+		NCIEditTab.currentTab().disableBatchMode();
+		
+		NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), ComplexEditType.MODIFY));
 		this.getTree().refreshComponent();
 		
 	}
