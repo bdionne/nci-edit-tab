@@ -1645,6 +1645,43 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
+    // make sure there is a FULL_SYN property with group PT and an rdfs:label
+    // that has the same value as the preferred_name property
+    public void syncPrefName(String preferred_name) {
+    	List<OWLOntologyChange> changes = new ArrayList<>();
+    	//retrieve rdfs:label and adjust if needed
+    	if (!getRDFSLabel(currentlyEditing).equals(preferred_name)) {
+    		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(currentlyEditing.getIRI())) {
+    			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
+    				changes.add(new RemoveAxiom(ontology, ax));
+    				OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
+    				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
+    						.getOWLAnnotationAssertionAxiom(LABEL_PROP, currentlyEditing.getIRI(), pref_name_val);
+    				changes.add(new AddAxiom(ontology, ax2));
+    			} else if (ax.getProperty().equals(NCIEditTabConstants.PREF_NAME)) {
+    				changes.add(new RemoveAxiom(ontology, ax));
+    				OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
+    				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
+    						.getOWLAnnotationAssertionAxiom(PREF_NAME, currentlyEditing.getIRI(), pref_name_val);
+    				changes.add(new AddAxiom(ontology, ax2));
+    				
+    			}
+    			
+    		}   		
+    	}
+    	ontology.getOWLOntologyManager().applyChanges(changes);
+    }
+    
+    public OWLAnnotationProperty getFullSyn() {
+    	for (OWLAnnotationProperty p : complex_properties) {
+			if (p.getIRI().getShortForm().equalsIgnoreCase("FULL_SYN")) {
+				return p;
+			}
+		}
+		return null;
+    	
+    }
+    
     
     
 }

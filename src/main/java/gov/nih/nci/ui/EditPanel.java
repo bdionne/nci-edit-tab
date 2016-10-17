@@ -117,6 +117,8 @@ public class EditPanel extends JPanel {
 
 				} else {
 					if (!NCIEditTab.currentTab().isEditing()) {
+						NCIEditTab.currentTab().setEditInProgress(true);
+						NCIEditTab.currentTab().setCurrentlyEditing(currentClass);						
 						enableButtons();
 					}
 				}
@@ -271,9 +273,11 @@ public class EditPanel extends JPanel {
             {
             	// Do the save
                 if (shouldSave()) {
+                	NCIEditTab.currentTab().syncPrefName(prefNameText.getText());
                 	NCIEditTab.currentTab().commitChanges();
                 	submitHistory();
-                	NCIEditTab.currentTab().setEditInProgress(false);
+                	origPref = prefNameText.getText();
+                	
                 	
                 }
             	

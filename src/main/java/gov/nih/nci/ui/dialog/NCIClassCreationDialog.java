@@ -250,7 +250,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax2));
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax3));
 		
-		OWLAnnotationProperty full_syn = getFullSyn();
+		OWLAnnotationProperty full_syn = NCIEditTab.currentTab().getFullSyn();
 		
 		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(full_syn, newClass.getIRI(), pref_name_val);
 		
@@ -268,28 +268,12 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		}
 		
 		OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
-		
-		
+				
 		changes.add(new AddAxiom(mngr.getActiveOntology(), new_new_axiom));
-		
-		
-		
-		
-		
+				
 		this.ont_changes = changes;
 		this.newClass = newClass;
-		
-		
     }
     
-    private OWLAnnotationProperty getFullSyn() {
-    	Set<OWLAnnotationProperty> comp_props = NCIEditTab.currentTab().getComplexProperties();
-		for (OWLAnnotationProperty p : comp_props) {
-			if (p.getIRI().getShortForm().equalsIgnoreCase("FULL_SYN")) {
-				return p;
-			}
-		}
-		return null;
-    	
-    }
+    
 }
