@@ -222,8 +222,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
 
     private void createUI() {
-        
-    	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    	setLayout(new BorderLayout());
     	
         propertyTable = new JTable(tableModel);
         
@@ -270,10 +269,11 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         
         sp = new JScrollPane(propertyTable);
         createLabelHeader(tableName, addButton, editButton, deleteButton);
-        add(tableHeaderPanel);
+        add(tableHeaderPanel, BorderLayout.NORTH);
         tableHeaderPanel.setVisible(false);        
         sp.setVisible(false);
-        add(sp);
+        sp.setPreferredSize(new Dimension(180, 150));
+        add(sp, BorderLayout.CENTER);
     }
 
     public void setSelectedCls(OWLClass cls) {
@@ -305,12 +305,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     private void createLabelHeader(String labeltext, JButton b1, JButton b2, JButton b3){
     	
     	tableHeaderPanel = new JPanel();
-        
     	tableHeaderPanel.setLayout(new BorderLayout());
         
-        tableNameLabel = new JLabel(labeltext);
+    	tableNameLabel = new JLabel(labeltext);
         tableNameLabel.setPreferredSize(new Dimension(100, 25));
-        
         
         JPanel panel2 = new JPanel();
         

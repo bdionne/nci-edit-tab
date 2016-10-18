@@ -89,15 +89,16 @@ public class EditPanel extends JPanel {
     }
     
     private void createUI() {
-        setLayout(new BorderLayout());
+    	setLayout(new BorderLayout());
         
         tabbedPane = new JTabbedPane();
         
         JPanel complexPropertyPanel = new JPanel();
         complexPropertyPanel.setLayout(new BoxLayout(complexPropertyPanel, BoxLayout.Y_AXIS));
-
+        JScrollPane compPropSP = new JScrollPane(complexPropertyPanel);
        
-        tabbedPane.addTab("Complex Properties", complexPropertyPanel);
+        //tabbedPane.addTab("Complex Properties", complexPropertyPanel);
+        tabbedPane.addTab("Complex Properties", compPropSP);
         
         JPanel genPropPanel = new JPanel();
         genPropPanel.setLayout(new BorderLayout());
@@ -169,10 +170,10 @@ public class EditPanel extends JPanel {
         		new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties));
 
                 
-        JScrollPane panel2 = new JScrollPane(gen_props);//will add tree or list to it
-        panel2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        JScrollPane generalSP = new JScrollPane(gen_props);//will add tree or list to it
+        generalSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         
-        genPropPanel.add(panel2, BorderLayout.CENTER);
+        genPropPanel.add(generalSP, BorderLayout.CENTER);
         
         tabbedPane.addTab("General", genPropPanel);
         
