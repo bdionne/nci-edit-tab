@@ -54,9 +54,6 @@ public class EditPanel extends JPanel {
     
     private List<PropertyTablePanel> tablePanelList = new ArrayList<PropertyTablePanel>();
     
-	//private JSplitPane splitPane;
-    //private JPanel upperPanel;
-    
     JTabbedPane tabbedPane;
     
     JScrollPane descrPane;

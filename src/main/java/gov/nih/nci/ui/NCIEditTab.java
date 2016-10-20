@@ -1438,74 +1438,74 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 
 	
-	public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
-			OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {
-		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-		OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
+    public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
+    		OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
 
-		if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT)) {
-			
-			Set<OWLAnnotation> anns = old_axiom.getAnnotations();
-			Set<OWLAnnotation> new_anns = new HashSet<OWLAnnotation>(); 
-			
-			
-			 for (OWLAnnotation annax : anns) {
-				String cv = annax.getProperty().getIRI().getShortForm();
-				String new_val = ann_vals.get(cv);
-				if (new_val != null) {
-					
-					OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), df.getOWLLiteral(new_val));
-					new_anns.add(new_ann); 
-				}
-			}
-			
-			
-			Set<OWLAnnotationProperty> req_props = this.getRequiredAnnotationsForAnnotation(complex_prop);
-			
-			for (OWLAnnotationProperty prop : req_props) {
-				String new_val = ann_vals.get(prop.getIRI().getShortForm());
-				
-				if (new_val != null) {
-					OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(new_val));
-					new_anns.add(new_ann);
-					
-				}
-			}
+    	if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT)) {
 
-			OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(old_axiom.getProperty(), cls.getIRI(),
-					df.getOWLLiteral(ann_vals.get("Value")), new_anns);
+    		Set<OWLAnnotation> anns = old_axiom.getAnnotations();
+    		Set<OWLAnnotation> new_anns = new HashSet<OWLAnnotation>(); 
 
 
-			changes.add(new RemoveAxiom(ontology, old_axiom));
-			changes.add(new AddAxiom(ontology, new_axiom));
-		} else if (operation.equalsIgnoreCase(NCIEditTabConstants.DELETE)) {
-			changes.add(new RemoveAxiom(ontology, old_axiom));
-			
-		} else if (operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
-			OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), df.getOWLLiteral(ann_vals.get("Value")));
-			
-			Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
-			Set<OWLAnnotationProperty> req_props = this.getRequiredAnnotationsForAnnotation(complex_prop);
-			
-			for (OWLAnnotationProperty prop : req_props) {
-				String val = ann_vals.get(prop.getIRI().getShortForm());
-				if (val != null) {
-					OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
-					anns.add(new_ann);
-					
-				}
-			}
-			
-			OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
-			
-			
-			changes.add(new AddAxiom(ontology, new_new_axiom));
-			
-		}
+    		for (OWLAnnotation annax : anns) {
+    			String cv = annax.getProperty().getIRI().getShortForm();
+    			String new_val = ann_vals.get(cv);
+    			if (new_val != null) {
+
+    				OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), df.getOWLLiteral(new_val));
+    				new_anns.add(new_ann); 
+    			}
+    		}
 
 
-		getOWLModelManager().applyChanges(changes);
-	}
+    		Set<OWLAnnotationProperty> req_props = this.getRequiredAnnotationsForAnnotation(complex_prop);
+
+    		for (OWLAnnotationProperty prop : req_props) {
+    			String new_val = ann_vals.get(prop.getIRI().getShortForm());
+
+    			if (new_val != null) {
+    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(new_val));
+    				new_anns.add(new_ann);
+
+    			}
+    		}
+
+    		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(old_axiom.getProperty(), cls.getIRI(),
+    				df.getOWLLiteral(ann_vals.get("Value")), new_anns);
+
+
+    		changes.add(new RemoveAxiom(ontology, old_axiom));
+    		changes.add(new AddAxiom(ontology, new_axiom));
+    	} else if (operation.equalsIgnoreCase(NCIEditTabConstants.DELETE)) {
+    		changes.add(new RemoveAxiom(ontology, old_axiom));
+
+    	} else if (operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
+    		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), df.getOWLLiteral(ann_vals.get("Value")));
+
+    		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
+    		Set<OWLAnnotationProperty> req_props = this.getRequiredAnnotationsForAnnotation(complex_prop);
+
+    		for (OWLAnnotationProperty prop : req_props) {
+    			String val = ann_vals.get(prop.getIRI().getShortForm());
+    			if (val != null) {
+    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+    				anns.add(new_ann);
+
+    			}
+    		}
+
+    		OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
+
+
+    		changes.add(new AddAxiom(ontology, new_new_axiom));
+
+    	}
+
+
+    	getOWLModelManager().applyChanges(changes);
+    }
 	
 	// Methods needed by BatchEditTask
 	
