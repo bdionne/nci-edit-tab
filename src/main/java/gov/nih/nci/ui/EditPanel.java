@@ -291,6 +291,7 @@ public class EditPanel extends JPanel {
             {
             	NCIEditTab.currentTab().undoChanges();            	
             	NCIEditTab.currentTab().setEditInProgress(false);
+            	NCIEditTab.currentTab().editClass();
             	disableButtons();
             	
             }

@@ -1502,9 +1502,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		changes.add(new AddAxiom(ontology, new_new_axiom));
 
     	}
-
-
     	getOWLModelManager().applyChanges(changes);
+    	
+    	this.syncFullSyn(cls, complex_prop);
+    	
     }
 	
 	// Methods needed by BatchEditTask
@@ -1671,6 +1672,43 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     	ontology.getOWLOntologyManager().applyChanges(changes);
     }
+    
+    public void syncFullSyn(OWLClass cls, OWLAnnotationProperty prop) {
+    	OWLAnnotationProperty full_syn = getFullSyn();
+    	if (!prop.equals(full_syn)) {
+    		return;
+    	}
+
+    	List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
+
+    	for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
+    		if (ax.getProperty().equals(full_syn)) {
+    			if ((getAnnotationValue(ax, "term-group").equals("PT")) &&
+    					(getAnnotationValue(ax, "term-source").equals("NCI"))) {
+    				assertions.add(ax);
+    			} 
+    		}
+    	}
+    	if (assertions.size() != 1) {
+    		JOptionPane.showMessageDialog(this, "One and only one PT with source NCI is allowed.", "Warning", JOptionPane.WARNING_MESSAGE);
+    	} else {
+    		syncPrefName(assertions.get(0).getValue().asLiteral().get().getLiteral());
+    		editClass();
+    	}
+    }
+    
+    String getAnnotationValue(OWLAnnotationAssertionAxiom axiom, String annProp) {
+    	Set<OWLAnnotation> anns = axiom.getAnnotations();
+    	for (OWLAnnotation ann : anns) {
+    		if (ann.getProperty().getIRI().getShortForm().equalsIgnoreCase(annProp)) {
+    			return ann.getValue().asLiteral().get().getLiteral();
+    		}
+    	}
+    	return "None";   	
+    	
+    }
+    
+    
     
     public OWLAnnotationProperty getFullSyn() {
     	for (OWLAnnotationProperty p : complex_properties) {
