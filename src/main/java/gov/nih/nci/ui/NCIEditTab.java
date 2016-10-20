@@ -1504,7 +1504,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     	getOWLModelManager().applyChanges(changes);
     	
-    	this.syncFullSyn(cls, complex_prop);
+    	syncFullSyn(cls, complex_prop);
     	
     }
 	
