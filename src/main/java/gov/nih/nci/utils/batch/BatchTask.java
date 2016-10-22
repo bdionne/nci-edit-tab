@@ -41,6 +41,8 @@ public class BatchTask {
 	String infile = null;
 
 	String outfile = null;
+	
+	String fileDelim = null;
 
 	Vector<String> data_vec = null;
 

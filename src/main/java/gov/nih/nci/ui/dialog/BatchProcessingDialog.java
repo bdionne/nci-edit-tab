@@ -3,14 +3,21 @@ package gov.nih.nci.ui.dialog;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -24,6 +31,7 @@ import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 
+import edu.stanford.protege.csv.export.CsvExporterBuilder;
 import gov.nih.nci.ui.BatchProcessOutputPanel;
 import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.utils.batch.BatchEditTask;
@@ -44,7 +52,14 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	JTextField fInputTf, fOutputTf;
 
 	JComboBox<String> batchType = null;
-
+	
+	JLabel fileDelimLbl;
+	JLabel propertyValuesDelimLbl;
+	JTextField fileDelim;
+	JTextField propertyValuesDelim;
+	
+	public static final String FILE_DELIMITER = ",", PROPERTY_VALUES_DELIMITER = "\t";
+	
 	NCIEditTab tab;
 
 	BatchProcessOutputPanel be = null;	
@@ -151,7 +166,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			Container container = this.getContentPane();
 			container.setLayout(new BorderLayout());
 
-			this.setLocation(450, 450);
+			this.setLocation(450, 520);
 
 			JPanel filePanel = new JPanel();
 			filePanel.setLayout(new BorderLayout());
@@ -166,14 +181,57 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			String[] types = new String[] { "Edit", "Load" };
 			batchType = new JComboBox<String>(types);
 			batchType.setSelectedIndex(0);
-			batchType.addActionListener(this);
-
+			//batchType.addActionListener(this);
+			
 			
 			JPanel labelcombopanel = new JPanel();
-			labelcombopanel.setPreferredSize(new Dimension(420, 50));
+			labelcombopanel.setPreferredSize(new Dimension(420, 30));
 			labelcombopanel.add(new JLabel("Batch Type"));
 			labelcombopanel.add(batchType, BorderLayout.CENTER);
-			container.add(labelcombopanel, BorderLayout.CENTER);
+
+			fileDelimLbl = new JLabel("File Delimiter                     ");
+			propertyValuesDelimLbl = new JLabel("Property Values Delimiter ");
+			
+			fileDelim = new JTextField(FILE_DELIMITER);
+			fileDelim.setPreferredSize(new Dimension(100, 25));
+	        propertyValuesDelim = new JTextField(PROPERTY_VALUES_DELIMITER);
+	        propertyValuesDelim.setPreferredSize(new Dimension(100, 25));
+	        
+	        fileDelim.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+	        fileDelim.addKeyListener(keyListener);
+	        propertyValuesDelim.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+	        propertyValuesDelim.addKeyListener(keyListener);
+						
+			JPanel filedelimpanel = new JPanel();
+			filedelimpanel.setPreferredSize(new Dimension(420, 25));
+			filedelimpanel.add(fileDelimLbl);
+			filedelimpanel.add(fileDelim, BorderLayout.CENTER);
+			
+			JPanel propvaluedelimpanel = new JPanel();
+			propvaluedelimpanel.setPreferredSize(new Dimension(420, 25));
+			propvaluedelimpanel.add(propertyValuesDelimLbl);
+			propvaluedelimpanel.add(propertyValuesDelim, BorderLayout.CENTER);
+			
+			JPanel centerPanel = new JPanel();
+			centerPanel.setPreferredSize(new Dimension(420, 100));
+			centerPanel.add(labelcombopanel, BorderLayout.NORTH);
+			centerPanel.add(filedelimpanel, BorderLayout.CENTER);
+			centerPanel.add(propvaluedelimpanel, BorderLayout.SOUTH);
+			container.add(centerPanel, BorderLayout.CENTER);
+			
+			batchType.addItemListener(new ItemListener() {
+			     @Override
+			     public void itemStateChanged(ItemEvent e) {
+			    	 if (e.getStateChange() == ItemEvent.SELECTED) {
+			             Object item = e.getItem();
+			             if (item.toString().equals("Load")) {		            	 
+			            	 propvaluedelimpanel.setVisible(false);
+			             } else {
+			            	 propvaluedelimpanel.setVisible(true);
+			             }
+			          }
+			     }
+			 });
 			
 			fStartButton = new JButton("Start");
 			fStartButton.addActionListener(this);
@@ -182,6 +240,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			fCancelButton.addActionListener(this);
 
 			JPanel btnPanel = new JPanel();
+			btnPanel.setPreferredSize(new Dimension(420, 35));
 			btnPanel.add(fStartButton);
 			btnPanel.add(fCancelButton);
 
@@ -196,6 +255,21 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 		}
 	}
+	
+	private KeyListener keyListener = new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if(e.getKeyCode() == KeyEvent.VK_TAB) {
+                if(e.getSource().equals(fileDelim)) {
+                    fileDelim.setText(fileDelim.getText() + "\t");
+                } else if(e.getSource().equals(propertyValuesDelim)) {
+                    propertyValuesDelim.setText(propertyValuesDelim.getText() + "\t");
+                }
+            } else {
+                super.keyReleased(e);
+            }
+        }
+    };
 
 	public String getInfile() {
 		if(fInputTf != null){
@@ -276,13 +350,15 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				BatchTask task = null;
 				if (type == BATCH_LOADER) {
 					
-					task = new BatchLoadTask(be, tab, infile, outfile);
+					//task = new BatchLoadTask(be, tab, infile, outfile);
+					task = new BatchLoadTask(be, tab, infile, outfile, fileDelim.getText());
 					
 					task.setType(BatchTask.TaskType.LOAD);
 					tpd = new TaskProgressDialog(new JFrame(), 
 							"Batch Load Progress Status", task);
 				} else if (type == BATCH_EDITOR) {
-					task = new BatchEditTask(be, tab, infile, outfile);
+					//task = new BatchEditTask(be, tab, infile, outfile);
+					task = new BatchEditTask(be, tab, infile, outfile, fileDelim.getText(), propertyValuesDelim.getText());
 					task.setType(BatchTask.TaskType.EDIT);
 					tpd = new TaskProgressDialog(new JFrame(),
 							"Batch Edit Progress Status", task);

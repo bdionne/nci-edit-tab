@@ -19,11 +19,12 @@ public class BatchLoadTask extends BatchTask {
 	List<String> codes = new ArrayList<String>();
 
 	public BatchLoadTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile,
-			String outfile) {
+			String outfile, String fileDelim) {
 		super(be);
 		this.tab = tab;
 		this.infile = infile;
 		this.outfile = outfile;
+		this.fileDelim = fileDelim;
 		
 		data_vec = getData(infile);
 		setMax(data_vec.size());

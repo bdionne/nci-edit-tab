@@ -23,6 +23,8 @@ public class BatchEditTask extends BatchTask {
 	Vector<String> supportedProperties = null;
 	Vector<String> supportedAssociations = null;
 	
+	String propertyValuesDelim = null;
+	
 	private boolean hasRole(OWLClass cls, String roleName, OWLClass filler) {
 		return true;
 	}
@@ -44,12 +46,14 @@ public class BatchEditTask extends BatchTask {
 	}
 	
 
-	public BatchEditTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile, String outfile) {
+	public BatchEditTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile, String outfile, String fileDelim, String propertyValuesDelim) {
 		
 		super(be);
 		this.tab = tab;
 		this.infile = infile;
 		this.outfile = outfile;
+		this.fileDelim = fileDelim;
+		this.propertyValuesDelim = propertyValuesDelim;
 	
 		supportedRoles = tab.getSupportedRoles();
 		supportedProperties = tab.getSupportedAnnotationProperties();
