@@ -94,7 +94,9 @@ public class PropertyEditingDialog extends JPanel {
     private JPanel createTextAreaPanel(String prop){
     	
     	JTextArea area = new JTextArea();
-    	//if(type == NCIEditTabConstants.EDIT && propvaluemap != null){
+    	area.setLineWrap(true);
+    	area.setWrapStyleWord(true);
+    	
     	if(type != NCIEditTabConstants.DELETE && propvaluemap != null){
     	   area.setText(propvaluemap.get(prop));
     	}
