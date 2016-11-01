@@ -1225,6 +1225,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return null;
 	}
 	
+	private boolean topOrBot(OWLNamedObject obj) {
+		if (getOWLEditorKit().getOWLModelManager().getOWLDataFactory().getOWLThing().equals(obj) ||
+				getOWLEditorKit().getOWLModelManager().getOWLDataFactory().getOWLNothing().equals(obj)) {
+			return true;
+		}
+		return false;
+	}
+	
 	public Optional<String> getRDFSLabel(OWLNamedObject oobj) {
 		// TODO: fall back to IRI if no label
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
@@ -1236,12 +1244,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			}
 		}
 
-		JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " requires an rdfs:label, using IRI short form instead",
-				"Warning", JOptionPane.WARNING_MESSAGE);
+		if (!topOrBot(oobj)) {
+
+			JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " requires an rdfs:label, using IRI short form instead",
+					"Warning", JOptionPane.WARNING_MESSAGE);
+		}
 		return Optional.of(oobj.getIRI().getShortForm());
 
 	}
-	
+
 	public Optional<String> getCode(OWLNamedObject oobj) {
 		// TODO: fall back to IRI if no label
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP)) {
@@ -1252,8 +1263,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			}
 		}
 
-		JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " should have a code property, using IRI short form instead",
-				"Warning", JOptionPane.WARNING_MESSAGE);
+		if (!topOrBot(oobj)) {
+
+			JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " should have a code property, using IRI short form instead",
+					"Warning", JOptionPane.WARNING_MESSAGE);
+		}
 		return Optional.of(oobj.getIRI().getShortForm());
 
 	}
