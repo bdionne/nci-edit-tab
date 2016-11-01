@@ -134,6 +134,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		navTree.refreshTree();
 	}
 	
+	private Set<OWLAnnotationProperty> annProps = null;
+	
 	private OWLClass split_source;
 	private OWLClass split_target;
 	private OWLClass merge_source;
@@ -1062,11 +1064,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private void initProperties() {
 		
-	
-		
 		getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
-		
-		//getOWLEditorKit().getSearchManager().performSearch("topos", new MySearchResultHandler());
 		
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {
@@ -1074,7 +1072,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 			if (project != null) {
 				// get all annotations from ontology to use for lookup
-				Set<OWLAnnotationProperty> annProps = ontology.getAnnotationPropertiesInSignature();
+				annProps = ontology.getAnnotationPropertiesInSignature();
 				
 				// populate associations
 				for (OWLAnnotationProperty p : annProps) {
@@ -1099,7 +1097,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					Set<String> complex_props = opts.getValues(COMPLEX_PROPS);
 					if (complex_props != null) {						
 						for (String cp : complex_props) {
-							OWLAnnotationProperty p = lookup(cp, annProps);
+							OWLAnnotationProperty p = lookUp(cp);
 							if (p != null) {
 								complex_properties.add(p);
 							} else {
@@ -1111,7 +1109,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 							Set<String> dependents = opts.getValues(cp);
 							if (dependents != null) {
 								for (String dp : dependents) {
-									OWLAnnotationProperty dpProp = lookup(dp, annProps);
+									OWLAnnotationProperty dpProp = lookUp(dp);
 									if (dpProp != null) {
 										dprops.add(dpProp);
 									} else {
@@ -1132,7 +1130,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					Set<String> imm_props = opts.getValues(IMMUTABLE_PROPS);
 					if (imm_props != null) {
 						for (String ip : imm_props) {
-							OWLAnnotationProperty p = lookup(ip, annProps);
+							OWLAnnotationProperty p = lookUp(ip);
 							if (p != null) {
 								immutable_properties.add(p);
 							}
@@ -1141,30 +1139,30 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					}
 					
 					// set constants for split/merge/retirement
-					MERGE_SOURCE = getSingleProperty("merge_source", opts, annProps);
-					MERGE_TARGET = getSingleProperty("merge_target", opts, annProps);
-					SPLIT_FROM = getSingleProperty("split_from", opts, annProps);
+					MERGE_SOURCE = getSingleProperty("merge_source", opts);
+					MERGE_TARGET = getSingleProperty("merge_target", opts);
+					SPLIT_FROM = getSingleProperty("split_from", opts);
 					
-					DEP_PARENT = getSingleProperty("deprecated_parent", opts, annProps);
-					DEP_CHILD = getSingleProperty("deprecated_child", opts, annProps);
-					DEP_ROLE = getSingleProperty("deprecated_role", opts, annProps);
-					DEP_IN_ROLE = getSingleProperty("deprecated_in_role", opts, annProps);
-					DEP_ASSOC = getSingleProperty("deprecated_assoc", opts, annProps);
-					DEP_IN_ASSOC = getSingleProperty("deprecated_in_assoc", opts, annProps);
+					DEP_PARENT = getSingleProperty("deprecated_parent", opts);
+					DEP_CHILD = getSingleProperty("deprecated_child", opts);
+					DEP_ROLE = getSingleProperty("deprecated_role", opts);
+					DEP_IN_ROLE = getSingleProperty("deprecated_in_role", opts);
+					DEP_ASSOC = getSingleProperty("deprecated_assoc", opts);
+					DEP_IN_ASSOC = getSingleProperty("deprecated_in_assoc", opts);
 					
 					PRE_MERGE_ROOT = findOWLClass("premerged_root", opts);
 					PRE_RETIRE_ROOT = findOWLClass("preretired_root", opts);
 					RETIRE_ROOT  = findOWLClass("retired_root", opts);
 					
-					DESIGN_NOTE = getSingleProperty("design_note", opts, annProps);
-					EDITOR_NOTE = getSingleProperty("editor_note", opts, annProps);	
+					DESIGN_NOTE = getSingleProperty("design_note", opts);
+					EDITOR_NOTE = getSingleProperty("editor_note", opts);	
 					
-					CODE_PROP = getSingleProperty("code_prop", opts, annProps);
-					LABEL_PROP = getSingleProperty("label_prop", opts, annProps);
+					CODE_PROP = getSingleProperty("code_prop", opts);
+					LABEL_PROP = getSingleProperty("label_prop", opts);
 					immutable_properties.add(LABEL_PROP);
-					PREF_NAME = getSingleProperty("pref_name", opts, annProps);
+					PREF_NAME = getSingleProperty("pref_name", opts);
 					
-					SEMANTIC_TYPE = getSingleProperty("semantic_type", opts, annProps); 
+					SEMANTIC_TYPE = getSingleProperty("semantic_type", opts); 
 					
 					
 				}
@@ -1199,16 +1197,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return cls;
 	}
 	
-	OWLAnnotationProperty getSingleProperty(String ps, ProjectOptions opts, Set<OWLAnnotationProperty> annProps) {
+	OWLAnnotationProperty getSingleProperty(String ps, ProjectOptions opts) {
 		OWLAnnotationProperty prop = null;
 		Set<String> ss = opts.getValues(ps);
 		if (ss != null) {
-			prop = lookup((String) ss.toArray()[0], annProps);
+			prop = lookUp((String) ss.toArray()[0]);
 		}
 		return prop;
 	}
 	
-	OWLAnnotationProperty lookup(String iri, Set<OWLAnnotationProperty> annProps) {
+	OWLAnnotationProperty lookUp(String iri) {
 		IRI cpIRI = IRI.create(iri);
 		for (OWLAnnotationProperty ap : annProps) {
 			if (ap.getIRI().equals(cpIRI)) {
@@ -1223,6 +1221,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			}
 		}
 		return null;
+	}
+	
+	public OWLAnnotationProperty lookUpShort(String shortName) {
+		
+		for (OWLAnnotationProperty ap : annProps) {
+			if (ap.getIRI().getShortForm().equals(shortName)) {				
+				return ap;	
+			}
+		}
+		return null;
+		
 	}
 	
 	private boolean topOrBot(OWLNamedObject obj) {
@@ -1320,6 +1329,21 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		return Optional.empty();		  
 		  
+	}
+	
+	public void addAnnotationToClass(String classCode, OWLAnnotationProperty prop, String value) {
+		
+		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+		
+		OWLLiteral lit_val = df.getOWLLiteral(value);
+		OWLClass ocl = getClass(classCode);
+		
+		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), lit_val);
+		
+		changes.add(new AddAxiom(ontology, ax));
+		
+		this.getOWLEditorKit().getModelManager().applyChanges(changes);
 	}
 	
 	public OWLClass getClass(String code) {

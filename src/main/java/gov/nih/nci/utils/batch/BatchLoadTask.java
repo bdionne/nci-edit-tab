@@ -14,17 +14,16 @@ import gov.nih.nci.ui.NCIEditTab;
 
 public class BatchLoadTask extends BatchTask {	
 
-	NCIEditTab tab = null;
+	
 	
 	List<String> codes = new ArrayList<String>();
 
 	public BatchLoadTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile,
 			String outfile, String fileDelim) {
-		super(be);
-		this.tab = tab;
+		super(be, tab);
 		this.infile = infile;
 		this.outfile = outfile;
-		this.fileDelim = fileDelim;
+		this.fieldDelim = fileDelim;
 		
 		data_vec = getData(infile);
 		setMax(data_vec.size());
@@ -58,22 +57,11 @@ public class BatchLoadTask extends BatchTask {
 		return true;
 	}
 	
-	public boolean complete() {
-		tab.commitChanges();
-		tab.disableBatchMode();
-		return true;
-	}
-	
-	public void cancelTask() {
-		super.cancelTask();
-		tab.undoChanges();
-		tab.disableBatchMode();
-	}
-	
 	public boolean begin() {
 		codes = tab.generateCodes(max);
-		tab.enableBatchMode();
-		return true;
+		return super.begin();
+		
+		
 	}
 
 	public Vector<String> validateData(Vector<String> v) {

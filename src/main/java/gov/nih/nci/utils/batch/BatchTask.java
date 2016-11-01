@@ -25,6 +25,8 @@ public class BatchTask {
 	public static enum TaskType {
 		LOAD, EDIT
 	};
+	
+	NCIEditTab tab = null;
 
 	boolean done = false;
 
@@ -34,15 +36,29 @@ public class BatchTask {
 		return canProceed;
 	}
 	
-	public boolean begin() {return true;}
+	public boolean complete() {
+		tab.commitChanges();
+		tab.disableBatchMode();
+		return true;
+	}
 	
-	public boolean complete() {return true;}
-
+	public void cancelTask() {
+		closePrintWriter();
+		cancelled = true;		
+		tab.undoChanges();
+		tab.disableBatchMode();
+	}
+	
+	public boolean begin() {
+		tab.enableBatchMode();
+		return true;
+	}
+	
 	String infile = null;
 
 	String outfile = null;
 	
-	String fileDelim = null;
+	String fieldDelim = null;
 
 	Vector<String> data_vec = null;
 
@@ -58,8 +74,9 @@ public class BatchTask {
 	PrintWriter pw = null;
 	TaskType batchtype = TaskType.LOAD;
 
-	public BatchTask(BatchProcessOutputPanel be) {
+	public BatchTask(BatchProcessOutputPanel be, NCIEditTab t) {
 		bp = be;
+		tab = t;
 		setMax(10000);
 		cancelled = false;
 		String title = "Batch Processing";
@@ -75,10 +92,7 @@ public class BatchTask {
 		this.max = max;
 	}
 
-	public void cancelTask() {
-		closePrintWriter();
-		cancelled = true;
-	}
+	
 
 	/**
 	 * Gets the title for this task.
@@ -232,7 +246,7 @@ public class BatchTask {
 	public Vector<String> getTokenStr(String value, int no_tokens) {
 		Vector<String> tokenValues = new Vector<String>();
 		// make sure there are enough values, even if all empty
-		String[] toks = value.split(fileDelim);
+		String[] toks = value.split(fieldDelim);
 		for (int i = 0; i < no_tokens; i++) {
 			String elem = "NA";
 			if ((i < toks.length) && !(toks[i].compareTo("") == 0)) {

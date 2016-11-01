@@ -2,6 +2,7 @@ package gov.nih.nci.utils.batch;
 
 import java.util.Vector;
 
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.BatchProcessOutputPanel;
@@ -13,11 +14,7 @@ import gov.nih.nci.ui.NCIEditTab;
 
 public class BatchEditTask extends BatchTask {
 
-	/**
-	 * Requests that the task be cancelled. This method will only be called if
-	 * the task can be cancelled.
-	 */
-	NCIEditTab tab = null;
+	
 
 	Vector<String> supportedRoles = null;
 	Vector<String> supportedProperties = null;
@@ -48,11 +45,10 @@ public class BatchEditTask extends BatchTask {
 
 	public BatchEditTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile, String outfile, String fileDelim, String propertyValuesDelim) {
 		
-		super(be);
-		this.tab = tab;
+		super(be, tab);
 		this.infile = infile;
 		this.outfile = outfile;
-		this.fileDelim = fileDelim;
+		this.fieldDelim = fileDelim;
 		this.propertyValuesDelim = propertyValuesDelim;
 	
 		supportedRoles = tab.getSupportedRoles();
@@ -63,6 +59,7 @@ public class BatchEditTask extends BatchTask {
 		setMax(data_vec.size());
 		setMessage("Batch Edit processing in progress, please wait ...");
 	}
+	
 
 	/*
 	 * 1 concept name 2 edit|new|delete|del-all 3
@@ -86,7 +83,7 @@ public class BatchEditTask extends BatchTask {
 		try {
 
 			Vector<String> w = getTokenStr(s, 9);
-			String name = (String) w.elementAt(0);
+			String className = (String) w.elementAt(0);
 
 			if (super.checkNoErrors(w, taskId)) {
 				// ok
@@ -94,7 +91,7 @@ public class BatchEditTask extends BatchTask {
 				return false;
 			}
 
-			String edit = (String) w.elementAt(1);
+			String operation = (String) w.elementAt(1);
 
 			String attribute = (String) w.elementAt(2);
 
@@ -104,12 +101,17 @@ public class BatchEditTask extends BatchTask {
 
 			String newAttributeValue = (String) w.elementAt(5);
 
-			//owlModel.beginTransaction("BatchEdit. Processing " + s);
-
-			// this should be false???
 			boolean retval = false;
-			if (edit.compareToIgnoreCase("new") == 0) {
+			if (operation.compareToIgnoreCase("new") == 0) {
 				if (attribute.compareToIgnoreCase("property") == 0) {
+					
+					OWLAnnotationProperty ap = tab.lookUpShort(attributeName);
+					
+					if (!tab.getComplexProperties().contains(ap)) {
+						tab.addAnnotationToClass(className, ap, attributeValue);						
+					}
+					
+					
 					/**
 					if (attributeName.compareToIgnoreCase(NCIEditTabConstants.ALTLABEL) == 0) {
 						OWLNamedClass hostClass = wrapper.getOWLNamedClass(name);
@@ -149,7 +151,7 @@ public class BatchEditTask extends BatchTask {
 							modifier);
 							*/
 				}
-			} else if (edit.compareToIgnoreCase("delete") == 0) {
+			} else if (operation.compareToIgnoreCase("delete") == 0) {
 				if (attribute.compareToIgnoreCase("property") == 0) {
 					/**
 					retval = wrapper.removeAnnotationProperty(name,
@@ -189,14 +191,14 @@ public class BatchEditTask extends BatchTask {
 							value, modifier);
 							*/
 				}
-			} else if (edit.compareToIgnoreCase("edit") == 0) {
+			} else if (operation.compareToIgnoreCase("edit") == 0) {
 				if (attribute.compareToIgnoreCase("property") == 0) {
 
 					/**
 					retval = wrapper.modifyAnnotationProperty(name,
 							attributeName, attributeValue, newAttributeValue);
 							*/
-					possiblySyncPreferredTerm(name, attributeName,
+					possiblySyncPreferredTerm(className, attributeName,
 							newAttributeValue);
 
 				} else if (attribute.compareToIgnoreCase("role") == 0) {
@@ -305,7 +307,7 @@ public class BatchEditTask extends BatchTask {
 		try {
 
 			String cls_name = (String) v.elementAt(0);
-			String action = (String) v.elementAt(1);
+			String operation = (String) v.elementAt(1);
 			String attribute = (String) v.elementAt(2);
 			String attributename = (String) v.elementAt(3);
 			String attributevalue_1 = (String) v.elementAt(4);
@@ -325,10 +327,10 @@ public class BatchEditTask extends BatchTask {
 
 			Vector superclasses = new Vector();
 			
-			if (action.compareToIgnoreCase("new") != 0
-					&& action.compareToIgnoreCase("edit") != 0
-					&& action.compareToIgnoreCase("delete") != 0) {
-				String error_msg = " -- action " + action
+			if (operation.compareToIgnoreCase("new") != 0
+					&& operation.compareToIgnoreCase("edit") != 0
+					&& operation.compareToIgnoreCase("delete") != 0) {
+				String error_msg = " -- action " + operation
 						+ " is not supported.";
 				w.add(error_msg);
 			}
@@ -342,7 +344,7 @@ public class BatchEditTask extends BatchTask {
 				w.add(error_msg);
 			}
 
-			if (action.compareToIgnoreCase("new") == 0) {
+			if (operation.compareToIgnoreCase("new") == 0) {
 				
 				if (hostClass != null) {
 					if (attribute.compareToIgnoreCase("role") == 0) {
@@ -459,11 +461,11 @@ public class BatchEditTask extends BatchTask {
 				
 			}
 
-			else if (action.compareToIgnoreCase("edit") == 0
-					|| action.compareToIgnoreCase("delete") == 0) {
+			else if (operation.compareToIgnoreCase("edit") == 0
+					|| operation.compareToIgnoreCase("delete") == 0) {
 				if (hostClass != null) {
 					if (attribute.compareToIgnoreCase("parent") == 0) {
-						if (action.compareToIgnoreCase("delete") == 0) {
+						if (operation.compareToIgnoreCase("delete") == 0) {
 							
 							OWLClass superClass = tab.getClass(attributename);
 							if (superClass == null) {
@@ -513,7 +515,7 @@ public class BatchEditTask extends BatchTask {
 
 									}
 
-									if (action.compareTo("edit") == 0) {
+									if (operation.compareTo("edit") == 0) {
 										pos = attributevalue_2.indexOf("|");
 										if (pos == -1) {
 											String error_msg = " -- missing modifier or filler.";
@@ -563,7 +565,7 @@ public class BatchEditTask extends BatchTask {
 							}
 							
 
-							if (action.compareToIgnoreCase("edit") == 0) {
+							if (operation.compareToIgnoreCase("edit") == 0) {
 								
 								if (hasProperty(hostClass,
 										attributename, attributevalue_2)) {
@@ -608,7 +610,7 @@ public class BatchEditTask extends BatchTask {
 							w.add(error_msg);
 						}
 
-						if (action.compareToIgnoreCase("delete") == 0) {
+						if (operation.compareToIgnoreCase("delete") == 0) {
 							
 							OWLClass targetClass = tab.getClass(attributevalue_1);
 							if (targetClass == null) {
