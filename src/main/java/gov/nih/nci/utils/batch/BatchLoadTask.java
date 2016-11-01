@@ -42,18 +42,6 @@ public class BatchLoadTask extends BatchTask {
 			//String pt = (String) w.elementAt(1);
 			String sup = (String) w.elementAt(1);
 			
-			
-			
-			/**
-			String sem_type = "";
-			if (w.size() > 3) {
-				sem_type = (String) w.elementAt(3);
-			}
-			*/
-			//
-			
-
-			// TODO: Batch these all up and do a single commit
 			if (super.checkNoErrors(w, taskId)) {
 				tab.createNewChild(tab.getClass(sup), Optional.of(name), Optional.of(codes.get(taskId)));
 				//Thread.sleep(1);

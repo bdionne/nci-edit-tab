@@ -37,6 +37,7 @@ import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.utils.batch.BatchEditTask;
 import gov.nih.nci.utils.batch.BatchLoadTask;
 import gov.nih.nci.utils.batch.BatchTask;
+import gov.nih.nci.utils.batch.BatchTask.TaskType;
 import javafx.scene.shape.Box;
 
 /**
@@ -51,7 +52,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 	JTextField fInputTf, fOutputTf;
 
-	JComboBox<String> batchType = null;
+	JComboBox<TaskType> batchType = null;
 	
 	JLabel fileDelimLbl;
 	JLabel propertyValuesDelimLbl;
@@ -69,11 +70,8 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	
 	File inputFolder;
 
-	public static final int BATCH_LOADER = 2;
 
-	public static final int BATCH_EDITOR = 1;
-
-	int type = BATCH_EDITOR;
+	TaskType type = TaskType.EDIT;
 
 	public BatchProcessingDialog(BatchProcessOutputPanel b, NCIEditTab tab) {
 		be = b;
@@ -88,9 +86,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 		init();
 	}
 
-	public void setBatchProcessType(int type) {
-		this.type = type;
-	}
+	
 	
 	private JPanel createFileField(String label, String extension, String type){
 		
@@ -178,10 +174,11 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 			container.add(filePanel, BorderLayout.NORTH);
 
-			String[] types = new String[] { "Edit", "Load" };
-			batchType = new JComboBox<String>(types);
-			batchType.setSelectedIndex(0);
-			//batchType.addActionListener(this);
+			batchType = new JComboBox<BatchTask.TaskType>();
+			batchType.addItem(BatchTask.TaskType.EDIT);
+			batchType.addItem(BatchTask.TaskType.LOAD);
+		
+			batchType.addActionListener(this);
 			
 			
 			JPanel labelcombopanel = new JPanel();
@@ -224,7 +221,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			     public void itemStateChanged(ItemEvent e) {
 			    	 if (e.getStateChange() == ItemEvent.SELECTED) {
 			             Object item = e.getItem();
-			             if (item.toString().equals("Load")) {		            	 
+			             if (item.equals(TaskType.LOAD)) {		            	 
 			            	 propvaluedelimpanel.setVisible(false);
 			             } else {
 			            	 propvaluedelimpanel.setVisible(true);
@@ -330,7 +327,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 		if (action == batchType) {
 			// TODO: Bob, this is disgusting
-			type = batchType.getSelectedIndex() + 1;
+			type = (TaskType) batchType.getSelectedItem();
 		} else if (action == fCancelButton) {
 			dispose();
 		} else if (action == fStartButton) {
@@ -348,7 +345,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				TaskProgressDialog tpd = null;
 
 				BatchTask task = null;
-				if (type == BATCH_LOADER) {
+				if (type == TaskType.LOAD) {
 					
 					//task = new BatchLoadTask(be, tab, infile, outfile);
 					task = new BatchLoadTask(be, tab, infile, outfile, fileDelim.getText());
@@ -356,7 +353,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 					task.setType(BatchTask.TaskType.LOAD);
 					tpd = new TaskProgressDialog(new JFrame(), 
 							"Batch Load Progress Status", task);
-				} else if (type == BATCH_EDITOR) {
+				} else if (type == TaskType.EDIT) {
 					//task = new BatchEditTask(be, tab, infile, outfile);
 					task = new BatchEditTask(be, tab, infile, outfile, fileDelim.getText(), propertyValuesDelim.getText());
 					task.setType(BatchTask.TaskType.EDIT);
