@@ -1239,15 +1239,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public boolean hasPropertyValue(OWLClass cls, String propName, String value) {
-		OWLAnnotationProperty prop = this.lookUpShort(propName);
-		Optional<String> val = this.getProperty(cls, prop);
-		if (val.isPresent()) {
-			if (value.equals(val.get())) {
-				return true;
-			}
-		}
-		return false;
-		
+		OWLAnnotationProperty prop = lookUpShort(propName);
+		List<String> values = this.getPropertyValues(cls, prop);
+		return values.contains(value);		
 	}
 	
 	private boolean topOrBot(OWLNamedObject obj) {
@@ -1334,7 +1328,23 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	// TODO: Need an all props here
 	
-	public Optional<String> getProperty(OWLNamedObject oobj, OWLAnnotationProperty prop) {
+	public List<String> getPropertyValues(OWLNamedObject oobj, OWLAnnotationProperty prop) {
+		
+		List<String> values = new ArrayList<String>();
+		  
+		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), prop)) {
+			OWLAnnotationValue av = annotation.getValue();
+			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+			if (ol.isPresent()) {
+				values.add(ol.get().getLiteral());
+			}   
+		}
+		
+		return values;		  
+		  
+	}
+	
+	public Optional<String> getPropertyValue(OWLNamedObject oobj, OWLAnnotationProperty prop) {
 		  
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), prop)) {
 			OWLAnnotationValue av = annotation.getValue();

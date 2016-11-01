@@ -326,7 +326,7 @@ public class ComplexEditPanel extends JPanel {
     }
     
     private OWLClass findTarget(OWLClass cls) {
-    	String target_code = NCIEditTab.currentTab().getProperty(cls, MERGE_TARGET).get();
+    	String target_code = NCIEditTab.currentTab().getPropertyValue(cls, MERGE_TARGET).get();
     	return NCIEditTab.currentTab().getClass(target_code);
     }
     
