@@ -52,7 +52,7 @@ public class BatchEditTask extends BatchTask {
 		this.propertyValuesDelim = propertyValuesDelim;
 	
 		supportedRoles = tab.getSupportedRoles();
-		supportedProperties = tab.getSupportedAnnotationProperties();
+		//supportedProperties = tab.getSupportedAnnotationProperties();
 		supportedAssociations = tab.getSupportedAssociations();
 
 		data_vec = getData(infile);
@@ -407,13 +407,13 @@ public class BatchEditTask extends BatchTask {
 					}
 
 					else if (attribute.compareToIgnoreCase("property") == 0) {
-						if (!supportedProperties.contains(attributename)) {
+						if (!tab.supportsProperty(attributename)) {
 							String error_msg = " -- property " + attributename
 									+ " is not identifiable.";
 							w.add(error_msg);
 						} else {
 							
-							if (hasProperty(hostClass, attributename,
+							if (tab.hasPropertyValue(hostClass, attributename,
 									attributevalue_1)) {
 								String error_msg = " -- property already exists.";
 								w.add(error_msg);

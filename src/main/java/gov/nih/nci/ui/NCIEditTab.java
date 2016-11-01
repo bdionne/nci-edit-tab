@@ -1234,6 +1234,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 	}
 	
+	public boolean supportsProperty(String shortPropName) {
+		return lookUpShort(shortPropName) != null;
+	}
+	
+	public boolean hasPropertyValue(OWLClass cls, String propName, String value) {
+		OWLAnnotationProperty prop = this.lookUpShort(propName);
+		Optional<String> val = this.getProperty(cls, prop);
+		if (val.isPresent()) {
+			if (value.equals(val.get())) {
+				return true;
+			}
+		}
+		return false;
+		
+	}
+	
 	private boolean topOrBot(OWLNamedObject obj) {
 		if (getOWLEditorKit().getOWLModelManager().getOWLDataFactory().getOWLThing().equals(obj) ||
 				getOWLEditorKit().getOWLModelManager().getOWLDataFactory().getOWLNothing().equals(obj)) {
@@ -1315,6 +1331,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		}
 		return new HashSet<OWLAnnotation>();
 	}
+	
+	// TODO: Need an all props here
 	
 	public Optional<String> getProperty(OWLNamedObject oobj, OWLAnnotationProperty prop) {
 		  
@@ -1554,10 +1572,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public Vector<String> getSupportedRoles() {
-		return null;
-	}
-	
-	public Vector<String> getSupportedAnnotationProperties() {
 		return null;
 	}
 	
