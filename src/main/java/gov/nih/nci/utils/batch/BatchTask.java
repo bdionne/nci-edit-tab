@@ -232,7 +232,7 @@ public class BatchTask {
 	public Vector<String> getTokenStr(String value, int no_tokens) {
 		Vector<String> tokenValues = new Vector<String>();
 		// make sure there are enough values, even if all empty
-		String[] toks = value.split("\t");
+		String[] toks = value.split(fileDelim);
 		for (int i = 0; i < no_tokens; i++) {
 			String elem = "NA";
 			if ((i < toks.length) && !(toks[i].compareTo("") == 0)) {
@@ -243,36 +243,5 @@ public class BatchTask {
 		return tokenValues;
 	}
 
-	public String removeTabs(String s) {
-		String rets = s;
-		while (rets.startsWith("\t")) {
-			rets = rets.substring(1);
-		}
-		return rets;
-	}
-
-	public String removeRtnChar(String line) {
-		String s = line;
-		char c = s.charAt(s.length() - 1);
-		if (c == '\n') {
-			s = s.substring(0, s.length() - 1);
-		}
-		return s;
-	}
-
-	public String getStringName(String line) {
-		String s = line;
-		int pos = s.indexOf(":");
-		if (pos == -1)
-			return "";
-		return s.substring(0, pos);
-	}
-
-	public String getStringValue(String line) {
-		String s = line;
-		int pos = s.indexOf(":");
-		String t1 = s.substring(pos + 1);
-		return (removeTabs(t1));
-	}
 
 }
