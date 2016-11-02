@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.JComboBox;
@@ -15,6 +16,8 @@ import javax.swing.JPanel;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.UIHelper;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+
+import gov.nih.nci.ui.NCIEditTab;
 
 public class ComplexPropChooser extends JPanel {
 
@@ -38,7 +41,10 @@ public class ComplexPropChooser extends JPanel {
 	private String[] populateStrings(Set<OWLAnnotationProperty> props) {
 		List<String> strs = new ArrayList<String>();
 		for (OWLAnnotationProperty p : props) {
-			strs.add(p.getIRI().getShortForm());
+			Optional<String> optl = NCIEditTab.currentTab().getRDFSLabel(p);
+			if (optl.isPresent()) {
+				strs.add(optl.get());
+			}
 		}
 		String[] res = new String[strs.size()];
 		for (int i = 0; i < res.length; i++) {
@@ -50,9 +56,14 @@ public class ComplexPropChooser extends JPanel {
 	
 	private OWLAnnotationProperty findProp(String s) {
 		for (OWLAnnotationProperty p : complex_props) {
-			if (p.getIRI().getShortForm().equalsIgnoreCase(s)) {
-				return p;
+			Optional<String> optl = NCIEditTab.currentTab().getRDFSLabel(p);
+			if (optl.isPresent()) {
+				if (optl.get().equalsIgnoreCase(s)) {
+					return p;
+				}
+				
 			}
+			
 		}
 		return null;
 		
