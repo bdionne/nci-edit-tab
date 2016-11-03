@@ -223,25 +223,16 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 			task.begin();
 			while (!cancelled && i < tpd.getTask().getProgressMax())
 			{
-				//owlModel = NCIEditTab.getActiveOWLModel();
-
-                
-                
                 if (task.processTask(i++)) {
                 	num_completed++;
                 }
 				
-                
-
-
-				String message = "Completed " + (i+1) + " out of " + tpd.getTask().getProgressMax();
+                String message = "Completed " + (i+1) + " out of " + tpd.getTask().getProgressMax();
 				tpd.setSubTaskMessage(message);
 				tpd.setProgress(i);
 				cancelled = tpd.isCancelled();
 
 				if (cancelled) break;
-                
-                // now sleep for a bit to let things settle
                 
 
 			}
@@ -250,9 +241,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 			}
 			long total = System.currentTimeMillis() - beg;
 			task.print("Total run time was: " + total + " ms");
-			//task.print("Time spent in create was: " + BatchLoadTask.create_time + " ms");
-			//task.print("Time spent in evs history was: " + BatchLoadTask.evs_time + " ms");
-			//owlModel.setGenerateEventsEnabled(eventsEnabled);
+			
             
 			task.print("Total successful completion: " + num_completed + " out of: " + i);
 
@@ -262,8 +251,6 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 				task.cancelTask();
 			}
 
-			//task.print("run completion at: " + i);
-			//num_completed = i;
 			dispose();
 
 		}

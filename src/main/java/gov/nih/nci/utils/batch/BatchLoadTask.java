@@ -35,7 +35,7 @@ public class BatchLoadTask extends BatchTask {
 	public boolean processTask(int taskId) {
 		try {
 			String s = (String) data_vec.elementAt(taskId);
-			Vector<String> w = getTokenStr(s, 2);
+			Vector<String> w = parseTokens(s);
 			
 			String name = (String) w.elementAt(0);
 			String sup = (String) w.elementAt(1);

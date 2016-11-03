@@ -227,7 +227,6 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 			newSet = owlEditorKit.getModelManager().getOWLEntityFactory().createOWLEntity(
 					OWLClass.class, gen_code, null);
 		} catch (OWLEntityCreationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

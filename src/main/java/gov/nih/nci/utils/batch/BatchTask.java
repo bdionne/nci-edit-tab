@@ -18,18 +18,17 @@ import gov.nih.nci.ui.NCIEditTab;
 /**
  * @Author: Bob Dionne
  */
-public class BatchTask {
+public abstract class BatchTask {
 	
 	private static final Logger log = Logger.getLogger(BatchTask.class);
 
 	public static enum TaskType {
-		LOAD, EDIT
+		LOAD, EDIT_SIMPLE_PROPS, EDIT_COMPLEX_PROPS, EDIT_PARENTS, EDIT_ROLES
 	};
 	
 	NCIEditTab tab = null;
 
 	boolean done = false;
-
 	private boolean canProceed = true;
 
 	public boolean canProceed() {
@@ -55,7 +54,6 @@ public class BatchTask {
 	}
 	
 	String infile = null;
-
 	String outfile = null;
 	
 	String fieldDelim = null;
@@ -72,7 +70,7 @@ public class BatchTask {
 	BatchProcessOutputPanel bp = null;
 
 	PrintWriter pw = null;
-	TaskType batchtype = TaskType.LOAD;
+	
 
 	public BatchTask(BatchProcessOutputPanel be, NCIEditTab t) {
 		bp = be;
@@ -84,9 +82,7 @@ public class BatchTask {
 		setMessage("Batch processing in progress, please wait ...");
 	}
 
-	public void setType(TaskType type) {
-		batchtype = type;
-	}
+	
 
 	protected void setMax(int max) {
 		this.max = max;
@@ -196,7 +192,7 @@ public class BatchTask {
 	}
 
 	public boolean 	checkNoErrors(Vector<String> w, int i) {
-		Vector<String> errors = this.validateData(w);
+		Vector<String> errors = validateData(w);
 		if (errors.size() > 0) {
 			for (int j = 0; j < errors.size(); j++) {
 				print("record " + (i+1) + ": " + errors.elementAt(j));
@@ -239,15 +235,13 @@ public class BatchTask {
 		return v;
 	}
 
-	public Vector<String> validateData(Vector<String> v) {
-		return null;
-	}
+	public abstract Vector<String> validateData(Vector<String> v);
 
-	public Vector<String> getTokenStr(String value, int no_tokens) {
+	public Vector<String> parseTokens(String value) {
 		Vector<String> tokenValues = new Vector<String>();
 		// make sure there are enough values, even if all empty
 		String[] toks = value.split(fieldDelim);
-		for (int i = 0; i < no_tokens; i++) {
+		for (int i = 0; i < toks.length; i++) {
 			String elem = "NA";
 			if ((i < toks.length) && !(toks[i].compareTo("") == 0)) {
 				elem = toks[i];

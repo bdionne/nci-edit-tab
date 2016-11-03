@@ -55,9 +55,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	JComboBox<TaskType> batchType = null;
 	
 	JLabel fileDelimLbl;
-	JLabel propertyValuesDelimLbl;
 	JTextField fileDelim;
-	JTextField propertyValuesDelim;
 	
 	public static final String FILE_DELIMITER = ",", PROPERTY_VALUES_DELIMITER = "\t";
 	
@@ -71,7 +69,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	File inputFolder;
 
 
-	TaskType type = TaskType.EDIT;
+	TaskType edit_type = TaskType.EDIT_SIMPLE_PROPS;
 
 	public BatchProcessingDialog(BatchProcessOutputPanel b, NCIEditTab tab) {
 		be = b;
@@ -94,64 +92,59 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	  panel.setPreferredSize(new Dimension(470, 30));
 	  JLabel lb = new JLabel(label);
 	  
-	  if(type == "input"){
-		  fInputTf = new  JTextField();
-	  
+	  if (type == "input") {
+		  fInputTf = new  JTextField();	  
 		  fInputTf.setPreferredSize(new Dimension(250, 25));
-	  }
-	  else{
-		  
-		  fOutputTf = new  JTextField();
-		  
+	  } else{		  
+		  fOutputTf = new  JTextField();		  
 		  fOutputTf.setPreferredSize(new Dimension(250, 25));
 	  }
+	  
 	  JButton btn = new JButton();
 	  btn.setText("browse");
 	  
 	  
-	  btn.addActionListener(new ActionListener(){
-		  
-		  public void actionPerformed(ActionEvent e){
+	  btn.addActionListener(new ActionListener() {
+
+		  public void actionPerformed(ActionEvent e) {
 			  if(type == "input"){
 				  JFileChooser fc = new JFileChooser();
 				  //to do - add file filter
 				  int select = fc.showOpenDialog(BatchProcessingDialog.this);
 				  if (select == JFileChooser.APPROVE_OPTION) {
-			            File file = fc.getSelectedFile();
-			            infile = file.getAbsolutePath();
-			            fInputTf.setText(infile);
-			            
-			            String filename = file.getName();
-			            String filedir = infile.replaceFirst(filename, "");
-			            
-			            inputFolder = new File(filedir);
+					  File file = fc.getSelectedFile();
+					  infile = file.getAbsolutePath();
+					  fInputTf.setText(infile);
+
+					  String filename = file.getName();
+					  String filedir = infile.replaceFirst(filename, "");
+
+					  inputFolder = new File(filedir);
 				  }
-			  }
-			  else{
+			  } else {
 				  JFileChooser fc = new JFileChooser();
 				  if(inputFolder != null){
 					  fc.setCurrentDirectory(inputFolder);
 				  }
 				  //todo - add file extension filter
 				  int select = fc.showSaveDialog(BatchProcessingDialog.this);
-				  			  
+
 				  if (select == JFileChooser.APPROVE_OPTION) {
-			            File file = fc.getSelectedFile();
-			            outfile = file.getAbsolutePath();
-			            fOutputTf.setText(outfile);
+					  File file = fc.getSelectedFile();
+					  outfile = file.getAbsolutePath();
+					  fOutputTf.setText(outfile);
 				  }
 			  }
 		  }
 	  });
+	  
 	  panel.add(lb);
 	  if(type == "input"){
-		  panel.add(fInputTf);
-		  
-	  }
-	  else{
+		  panel.add(fInputTf);		  
+	  } else {
 		  panel.add(fOutputTf);
 	  }
-	 // panel.add(field);
+	  
 	  panel.add(btn);
 	  
 	  return panel;
@@ -175,8 +168,11 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			container.add(filePanel, BorderLayout.NORTH);
 
 			batchType = new JComboBox<BatchTask.TaskType>();
-			batchType.addItem(BatchTask.TaskType.EDIT);
 			batchType.addItem(BatchTask.TaskType.LOAD);
+			batchType.addItem(BatchTask.TaskType.EDIT_SIMPLE_PROPS);
+			batchType.addItem(BatchTask.TaskType.EDIT_COMPLEX_PROPS);
+			batchType.addItem(BatchTask.TaskType.EDIT_PARENTS);
+			batchType.addItem(BatchTask.TaskType.EDIT_ROLES);
 		
 			batchType.addActionListener(this);
 			
@@ -187,17 +183,12 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			labelcombopanel.add(batchType, BorderLayout.CENTER);
 
 			fileDelimLbl = new JLabel("File Delimiter                     ");
-			propertyValuesDelimLbl = new JLabel("Property Values Delimiter ");
 			
 			fileDelim = new JTextField(FILE_DELIMITER);
 			fileDelim.setPreferredSize(new Dimension(100, 25));
-	        propertyValuesDelim = new JTextField(PROPERTY_VALUES_DELIMITER);
-	        propertyValuesDelim.setPreferredSize(new Dimension(100, 25));
 	        
 	        fileDelim.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
 	        fileDelim.addKeyListener(keyListener);
-	        propertyValuesDelim.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
-	        propertyValuesDelim.addKeyListener(keyListener);
 						
 			JPanel filedelimpanel = new JPanel();
 			filedelimpanel.setPreferredSize(new Dimension(420, 25));
@@ -206,8 +197,6 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			
 			JPanel propvaluedelimpanel = new JPanel();
 			propvaluedelimpanel.setPreferredSize(new Dimension(420, 25));
-			propvaluedelimpanel.add(propertyValuesDelimLbl);
-			propvaluedelimpanel.add(propertyValuesDelim, BorderLayout.CENTER);
 			
 			JPanel centerPanel = new JPanel();
 			centerPanel.setPreferredSize(new Dimension(420, 100));
@@ -215,20 +204,6 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			centerPanel.add(filedelimpanel, BorderLayout.CENTER);
 			centerPanel.add(propvaluedelimpanel, BorderLayout.SOUTH);
 			container.add(centerPanel, BorderLayout.CENTER);
-			
-			batchType.addItemListener(new ItemListener() {
-			     @Override
-			     public void itemStateChanged(ItemEvent e) {
-			    	 if (e.getStateChange() == ItemEvent.SELECTED) {
-			             Object item = e.getItem();
-			             if (item.equals(TaskType.LOAD)) {		            	 
-			            	 propvaluedelimpanel.setVisible(false);
-			             } else {
-			            	 propvaluedelimpanel.setVisible(true);
-			             }
-			          }
-			     }
-			 });
 			
 			fStartButton = new JButton("Start");
 			fStartButton.addActionListener(this);
@@ -243,13 +218,11 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 			container.add(btnPanel, BorderLayout.SOUTH);
             
-			//setSize(400, 400);
 			pack();
 			this.setVisible(true);
 
 		} catch (Exception ex) {
 			log.warn("Exception caught", ex);
-
 		}
 	}
 	
@@ -259,8 +232,6 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
             if(e.getKeyCode() == KeyEvent.VK_TAB) {
                 if(e.getSource().equals(fileDelim)) {
                     fileDelim.setText(fileDelim.getText() + "\t");
-                } else if(e.getSource().equals(propertyValuesDelim)) {
-                    propertyValuesDelim.setText(propertyValuesDelim.getText() + "\t");
                 }
             } else {
                 super.keyReleased(e);
@@ -269,14 +240,14 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
     };
 
 	public String getInfile() {
-		if(fInputTf != null){
+		if (fInputTf != null) {
 		   return  fInputTf.getText();
-		}
-		
+		}		
 		return "";
 	}
 
-	public String getOutfile() {		
+	public String getOutfile() {
+		
 		if(fOutputTf != null){
 			return fOutputTf.getText();
 		}
@@ -326,8 +297,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 		Object action = event.getSource();
 
 		if (action == batchType) {
-			// TODO: Bob, this is disgusting
-			type = (TaskType) batchType.getSelectedItem();
+			edit_type = (TaskType) batchType.getSelectedItem();
 		} else if (action == fCancelButton) {
 			dispose();
 		} else if (action == fStartButton) {
@@ -345,63 +315,39 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				TaskProgressDialog tpd = null;
 
 				BatchTask task = null;
-				if (type == TaskType.LOAD) {
+				if (edit_type == TaskType.LOAD) {
 					
 					//task = new BatchLoadTask(be, tab, infile, outfile);
 					task = new BatchLoadTask(be, tab, infile, outfile, fileDelim.getText());
 					
-					task.setType(BatchTask.TaskType.LOAD);
 					tpd = new TaskProgressDialog(new JFrame(), 
 							"Batch Load Progress Status", task);
-				} else if (type == TaskType.EDIT) {
+				} else {
 					//task = new BatchEditTask(be, tab, infile, outfile);
-					task = new BatchEditTask(be, tab, infile, outfile, fileDelim.getText(), propertyValuesDelim.getText());
-					task.setType(BatchTask.TaskType.EDIT);
+					task = new BatchEditTask(be, tab, infile, outfile, fileDelim.getText(), edit_type);
+					
 					tpd = new TaskProgressDialog(new JFrame(),
 							"Batch Edit Progress Status", task);
 				}
 
 				task.openPrintWriter(outfile);
 
-				//task.validateData();
+				
 				if (!task.canProceed()) {
-					//MsgDialog
-					//		.error(
-					//				(JFrame) tab.getTopLevelAncestor(),
-					//				"Severe input data issues detected, cannot proceed. "
-					//						+ "Please correct all errors and try again.");
 					return;
 				}
 				dispose();
 
 				if (tpd != null) {
 					tpd.run();
-				}
+				}			
 
-				
-
-				if (tpd != null) {
-					//MsgDialog.ok((JFrame) tab.getTopLevelAncestor(),
-					//	getTitle(), "Completed actions: "
-					//			+ tpd.getNumCompleted());
-				}
 				try {
 					task.closePrintWriter();
 				} catch (Exception e) {
 
 				}
-
-				if (task.isCancelled()) {
-					//be.enableButton("clearButton", true);
-				} else {
-					//	be.enableButton("inputButton", false);
-					//	be.enableButton("saveButton", true);
-					//	be.enableButton("clearButton", true);
-				}
-
 			}
-
 		}
-
 	}
 }
