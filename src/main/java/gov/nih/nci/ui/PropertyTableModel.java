@@ -36,12 +36,12 @@ public class PropertyTableModel extends AbstractTableModel {
 	
 	public OWLClass getSelection() {return selection;}
 	
-	//private List<OWLAnnotationProperty> complexProperties;
 	private OWLAnnotationProperty complexProp;
 	
 	public OWLAnnotationProperty getComplexProp() {
 		return complexProp;
 	}
+	
 	private Set<OWLAnnotationProperty> requiredAnnotations;
 	private List<OWLAnnotationProperty> requiredAnnotationsList;
 	private List<OWLAnnotation> annotations = new ArrayList<>();

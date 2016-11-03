@@ -275,6 +275,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         sp.setPreferredSize(new Dimension(180, 150));
         add(sp, BorderLayout.CENTER);
     }
+    
+    public boolean isViewable() {
+    	return tableModel.hasAnnotation();
+    }
 
     public void setSelectedCls(OWLClass cls) {
     	tableModel.setSelection(cls);
@@ -282,19 +286,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     	if (tableModel.hasAnnotation()) {
     		tableHeaderPanel.setVisible(true);
     		sp.setVisible(true);
-    		tableModel.fireTableDataChanged();
-    		//TableColumn c = propertyTable.getColumnModel().getColumn(0);
-	       // updateRowHeights(0, c.getWidth(), propertyTable);
-    		//propertyTable.getColumn(0).setWidth(propertyTable.getColumn(0).getWidth() + 1);
-    		/*TableRowSorter<TableModel> sorter = new TableRowSorter<>(tableModel);
-            propertyTable.setRowSorter(sorter);
-            List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-             
-            int columnIndexToSort = 0;
-            sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
-             
-            sorter.setSortKeys(sortKeys);
-            sorter.sort();*/
+    		tableModel.fireTableDataChanged();    		
     	} else {
     		tableHeaderPanel.setVisible(false);
     		sp.setVisible(false);
