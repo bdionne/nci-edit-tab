@@ -137,7 +137,7 @@ public class PropertyTableModel extends AbstractTableModel {
 		return propertyTypes;
 	}
 
-	public Map<String, String> getSelectedPropertyValue(int row) {
+	public Map<String, String> getSelectedPropertyValues(int row) {
 		Map<String, String> propertyValues = new HashMap<String, String>();
 		if ( row < 0 ) {
 			return propertyValues;
@@ -154,7 +154,18 @@ public class PropertyTableModel extends AbstractTableModel {
 			}
 			OWLAnnotation annot = annotations.get(startIndex + i);
 			if (annot != null) {
-				propertyValues.put(propShortForm, literalExtractor.getLiteral(annot.getValue()));
+				// TODO: temporarily hardcode this, certain annotations always use system defaults
+				// even when diting an existing row. We need to add this as a property of the annotation
+				// or otherwise distinguish in ghte config file
+				if (propShortForm.equals("Definition_Review_Date") ||
+						propShortForm.equals("Definition_Reviewer_Name")) {
+					OWLAnnotationProperty p = requiredAnnotationsList.get(i-1);
+					propertyValues.put(propShortForm,
+							NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(p)));
+				} else {
+
+					propertyValues.put(propShortForm, literalExtractor.getLiteral(annot.getValue()));
+				}
 			}
 		}
 

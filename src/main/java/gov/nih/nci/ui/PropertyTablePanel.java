@@ -348,7 +348,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 					int modelRow = propertyTable.convertRowIndexToModel(viewRow);
 					Map selectedPropertyMap = new HashMap();
 					
-					PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValue(modelRow), 
+					PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValues(modelRow), 
 							tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
 					HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
 					if (data != null) {
