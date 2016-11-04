@@ -1359,19 +1359,33 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		  
 	}
 	
-	public void addAnnotationToClass(String classCode, OWLAnnotationProperty prop, String value) {
+	public void addAnnotationToClass(OWLClass ocl, OWLAnnotationProperty prop, String value) {
 		
 		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		
 		OWLLiteral lit_val = df.getOWLLiteral(value);
-		OWLClass ocl = getClass(classCode);
 		
 		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), lit_val);
 		
 		changes.add(new AddAxiom(ontology, ax));
 		
 		this.getOWLEditorKit().getModelManager().applyChanges(changes);
+	}
+	
+	public void removeAnnotationToClass(OWLClass ocl, OWLAnnotationProperty prop, String value) {
+		
+		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+		
+		OWLLiteral lit_val = df.getOWLLiteral(value);
+		
+		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), lit_val);
+		
+		changes.add(new RemoveAxiom(ontology, ax));
+		
+		this.getOWLEditorKit().getModelManager().applyChanges(changes);
+		
 	}
 	
 	public OWLClass getClass(String code) {
