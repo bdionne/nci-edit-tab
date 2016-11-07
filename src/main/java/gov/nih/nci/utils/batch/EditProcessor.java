@@ -15,8 +15,7 @@ public abstract class EditProcessor {
 	protected static enum EditOp { NEW, MODIFY, DELETE, DEL_ALL };
 	
 	protected EditOp operation = null;
-	
-	
+		
 	public EditProcessor(NCIEditTab t) { tab = t; }
 	
 	public Vector<String> validateData(Vector<String> v) {
@@ -27,9 +26,7 @@ public abstract class EditProcessor {
 			String cls_iri = (String) v.elementAt(0);
 			String op = (String) v.elementAt(1);
 			
-			classToEdit = tab.getClass(cls_iri);
-			
-			
+			classToEdit = tab.getClass(cls_iri);			
 
 			if (classToEdit == null) {
 				String error_msg = " -- concept " + cls_iri

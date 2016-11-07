@@ -51,7 +51,6 @@ public class BatchEditTask extends BatchTask {
 
 			Vector<String> w = parseTokens(s);
 			
-
 			if (super.checkNoErrors(w, taskId)) {
 				
 			} else {
@@ -59,7 +58,6 @@ public class BatchEditTask extends BatchTask {
 			}
 			
 			boolean retval = processor.processData(w);
-
 
 			if (retval) {
 				/**
@@ -70,8 +68,7 @@ public class BatchEditTask extends BatchTask {
 			} else {
 				super.print("\t Failed.");
 			}
-		
-
+			
 		} catch (Exception ex) {
 			print("Server Error occurred:");
 			ex.printStackTrace();
