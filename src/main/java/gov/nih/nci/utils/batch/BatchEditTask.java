@@ -2,12 +2,8 @@ package gov.nih.nci.utils.batch;
 
 import java.util.Vector;
 
-import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLClass;
-
 import gov.nih.nci.ui.BatchProcessOutputPanel;
 import gov.nih.nci.ui.NCIEditTab;
-import gov.nih.nci.utils.batch.BatchTask.TaskType;
 
 /**
  * @Author: NGIT, Kim Ong; Iris Guo
@@ -38,9 +34,7 @@ public class BatchEditTask extends BatchTask {
 		this.fieldDelim = fileDelim;
 		this.batchtype = t;
 		
-		initProcessor(batchtype);
-			
-		
+		initProcessor(batchtype);	
 
 		data_vec = getData(infile);
 		setMax(data_vec.size());

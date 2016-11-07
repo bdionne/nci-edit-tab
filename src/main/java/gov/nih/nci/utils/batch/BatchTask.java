@@ -8,8 +8,6 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
-import java.util.logging.Level;
-
 import org.apache.log4j.Logger;
 
 import gov.nih.nci.ui.BatchProcessOutputPanel;
