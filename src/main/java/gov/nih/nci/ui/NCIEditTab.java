@@ -12,6 +12,7 @@ import static gov.nih.nci.ui.NCIEditTabConstants.DESIGN_NOTE;
 import static gov.nih.nci.ui.NCIEditTabConstants.EDITOR_NOTE;
 import static gov.nih.nci.ui.NCIEditTabConstants.IMMUTABLE_PROPS;
 import static gov.nih.nci.ui.NCIEditTabConstants.LABEL_PROP;
+import static gov.nih.nci.ui.NCIEditTabConstants.FULL_SYN;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_SOURCE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
@@ -1179,6 +1180,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					
 					CODE_PROP = getSingleProperty("code_prop", opts);
 					LABEL_PROP = getSingleProperty("label_prop", opts);
+					FULL_SYN = getSingleProperty("fully_qualified_syn", opts);
 					immutable_properties.add(LABEL_PROP);
 					PREF_NAME = getSingleProperty("pref_name", opts);
 					
@@ -1827,12 +1829,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     
     public OWLAnnotationProperty getFullSyn() {
-    	for (OWLAnnotationProperty p : complex_properties) {
-			if (p.getIRI().getShortForm().equalsIgnoreCase("FULL_SYN")) {
-				return p;
-			}
-		}
-		return null;
+    	
+		return FULL_SYN;
     	
     }
    

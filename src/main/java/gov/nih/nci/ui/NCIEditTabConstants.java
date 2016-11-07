@@ -35,6 +35,7 @@ public class NCIEditTabConstants {
 	
 	public static OWLAnnotationProperty CODE_PROP;
 	public static OWLAnnotationProperty LABEL_PROP;
+	public static OWLAnnotationProperty FULL_SYN;
 	public static OWLAnnotationProperty PREF_NAME;
 	
 	public static OWLAnnotationProperty SEMANTIC_TYPE;
