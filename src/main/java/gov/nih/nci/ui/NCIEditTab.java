@@ -291,6 +291,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private Set<OWLAnnotationProperty> complex_properties = new HashSet<OWLAnnotationProperty>();
 	
+	private Map<OWLAnnotationProperty, Set<OWLAnnotationProperty>> configured_annotation_dependencies =
+			new HashMap<OWLAnnotationProperty, Set<OWLAnnotationProperty>>();
+	
 	private Map<OWLAnnotationProperty, Set<OWLAnnotationProperty>> required_annotation_dependencies =
 			new HashMap<OWLAnnotationProperty, Set<OWLAnnotationProperty>>();
 
@@ -344,6 +347,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Set<OWLAnnotationProperty> getRequiredAnnotationsForAnnotation(OWLAnnotationProperty annp) {
 		return required_annotation_dependencies.get(annp);		
+	}
+	
+	public Set<OWLAnnotationProperty> getConfiguredAnnotationsForAnnotation(OWLAnnotationProperty annp) {
+		return configured_annotation_dependencies.get(annp);		
 	}
 	
 	public Set<OWLAnnotationProperty> getOptionalAnnotationsForAnnotation(OWLAnnotationProperty annp) {
@@ -1105,18 +1112,31 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 							}
 							
 							// now get dependencies
+							// cprops are what is in the config file
+							Set<OWLAnnotationProperty> cprops = new HashSet<OWLAnnotationProperty>();
+							// dprops are required, they have the required annotation set to true
 							Set<OWLAnnotationProperty> dprops = new HashSet<OWLAnnotationProperty>();
+							// oprops are options, they do not have the rquired annotation or they have it set to false
+							Set<OWLAnnotationProperty> oprops = new HashSet<OWLAnnotationProperty>();
 							Set<String> dependents = opts.getValues(cp);
 							if (dependents != null) {
 								for (String dp : dependents) {
 									OWLAnnotationProperty dpProp = lookUp(dp);
 									if (dpProp != null) {
-										dprops.add(dpProp);
+										// always add to cprops
+										cprops.add(dpProp);
+										if (is_required(dpProp)) {
+											dprops.add(dpProp);
+										} else {
+											oprops.add(dpProp);
+										}
 									} else {
 										not_found_props.add(dp);
 									}								
 								}
+								configured_annotation_dependencies.put(p, cprops);
 								required_annotation_dependencies.put(p, dprops);
+								optional_annotation_dependencies.put(p, oprops);
 							}							
 						}
 						if (not_found_props.size() > 0) {
@@ -1183,6 +1203,26 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		}
 		
 	}
+	
+	private boolean is_required(OWLAnnotationProperty prop) {
+		OWLAnnotationProperty p = this.lookUpShort("required");
+		Optional<String> b_val = getPropertyValue(prop, p);
+		if (b_val.isPresent()) {
+			return Boolean.parseBoolean(b_val.get());
+		}
+		return false;
+	}
+	
+	public String getDefault(OWLAnnotationProperty prop) {
+		if (prop == null) {return null;}
+		OWLAnnotationProperty p = this.lookUpShort("default");
+		Optional<String> val = getPropertyValue(prop, p);
+		if (val.isPresent()) {
+			return val.get();
+		}
+		return null;
+	}
+	
 	
 	OWLClass findOWLClass(String opt, ProjectOptions opts) {
 		OWLClass cls = null;
@@ -1417,7 +1457,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		} else if (type.equalsIgnoreCase("user-system")) {
 			return clientSession.getActiveClient().getUserInfo().getName().toString();
 		} else if (type.endsWith("enum")) {
-			return getEnumValues(iri).get(0);
+			return getDefault(lookUp(type));
 		}
 		return "";
 	}
@@ -1540,7 +1580,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}
 
 
-    		Set<OWLAnnotationProperty> req_props = this.getRequiredAnnotationsForAnnotation(complex_prop);
+    		Set<OWLAnnotationProperty> req_props = this.getConfiguredAnnotationsForAnnotation(complex_prop);
 
     		for (OWLAnnotationProperty prop : req_props) {
     			String new_val = ann_vals.get(prop.getIRI().getShortForm());
@@ -1565,7 +1605,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), df.getOWLLiteral(ann_vals.get("Value")));
 
     		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
-    		Set<OWLAnnotationProperty> req_props = this.getRequiredAnnotationsForAnnotation(complex_prop);
+    		Set<OWLAnnotationProperty> req_props = getConfiguredAnnotationsForAnnotation(complex_prop);
 
     		for (OWLAnnotationProperty prop : req_props) {
     			String val = ann_vals.get(prop.getIRI().getShortForm());
@@ -1795,6 +1835,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return null;
     	
     }
+   
     
     
     

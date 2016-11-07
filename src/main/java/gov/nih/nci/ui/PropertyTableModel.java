@@ -42,7 +42,7 @@ public class PropertyTableModel extends AbstractTableModel {
 		return complexProp;
 	}
 	
-	private Set<OWLAnnotationProperty> requiredAnnotations;
+	private Set<OWLAnnotationProperty> configuredAnnotations;
 	private List<OWLAnnotationProperty> requiredAnnotationsList;
 	private List<OWLAnnotation> annotations = new ArrayList<>();
 	
@@ -57,8 +57,8 @@ public class PropertyTableModel extends AbstractTableModel {
 	public PropertyTableModel(OWLEditorKit k, OWLAnnotationProperty complexProperty) {
 		ont = k.getOWLModelManager().getActiveOntology();
 		complexProp = complexProperty;
-		requiredAnnotations = NCIEditTab.currentTab().getRequiredAnnotationsForAnnotation(complexProp);
-		requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(requiredAnnotations);
+		configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(complexProp);
+		requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(configuredAnnotations);
 	}
 
 
@@ -72,8 +72,8 @@ public class PropertyTableModel extends AbstractTableModel {
 
 
 	public int getColumnCount() {
-		if (this.requiredAnnotations != null) {
-			return this.requiredAnnotations.size() + 1;
+		if (this.configuredAnnotations != null) {
+			return this.configuredAnnotations.size() + 1;
 		} else {
 			return 0;
 		}
@@ -92,7 +92,7 @@ public class PropertyTableModel extends AbstractTableModel {
 				if (columnIndex == 0) {
 					return literalExtractor.getLiteral(annot.getValue());
 				}
-				for (OWLAnnotationProperty aprop : requiredAnnotations) {
+				for (OWLAnnotationProperty aprop : configuredAnnotations) {
 
 					if ( annot.getProperty().equals(aprop)) {
 						return literalExtractor.getLiteral(annot.getValue());
@@ -199,7 +199,7 @@ public class PropertyTableModel extends AbstractTableModel {
 
 	private boolean isDataTypeTextArea( IRI dataType ) {
 		boolean result = false;
-		if (dataType.toString().contains("textarea")) {
+		if (dataType.toString().toUpperCase().contains("TEXTAREA")) {
 			result = true;
 		}
 		return result;
@@ -280,7 +280,7 @@ public class PropertyTableModel extends AbstractTableModel {
 						annotations.add(annot);
 					}
 					Set<OWLAnnotation> annotSet = ax.getAnnotations();
-					for (OWLAnnotationProperty req_a : requiredAnnotations) {
+					for (OWLAnnotationProperty req_a : configuredAnnotations) {
 						OWLAnnotation found = null;
 						for (OWLAnnotation owl_a : annotSet) {
 							if (req_a.equals(owl_a.getProperty())) {

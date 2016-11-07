@@ -257,13 +257,16 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		Set<OWLAnnotationProperty> req_props = NCIEditTab.currentTab().getRequiredAnnotationsForAnnotation(full_syn);
 		
 		for (OWLAnnotationProperty prop : req_props) {
-			// TODO: get defaults?
-			String val = "DF";
-			if (val != null) {
-				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
-				anns.add(new_ann);
-				
+			
+			String val = NCIEditTab.currentTab().getDefault(prop);
+			if (val == null) {
+				val = "No_Default";
+
 			}
+			OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+			anns.add(new_ann);
+
+
 		}
 		
 		OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
