@@ -1,20 +1,133 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
-import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLAnnotation;
 
 import gov.nih.nci.ui.NCIEditTab;
 
 public class ComplexPropProcessor extends EditProcessor {
+	
+	private List<OWLAnnotation> qualifiers = new ArrayList<OWLAnnotation>();
+	private List<OWLAnnotation> new_qualifiers = new ArrayList<OWLAnnotation>();
 
 	public ComplexPropProcessor(NCIEditTab t) {
 		super(t);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public Vector<String> validateData(Vector<String> v) {
-		return super.validateData(v);
+		
+		Vector<String> w = super.validateData(v);
+		
+		if (classToEdit != null) {
+			try {
+				
+				// in all cases we need the prop id
+				String prop_iri = (String) v.elementAt(2);
+				String prop_value = null;
+				String new_prop_value = null;
+				
+				if (!tab.supportsProperty(prop_iri)) {
+					String error_msg = " -- property " + prop_iri
+							+ " is not identifiable.";
+					w.add(error_msg);
+					return w;
+				} else if (tab.isReadOnlyProperty(prop_iri)) {
+					String error_msg = " -- property "
+							+ prop_iri + ", it is read-only.";
+					w.add(error_msg);
+					return w;
+				}
+				
+				// with the exception of DEL_ALL, all other operations will require
+				// at least a prop value and a set of annotations				
+				if (!this.operation.equals(EditOp.DEL_ALL)) {
+					
+					prop_value = (String) v.elementAt(3);
+					
+					qualifiers = new ArrayList<OWLAnnotation>();
+					
+					int pairs = 4;
+					while ((v.elementAt(pairs) != null) &&
+							(v.elementAt(pairs) != prop_iri)) {
+						String ann = v.elementAt(pairs++);
+						if (v.elementAt(pairs) != null) {
+							// ok, we have two more
+							String ann_val = v.elementAt(pairs++);
+							qualifiers.add(tab.createAnnotation(ann, ann_val));
+						} else {
+							// error, qualifiers come in pairs
+						}
+					}
+					if (operation.equals(EditOp.MODIFY)) {
+						new_prop_value = v.elementAt(++pairs);
+						
+						while ((v.elementAt(pairs) != null) &&
+								(v.elementAt(pairs) != prop_iri)) {
+							String ann = v.elementAt(pairs++);
+							if (v.elementAt(pairs) != null) {
+								// ok, we have two more
+								String ann_val = v.elementAt(pairs++);
+								new_qualifiers.add(tab.createAnnotation(ann, ann_val));
+							} else {
+								// error, qualifiers come in pairs
+							}
+						}
+						
+						
+					}
+					
+				}
+
+				switch (operation) {
+				case DELETE:
+			         NEW:								
+
+					if (!tab.hasComplexPropertyValue(classToEdit, prop_iri,
+							prop_value, qualifiers)) {
+						String error_msg = " -- complex property " + "("
+								+ prop_iri + ", "
+								+ prop_value
+								+ ") does not exist.";
+						w.add(error_msg);
+						return w;
+					}
+					break;
+				case DEL_ALL:
+					// TODO: Is there anything to validate here?
+					break;
+				case MODIFY:
+					
+					
+					if (!tab.hasComplexPropertyValue(classToEdit, prop_iri,
+							new_prop_value, new_qualifiers)) {
+						String error_msg = " -- complex property " + "("
+								+ prop_iri + ", "
+								+ prop_value
+								+ ") does not exist.";
+						w.add(error_msg);
+						return w;
+					}
+					
+					break;
+				
+				default:
+					break;
+				}
+			} catch (Exception e) {
+				w.add("Exception caught" + e.toString());
+			}
+		}
+
+		return w;
+	}
+	
+	public boolean processData(Vector<String> w) {
+		return true;
+	}
+
 		
 /**
 		try {
@@ -239,10 +352,7 @@ public class ComplexPropProcessor extends EditProcessor {
 		return w;
 	}
 	**/
-	}
 	
-	public boolean processData(Vector<String> w) {
-		return true;
-	}
-
+	
+	
 }

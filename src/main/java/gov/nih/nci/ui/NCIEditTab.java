@@ -1286,6 +1286,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return values.contains(value);		
 	}
 	
+
+	public boolean hasComplexPropertyValue(OWLClass cls, String propName, String value, List<OWLAnnotation> annotations) {
+		return true;	
+	}
+	
 	private boolean topOrBot(OWLNamedObject obj) {
 		if (getOWLEditorKit().getOWLModelManager().getOWLDataFactory().getOWLThing().equals(obj) ||
 				getOWLEditorKit().getOWLModelManager().getOWLDataFactory().getOWLNothing().equals(obj)) {
@@ -1344,6 +1349,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 		
 
+	}
+	
+	public OWLAnnotation createAnnotation(String name, String value) {
+		
+		OWLDataFactory df = getOWLModelManager().getOWLDataFactory();		
+        return df.getOWLAnnotation(tab.lookUpShort(name), df.getOWLLiteral(value));
+		
 	}
 	
 	public Set<OWLAnnotation> getAnnotations(OWLClass cls) {

@@ -31,10 +31,12 @@ public class SimplePropProcessor extends EditProcessor {
 					String error_msg = " -- property " + prop_iri
 							+ " is not identifiable.";
 					w.add(error_msg);
+					return w;
 				} else if (tab.isReadOnlyProperty(prop_iri)) {
 					String error_msg = " -- property "
 							+ prop_iri + ", it is read-only.";
 					w.add(error_msg);
+					return w;
 				}
 
 				switch (operation) {
