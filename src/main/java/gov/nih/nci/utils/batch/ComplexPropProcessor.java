@@ -1,12 +1,8 @@
 package gov.nih.nci.utils.batch;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
-import org.semanticweb.owlapi.model.OWLAnnotation;
 
 import gov.nih.nci.ui.NCIEditTab;
 
@@ -52,7 +48,8 @@ public class ComplexPropProcessor extends EditProcessor {
 					qualifiers = new HashMap<String, String>();
 					
 					int pairs = 4;
-					while ((v.elementAt(pairs) != null) &&
+					while ((pairs < v.size()) &&
+							(v.elementAt(pairs) != null) &&
 							(v.elementAt(pairs) != prop_iri)) {
 						String ann = v.elementAt(pairs++);
 						if (v.elementAt(pairs) != null) {
@@ -66,7 +63,8 @@ public class ComplexPropProcessor extends EditProcessor {
 					if (operation.equals(EditOp.MODIFY)) {
 						new_prop_value = v.elementAt(++pairs);
 						
-						while ((v.elementAt(pairs) != null) &&
+						while ((pairs < v.size()) &&
+								(v.elementAt(pairs) != null) &&
 								(v.elementAt(pairs) != prop_iri)) {
 							String ann = v.elementAt(pairs++);
 							if (v.elementAt(pairs) != null) {
@@ -85,7 +83,7 @@ public class ComplexPropProcessor extends EditProcessor {
 
 				switch (operation) {
 				case DELETE:
-			         NEW:								
+				case MODIFY:								
 
 					if (!tab.hasComplexPropertyValue(classToEdit, prop_iri,
 							prop_value, qualifiers)) {
@@ -100,15 +98,15 @@ public class ComplexPropProcessor extends EditProcessor {
 				case DEL_ALL:
 					// TODO: Is there anything to validate here?
 					break;
-				case MODIFY:
+				case NEW:
 					
 					
-					if (!tab.hasComplexPropertyValue(classToEdit, prop_iri,
-							new_prop_value, new_qualifiers)) {
+					if (tab.hasComplexPropertyValue(classToEdit, prop_iri,
+							prop_value, qualifiers)) {
 						String error_msg = " -- complex property " + "("
 								+ prop_iri + ", "
 								+ prop_value
-								+ ") does not exist.";
+								+ ") already exists.";
 						w.add(error_msg);
 						return w;
 					}

@@ -21,8 +21,9 @@ public class BatchEditTask extends BatchTask {
 	private void initProcessor(TaskType t) {
 		if (t.equals(TaskType.EDIT_SIMPLE_PROPS)) {
 			processor = new SimplePropProcessor(tab);
-		}
-		
+		} else if (t.equals(TaskType.EDIT_COMPLEX_PROPS)) {
+			processor = new ComplexPropProcessor(tab);			
+		}		
 	}
 	
 	public BatchEditTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile, String outfile, 

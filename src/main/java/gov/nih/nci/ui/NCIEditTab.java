@@ -1290,27 +1290,30 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public boolean hasComplexPropertyValue(OWLClass cls, String propName, String value, Map<String, String> annotations) {
 		OWLAnnotationProperty prop = lookUpShort(propName);
 		boolean found = false;
-		for (OWLAnnotation ann : annotationObjects(ontology.getAnnotationAssertionAxioms(cls.getIRI()), prop)) {
-			OWLAnnotationValue av = ann.getValue();
-			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
-			if (ol.isPresent()) {
-				if (ol.get().getLiteral().equals(value)) {
-					// we have a possible
-					found = true;
-					Set<OWLAnnotation> quals = ann.getAnnotations();
-					for (OWLAnnotation q_a : quals) {
-						String name = q_a.getProperty().getIRI().getShortForm();
-						String val = q_a.getValue().toString();
-						if (annotations.containsKey(name)) {
-							if (val.equals(annotations.get(name))) {
-								// ok
-							} else {
-								found = false;
+		for (OWLAnnotationAssertionAxiom ann_ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
+			OWLAnnotation ann = ann_ax.getAnnotation();
+			if (ann.getProperty().equals(prop)) {
+				OWLAnnotationValue av = ann.getValue();
+				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				if (ol.isPresent()) {
+					if (ol.get().getLiteral().equals(value)) {
+						// we have a possible
+						found = true;
+						Set<OWLAnnotation> quals = ann_ax.getAnnotations();
+						for (OWLAnnotation q_a : quals) {
+							String name = q_a.getProperty().getIRI().getShortForm();
+							String val = q_a.getValue().asLiteral().get().getLiteral();
+							if (annotations.containsKey(name)) {
+								if (val.equals(annotations.get(name))) {
+									// ok
+								} else {
+									found = false;
+								}
 							}
 						}
-					}
-					if (found) {
-						return found;
+						if (found) {
+							return found;
+						}
 					}
 				}
 			}
