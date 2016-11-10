@@ -1282,14 +1282,42 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public boolean hasPropertyValue(OWLClass cls, String propName, String value) {
 		OWLAnnotationProperty prop = lookUpShort(propName);
-		List<String> values = this.getPropertyValues(cls, prop);
+		List<String> values = getPropertyValues(cls, prop);
 		return values.contains(value);		
 	}
 	
 
-	public boolean hasComplexPropertyValue(OWLClass cls, String propName, String value, List<OWLAnnotation> annotations) {
-		return true;	
+	public boolean hasComplexPropertyValue(OWLClass cls, String propName, String value, Map<String, String> annotations) {
+		OWLAnnotationProperty prop = lookUpShort(propName);
+		boolean found = false;
+		for (OWLAnnotation ann : annotationObjects(ontology.getAnnotationAssertionAxioms(cls.getIRI()), prop)) {
+			OWLAnnotationValue av = ann.getValue();
+			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+			if (ol.isPresent()) {
+				if (ol.get().getLiteral().equals(value)) {
+					// we have a possible
+					found = true;
+					Set<OWLAnnotation> quals = ann.getAnnotations();
+					for (OWLAnnotation q_a : quals) {
+						String name = q_a.getProperty().getIRI().getShortForm();
+						String val = q_a.getValue().toString();
+						if (annotations.containsKey(name)) {
+							if (val.equals(annotations.get(name))) {
+								// ok
+							} else {
+								found = false;
+							}
+						}
+					}
+					if (found) {
+						return found;
+					}
+				}
+			}
+		}
+		return false;
 	}
+		
 	
 	private boolean topOrBot(OWLNamedObject obj) {
 		if (getOWLEditorKit().getOWLModelManager().getOWLDataFactory().getOWLThing().equals(obj) ||

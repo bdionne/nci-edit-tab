@@ -1,7 +1,9 @@
 package gov.nih.nci.utils.batch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -10,9 +12,9 @@ import gov.nih.nci.ui.NCIEditTab;
 
 public class ComplexPropProcessor extends EditProcessor {
 	
-	private List<OWLAnnotation> qualifiers = new ArrayList<OWLAnnotation>();
-	private List<OWLAnnotation> new_qualifiers = new ArrayList<OWLAnnotation>();
-
+	private Map<String, String> qualifiers = new HashMap<String, String>();
+	private Map<String, String> new_qualifiers = new HashMap<String, String>();
+	
 	public ComplexPropProcessor(NCIEditTab t) {
 		super(t);
 	}
@@ -47,7 +49,7 @@ public class ComplexPropProcessor extends EditProcessor {
 					
 					prop_value = (String) v.elementAt(3);
 					
-					qualifiers = new ArrayList<OWLAnnotation>();
+					qualifiers = new HashMap<String, String>();
 					
 					int pairs = 4;
 					while ((v.elementAt(pairs) != null) &&
@@ -56,7 +58,7 @@ public class ComplexPropProcessor extends EditProcessor {
 						if (v.elementAt(pairs) != null) {
 							// ok, we have two more
 							String ann_val = v.elementAt(pairs++);
-							qualifiers.add(tab.createAnnotation(ann, ann_val));
+							qualifiers.put(ann, ann_val);
 						} else {
 							// error, qualifiers come in pairs
 						}
@@ -70,7 +72,7 @@ public class ComplexPropProcessor extends EditProcessor {
 							if (v.elementAt(pairs) != null) {
 								// ok, we have two more
 								String ann_val = v.elementAt(pairs++);
-								new_qualifiers.add(tab.createAnnotation(ann, ann_val));
+								new_qualifiers.put(ann, ann_val);
 							} else {
 								// error, qualifiers come in pairs
 							}
