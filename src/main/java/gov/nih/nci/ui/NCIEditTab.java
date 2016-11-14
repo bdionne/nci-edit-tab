@@ -1286,8 +1286,57 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return values.contains(value);		
 	}
 	
+	public void removeComplexAnnotationProperty(OWLClass cls, String propName, 
+			String value, Map<String, String> annotations) {
+		
+		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+		
+		OWLAnnotationAssertionAxiom ann_ax = getComplexPropertyValueAssertion(cls, propName, value, annotations);
+		
+        changes.add(new RemoveAxiom(ontology, ann_ax));
+		
+		getOWLModelManager().applyChanges(changes);
+		
+	}
+	
+	public void addComplexAnnotationProperty(OWLClass cls, String propName, 
+			String value, Map<String, String> annotations) {
+		
+		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+		
+		OWLAnnotationProperty complex_prop = lookUpShort(propName);
+		
+		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), df.getOWLLiteral(value));
 
+		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
+		Set<OWLAnnotationProperty> req_props = getConfiguredAnnotationsForAnnotation(complex_prop);
+
+		for (OWLAnnotationProperty prop : req_props) {
+			String val = annotations.get(prop.getIRI().getShortForm());
+			if (val != null) {
+				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+				anns.add(new_ann);
+			}
+		}
+
+		OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
+
+		changes.add(new AddAxiom(ontology, new_new_axiom));
+		
+		getOWLModelManager().applyChanges(changes);
+
+	}
+	
 	public boolean hasComplexPropertyValue(OWLClass cls, String propName, String value, Map<String, String> annotations) {
+		
+		return (getComplexPropertyValueAssertion(cls, propName, 
+				value, annotations) != null);
+		
+	}
+	
+	public OWLAnnotationAssertionAxiom getComplexPropertyValueAssertion(OWLClass cls, String propName, String value, Map<String, String> annotations) {
 		OWLAnnotationProperty prop = lookUpShort(propName);
 		boolean found = false;
 		for (OWLAnnotationAssertionAxiom ann_ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
@@ -1312,13 +1361,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 							}
 						}
 						if (found) {
-							return found;
+							return ann_ax;
 						}
 					}
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 		
 	
@@ -1376,9 +1425,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			return Optional.of(av);
 			
 		}
-		return Optional.empty();
-
-		
+		return Optional.empty();		
 
 	}
 	
@@ -1396,8 +1443,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			res.add(ax.getAnnotation());
 		}
 		
-		return res;
-			
+		return res;			
 	}
 	
 	public Set<OWLAnnotation> getDependentAnnotations(OWLClass cls, OWLAnnotationProperty prop) {
@@ -1723,23 +1769,23 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	Set<String> getLogicalRes(OWLClass cls, String type) {
 		Set<String> res = new HashSet<String>();
 		Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
-	    
-	    for (OWLSubClassOfAxiom ax1 : sub_axioms) {
-	    	OWLClassExpression exp = ax1.getSuperClass();
-	    	res = getParentRoleExps(res, exp, type, false, cls);
-	    		    	
-	    }
-	    
-	    Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
-	    
-	    for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
-	    	Set<OWLClassExpression> exps = ax1.getClassExpressions();
-	    	for (OWLClassExpression exp : exps) {
-	    		res = getParentRoleExps(res, exp, type, true, cls);
-	    		}
-	    }
-	    return res;
-		
+
+		for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+			OWLClassExpression exp = ax1.getSuperClass();
+			res = getParentRoleExps(res, exp, type, false, cls);
+
+		}
+
+		Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
+
+		for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+			Set<OWLClassExpression> exps = ax1.getClassExpressions();
+			for (OWLClassExpression exp : exps) {
+				res = getParentRoleExps(res, exp, type, true, cls);
+			}
+		}
+		return res;
+
 	}
 	
 	private boolean isParentType(String type) {

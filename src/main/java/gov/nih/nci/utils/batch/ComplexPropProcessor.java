@@ -11,6 +11,11 @@ public class ComplexPropProcessor extends EditProcessor {
 	private Map<String, String> qualifiers = new HashMap<String, String>();
 	private Map<String, String> new_qualifiers = new HashMap<String, String>();
 	
+	String prop_iri = null;
+	String prop_value = null;
+	String new_prop_value = null;
+	
+	
 	public ComplexPropProcessor(NCIEditTab t) {
 		super(t);
 	}
@@ -23,9 +28,9 @@ public class ComplexPropProcessor extends EditProcessor {
 			try {
 				
 				// in all cases we need the prop id
-				String prop_iri = (String) v.elementAt(2);
-				String prop_value = null;
-				String new_prop_value = null;
+				prop_iri = (String) v.elementAt(2);
+				prop_value = null;
+				new_prop_value = null;
 				
 				if (!tab.supportsProperty(prop_iri)) {
 					String error_msg = " -- property " + prop_iri
@@ -125,6 +130,23 @@ public class ComplexPropProcessor extends EditProcessor {
 	}
 	
 	public boolean processData(Vector<String> w) {
+		switch (operation) {
+		case DELETE:
+			tab.removeComplexAnnotationProperty(this.classToEdit, this.prop_iri, this.prop_value, this.qualifiers);
+			break;
+		case MODIFY:
+			tab.removeComplexAnnotationProperty(this.classToEdit, this.prop_iri, this.prop_value, this.qualifiers);
+			tab.addComplexAnnotationProperty(this.classToEdit, this.prop_iri, this.new_prop_value, this.new_qualifiers);
+			break;
+		case DEL_ALL:
+			break;
+		case NEW:
+			tab.addComplexAnnotationProperty(this.classToEdit, this.prop_iri, this.prop_value, this.qualifiers);
+			break;		
+		default:
+			break;
+		}
+		
 		return true;
 	}
 
