@@ -1,11 +1,7 @@
 package gov.nih.nci.utils;
 
 
-import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ASSOC;
-import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ASSOC;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,9 +11,6 @@ import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -29,9 +22,7 @@ import org.semanticweb.owlapi.model.OWLDataHasValue;
 import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
 import org.semanticweb.owlapi.model.OWLDataMinCardinality;
 import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
-import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
@@ -48,24 +39,19 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 
-import gov.nih.nci.ui.NCIEditTab;
-
 public class ReferenceReplace implements OWLClassExpressionVisitor {
 
 	private OWLClass source;
 	
 	private OWLClass target;
 	
-	private OWLClassExpression currentExpression;
-
 	private OWLModelManager owlModelManager;
 	
 	private OWLDataFactory dataFact;
 
 	private OWLOntology ont;
 	
-	HashMap<OWLAnnotationProperty, Set<String>> fixups = new HashMap<OWLAnnotationProperty, Set<String>>();	
-
+	
 	public ReferenceReplace(OWLModelManager man) {
 		owlModelManager = man;
 		dataFact = man.getOWLDataFactory();
@@ -146,18 +132,8 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 	}
 
 	
-	public HashMap<OWLAnnotationProperty, Set<String>> addToFixups(HashMap<OWLAnnotationProperty, Set<String>> fixups, OWLAnnotationProperty prop, String val) {
-		Set<String> ss = fixups.get(prop);
-		if (ss == null) {
-			ss = new HashSet<String>();
-			fixups.put(prop,  ss);
-		}
-		ss.add(val);
-		return fixups;
-	}
 	
 	private void setExpression(OWLClassExpression exp) {
-		currentExpression = exp;
 	}
 	
 	private OWLClassExpression newExpression;
