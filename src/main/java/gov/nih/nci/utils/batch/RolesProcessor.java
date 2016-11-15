@@ -115,7 +115,7 @@ public class RolesProcessor extends EditProcessor {
 	
 
 	private boolean hasRole(OWLClass cls, String roleName, String modifier, String filler_iri, String type) {
-		return true;
+		return tab.hasRole(cls, roleName, modifier, filler_iri, type);
 	}
 	
 

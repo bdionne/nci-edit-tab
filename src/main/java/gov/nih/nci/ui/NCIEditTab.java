@@ -1286,6 +1286,88 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return values.contains(value);		
 	}
 	
+	public boolean hasRole(OWLClass cls, String roleName, String mod, String filler, String type) {
+		if (type.equalsIgnoreCase("P")) {
+			Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
+	        
+	        for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+	        	OWLClassExpression exp = ax1.getSuperClass();
+	        	
+	        	if (getRole(cls, exp, roleName, mod, filler) != null) {
+	        		return true;
+	        	}
+	        	
+	        	
+	        }
+	        return false;
+			
+		} else if (type.equalsIgnoreCase("D")) {
+			Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
+	        
+	        for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+	        	Set<OWLClassExpression> exps = ax1.getClassExpressions();
+	        	for (OWLClassExpression exp : exps) {
+	        		if (getRole(cls, exp, roleName, mod, filler) != null) {
+		        		return true;
+		        	}
+	        		
+	        	}
+	        }
+	        return false;
+			
+		} else {
+			return false;
+		}
+	}
+	
+	private OWLQuantifiedObjectRestriction getRole(OWLClass cls, OWLClassExpression exp, String roleName,
+			String modifier, String filler) {
+		OWLQuantifiedObjectRestriction result = null;
+    	if (exp instanceof OWLClass) {
+    		
+    	} else if (exp instanceof OWLQuantifiedObjectRestriction) {
+    		
+    		
+    		boolean found = true;
+    		
+    		OWLQuantifiedObjectRestriction qobj = (OWLQuantifiedObjectRestriction) exp;
+    		
+    		found = qobj.getProperty().asOWLObjectProperty().getIRI().getShortForm().equalsIgnoreCase(roleName);
+    		
+    		OWLClassExpression rexp = qobj.getFiller();
+
+    		if (rexp instanceof OWLClass) {
+    			found = ((OWLClass) rexp).getIRI().getShortForm().equals(filler);
+    		} else {
+    			found = false;
+    		}
+
+    		if (exp instanceof OWLObjectSomeValuesFrom) {
+    			found = modifier.equalsIgnoreCase("some");
+    		} else if (exp instanceof OWLObjectAllValuesFrom) {
+    			found = modifier.equalsIgnoreCase("only");
+    		}
+    		
+    		if (found) {
+    			result = qobj;
+    		}
+    	} else if (exp instanceof OWLObjectIntersectionOf) {
+    		OWLObjectIntersectionOf oio = (OWLObjectIntersectionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asConjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			result = getRole(cls, c, roleName, modifier, filler);
+    		}
+    	} else if (exp instanceof OWLObjectUnionOf) {
+    		OWLObjectUnionOf oio = (OWLObjectUnionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asDisjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			result = getRole(cls, c, roleName, modifier, filler);
+    		}
+    	}
+    	return result;
+		
+	}
+	
 	public void removeRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
 
 	}
