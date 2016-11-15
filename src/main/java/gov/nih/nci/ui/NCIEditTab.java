@@ -1286,6 +1286,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return values.contains(value);		
 	}
 	
+	public void removeRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
+
+	}
+
+	public void addRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
+
+	}
+	
 	public void removeComplexAnnotationProperty(OWLClass cls, String propName, 
 			String value, Map<String, String> annotations) {
 		

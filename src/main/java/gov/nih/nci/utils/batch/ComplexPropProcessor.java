@@ -43,16 +43,30 @@ public class ComplexPropProcessor extends EditProcessor {
 					w.add(error_msg);
 					return w;
 				}
-				
-				// with the exception of DEL_ALL, all other operations will require
-				// at least a prop value and a set of annotations				
-				if (!this.operation.equals(EditOp.DEL_ALL)) {
-					
-					prop_value = (String) v.elementAt(3);
-					
-					qualifiers = new HashMap<String, String>();
-					
-					int pairs = 4;
+
+
+
+				prop_value = (String) v.elementAt(3);
+
+				qualifiers = new HashMap<String, String>();
+
+				int pairs = 4;
+				while ((pairs < v.size()) &&
+						(v.elementAt(pairs) != null) &&
+						(v.elementAt(pairs) != prop_iri)) {
+					String ann = v.elementAt(pairs++);
+					if (v.elementAt(pairs) != null) {
+						// ok, we have two more
+						String ann_val = v.elementAt(pairs++);
+						qualifiers.put(ann, ann_val);
+					} else {
+						// error, qualifiers come in pairs
+					}
+				}
+				if (operation.equals(EditOp.MODIFY)) {
+					// prop_id is only a delimiter to break while loop above
+					new_prop_value = v.elementAt(++pairs);
+
 					while ((pairs < v.size()) &&
 							(v.elementAt(pairs) != null) &&
 							(v.elementAt(pairs) != prop_iri)) {
@@ -60,32 +74,13 @@ public class ComplexPropProcessor extends EditProcessor {
 						if (v.elementAt(pairs) != null) {
 							// ok, we have two more
 							String ann_val = v.elementAt(pairs++);
-							qualifiers.put(ann, ann_val);
+							new_qualifiers.put(ann, ann_val);
 						} else {
 							// error, qualifiers come in pairs
 						}
-					}
-					if (operation.equals(EditOp.MODIFY)) {
-						new_prop_value = v.elementAt(++pairs);
-						
-						while ((pairs < v.size()) &&
-								(v.elementAt(pairs) != null) &&
-								(v.elementAt(pairs) != prop_iri)) {
-							String ann = v.elementAt(pairs++);
-							if (v.elementAt(pairs) != null) {
-								// ok, we have two more
-								String ann_val = v.elementAt(pairs++);
-								new_qualifiers.put(ann, ann_val);
-							} else {
-								// error, qualifiers come in pairs
-							}
-						}
-						
-						
-					}
-					
-				}
+					}	
 
+				}
 				switch (operation) {
 				case DELETE:
 				case MODIFY:								
@@ -99,13 +94,8 @@ public class ComplexPropProcessor extends EditProcessor {
 						w.add(error_msg);
 						return w;
 					}
-					break;
-				case DEL_ALL:
-					// TODO: Is there anything to validate here?
-					break;
-				case NEW:
-					
-					
+					break;				
+				case NEW:				
 					if (tab.hasComplexPropertyValue(classToEdit, prop_iri,
 							prop_value, qualifiers)) {
 						String error_msg = " -- complex property " + "("
@@ -137,9 +127,7 @@ public class ComplexPropProcessor extends EditProcessor {
 		case MODIFY:
 			tab.removeComplexAnnotationProperty(classToEdit, prop_iri, prop_value, qualifiers);
 			tab.addComplexAnnotationProperty(classToEdit, prop_iri, new_prop_value, new_qualifiers);
-			break;
-		case DEL_ALL:
-			break;
+			break;		
 		case NEW:
 			tab.addComplexAnnotationProperty(classToEdit, prop_iri, prop_value, qualifiers);
 			break;		

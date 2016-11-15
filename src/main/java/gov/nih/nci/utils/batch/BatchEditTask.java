@@ -23,6 +23,10 @@ public class BatchEditTask extends BatchTask {
 			processor = new SimplePropProcessor(tab);
 		} else if (t.equals(TaskType.EDIT_COMPLEX_PROPS)) {
 			processor = new ComplexPropProcessor(tab);			
+		} else if (t.equals(TaskType.EDIT_ROLES)) {
+			processor = new RolesProcessor(tab);			
+		} else if (t.equals(TaskType.EDIT_PARENTS)) {
+			processor = new ParentsProcessor(tab);			
 		}		
 	}
 	

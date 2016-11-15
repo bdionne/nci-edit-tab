@@ -55,9 +55,6 @@ public class SimplePropProcessor extends EditProcessor {
 						w.add(error_msg);
 					}
 					break;
-				case DEL_ALL:
-					// TODO: Is there anything to validate here?
-					break;
 				case MODIFY:
 					prop_value = (String) v.elementAt(3);
 					
@@ -116,8 +113,6 @@ public class SimplePropProcessor extends EditProcessor {
 		switch (operation) {
 		case DELETE:
 			tab.removeAnnotationToClass(classToEdit, ap, prop_value);
-			break;
-		case DEL_ALL:
 			break;
 		case MODIFY:
 			tab.removeAnnotationToClass(classToEdit, ap, prop_value);

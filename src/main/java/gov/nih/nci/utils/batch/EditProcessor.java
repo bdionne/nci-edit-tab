@@ -12,7 +12,7 @@ public abstract class EditProcessor {
 	
 	protected OWLClass classToEdit = null;
 	
-	protected static enum EditOp { NEW, MODIFY, DELETE, DEL_ALL };
+	protected static enum EditOp { NEW, MODIFY, DELETE };
 	
 	protected EditOp operation = null;
 		
