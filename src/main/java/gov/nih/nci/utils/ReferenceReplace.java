@@ -78,7 +78,6 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 				changes.add(new RemoveAxiom(ont, ax));
 				Set<OWLClassExpression> newExps = new HashSet<OWLClassExpression>();
 				for (OWLClassExpression desc : ((OWLEquivalentClassesAxiom) ax).getClassExpressions()) {
-					this.setExpression(desc);
 					desc.accept(this);
 					newExps.add(getNewExpression());
 				}
@@ -93,7 +92,6 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 				OWLClassExpression newPar = null;
 
 				if (par.isAnonymous()) {
-					this.setExpression(par);
 					par.accept(this);
 					newPar = this.getNewExpression();
 
@@ -130,11 +128,6 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 		return changes;
 
 	}
-
-	
-	
-	private void setExpression(OWLClassExpression exp) {
-	}
 	
 	private OWLClassExpression newExpression;
 	
@@ -155,7 +148,6 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 		
 		Set<OWLClassExpression> conjs = ce.asConjunctSet();
 		for (OWLClassExpression c : conjs) {
-			setExpression(c);
 			c.accept(this);
 			newConjs.add(getNewExpression());
 		}
@@ -168,7 +160,6 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 		
 		Set<OWLClassExpression> disjs = ce.asDisjunctSet();
 		for (OWLClassExpression c : disjs) {
-			setExpression(c);
 			c.accept(this);
 			newDisjs.add(getNewExpression());
 		}
