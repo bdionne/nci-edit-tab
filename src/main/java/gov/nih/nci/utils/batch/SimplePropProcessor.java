@@ -9,6 +9,10 @@ import gov.nih.nci.ui.NCIEditTab;
 
 public class SimplePropProcessor extends EditProcessor {
 	
+	String prop_iri = null;
+	String prop_value = null;
+	String new_prop_value = null;
+	
 	public SimplePropProcessor(NCIEditTab t) {
 		
 		super(t);		
@@ -23,9 +27,8 @@ public class SimplePropProcessor extends EditProcessor {
 		if (classToEdit != null) {
 			try {
 
-				String prop_iri = (String) v.elementAt(2);
-				String prop_value;
-				String new_prop_value;
+				prop_iri = (String) v.elementAt(2);
+				
 
 				if (!tab.supportsProperty(prop_iri)) {
 					String error_msg = " -- property " + prop_iri
@@ -108,25 +111,20 @@ public class SimplePropProcessor extends EditProcessor {
 		
 		boolean retval = false;
 		
-		OWLAnnotationProperty ap = tab.lookUpShort((String) w.elementAt(2));
-		String prop_value;	
-		
+		OWLAnnotationProperty ap = tab.lookUpShort(prop_iri);
+				
 		switch (operation) {
 		case DELETE:
-			prop_value = (String) w.elementAt(3);
 			tab.removeAnnotationToClass(classToEdit, ap, prop_value);
 			break;
 		case DEL_ALL:
 			break;
 		case MODIFY:
-			prop_value = (String) w.elementAt(3);
-			String new_prop_value = (String) w.elementAt(4);
 			tab.removeAnnotationToClass(classToEdit, ap, prop_value);
 			tab.addAnnotationToClass(classToEdit, ap, new_prop_value);
 			possiblySyncPreferredTerm(classToEdit, ap, new_prop_value);			
 			break;
 		case NEW:
-			prop_value = (String) w.elementAt(3);			
 			tab.addAnnotationToClass(classToEdit, ap, prop_value);
 			
 			/**

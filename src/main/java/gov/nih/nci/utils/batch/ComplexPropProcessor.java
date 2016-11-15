@@ -132,16 +132,16 @@ public class ComplexPropProcessor extends EditProcessor {
 	public boolean processData(Vector<String> w) {
 		switch (operation) {
 		case DELETE:
-			tab.removeComplexAnnotationProperty(this.classToEdit, this.prop_iri, this.prop_value, this.qualifiers);
+			tab.removeComplexAnnotationProperty(classToEdit, prop_iri, prop_value, qualifiers);
 			break;
 		case MODIFY:
-			tab.removeComplexAnnotationProperty(this.classToEdit, this.prop_iri, this.prop_value, this.qualifiers);
-			tab.addComplexAnnotationProperty(this.classToEdit, this.prop_iri, this.new_prop_value, this.new_qualifiers);
+			tab.removeComplexAnnotationProperty(classToEdit, prop_iri, prop_value, qualifiers);
+			tab.addComplexAnnotationProperty(classToEdit, prop_iri, new_prop_value, new_qualifiers);
 			break;
 		case DEL_ALL:
 			break;
 		case NEW:
-			tab.addComplexAnnotationProperty(this.classToEdit, this.prop_iri, this.prop_value, this.qualifiers);
+			tab.addComplexAnnotationProperty(classToEdit, prop_iri, prop_value, qualifiers);
 			break;		
 		default:
 			break;
