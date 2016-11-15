@@ -92,7 +92,7 @@ public class RolesProcessor extends EditProcessor {
 			break;
 		case MODIFY:
 			tab.removeRole(classToEdit, role_iri, mod, filler, type);
-			tab.addRole(classToEdit, role_iri, mod, filler, type);
+			tab.addRole(classToEdit, role_iri, new_mod, new_filler, new_type);
 			break;
 		case NEW:
 			tab.addRole(classToEdit, role_iri, mod, filler, type);
