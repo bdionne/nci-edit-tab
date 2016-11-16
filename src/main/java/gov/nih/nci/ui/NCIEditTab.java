@@ -93,6 +93,7 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedObject;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -116,6 +117,7 @@ import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
 import gov.nih.nci.utils.NCIClassSearcher;
 import gov.nih.nci.utils.ReferenceReplace;
+import gov.nih.nci.utils.RoleReplacer;
 
 public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionListener, UndoManagerListener {
 	private static final Logger log = Logger.getLogger(NCIEditTab.class);
@@ -1328,29 +1330,32 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	} else if (exp instanceof OWLQuantifiedObjectRestriction) {
     		
     		
-    		boolean found = true;
-    		
     		OWLQuantifiedObjectRestriction qobj = (OWLQuantifiedObjectRestriction) exp;
     		
-    		found = qobj.getProperty().asOWLObjectProperty().getIRI().getShortForm().equalsIgnoreCase(roleName);
+    		if (!qobj.getProperty().asOWLObjectProperty().getIRI().getShortForm().equalsIgnoreCase(roleName)) {
+    			return null;
+    		};
     		
     		OWLClassExpression rexp = qobj.getFiller();
 
     		if (rexp instanceof OWLClass) {
-    			found = ((OWLClass) rexp).getIRI().getShortForm().equals(filler);
+    			if (!((OWLClass) rexp).getIRI().getShortForm().equals(filler)) {
+    				return null;
+    			};
     		} else {
-    			found = false;
+    			return null;
     		}
 
-    		if (exp instanceof OWLObjectSomeValuesFrom) {
-    			found = modifier.equalsIgnoreCase("some");
-    		} else if (exp instanceof OWLObjectAllValuesFrom) {
-    			found = modifier.equalsIgnoreCase("only");
+    		if ((exp instanceof OWLObjectSomeValuesFrom) &&
+    				!modifier.equalsIgnoreCase("some")) {
+    			return null;
+    		} else if ((exp instanceof OWLObjectAllValuesFrom) &&
+    				!modifier.equalsIgnoreCase("only")) {
+    			return null;
     		}
     		
-    		if (found) {
-    			result = qobj;
-    		}
+    		result = qobj;
+    		
     	} else if (exp instanceof OWLObjectIntersectionOf) {
     		OWLObjectIntersectionOf oio = (OWLObjectIntersectionOf) exp;
     		Set<OWLClassExpression> conjs = oio.asConjunctSet();
@@ -1369,10 +1374,56 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public void removeRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
+		RoleReplacer role_rep = new RoleReplacer(getOWLEditorKit().getModelManager());
+		List<OWLOntologyChange> changes = role_rep.removeRole(cls, roleName, modifier, filler, type);
+		getOWLModelManager().applyChanges(changes);
 
 	}
 
 	public void addRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
+		
+		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+		
+		OWLObjectProperty o_p = getRoleShort(roleName);
+		OWLClass fill_cls = getClass(filler);
+		
+		OWLClassExpression exp = null;
+		
+		if (modifier.equals("some")) {
+			exp = df.getOWLObjectSomeValuesFrom(o_p, fill_cls);			
+		} else {
+			exp = df.getOWLObjectAllValuesFrom(o_p, fill_cls);			
+		}
+		
+		OWLAxiom ax = null;
+		
+		
+		if (type.equalsIgnoreCase("P")) {
+			ax = df.getOWLSubClassOfAxiom(cls, exp);
+			
+		} else if (type.equalsIgnoreCase("D")) {
+			ax = df.getOWLEquivalentClassesAxiom(cls, exp);			
+		}
+		
+		changes.add(new AddAxiom(ontology, ax));
+		
+		this.getOWLEditorKit().getModelManager().applyChanges(changes);
+
+	}
+	
+	public void modifyRole(OWLClass cls, String roleName, String modifier, String filler, String type,
+			String new_modifier, String new_filler, String new_type) {
+		if (type.equals(new_type)) {
+			// no type change
+			RoleReplacer role_rep = new RoleReplacer(getOWLModelManager());
+			List<OWLOntologyChange> changes = role_rep.modifyRole(cls, roleName, modifier, filler, type, 
+					new_modifier, new_filler, new_type);
+			this.getOWLEditorKit().getModelManager().applyChanges(changes);
+		} else {
+			removeRole(cls, roleName, modifier, filler, type);
+			addRole(cls, roleName, new_modifier, new_filler, new_type);
+		}
 
 	}
 	
@@ -1816,11 +1867,29 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return cls;
 	}
 	
-	public Vector<String> getSupportedRoles() {
+	public Set<String> getSupportedRoles() {
+		Set<OWLObjectProperty> o_props = ontology.getObjectPropertiesInSignature();
+		Set<String> res = new HashSet<String>();
+		for (OWLObjectProperty op : o_props) {
+			res.add(op.getIRI().getShortForm());
+		}
+		
+		return res;
+	}
+	
+	public OWLObjectProperty getRoleShort(String roleName) {
+		Set<OWLObjectProperty> o_props = ontology.getObjectPropertiesInSignature();
+		
+		for (OWLObjectProperty op : o_props) {
+			if (op.getIRI().getShortForm().equals(roleName)) {
+				return op;
+			}
+		}
+		
 		return null;
 	}
 	
-	public Vector<String> getSupportedAssociations() {
+	public Set<String> getSupportedAssociations() {
 		return null;
 	}
 	

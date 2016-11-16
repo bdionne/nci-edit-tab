@@ -1,5 +1,6 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.Set;
 import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLClass;
@@ -8,8 +9,7 @@ import gov.nih.nci.ui.NCIEditTab;
 
 public class RolesProcessor extends EditProcessor {
 
-	Vector<String> supportedRoles = null;
-	Vector<String> supportedAssociations = null;
+	Set<String> supportedRoles = null;
 	
 	String role_iri = null;
 	String mod = null;
@@ -22,7 +22,6 @@ public class RolesProcessor extends EditProcessor {
 	public RolesProcessor(NCIEditTab t) {
 		super(t);
 		supportedRoles = tab.getSupportedRoles();
-		supportedAssociations = tab.getSupportedAssociations();
 	}
 
 	public Vector<String> validateData(Vector<String> v) {
@@ -91,8 +90,7 @@ public class RolesProcessor extends EditProcessor {
 			tab.removeRole(classToEdit, role_iri, mod, filler, type);
 			break;
 		case MODIFY:
-			tab.removeRole(classToEdit, role_iri, mod, filler, type);
-			tab.addRole(classToEdit, role_iri, new_mod, new_filler, new_type);
+			tab.modifyRole(classToEdit, role_iri, mod, filler, type, new_mod, new_filler, new_type);
 			break;
 		case NEW:
 			tab.addRole(classToEdit, role_iri, mod, filler, type);
