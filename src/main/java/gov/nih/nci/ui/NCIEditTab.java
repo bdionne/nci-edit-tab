@@ -116,6 +116,7 @@ import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
 import gov.nih.nci.utils.NCIClassSearcher;
+import gov.nih.nci.utils.ParentRemover;
 import gov.nih.nci.utils.ReferenceReplace;
 import gov.nih.nci.utils.RoleReplacer;
 
@@ -1288,6 +1289,68 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return values.contains(value);		
 	}
 	
+	public boolean hasParent(OWLClass cls, OWLClass par_cls, String type) {
+		if (type.equalsIgnoreCase("P")) {
+			Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
+	        
+	        for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+	        	OWLClassExpression exp = ax1.getSuperClass();
+	        	
+	        	if (getParent(exp, par_cls) != null) {
+	        		return true;
+	        	}        	
+	        	
+	        }
+	        return false;
+			
+		} else if (type.equalsIgnoreCase("D")) {
+			Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
+	        
+	        for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+	        	Set<OWLClassExpression> exps = ax1.getClassExpressions();
+	        	for (OWLClassExpression exp : exps) {
+	        		if (getParent(exp, par_cls) != null) {
+		        		return true;
+		        	}
+	        		
+	        	}
+	        }
+	        return false;
+			
+		} else {
+			return false;
+		}
+	}
+	
+	private OWLClass getParent(OWLClassExpression exp, OWLClass par_cls) {
+		
+		OWLClass result = null;
+		
+    	if (exp instanceof OWLClass) {
+    		if (exp.asOWLClass().equals(par_cls)) {
+    			result = par_cls;
+    		}
+    		
+    	} else if (exp instanceof OWLQuantifiedObjectRestriction) {
+    		    		
+    	} else if (exp instanceof OWLObjectIntersectionOf) {
+    		OWLObjectIntersectionOf oio = (OWLObjectIntersectionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asConjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			result = getParent(c, par_cls);
+    		}
+    	} else if (exp instanceof OWLObjectUnionOf) {
+    		OWLObjectUnionOf oio = (OWLObjectUnionOf) exp;
+    		Set<OWLClassExpression> conjs = oio.asDisjunctSet();
+    		for (OWLClassExpression c : conjs) {
+    			result = getParent(c, par_cls);
+    		}
+    	}
+    	return result;
+		
+	}
+	
+	
 	public boolean hasRole(OWLClass cls, String roleName, String mod, String filler, String type) {
 		if (type.equalsIgnoreCase("P")) {
 			Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
@@ -1295,7 +1358,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	        for (OWLSubClassOfAxiom ax1 : sub_axioms) {
 	        	OWLClassExpression exp = ax1.getSuperClass();
 	        	
-	        	if (getRole(cls, exp, roleName, mod, filler) != null) {
+	        	if (getRole(exp, roleName, mod, filler) != null) {
 	        		return true;
 	        	}
 	        	
@@ -1309,7 +1372,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	        for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
 	        	Set<OWLClassExpression> exps = ax1.getClassExpressions();
 	        	for (OWLClassExpression exp : exps) {
-	        		if (getRole(cls, exp, roleName, mod, filler) != null) {
+	        		if (getRole(exp, roleName, mod, filler) != null) {
 		        		return true;
 		        	}
 	        		
@@ -1322,7 +1385,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		}
 	}
 	
-	private OWLQuantifiedObjectRestriction getRole(OWLClass cls, OWLClassExpression exp, String roleName,
+	private OWLQuantifiedObjectRestriction getRole(OWLClassExpression exp, String roleName,
 			String modifier, String filler) {
 		OWLQuantifiedObjectRestriction result = null;
     	if (exp instanceof OWLClass) {
@@ -1360,17 +1423,43 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		OWLObjectIntersectionOf oio = (OWLObjectIntersectionOf) exp;
     		Set<OWLClassExpression> conjs = oio.asConjunctSet();
     		for (OWLClassExpression c : conjs) {
-    			result = getRole(cls, c, roleName, modifier, filler);
+    			result = getRole(c, roleName, modifier, filler);
     		}
     	} else if (exp instanceof OWLObjectUnionOf) {
     		OWLObjectUnionOf oio = (OWLObjectUnionOf) exp;
     		Set<OWLClassExpression> conjs = oio.asDisjunctSet();
     		for (OWLClassExpression c : conjs) {
-    			result = getRole(cls, c, roleName, modifier, filler);
+    			result = getRole(c, roleName, modifier, filler);
     		}
     	}
     	return result;
 		
+	}
+	
+	public void removeParent(OWLClass cls, OWLClass par_cls, String type) {
+		ParentRemover par_rem = new ParentRemover(getOWLEditorKit().getModelManager());
+		List<OWLOntologyChange> changes = par_rem.removeParent(cls, par_cls, type);
+		getOWLModelManager().applyChanges(changes);
+
+	}
+
+	public void addParent(OWLClass cls, OWLClass par_cls, String type) {
+		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+		
+		OWLAxiom ax = null;		
+		
+		if (type.equalsIgnoreCase("P")) {
+			ax = df.getOWLSubClassOfAxiom(cls, par_cls);
+			
+		} else if (type.equalsIgnoreCase("D")) {
+			ax = df.getOWLEquivalentClassesAxiom(cls, par_cls);			
+		}
+		
+		changes.add(new AddAxiom(ontology, ax));
+		
+		this.getOWLEditorKit().getModelManager().applyChanges(changes);
+
 	}
 	
 	public void removeRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
