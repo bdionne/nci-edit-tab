@@ -108,7 +108,7 @@ public class RolesProcessor extends EditProcessor {
 				+ filler + ", "
 				+ type + ") " + msg;
 		return error_msg;
-		}
+	}
 	
 	
 
