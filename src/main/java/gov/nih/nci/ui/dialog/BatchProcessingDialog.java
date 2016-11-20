@@ -30,6 +30,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
+import org.protege.editor.core.prefs.Preferences;
+import org.protege.editor.core.prefs.PreferencesManager;
 
 import edu.stanford.protege.csv.export.CsvExporterBuilder;
 import gov.nih.nci.ui.BatchProcessOutputPanel;
@@ -58,6 +60,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	JTextField fileDelim;
 	
 	public static final String FILE_DELIMITER = ",", PROPERTY_VALUES_DELIMITER = "\t";
+	protected static final String LAST_USED_FOLDER = "";
 	
 	NCIEditTab tab;
 
@@ -108,10 +111,15 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 		  public void actionPerformed(ActionEvent e) {
 			  if(type == "input"){
-				  JFileChooser fc = new JFileChooser();
+				  
+				  Preferences prefs = PreferencesManager.getInstance().getApplicationPreferences(getClass());   
+				  JFileChooser fc = new JFileChooser(prefs.getString(LAST_USED_FOLDER, new File(".").getAbsolutePath()));
+				  
 				  //to do - add file filter
 				  int select = fc.showOpenDialog(BatchProcessingDialog.this);
 				  if (select == JFileChooser.APPROVE_OPTION) {
+					  prefs.putString(LAST_USED_FOLDER, fc.getSelectedFile().getParent());
+					  
 					  File file = fc.getSelectedFile();
 					  infile = file.getAbsolutePath();
 					  fInputTf.setText(infile);
