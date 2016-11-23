@@ -4,18 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -23,23 +19,13 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
-import javax.swing.UIManager;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -83,8 +69,6 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     
     private JButton deleteButton;
 
-    //private ActionListener actionListener;
-    
     public PropertyTablePanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
         initialiseOWLView();
@@ -109,10 +93,6 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
             }
         });
     }
-
-
-
-
 
     protected void initialiseOWLView() {
         tableModel = new PropertyTableModel(owlEditorKit, complexProp);
@@ -254,7 +234,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         propertyTable.getColumnModel().addColumnModelListener(cl);
         propertyTable.getTableHeader().addMouseListener(cl);
 
-        propertyTable.getModel().addTableModelListener(new TableModelListener() {
+        /*propertyTable.getModel().addTableModelListener(new TableModelListener() {
 
             public void tableChanged(TableModelEvent e) {
             	if(e.getColumn() == 0){
@@ -262,11 +242,8 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
             		updateRowHeights(0, c.getWidth(), propertyTable);
             	}
             }
-          });
+          });*/
 
-
-
-        
         sp = new JScrollPane(propertyTable);
         createLabelHeader(tableName, addButton, editButton, deleteButton);
         add(tableHeaderPanel, BorderLayout.NORTH);
@@ -286,7 +263,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     	if (tableModel.hasAnnotation()) {
     		tableHeaderPanel.setVisible(true);
     		sp.setVisible(true);
-    		tableModel.fireTableDataChanged();    		
+    		//tableModel.fireTableDataChanged();  
+    		TableColumn c = propertyTable.getColumnModel().getColumn(0);
+    		updateRowHeights(0, c.getWidth(), propertyTable);
+    		 
     	} else {
     		tableHeaderPanel.setVisible(false);
     		sp.setVisible(false);
@@ -335,9 +315,6 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 					this.setSelectedCls(tableModel.getSelection());
 				}
 				
-				TableColumn c = propertyTable.getColumnModel().getColumn(0);
-		        updateRowHeights(0, c.getWidth(), propertyTable);
-
 				System.out.println("The data: " + data);
 				//upade view
 			}		
@@ -358,9 +335,6 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 						setSelectedCls(tableModel.getSelection());
 
 					}
-
-					TableColumn c = propertyTable.getColumnModel().getColumn(0);
-					updateRowHeights(0, c.getWidth(), propertyTable);
 
 					System.out.println("The data: " + data);
 				}
