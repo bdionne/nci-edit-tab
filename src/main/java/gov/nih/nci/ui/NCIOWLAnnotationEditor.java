@@ -6,6 +6,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.hierarchy.OWLAnnotationPropertyHierarchyProvider;
 import org.protege.editor.owl.ui.editor.AbstractOWLObjectEditor;
+import org.protege.editor.owl.ui.editor.EnumEditor;
 import org.protege.editor.owl.ui.editor.IRIFromEntityEditor;
 import org.protege.editor.owl.ui.editor.IRITextEditor;
 import org.protege.editor.owl.ui.editor.OWLAnonymousIndividualAnnotationValueEditor;
@@ -137,12 +138,35 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
         
         final IRITextEditor textEditor = new IRITextEditor(owlEditorKit);
         textEditor.addStatusChangedListener(mergedVerificationListener);
+        
+        final EnumEditor enumEditor = new EnumEditor(owlEditorKit);
+        this.annotationPropertySelector.addSelectionListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {				
+				OWLAnnotationProperty prop = annotationPropertySelector.getSelectedObject();
+				if (prop != null) {
+					if (enumEditor.isDataTypeCombobox(enumEditor.getDataType(prop))) {
+						enumEditor.setProp(prop);
+						for (int i = 0; i < editors.size(); i++) {
+							OWLObjectEditor<?> editor = editors.get(i);
+							if (editor instanceof EnumEditor) {
+								tabbedPane.setSelectedIndex(i);
+							}
+						}
+					}
+				}
+			}
+			
+        });
+        
     	
     	List<OWLObjectEditor<? extends OWLAnnotationValue>> result = new ArrayList<>();
         result.add(constantEditor);
         result.add(iriEditor);
         result.add(textEditor);
         result.add(anonIndividualEditor);
+        result.add(enumEditor);
 		return result;
 	}
 
@@ -157,18 +181,25 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
         if (annotation != null) {
             annotationPropertySelector.setSelection(annotation.getProperty());
             for (int i = 0; i < editors.size(); i++) {
-                OWLObjectEditor editor = editors.get(i);
-                // because we don't know the type of the editor we need to test
-                if (editor.canEdit(annotation.getValue())) {
-                    editor.setEditedObject(annotation.getValue());
-                    if (tabIndex == -1) {
-                        tabIndex = i;
-                    }
-                }
-                else {
-                    editor.clear();
-                    editor.setEditedObject(null);
-                }
+            	OWLObjectEditor editor = editors.get(i);
+            	// because we don't know the type of the editor we need to test
+            	if (editor.canEdit(annotation.getValue())) {
+            		if (editor instanceof EnumEditor) {
+            			EnumEditor eed = (EnumEditor) editor;                		
+            			if (eed.isDataTypeCombobox(eed.getDataType(annotation.getProperty()))) {                		
+            				eed.setProp(annotation.getProperty());
+            				tabIndex = i;
+            			}
+            		}
+            		editor.setEditedObject(annotation.getValue());
+            		if (tabIndex == -1) {
+            			tabIndex = i;
+            		}
+            	}
+            	else {
+            		editor.clear();
+            		editor.setEditedObject(null);
+            	}
             }
         }
         else {

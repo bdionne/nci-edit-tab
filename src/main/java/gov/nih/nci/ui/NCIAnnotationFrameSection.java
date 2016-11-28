@@ -54,9 +54,9 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
         	if (!getOWLEditorKit().getWorkspace().isHiddenAnnotationURI(ax.getAnnotation().getProperty().getIRI().toURI()) &&
         			!propsToExclude.contains(ax.getProperty())) {
         		if (!readOnlyProps.contains(ax.getProperty())) {
-        			addRow(new OWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, ax));
+        			addRow(new NCIOWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, ax));
         		} else {
-        			addRow(new OWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, ax, false));
+        			addRow(new NCIOWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, ax, false));
 
         		}
         	} else {
