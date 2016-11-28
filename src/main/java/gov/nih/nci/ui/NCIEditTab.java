@@ -1219,7 +1219,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return false;
 	}
 	
-	public String getDefault(OWLAnnotationProperty prop) {
+	public String getDefault(OWLDatatype prop) {
 		if (prop == null) {return null;}
 		OWLAnnotationProperty p = this.lookUpShort("default");
 		Optional<String> val = getPropertyValue(prop, p);
@@ -1267,6 +1267,19 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			}
 		}
 		return null;
+	}
+	
+	OWLDatatype lookUpDataType(String iri) {
+		IRI cpIRI = IRI.create(iri);
+		Set<OWLDatatype> d_types = ontology.getDatatypesInSignature();
+		
+		for (OWLDatatype d_t : d_types) {
+			if (d_t.getIRI().getShortForm().equals(iri)) {
+				return d_t;
+			}
+		}
+		return null;
+		
 	}
 	
 	public OWLAnnotationProperty lookUpShort(String shortName) {
@@ -1779,7 +1792,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		} else if (type.equalsIgnoreCase("user-system")) {
 			return clientSession.getActiveClient().getUserInfo().getName().toString();
 		} else if (type.endsWith("enum")) {
-			return getDefault(lookUp(type));
+			return getDefault(lookUpDataType(type));
 		}
 		return "";
 	}

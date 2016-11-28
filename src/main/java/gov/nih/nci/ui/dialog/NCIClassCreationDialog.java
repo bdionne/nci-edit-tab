@@ -258,7 +258,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		
 		for (OWLAnnotationProperty prop : req_props) {
 			
-			String val = NCIEditTab.currentTab().getDefault(prop);
+			String val = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(prop));
 			if (val == null) {
 				val = "No_Default";
 
