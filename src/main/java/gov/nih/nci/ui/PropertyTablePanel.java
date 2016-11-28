@@ -263,7 +263,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     	if (tableModel.hasAnnotation()) {
     		tableHeaderPanel.setVisible(true);
     		sp.setVisible(true);
-    		//tableModel.fireTableDataChanged();  
+    		tableModel.fireTableDataChanged();  
     		TableColumn c = propertyTable.getColumnModel().getColumn(0);
     		updateRowHeights(0, c.getWidth(), propertyTable);
     		 
