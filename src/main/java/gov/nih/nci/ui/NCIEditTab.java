@@ -673,6 +673,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         if (currentTab().isWorkFlowManager()) {
         	changes.add(new AddAxiom(ontology,
         			df.getOWLSubClassOfAxiom(retire_class, RETIRE_ROOT)));
+        	changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(retire_class.getIRI())));
 
         } else {
         	changes.add(new AddAxiom(ontology,
