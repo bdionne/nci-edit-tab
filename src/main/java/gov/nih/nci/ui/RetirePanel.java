@@ -210,6 +210,7 @@ public class RetirePanel extends JPanel {
     	}
     	changes.add(new AddAxiom(mngr.getActiveOntology(),
     			df.getOWLSubClassOfAxiom(classToRetire, RETIRE_ROOT)));
+    	changes.add(new AddAxiom(mngr.getActiveOntology(), df.getDeprecatedOWLAnnotationAssertionAxiom(classToRetire.getIRI())));
     	
     	mngr.applyChanges(changes);
         
