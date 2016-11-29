@@ -28,6 +28,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 
@@ -308,15 +309,9 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 			if(button.getType() == NCIEditTabConstants.ADD){
 				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), 
 						tableModel.getDefaultPropertyValues(), tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
-				HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
-				if (data != null) {
-					NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),
-							tableModel.getComplexProp(), null, data);
-					this.setSelectedCls(tableModel.getSelection());
-				}
 				
-				System.out.println("The data: " + data);
-				//upade view
+				this.showAndValidate(addedit, NCIEditTabConstants.ADD, null);
+								
 			}		
 			else if(button.getType() == NCIEditTabConstants.EDIT){
 
@@ -327,16 +322,8 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 					
 					PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValues(modelRow), 
 							tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
-					HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
-					if (data != null) {
-						NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, tableModel.getSelection(),
-								tableModel.getComplexProp(), tableModel.getAssertion(modelRow), data);
-
-						setSelectedCls(tableModel.getSelection());
-
-					}
-
-					System.out.println("The data: " + data);
+					
+					this.showAndValidate(addedit, NCIEditTabConstants.EDIT, tableModel.getAssertion(modelRow));					
 				}
 
 				//update view
@@ -364,15 +351,29 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 		
 		PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), tableModel.getDefaultPropertyValues(), 
 				tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
-		HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
-		if (data != null) {
-			NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, tableModel.getSelection(),
-					tableModel.getComplexProp(), null, data);
-			setSelectedCls(tableModel.getSelection());
-		}
-		System.out.println("The data: " + data);
-		//upade view
 		
+		this.showAndValidate(addedit, NCIEditTabConstants.ADD, null);
+		
+		
+		
+	}
+	
+	private void showAndValidate(PropertyEditingDialog addedit, String type, OWLAnnotationAssertionAxiom axiom) {
+
+		boolean done = false;
+		while(!done) {
+			HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
+			if (data != null) {
+				if (NCIEditTab.currentTab().complexPropOp(type, tableModel.getSelection(),
+						tableModel.getComplexProp(), axiom, data)) {
+					this.setSelectedCls(tableModel.getSelection());
+					done = true;						
+				}				
+
+			} else {
+				done = true;
+			}
+		}
 	}
  
 }

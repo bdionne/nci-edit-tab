@@ -295,6 +295,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private Set<OWLAnnotationProperty> complex_properties = new HashSet<OWLAnnotationProperty>();
 	
+	private Set<OWLAnnotationProperty> not_equal_props = new HashSet<OWLAnnotationProperty>();
+	
 	private Map<OWLAnnotationProperty, Set<OWLAnnotationProperty>> configured_annotation_dependencies =
 			new HashMap<OWLAnnotationProperty, Set<OWLAnnotationProperty>>();
 	
@@ -844,6 +846,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		history.undo();
     	}
     	
+    }
+    
+    public void backOutChange() {
+    	if (history.canUndo()) {
+    		history.undo();
+    	}
     }
     
     public void commitChanges() {
@@ -1893,7 +1901,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 
 	
-    public void complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
+    public boolean complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
     		OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
@@ -1959,7 +1967,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     	getOWLModelManager().applyChanges(changes);
     	
-    	syncFullSyn(cls, complex_prop);
+    	if (checkForDups(cls, complex_prop) && syncFullSyn(cls, complex_prop)) {
+    		return true;
+    	} else {
+    		this.backOutChange();
+    		return false;
+    	}
     	
     }
 	
@@ -2142,10 +2155,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	ontology.getOWLOntologyManager().applyChanges(changes);
     }
     
-    public void syncFullSyn(OWLClass cls, OWLAnnotationProperty prop) {
+    public boolean syncFullSyn(OWLClass cls, OWLAnnotationProperty prop) {
     	OWLAnnotationProperty full_syn = getFullSyn();
     	if (!prop.equals(full_syn)) {
-    		return;
+    		return false;
     	}
 
     	List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
@@ -2160,10 +2173,69 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     	if (assertions.size() != 1) {
     		JOptionPane.showMessageDialog(this, "One and only one PT with source NCI is allowed.", "Warning", JOptionPane.WARNING_MESSAGE);
+    		return false;
     	} else {
     		syncPrefName(assertions.get(0).getValue().asLiteral().get().getLiteral());
     		editClass();
+    		return true;
     	}
+    }
+    
+    // true means there are no dups, all ok    
+    public boolean checkForDups(OWLClass cls, OWLAnnotationProperty prop) {
+    	
+    	List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
+    	
+    	Set<HashMap<String, String>> list_ann_vals = new HashSet<HashMap<String, String>>();
+    	
+    	// round them all up into map
+    	for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
+    		if (ax.getProperty().equals(prop)) {
+    			HashMap<String, String> vals = new HashMap<String, String>();
+    			
+    			vals.put("Value", ax.getValue().asLiteral().toString());
+    			
+    			Set<OWLAnnotation> anns = ax.getAnnotations();
+    			for (OWLAnnotation ann : anns) {
+    				if (ann.getProperty().getIRI().getShortForm().equals("Definition_Review_Date") ||
+    						ann.getProperty().getIRI().getShortForm().equals("Definition_Reviewer_Name")) {
+    					// ignore
+    				} else {
+    					vals.put(ann.getProperty().getIRI().getShortForm(), ann.getValue().asLiteral().toString());
+    					
+    				}
+    			}
+    			list_ann_vals.add(vals);
+    		}
+    	}
+    	return noDups(list_ann_vals);
+    }
+    
+    private boolean noDups(Set<HashMap<String, String>> ann_rows) {
+    	
+    	for (HashMap<String, String> row : ann_rows) {
+    		
+    		for (HashMap<String, String> row1 : ann_rows) {
+    			// exclude check for row against itself
+    			if (!row.equals(row1)) {
+    				boolean found_dup = true;
+    				for (String row_s : row.keySet()) {
+    					if ((row1.get(row_s) != null) &&
+    							(row.get(row_s) != null) &&
+    							!row1.get(row_s).equals(row.get(row_s))) {
+    						found_dup = false;    					
+    					}
+    				}
+    				if (found_dup) {
+    					JOptionPane.showMessageDialog(this, "Duplicates not allowed.", "Warning", JOptionPane.WARNING_MESSAGE);
+    					return false;
+    				}
+    			}
+
+    		}
+    		
+    	}    
+    	return true;
     }
     
     String getAnnotationValue(OWLAnnotationAssertionAxiom axiom, String annProp) {
