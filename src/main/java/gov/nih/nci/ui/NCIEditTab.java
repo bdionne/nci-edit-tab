@@ -176,7 +176,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public void setEditInProgress(boolean b) {
 		editInProgress = b;
 		currentlyEditing = null;
-		//refreshNavTree();
 	}
 	
 	public void setCurrentlyEditing(OWLClass cls) { currentlyEditing = cls; }
@@ -1061,6 +1060,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     	} else {
     		if (!inBatchMode) {
+    			// TODO: Need to filter out events coming from Annotation and Entities tabs
     			fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
     		}
     	}
@@ -1069,18 +1069,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public void resetHistory() {
 		history.reset();		
 	}
-	
-	private class MySearchResultHandler implements SearchResultHandler {
-
-		@Override
-		public void searchFinished(Collection<SearchResult> searchResults) {
-			System.out.println("Found a topos " + searchResults.size());
-			
-		}
-	}
-	
-	
-	
 	
 	private void initProperties() {
 		
