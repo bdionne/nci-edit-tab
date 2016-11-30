@@ -2158,7 +2158,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public boolean syncFullSyn(OWLClass cls, OWLAnnotationProperty prop) {
     	OWLAnnotationProperty full_syn = getFullSyn();
     	if (!prop.equals(full_syn)) {
-    		return false;
+    		return true;
     	}
 
     	List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
