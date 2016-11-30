@@ -374,7 +374,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		addListeners();
 		
-		this.getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(this.getOWLEditorKit()));		
+		getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(this.getOWLEditorKit()));		
 	}
     
    
@@ -960,8 +960,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	OWLModelManager mngr = getOWLModelManager();
     	OWLDataFactory df = mngr.getOWLDataFactory();
     	
+    	ComplexEditType type = ComplexEditType.SPLIT;
+    	
     	if (clone_p) {
-    		// do nothing
+    		type = ComplexEditType.CLONE;
     	} else {
     		OWLLiteral fromCode = df.getOWLLiteral(selectedClass.getIRI().getShortForm());
     		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(SPLIT_FROM, newClass.getIRI(), fromCode);
@@ -979,7 +981,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	split_source = selectedClass;
     	split_target = newClass;
 
-    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SPLIT));
+    	this.fireChange(new EditTabChangeEvent(this, type));
     	
     	setEditInProgress(true);
 		setCurrentlyEditing(split_target);
@@ -1061,7 +1063,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	} else {
     		if (!inBatchMode) {
     			// TODO: Need to filter out events coming from Annotation and Entities tabs
-    			fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
+    			//if (editInProgress)
+    				fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
     		}
     	}
     }
@@ -2118,6 +2121,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     // make sure there is a FULL_SYN property with group PT and an rdfs:label
     // that has the same value as the preferred_name property
+    // TODO: Add FULL_SYN without creating cycle
     public void syncPrefName(String preferred_name) {
     	List<OWLOntologyChange> changes = new ArrayList<>();
     	//retrieve rdfs:label and adjust if needed

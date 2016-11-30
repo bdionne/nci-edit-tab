@@ -66,8 +66,11 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 			complexEditPanel.setRootObjects(NCIEditTab.currentTab().getSplitSource(),
 					NCIEditTab.currentTab().getSplitTarget());
 			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
-	                "nci-edit-tab.ComplexEditView");
-			complexEditPanel.setSplit();
+					"nci-edit-tab.ComplexEditView");
+			if (!event.isType(ComplexEditType.CLONE)) {
+				complexEditPanel.setSplit();
+			}
+			complexEditPanel.enableButtons();
 		} else if (event.isType(ComplexEditType.MERGE)) {
 			complexEditPanel.setRootObjects(NCIEditTab.currentTab().getMergeSource(), NCIEditTab.currentTab().getMergeTarget());
 		}
