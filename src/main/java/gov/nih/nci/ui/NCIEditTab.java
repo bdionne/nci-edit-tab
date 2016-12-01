@@ -25,6 +25,7 @@ import static gov.nih.nci.ui.NCIEditTabConstants.SPLIT_FROM;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -599,10 +600,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
-    public void completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {		
+    public void completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {
     	
-    	String editornote = "";
-        String designnote = "";
+    	String user = clientSession.getActiveClient().getUserInfo().getName().toString();
+    	String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+    	
+    	String editornote = "Retired on: " + timestamp + " by " + user;
+        String designnote = "Retired on: " + timestamp;
         // TODO: removing prefix, discuss with Gilberto, I think it's unnecessary
         //String prefix = "preretire_annotation";        
         
@@ -1787,7 +1791,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public String getDefaultValue(IRI iri) {
 		String type = iri.getShortForm();
 		if (type.equalsIgnoreCase("date-time-system")) {
-			return LocalDateTime.now().toString();
+			return LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 		} else if (type.equalsIgnoreCase("user-system")) {
 			return clientSession.getActiveClient().getUserInfo().getName().toString();
 		} else if (type.endsWith("enum")) {
