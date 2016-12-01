@@ -31,6 +31,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 
+import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.RetireTransferHandler;
 import gov.nih.nci.utils.ReferenceFinder;
 
@@ -151,7 +152,8 @@ public class RetirePanel extends JPanel {
     			} else if (retireButton.getText().equals("Save")) {
     				// TODO: refactor and move type check to edit tab
     				NCIEditTab.currentTab().commitChanges();
-    				// TODO: put EVS history
+    				submitHistory();
+    				NCIEditTab.currentTab().completeRetire();
     				upperPanelList.setRootObject(null);
         			usage_panel.setOWLEntity(null);
         			disableButtons();
@@ -193,6 +195,15 @@ public class RetirePanel extends JPanel {
     
     public void warnUsages() {
     	JOptionPane.showMessageDialog(this, "Can't retire until all usages are repaired", "Warning", JOptionPane.WARNING_MESSAGE);    	
+    }
+    
+    public void submitHistory() {
+    	OWLClass cls = this.classToRetire;
+    	String c = cls.getIRI().getShortForm();
+    	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
+    	String op = NCIEditTab.currentTab().getCurrentOp().toString();
+    	String ref = "";
+    	NCIEditTab.currentTab().putHistory(c, n, op, ref);
     }
     
     

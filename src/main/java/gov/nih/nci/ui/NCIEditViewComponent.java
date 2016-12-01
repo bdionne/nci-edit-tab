@@ -81,6 +81,8 @@ EditTabChangeListener {
 			}
 
 		} else if (event.isType(ComplexEditType.COMMIT)) { 
+			
+			// need to test other ops here? I guess ok as merge/clone are eq
 			if (NCIEditTab.currentTab().isSplitting()) {
 
 			} else {

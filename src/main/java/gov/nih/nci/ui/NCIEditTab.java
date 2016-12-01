@@ -1,5 +1,6 @@
 package gov.nih.nci.ui;
 
+import static gov.nih.nci.ui.event.ComplexEditType.*;
 import static gov.nih.nci.ui.NCIEditTabConstants.CODE_PROP;
 import static gov.nih.nci.ui.NCIEditTabConstants.COMPLEX_PROPS;
 import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ASSOC;
@@ -145,7 +146,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private OWLClass split_target;
 	private OWLClass merge_source;
 	private OWLClass merge_target;
-	private OWLClass retire_class;
+	private OWLClass class_to_retire;
 	
 	private boolean editInProgress = false;
 	private OWLClass currentlyEditing = null;
@@ -183,10 +184,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
 	
-	private boolean isRetiring = false;
+	//private boolean isRetiring = false;
+	
+	private ComplexEditType current_op = null;
 	
 	public boolean isRetiring() {
-		return isRetiring;
+		return (current_op == RETIRE || current_op == PRERETIRE);
 	}
 	
 	public boolean isFree() {
@@ -194,8 +197,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public void cancelRetire() {
-		retire_class = null;
-		isRetiring = false;
+		class_to_retire = null;
+		current_op = null;
 		editInProgress = false;
 		refreshNavTree();
 	}
@@ -241,7 +244,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public OWLClass getRetireClass() {
-		return retire_class;		
+		return class_to_retire;		
 	}
 	
 	public OWLClass getMergeSource() {
@@ -610,31 +613,31 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         // TODO: removing prefix, discuss with Gilberto, I think it's unnecessary
         //String prefix = "preretire_annotation";        
         
-    	List<OWLOntologyChange> changes = addNotes(editornote, designnote, retire_class);
+    	List<OWLOntologyChange> changes = addNotes(editornote, designnote, class_to_retire);
     	
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();    	
         
-        Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(retire_class);
+        Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(class_to_retire);
         
         for (OWLSubClassOfAxiom ax1 : sub_axioms) {
         	OWLClassExpression exp = ax1.getSuperClass();
-        	changes = addParentRoleAssertions(changes, exp, retire_class);
+        	changes = addParentRoleAssertions(changes, exp, class_to_retire);
         	changes.add(new RemoveAxiom(ontology, ax1));
         	
         }
         
-        Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(retire_class);
+        Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(class_to_retire);
         
         for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
         	Set<OWLClassExpression> exps = ax1.getClassExpressions();
         	for (OWLClassExpression exp : exps) {
-        		changes = addParentRoleAssertions(changes, exp, retire_class);
+        		changes = addParentRoleAssertions(changes, exp, class_to_retire);
         	}
         	changes.add(new RemoveAxiom(ontology, ax1));
         	
         }
         
-        Set<OWLAnnotationAssertionAxiom> assocs = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) retire_class.getIRI());
+        Set<OWLAnnotationAssertionAxiom> assocs = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) class_to_retire.getIRI());
         
         for (OWLAnnotationAssertionAxiom ax1 : assocs) {
         	// TODO: check that annotation is an association
@@ -657,7 +660,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         		String val = ax1.getProperty().getIRI().getShortForm() + "|"
         				+ ax1.getValue().asIRI().get().getShortForm();
         		OWLLiteral lit = df.getOWLLiteral(val);
-        		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, retire_class.getIRI(), lit);
+        		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, class_to_retire.getIRI(), lit);
         		changes.add(new AddAxiom(ontology, ax));
 
         		changes.add(new RemoveAxiom(ontology, ax1));
@@ -669,7 +672,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         for (OWLAnnotationProperty p : fixups.keySet()) {
         	for (String s : fixups.get(p)) {
         		OWLLiteral val1 = df.getOWLLiteral(s);
-        		OWLAxiom ax1 = df.getOWLAnnotationAssertionAxiom(p, retire_class.getIRI(), val1);
+        		OWLAxiom ax1 = df.getOWLAnnotationAssertionAxiom(p, class_to_retire.getIRI(), val1);
         		changes.add(new AddAxiom(ontology, ax1));
         		
         	}
@@ -677,18 +680,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         }
         if (currentTab().isWorkFlowManager()) {
         	changes.add(new AddAxiom(ontology,
-        			df.getOWLSubClassOfAxiom(retire_class, RETIRE_ROOT)));
-        	changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(retire_class.getIRI())));
+        			df.getOWLSubClassOfAxiom(class_to_retire, RETIRE_ROOT)));
+        	changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(class_to_retire.getIRI())));
 
         } else {
         	changes.add(new AddAxiom(ontology,
-        			df.getOWLSubClassOfAxiom(retire_class, PRE_RETIRE_ROOT))); 
+        			df.getOWLSubClassOfAxiom(class_to_retire, PRE_RETIRE_ROOT))); 
         }
         
-        getOWLModelManager().applyChanges(changes);
-        
-        retire_class = null;
-        isRetiring = false;        
+        getOWLModelManager().applyChanges(changes);       
         
         
         
@@ -767,8 +767,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public void retire(OWLClass selectedClass) {
-    	retire_class = selectedClass;
-    	isRetiring = true;
+    	class_to_retire = selectedClass;
+    	if (isWorkFlowModeler()) {
+    		current_op = PRERETIRE;
+    	} else {
+    		current_op = RETIRE;
+    	}
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE)); 
     	
     }
@@ -845,7 +849,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public void completeRetire() {
-    	this.isRetiring = false;
+    	class_to_retire = null;
+        current_op = null;
     }
     
     public boolean canSplit(OWLClass cls) {
@@ -867,7 +872,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void commitChanges() {
     	
-    	ComplexEditType type = this.getComplexEditType();
+    	ComplexEditType type = getCurrentOp();
     	
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
 
@@ -941,7 +946,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     
     
-    private ComplexEditType getComplexEditType() {
+    public ComplexEditType getCurrentOp() {
     	ComplexEditType type = ComplexEditType.MODIFY;
     	if (currentTab().isRetiring()) {
     		if (currentTab().isWorkFlowManager()) {

@@ -320,7 +320,7 @@ public class EditPanel extends JPanel {
     	OWLClass cls = list.getRootObject();
     	String c = cls.getIRI().getShortForm();
     	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
-    	String op = ComplexEditType.MODIFY.toString();
+    	String op = ComplexEditType.EDIT.toString();
     	String ref = "";
     	NCIEditTab.currentTab().putHistory(c, n, op, ref);
     }
