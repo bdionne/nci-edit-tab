@@ -224,6 +224,7 @@ public class EditPanel extends JPanel {
     				this.complexPropertyPanel.remove(tablePanel);
     			}
     		}
+    		this.complexPropertyPanel.repaint();
     		list.setRootObject(cls);
     		if (cls != null) {
     			gen_props.setRootObject(cls.getIRI());

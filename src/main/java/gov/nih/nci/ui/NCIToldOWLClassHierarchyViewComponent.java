@@ -133,9 +133,12 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 					// if merging or cloning splitting returns the same result
 					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getSplitSource());
 				} else {
-					NCIEditTab.currentTab().editClass();
-				}
-				//getTree().expandPath(e.getPath());
+					if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject())) {
+
+					} else {
+						NCIEditTab.currentTab().editClass();
+					}
+				}				
 			}        	
         });
         

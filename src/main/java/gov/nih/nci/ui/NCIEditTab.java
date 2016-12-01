@@ -817,16 +817,24 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public boolean isSubClass(OWLClass sub, OWLClass sup) {
-    	    	
-    	Set<OWLSubClassOfAxiom> subs = ontology.getSubClassAxiomsForSubClass(sub);
-    	for (OWLSubClassOfAxiom s : subs) {
-    		if (!s.getSuperClass().isAnonymous()) {
-    			if (s.getSuperClass().asOWLClass().equals(sup)) {
-    				return true;
-    			}
-    		}    		
+    	//before ontology is open user may click on Thing
+    	if (ontology != null) {
+
+    		if ((sub != null) && sub.equals(sup)) {
+    			return true;
+    		}
+
+    		Set<OWLSubClassOfAxiom> subs = ontology.getSubClassAxiomsForSubClass(sub);
+    		for (OWLSubClassOfAxiom s : subs) {
+    			if (!s.getSuperClass().isAnonymous()) {
+    				if (s.getSuperClass().asOWLClass().equals(sup)) {
+    					return true;
+    				}
+    			}    		
+    		}
     	}
-    	return false;    	
+    	return false;
+
     }
     
     public void updateRetire() {
@@ -1628,12 +1636,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Optional<String> getRDFSLabel(OWLNamedObject oobj) {
 		// TODO: fall back to IRI if no label
-		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
-				.getRDFSLabel())) {
-			OWLAnnotationValue av = annotation.getValue();
-			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
-			if (ol.isPresent()) {
-				return Optional.of(ol.get().getLiteral());
+		if (topOrBot(oobj)) {
+			return Optional.of(oobj.getIRI().getShortForm());			
+		}
+		if (ontology != null) {
+			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
+					.getRDFSLabel())) {
+				OWLAnnotationValue av = annotation.getValue();
+				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				if (ol.isPresent()) {
+					return Optional.of(ol.get().getLiteral());
+				}
 			}
 		}
 
@@ -1643,6 +1656,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					"Warning", JOptionPane.WARNING_MESSAGE);
 		}
 		return Optional.of(oobj.getIRI().getShortForm());
+
 
 	}
 

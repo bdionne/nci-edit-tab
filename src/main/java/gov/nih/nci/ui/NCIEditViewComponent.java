@@ -31,7 +31,10 @@ EditTabChangeListener {
 
     @Override
 	protected OWLClass updateView(OWLClass selectedClass) {
-        return selectedClass;
+    	if (!NCIEditTab.currentTab().isRetired(selectedClass)) {
+    		return selectedClass;
+    	}
+        return null;
 	}
 
 	@Override
