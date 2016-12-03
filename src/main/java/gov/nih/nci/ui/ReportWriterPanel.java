@@ -535,7 +535,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			if (Thread.interrupted()) {
 				throw new InterruptedException();
 			}
-			Thread.sleep(300);
+			Thread.sleep(50);
 
 			alreadySeen.put(superCls, superCls);
 			
@@ -741,11 +741,11 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 						maxlevel = getMaxLevel((OWLClass) root);
 					}
 					// reinit alreadySeen for reuse
-					alreadySeen = new HashMap<OWLClass, OWLClass>();
+					alreadySeen.clear();;
 
 					max = getTreeSize(root, 0, maxlevel);
 					// reinit already seen as it's used to compute max
-					alreadySeen = new HashMap<OWLClass, OWLClass>();
+					alreadySeen.clear();
 
 					reportTextArea.append("Tree size: " + max + "\n");
 
@@ -834,14 +834,16 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			if (level < maxlevel) {
 				level++;
 				List<OWLClass> subclasses = tab.getDirectSubClasses(cls);
-				
+
 				for (OWLClass sub : subclasses) {
-					num_subs = num_subs
-							+ getTreeSize(sub, level, maxlevel);
-					
+					if (alreadySeen.get(sub) == null) {
+						num_subs = num_subs
+								+ getTreeSize(sub, level, maxlevel);
+					}
+
 				}
-				
-				
+
+
 			}
 			return num_subs + 1;
 		} catch (Exception e) {
