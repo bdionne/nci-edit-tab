@@ -333,6 +333,8 @@ public class ComplexEditPanel extends JPanel {
     	if (NCIEditTab.currentTab().readyMerge()) {
     		saveButton.setText("Merge");
     		enableButtons();
+    	} else {
+    		enableClear();
     	}
     }
 
@@ -347,6 +349,11 @@ public class ComplexEditPanel extends JPanel {
 	
 	public void enableButtons() {
     	saveButton.setEnabled(true);
+    	clearButton.setEnabled(true);
+    	
+    }
+	
+	public void enableClear() {
     	clearButton.setEnabled(true);
     	
     }
