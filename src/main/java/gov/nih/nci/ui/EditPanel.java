@@ -50,7 +50,7 @@ public class EditPanel extends JPanel {
 	
 	private OWLClass currentClass = null;
 	
-	;
+	JPanel genPropPanel = null;
     
     private List<PropertyTablePanel> tablePanelList = new ArrayList<PropertyTablePanel>();
     
@@ -86,6 +86,7 @@ public class EditPanel extends JPanel {
     }
     
     private JPanel complexPropertyPanel;
+    
     private void createUI() {
     	setLayout(new BorderLayout());
         
@@ -97,7 +98,7 @@ public class EditPanel extends JPanel {
        
         tabbedPane.addTab("Complex Properties", compPropSP);
         
-        JPanel genPropPanel = new JPanel();
+        genPropPanel = new JPanel();
         genPropPanel.setLayout(new BorderLayout());
         
         JLabel prefNamLabel = new JLabel("Preferred Name");        
@@ -224,7 +225,8 @@ public class EditPanel extends JPanel {
     				this.complexPropertyPanel.remove(tablePanel);
     			}
     		}
-    		this.complexPropertyPanel.repaint();
+    		complexPropertyPanel.repaint();
+    		
     		list.setRootObject(cls);
     		if (cls != null) {
     			gen_props.setRootObject(cls.getIRI());
@@ -234,6 +236,23 @@ public class EditPanel extends JPanel {
     			tabbedPane.setSelectedComponent(descrPane);
 
     		}
+    	} else {
+    		// null out panels
+    		List<PropertyTablePanel> tablePanelList = getPropertyTablePanelList();
+    		for (PropertyTablePanel tablePanel : tablePanelList) {
+    			tablePanel.setSelectedCls(null);
+    			if (tablePanel.isViewable()) {
+    				complexPropertyPanel.add(tablePanel);    				
+    			} else {
+    				this.complexPropertyPanel.remove(tablePanel);
+    			}
+    		}
+    		complexPropertyPanel.repaint();
+    		list.setRootObject(null);
+    		gen_props.setRootObject(null);
+    		prefNameText.setText(null);
+    		codeText.setText("nocode");
+    		this.genPropPanel.repaint();
     	}
     }
     
@@ -296,7 +315,7 @@ public class EditPanel extends JPanel {
             {
             	NCIEditTab.currentTab().undoChanges();            	
             	NCIEditTab.currentTab().setEditInProgress(false);
-            	NCIEditTab.currentTab().editClass();
+            	NCIEditTab.currentTab().selectClass(NCIEditTab.currentTab().getCurrentlyEditing());
             	disableButtons();
             	
             }
@@ -320,7 +339,7 @@ public class EditPanel extends JPanel {
     	OWLClass cls = list.getRootObject();
     	String c = cls.getIRI().getShortForm();
     	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
-    	String op = ComplexEditType.EDIT.toString();
+    	String op = ComplexEditType.MODIFY.toString();
     	String ref = "";
     	NCIEditTab.currentTab().putHistory(c, n, op, ref);
     }
