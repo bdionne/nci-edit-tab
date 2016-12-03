@@ -134,9 +134,10 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getSplitSource());
 				} else {
 					if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject())) {
+						NCIEditTab.currentTab().setCurrentlyEditing(null);
 
 					} else {
-						NCIEditTab.currentTab().editClass();
+						NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
 					}
 				}				
 			}        	
@@ -161,10 +162,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		if (NCIEditTab.currentTab().inComplexOp()) {
 			
 		} else {
-			getTree().setSelectedOWLObject(entity);
-			
-		
-			NCIEditTab.currentTab().editClass();
+			getTree().setSelectedOWLObject(entity);		
+			NCIEditTab.currentTab().selectClass(entity);
 		}        
     }   
 	 

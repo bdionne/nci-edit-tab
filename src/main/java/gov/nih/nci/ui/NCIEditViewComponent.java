@@ -11,8 +11,7 @@ import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
 
 
-public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent implements OWLSelectionModelListener,
-EditTabChangeListener {
+public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent implements EditTabChangeListener {
 	private static final long serialVersionUID = 1L;
 	private EditPanel editPanel;
 	
@@ -24,33 +23,31 @@ EditTabChangeListener {
     	
         setLayout(new BorderLayout());
         add(editPanel);
-        this.getOWLWorkspace().getOWLSelectionModel().addListener(this);
         NCIEditTab.addListener(this);
         
     }
 
     @Override
 	protected OWLClass updateView(OWLClass selectedClass) {
-    	if (!NCIEditTab.currentTab().isRetired(selectedClass)) {
-    		return selectedClass;
+    	if (selectedClass != null) {
+    		if (!NCIEditTab.currentTab().isRetired(selectedClass)) {
+        		return selectedClass;
+        	}
+    		
+    	} else {
+    		editPanel.setSelectedClass(null);
     	}
+    	
         return null;
 	}
 
 	@Override
 	public void disposeView() {
-		editPanel.disposeView();		
-		this.getOWLWorkspace().getOWLSelectionModel().removeListener(this);
+		editPanel.disposeView();
 		super.disposeView();		
 	}
 
 	
-
-	@Override
-	public void selectionChanged() throws Exception {
-		
-	}
-
 	@Override
 	public void handleChange(EditTabChangeEvent event) {
 		if (event.isType(ComplexEditType.ADD_PROP)) {
@@ -73,8 +70,8 @@ EditTabChangeListener {
 				NCIEditTab.currentTab().setCurrentlyEditing(editPanel.getSelectedClass());
 			}
 
-		} else if (event.isType(ComplexEditType.EDIT)) {
-			editPanel.setSelectedClass(getSelectedOWLClass());
+		} else if (event.isType(ComplexEditType.SELECTED)) {
+			editPanel.setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
 			if (!NCIEditTab.currentTab().beginningMerge()) {
 				getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
 						"nci-edit-tab.EditView");

@@ -293,6 +293,8 @@ public class PropertyTableModel extends AbstractTableModel {
 
 			}  
 			
+		} else {
+			annotations.clear();
 		}
 
 	}

@@ -1,6 +1,7 @@
 package gov.nih.nci.ui.event;
 
 public enum ComplexEditType {
+	SELECTED,
 	EDIT,
 	MODIFY,
 	SPLIT,

@@ -2,11 +2,10 @@ package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
 
-import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.cls.OWLClassAnnotationsViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
 
-public class ReportWriterViewComponent extends OWLClassAnnotationsViewComponent implements OWLSelectionModelListener
+public class ReportWriterViewComponent extends OWLClassAnnotationsViewComponent
 {
 
     private static final long serialVersionUID = 1L;
@@ -14,7 +13,6 @@ public class ReportWriterViewComponent extends OWLClassAnnotationsViewComponent 
 
 	
 	public ReportWriterViewComponent() {
-		//NCIEditTab.addListener(this);
 		
 	}
 
@@ -28,8 +26,7 @@ public class ReportWriterViewComponent extends OWLClassAnnotationsViewComponent 
 	
 	@Override
 	protected OWLClass updateView(OWLClass selectedClass) {
-		reportPanel.setSelectedClass(selectedClass);
-		
+		reportPanel.setSelectedClass(selectedClass);		
         return selectedClass;
 	}
 
@@ -38,11 +35,6 @@ public class ReportWriterViewComponent extends OWLClassAnnotationsViewComponent 
 		reportPanel.dispose();
 	}
 
-	@Override
-	public void selectionChanged() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	
 }

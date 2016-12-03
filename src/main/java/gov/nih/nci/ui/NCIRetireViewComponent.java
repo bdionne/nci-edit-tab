@@ -10,8 +10,7 @@ import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
 
-public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent implements OWLSelectionModelListener,
-EditTabChangeListener {
+public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent implements EditTabChangeListener {
 
     private static final long serialVersionUID = 1L;
 	private RetirePanel retirePanel;
@@ -33,8 +32,7 @@ EditTabChangeListener {
 	
 	
 	public NCIRetireViewComponent() {
-		NCIEditTab.addListener(this);
-		
+		NCIEditTab.addListener(this);		
 	}
 
 	@Override
@@ -49,8 +47,9 @@ EditTabChangeListener {
 	protected OWLClass updateView(OWLClass selectedClass) {	
 		if (retirePanel.getRetiringClass() != null) {
 			if (!selectedClass.equals(retirePanel.getRetiringClass())) {
+				// switch to edit tab to edit reference to retiring class
 				if (NCIEditTab.currentTab().isRetiring()) {
-					NCIEditTab.currentTab().editClass();
+					NCIEditTab.currentTab().selectClass(selectedClass);
 					getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
 							"nci-edit-tab.EditView");
 				}
@@ -66,11 +65,4 @@ EditTabChangeListener {
 		retirePanel.dispose();
 	}
 
-
-
-	@Override
-	public void selectionChanged() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
 }
