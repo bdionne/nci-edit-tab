@@ -159,19 +159,22 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	
 	@Override
 	public void setSelectedEntity(OWLClass entity) {
-		if (NCIEditTab.currentTab().inComplexOp()) {
-			
-		} else {
-			getTree().setSelectedOWLObject(entity);		
-			NCIEditTab.currentTab().selectClass(entity);
-		}        
-    }   
+
+		getTree().setSelectedOWLObject(entity);		
+		NCIEditTab.currentTab().selectClass(entity);
+
+	} 
+	
+	private boolean isFree() {
+		return NCIEditTab.currentTab().isFree();
+		
+	}
 	 
 	@Override
 	public boolean canRetireClass() {
 		return (getSelectedEntities().size() == 1 &&
 				NCIEditTab.currentTab().canRetire(getSelectedEntity()) &&
-				NCIEditTab.currentTab().isFree());
+				isFree());
 	}
 
 	@Override
@@ -189,7 +192,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	@Override
 	public boolean canMergeClass() {
 		return (getSelectedEntities().size() == 2 &&
-				NCIEditTab.currentTab().canMerge());
+				NCIEditTab.currentTab().canMerge() &&
+				isFree());
 	}
 
 	@Override
@@ -200,7 +204,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	@Override
 	public boolean canCloneClass() {
 		return (getSelectedEntities().size() == 1 &&
-				NCIEditTab.currentTab().canClone(getSelectedEntity()));
+				NCIEditTab.currentTab().canClone(getSelectedEntity()) &&
+				isFree());
 	}
 
 	@Override
@@ -211,7 +216,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	@Override
 	public boolean canSplitClass() {
 		return (getSelectedEntities().size() == 1 &&
-				NCIEditTab.currentTab().canSplit(getSelectedEntity()));
+				NCIEditTab.currentTab().canSplit(getSelectedEntity()) &&
+				isFree());
 	}
 
 	@Override
@@ -221,11 +227,11 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	}
 	
 	private void splitOrCloneClass(boolean clone_p) {
+		NCIEditTab.currentTab().setOp(ComplexEditType.SPLIT);
 		NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class, Optional.empty(), Optional.empty());
 		if (dlg.showDialog()) {
-			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), getSelectedEntity(), clone_p);
-			//getOWLWorkspace().getOWLSelectionModel().setSelectedEntity(dlg.getNewClass());
+			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), getSelectedEntity(), clone_p);
 			
 		}		
 	}
@@ -267,7 +273,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 
 		@Override
 		public boolean canAddComplex() {
-			return true;
+			return isFree();
 		}
 
 		@Override

@@ -68,6 +68,8 @@ public class EditPanel extends JPanel {
     
     private JButton cancelButton;
     
+    private DocumentListener doc_listen = null;
+    
     public EditPanel(OWLEditorKit editorKit) {
     	
         this.owlEditorKit = editorKit;
@@ -105,7 +107,7 @@ public class EditPanel extends JPanel {
         prefNameText = new JTextField("preferred name");
         prefNameText.setVisible(true);
         
-        prefNameText.getDocument().addDocumentListener(new DocumentListener() {
+        doc_listen = new DocumentListener() {
 
 			@Override
 			public void insertUpdate(DocumentEvent e) {
@@ -141,7 +143,9 @@ public class EditPanel extends JPanel {
 			@Override
 			public void changedUpdate(DocumentEvent e) {}
         	
-        });
+        };
+        
+        prefNameText.getDocument().addDocumentListener(doc_listen);
         
         JPanel prefTxt = new JPanel();
         prefTxt.setLayout(new BorderLayout());
@@ -195,6 +199,7 @@ public class EditPanel extends JPanel {
     }
     
     public void setSelectedClass(OWLClass cls) {
+    	prefNameText.getDocument().removeDocumentListener(doc_listen);
     	if (cls != null) {
 
     		this.currentClass = cls;
@@ -254,6 +259,7 @@ public class EditPanel extends JPanel {
     		codeText.setText("nocode");
     		this.genPropPanel.repaint();
     	}
+    	prefNameText.getDocument().addDocumentListener(doc_listen);
     }
     
     public OWLClass getSelectedClass() {

@@ -151,8 +151,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private boolean editInProgress = false;
 	private OWLClass currentlyEditing = null;
-	private boolean beginMerge = false;
-	private boolean endMerge = false;
+	
 	
 	private boolean inBatchMode = false;
 	
@@ -166,12 +165,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		history.startTalking();
 	}
 	
-	public void setMergeBegin(Boolean b) { beginMerge = b; }
-	public boolean beginningMerge() { return beginMerge; }
-	
-	public void setMergeEnd(Boolean e) { endMerge = e; }
-	public boolean getMergeEnd() { return endMerge; }
-	
 	public boolean isEditing() {
 		return editInProgress;
 	}
@@ -181,7 +174,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		currentlyEditing = null;
 	}
 	
-	public void setCurrentlyEditing(OWLClass cls) { currentlyEditing = cls; }
+	public void setCurrentlyEditing(OWLClass cls) { 
+		currentlyEditing = cls;
+	}
 	
 	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
 	
@@ -189,12 +184,24 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private ComplexEditType current_op = null;
 	
+	public void setOp(ComplexEditType op) {
+		current_op = op;
+	}
+	
 	public boolean isRetiring() {
 		return (current_op == RETIRE || current_op == PRERETIRE);
 	}
 	
+	public boolean isMerging() {
+		return (current_op == ComplexEditType.MERGE || current_op == PREMERGE);
+	}
+	
+	public boolean isSplitting() {
+		return (current_op == ComplexEditType.SPLIT);
+	}
+	
 	public boolean isFree() {
-		return (!isRetiring() && !isEditing());
+		return (!this.inComplexOp() && !this.isEditing());
 	}
 	
 	public void cancelRetire() {
@@ -204,8 +211,20 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		refreshNavTree();
 	}
 	
-	public void cancelSplit() {		
-		editInProgress = false;
+	public void cancelOp() {
+		if (current_op == SPLIT || current_op == CLONE) {
+			cancelSplit();
+		}
+		if (current_op == ComplexEditType.MERGE) {
+			cancelMerge();
+			
+		}
+		current_op = null;
+		
+	}
+	
+	public void cancelSplit() {	
+		setEditInProgress(false);
 		// go back to previous selected class
 		setCurrentlyEditing(split_source);
 		//refreshNavTree();
@@ -216,6 +235,42 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 	}
 	
+	public void cancelMerge() {		
+		
+		setEditInProgress(false);
+		// go back to previous selected class
+		if (merge_source != null) {
+			
+			navTree.setSelectedEntity(merge_source);
+			
+		}
+		
+		if (merge_target != null) {
+			
+			navTree.setSelectedEntity(merge_target);
+			
+		}
+		
+		//refreshNavTree();
+		undoChanges();
+		
+		merge_source = null;
+		merge_target = null;
+		
+	}
+	
+	public void completeOp() {
+		if (current_op == SPLIT || current_op == CLONE) {
+			completeSplit();
+		}
+		if (current_op == ComplexEditType.MERGE) {
+			completeMerge();
+			
+		}
+		current_op = null;
+		
+	}
+	
 	public void completeSplit() {
 		setEditInProgress(false);
 		navTree.setSelectedEntity(split_source);
@@ -223,14 +278,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		split_target = null;		
 	}
 	
-	public boolean isMerging() {
-		return isSplitting();
+	public void completeMerge() {
+		setEditInProgress(false);
+		navTree.setSelectedEntity(merge_source);
+		merge_source = null;
+		merge_target = null;
+		
 	}
 	
-	public boolean isSplitting() {
-		return (split_source != null) &&
-				(split_target != null);
-	}
+	
 	
 	public boolean isCloning() {
 		return isSplitting();
@@ -257,18 +313,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public void setMergeSource(OWLClass cls) {
-		this.merge_source = cls;
+		current_op = ComplexEditType.MERGE;
+		merge_source = cls;
 	}
 	
 	public void setMergeTarget(OWLClass cls) {
-		this.merge_target = cls;
+		current_op = ComplexEditType.MERGE;
+		merge_target = cls;
 	}
 	
 	public boolean inComplexOp() {
-		return isSplitting() ||
-				isRetiring() ||
-				isMerging() ||
-				isCloning();
+		return current_op != null;
 	}
 		
 	// use undo/redo facility
@@ -412,7 +467,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return can;
     }
     
-    public void merge() {
+    public boolean merge() {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
     	
@@ -450,8 +505,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	    			setMergeTarget(merge_source);
 	    			setMergeSource(temp);
 	    			this.fireChange(new EditTabChangeEvent(this, ComplexEditType.MERGE));
-	    			setMergeEnd(false);
-					return;
+					return false;
 				} 
 				
     		} 
@@ -467,8 +521,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		
     		if (dcs.isEmpty()) {
     			fireChange(new EditTabChangeEvent(this, ComplexEditType.MERGE));
-    			setMergeEnd(false);
-				return;
+				return false;
     		}
     		
     		changes.addAll(dcs);
@@ -508,7 +561,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		
     	} 
     	getOWLModelManager().applyChanges(changes);
-    	setMergeEnd(true);
+    	
+    	return true;
     	
     }
     
@@ -866,7 +920,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public boolean canSplit(OWLClass cls) {
-    	return !(isPreRetired(cls) || isRetired(cls));
+    	return !(isPreRetired(cls) || isRetired(cls)
+    			|| isPreMerged(cls));
     }
     
     public void undoChanges() {
@@ -885,6 +940,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void commitChanges() {
     	
     	ComplexEditType type = getCurrentOp();
+    	if (type == null) {
+    		type = ComplexEditType.EDIT;
+    	}
     	
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
 
@@ -959,40 +1017,20 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     
     public ComplexEditType getCurrentOp() {
-    	ComplexEditType type = ComplexEditType.MODIFY;
-    	if (currentTab().isRetiring()) {
-    		if (currentTab().isWorkFlowManager()) {
-    			type = ComplexEditType.RETIRE;
-    		} else {
-    			type = ComplexEditType.PRERETIRE;
-
-    		}
-    	}
-    	if (currentTab().isMerging()) {
-    		if (currentTab().isWorkFlowManager()) {
-    			type = ComplexEditType.MERGE;
-    		} else {
-    			type = ComplexEditType.PREMERGE;
-
-    		}
-
-    	}
-    	if (currentTab().isSplitting()) {
-    		type = ComplexEditType.SPLIT;
-    	}
-    	return type;
-
+    	return this.current_op;
     }
     
-    public void splitClass(OWLClass newClass, List<OWLOntologyChange> changes, OWLClass selectedClass, boolean clone_p) {    	
+    public void splitClass(OWLClass newClass, OWLClass selectedClass, boolean clone_p) {    	
 
     	OWLModelManager mngr = getOWLModelManager();
     	OWLDataFactory df = mngr.getOWLDataFactory();
     	
-    	ComplexEditType type = ComplexEditType.SPLIT;
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	
+    	
     	
     	if (clone_p) {
-    		type = ComplexEditType.CLONE;
+    		
     	} else {
     		OWLLiteral fromCode = df.getOWLLiteral(selectedClass.getIRI().getShortForm());
     		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(SPLIT_FROM, newClass.getIRI(), fromCode);
@@ -1010,7 +1048,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	split_source = selectedClass;
     	split_target = newClass;
 
-    	this.fireChange(new EditTabChangeEvent(this, type));
+    	this.fireChange(new EditTabChangeEvent(this, current_op));
     	
     	setEditInProgress(true);
 		setCurrentlyEditing(split_target);
@@ -1034,7 +1072,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     	if (proceed) {
     		OWLClass newClass = dlg.getNewClass();
-    		List<OWLOntologyChange> changes = dlg.getOntChanges();
+    		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     		OWLModelManager mngr = getOWLModelManager();
     		OWLDataFactory df = mngr.getOWLDataFactory();
 
@@ -1093,7 +1131,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		if (!inBatchMode) {
     			// TODO: Need to filter out events coming from Annotation and Entities tabs
     			//if (editInProgress)
-    				fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
+    			if (!inComplexOp() ||
+    					isRetiring())
+    				fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));    			
     		}
     	}
     }

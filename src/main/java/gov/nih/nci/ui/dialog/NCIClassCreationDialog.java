@@ -207,7 +207,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     
     private List<OWLOntologyChange> ont_changes = null;
     
-    public List<OWLOntologyChange> getOntChanges() {return ont_changes;}
+    //public List<OWLOntologyChange> getOntChanges() {return ont_changes;}
     		
     
     public void buildNewClass(String preferredName, Optional<String> code) {
@@ -272,9 +272,12 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
 				
 		changes.add(new AddAxiom(mngr.getActiveOntology(), new_new_axiom));
+		
 				
 		this.ont_changes = changes;
 		this.newClass = newClass;
+		
+		mngr.applyChanges(ont_changes);
     }
     
     

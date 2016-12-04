@@ -4,6 +4,7 @@ import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -158,8 +160,8 @@ public class ComplexEditPanel extends JPanel {
             public void actionPerformed(ActionEvent e)
             {
             	if (saveButton.getText().equals("Merge")) {
-            		NCIEditTab.currentTab().merge();
-            		if (NCIEditTab.currentTab().getMergeEnd()) {
+            		
+            		if (NCIEditTab.currentTab().merge()) {
             			saveButton.setText("Save");
             		}
             	} else {
@@ -202,7 +204,7 @@ public class ComplexEditPanel extends JPanel {
             	lowerLabel.setText("Target");
             	
             	saveButton.setText("Save");
-            	NCIEditTab.currentTab().cancelSplit();
+            	NCIEditTab.currentTab().cancelOp();
             	disableButtons();
             }
         });     
@@ -231,23 +233,22 @@ public class ComplexEditPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JRadioButton sb = (JRadioButton) e.getSource();
-				if (sb.equals(mergeButton)) {
-					upperLabel.setText("Retiring Concept");
-					lowerLabel.setText("Surviving Concept");
-					NCIEditTab.currentTab().setMergeBegin(true);
-					
-				} else if (sb.equals(splitButton)) {
-					upperLabel.setText("Split From");
-					lowerLabel.setText("Split To");
-					//NCIEditTab.currentTab().setSplitBegin(true);
-					
-				} else if (sb.equals(cloneButton)) {
-					upperLabel.setText("Clone From");
-					lowerLabel.setText("Clone To");
-					
+				if (NCIEditTab.currentTab().isRetiring()) {
+					JOptionPane.showMessageDialog(new Frame(), "Retirement in progress.", "Warning", JOptionPane.WARNING_MESSAGE);
+					radioButtonGroup.clearSelection();
+				} else {
+					if (sb.equals(mergeButton)) {
+						upperLabel.setText("Retiring Concept");
+						lowerLabel.setText("Surviving Concept");
+					} else if (sb.equals(splitButton)) {
+						upperLabel.setText("Split From");
+						lowerLabel.setText("Split To");
+					} else if (sb.equals(cloneButton)) {
+						upperLabel.setText("Clone From");
+						lowerLabel.setText("Clone To");
+
+					}
 				}
-				// TODO Auto-generated method stub
-				
 			}
     		
     	};

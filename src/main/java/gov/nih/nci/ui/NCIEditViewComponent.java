@@ -61,10 +61,10 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 	        add(editPanel);
 			
 		} else if (event.isType(ComplexEditType.MODIFY)) { 
-			if (NCIEditTab.currentTab().isSplitting()) {
-
+			if (NCIEditTab.currentTab().isSplitting() ||
+					NCIEditTab.currentTab().isMerging() ||
+					NCIEditTab.currentTab().isCloning()) {
 			} else {
-				// TODO: need to make sure edit occurs in EditTab
 				editPanel.enableButtons();
 				NCIEditTab.currentTab().setEditInProgress(true);
 				NCIEditTab.currentTab().setCurrentlyEditing(editPanel.getSelectedClass());
@@ -72,7 +72,7 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 
 		} else if (event.isType(ComplexEditType.SELECTED)) {
 			editPanel.setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
-			if (!NCIEditTab.currentTab().beginningMerge()) {
+			if (!NCIEditTab.currentTab().inComplexOp()) {
 				getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
 						"nci-edit-tab.EditView");
 			}

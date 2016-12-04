@@ -14,6 +14,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import gov.nih.nci.ui.ComplexEditPanel;
 import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
+import gov.nih.nci.ui.event.ComplexEditType;
 
 public class ComplexEditTransferHandler extends TransferHandler {
 	
@@ -61,11 +62,17 @@ public class ComplexEditTransferHandler extends TransferHandler {
 			boolean clone_p = complexEditPanel.isCloneBtnSelected(); 
 			if (NCIEditTab.currentTab().canSplit(data.get(0))) {
 				// if you can split you can clone
+				if (clone_p) {
+					NCIEditTab.currentTab().setOp(ComplexEditType.CLONE);
+				} else {
+					NCIEditTab.currentTab().setOp(ComplexEditType.SPLIT);
+
+				}
 				NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(complexEditPanel.getEditorKit(),
 						"Please enter a class name", OWLClass.class, Optional.empty(), Optional.empty());
 
 				if (dlg.showDialog()) {
-					NCIEditTab.currentTab().splitClass(dlg.getNewClass(), dlg.getOntChanges(), data.get(0), clone_p);
+					NCIEditTab.currentTab().splitClass(dlg.getNewClass(), data.get(0), clone_p);
 					complexEditPanel.setEnableUnselectedRadioButtons(false);
 					return true;
 				}
