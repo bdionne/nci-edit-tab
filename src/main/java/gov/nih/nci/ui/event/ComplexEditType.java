@@ -12,5 +12,6 @@ public enum ComplexEditType {
 	RETIRE,
 	ADD_PROP,
 	INIT_PROPS,
-	COMMIT
+	COMMIT,
+	CREATE
 }

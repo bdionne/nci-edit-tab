@@ -200,6 +200,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return (current_op == ComplexEditType.SPLIT);
 	}
 	
+	public boolean isCloning() {
+		return (current_op == ComplexEditType.CLONE);
+	}
+	
 	public boolean isFree() {
 		return (!this.inComplexOp() && !this.isEditing());
 	}
@@ -288,9 +292,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	
 	
-	public boolean isCloning() {
-		return isSplitting();
-	}
+	
 		
 	public OWLClass getSplitSource() {
 		return split_source;
@@ -833,10 +835,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void retire(OWLClass selectedClass) {
     	class_to_retire = selectedClass;
-    	if (isWorkFlowModeler()) {
-    		current_op = PRERETIRE;
-    	} else {
+    	if (isWorkFlowManager()) {
     		current_op = RETIRE;
+    	} else {
+    		current_op = PRERETIRE;
     	}
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE)); 
     	

@@ -25,6 +25,7 @@ import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
 
+import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.ComplexEditTransferHandler;
 
 
@@ -166,7 +167,8 @@ public class ComplexEditPanel extends JPanel {
             		}
             	} else {
             		NCIEditTab.currentTab().commitChanges();
-            		NCIEditTab.currentTab().completeSplit();
+            		submitHistory();
+            		NCIEditTab.currentTab().completeOp();
             		
             		setEnableUnselectedRadioButtons(true);
                 	//Execute when button is pressed
@@ -213,6 +215,39 @@ public class ComplexEditPanel extends JPanel {
 		buttonPanel.add(clearButton);
 		return buttonPanel;
 	}
+    
+    public void submitHistory() {
+    	OWLClass cls = null;
+    	OWLClass ref_cls = null;
+    	if (NCIEditTab.currentTab().isSplitting() ||
+    			NCIEditTab.currentTab().isCloning()) {
+    		cls = NCIEditTab.currentTab().getSplitSource();
+    		ref_cls = NCIEditTab.currentTab().getSplitTarget();
+    	} else {
+    		cls = NCIEditTab.currentTab().getMergeSource();
+    		ref_cls = NCIEditTab.currentTab().getMergeTarget();    		
+    	}
+    	String c = cls.getIRI().getShortForm();
+    	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
+    	String op = NCIEditTab.currentTab().getCurrentOp().toString();
+    	String ref = ref_cls.getIRI().getShortForm();
+    	String ref_n = NCIEditTab.currentTab().getRDFSLabel(ref_cls).get();
+    	if (NCIEditTab.currentTab().isSplitting()) {
+    		NCIEditTab.currentTab().putHistory(c, n, op, c);
+    		NCIEditTab.currentTab().putHistory(c, n, op, ref);
+    		NCIEditTab.currentTab().putHistory(ref, ref_n, ComplexEditType.CREATE.toString(), "");
+    		
+    	} else if (NCIEditTab.currentTab().isCloning()) {
+    		NCIEditTab.currentTab().putHistory(ref, ref_n, ComplexEditType.CREATE.toString(), "");
+    		
+    	} else if (NCIEditTab.currentTab().isMerging()) {
+    		NCIEditTab.currentTab().putHistory(ref, ref_n, op, ref);
+    		NCIEditTab.currentTab().putHistory(c, n, op, ref);
+    		NCIEditTab.currentTab().putHistory(c, n, ComplexEditType.RETIRE.toString(), "");
+    		
+    	} 
+    	
+    }
     
     private JPanel createRadioButtonPanel() {
     	
