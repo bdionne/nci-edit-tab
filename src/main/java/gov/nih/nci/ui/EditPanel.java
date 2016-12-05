@@ -274,6 +274,7 @@ public class EditPanel extends JPanel {
     			panel.createNewProp();
     		}
     	}
+    	this.setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
     }
     
     private void createComplexPropertyTable(OWLAnnotationProperty complexProperty) {
