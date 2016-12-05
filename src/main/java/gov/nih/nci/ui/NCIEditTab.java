@@ -943,7 +943,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	ComplexEditType type = getCurrentOp();
     	if (type == null) {
-    		type = ComplexEditType.EDIT;
+    		type = ComplexEditType.MODIFY;
     	}
     	
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
@@ -982,7 +982,32 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     private void doCommit(List<OWLOntologyChange> changes, ComplexEditType type) throws ClientRequestException, 
     AuthorizationException, ClientRequestException {
-    	String comment = type.name();
+    	String comment = "";
+    	String label = getRDFSLabel(currentlyEditing).get();
+    	if (type == MODIFY) {
+    		comment = label + "(" +
+    				currentlyEditing.getIRI().getShortForm() + ") - " +
+    				type.name();
+    	} else if (type == SPLIT)  {
+    		comment = label + "(" +
+    				split_source.getIRI().getShortForm() + " -> " +
+    				split_target.getIRI().getShortForm() + ") - " +
+    				type.name();
+    	
+    	} else if (type == ComplexEditType.MERGE)  {
+    		comment = label + "(" +
+    				merge_source.getIRI().getShortForm() + " -> " +
+    				merge_target.getIRI().getShortForm() + ") - " +
+    				type.name();
+    	
+    	} else if (type == ComplexEditType.RETIRE)  {
+    		comment = label + "(" +
+    				this.class_to_retire.getIRI().getShortForm() + ") - " +
+    				type.name();
+    	
+    	} else {
+    		comment = type.name();
+    	}
 		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
 		DocumentRevision base = clientSession.getActiveVersionOntology().getHeadRevision();
 		CommitBundle commitBundle = new CommitBundleImpl(base, commit);
