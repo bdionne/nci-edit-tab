@@ -284,7 +284,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void completeMerge() {
 		setEditInProgress(false);
-		navTree.setSelectedEntity(merge_source);
+		navTree.setSelectedEntity(merge_target);
 		merge_source = null;
 		merge_target = null;
 		
@@ -983,31 +983,33 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     private void doCommit(List<OWLOntologyChange> changes, ComplexEditType type) throws ClientRequestException, 
     AuthorizationException, ClientRequestException {
     	String comment = "";
-    	String label = getRDFSLabel(currentlyEditing).get();
-    	if (type == MODIFY) {
-    		comment = label + "(" +
-    				currentlyEditing.getIRI().getShortForm() + ") - " +
-    				type.name();
-    	} else if (type == SPLIT)  {
-    		comment = label + "(" +
-    				split_source.getIRI().getShortForm() + " -> " +
-    				split_target.getIRI().getShortForm() + ") - " +
-    				type.name();
-    	
-    	} else if (type == ComplexEditType.MERGE)  {
-    		comment = label + "(" +
-    				merge_source.getIRI().getShortForm() + " -> " +
-    				merge_target.getIRI().getShortForm() + ") - " +
-    				type.name();
-    	
-    	} else if (type == ComplexEditType.RETIRE)  {
-    		comment = label + "(" +
-    				this.class_to_retire.getIRI().getShortForm() + ") - " +
-    				type.name();
-    	
-    	} else {
-    		comment = type.name();
+    	comment = type.name();
+    	if (!this.inBatchMode) {
+    		String label = getRDFSLabel(currentlyEditing).get();
+    		if (type == MODIFY) {
+    			comment = label + "(" +
+    					currentlyEditing.getIRI().getShortForm() + ") - " +
+    					type.name();
+    		} else if (type == SPLIT)  {
+    			comment = label + "(" +
+    					split_source.getIRI().getShortForm() + " -> " +
+    					split_target.getIRI().getShortForm() + ") - " +
+    					type.name();
+
+    		} else if (type == ComplexEditType.MERGE)  {
+    			comment = label + "(" +
+    					merge_source.getIRI().getShortForm() + " -> " +
+    					merge_target.getIRI().getShortForm() + ") - " +
+    					type.name();
+
+    		} else if (type == ComplexEditType.RETIRE)  {
+    			comment = label + "(" +
+    					this.class_to_retire.getIRI().getShortForm() + ") - " +
+    					type.name();
+
+    		}
     	}
+    	
 		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
 		DocumentRevision base = clientSession.getActiveVersionOntology().getHeadRevision();
 		CommitBundle commitBundle = new CommitBundleImpl(base, commit);
@@ -1720,6 +1722,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Optional<String> getRDFSLabel(OWLNamedObject oobj) {
 		// TODO: fall back to IRI if no label
+		if (oobj == null) {
+			return Optional.empty();
+		}
 		if (topOrBot(oobj)) {
 			return Optional.of(oobj.getIRI().getShortForm());			
 		}

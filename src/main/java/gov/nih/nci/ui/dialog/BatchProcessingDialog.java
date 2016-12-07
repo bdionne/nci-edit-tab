@@ -72,7 +72,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	File inputFolder;
 
 
-	TaskType edit_type = TaskType.EDIT_SIMPLE_PROPS;
+	TaskType edit_type = TaskType.LOAD;
 
 	public BatchProcessingDialog(BatchProcessOutputPanel b, NCIEditTab tab) {
 		be = b;
@@ -190,9 +190,9 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			labelcombopanel.add(new JLabel("Batch Type"));
 			labelcombopanel.add(batchType, BorderLayout.CENTER);
 
-			fileDelimLbl = new JLabel("File Delimiter                     ");
+			fileDelimLbl = new JLabel("Field Delimiter                     ");
 			
-			fileDelim = new JTextField(FILE_DELIMITER);
+			fileDelim = new JTextField(this.PROPERTY_VALUES_DELIMITER);
 			fileDelim.setPreferredSize(new Dimension(100, 25));
 	        
 	        fileDelim.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
