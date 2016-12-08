@@ -34,8 +34,8 @@ public abstract class BatchTask {
 	}
 	
 	public boolean complete() {
-		tab.applyChanges();
-		tab.commitChanges();
+		//tab.applyChanges();
+		//tab.commitChanges();
 		tab.disableBatchMode();
 		return true;
 	}
