@@ -41,7 +41,7 @@ public class BatchLoadTask extends BatchTask {
 			String sup = (String) w.elementAt(1);
 			
 			if (super.checkNoErrors(w, taskId)) {
-				tab.createNewChild(tab.getClass(sup), Optional.of(name), Optional.of(codes.get(taskId)));
+				tab.createNewChild(tab.getClass(sup), Optional.of(name), Optional.of(codes.get(taskId)), true);
 			} else {
 				return false;
 			}

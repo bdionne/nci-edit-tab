@@ -80,6 +80,13 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 
     public NCIClassCreationDialog(OWLEditorKit owlEditorKit, String message, Class<T> type, Optional<String> prefName,
     		Optional<String> code) {
+    	this(owlEditorKit, message, type, prefName, code, false);
+          
+    }
+    
+    public NCIClassCreationDialog(OWLEditorKit owlEditorKit, String message, Class<T> type, Optional<String> prefName,
+    		Optional<String> code, boolean dontApply) {
+    	this.dont_apply_changes = dontApply;
         this.owlEditorKit = owlEditorKit;
         this.type = type;
         if (prefName.isPresent()) {
@@ -206,8 +213,9 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     public OWLClass getNewClass() {return newClass;}
     
     private List<OWLOntologyChange> ont_changes = null;
+    private boolean dont_apply_changes = false;
     
-    //public List<OWLOntologyChange> getOntChanges() {return ont_changes;}
+    public List<OWLOntologyChange> getOntChanges() {return ont_changes;}
     		
     
     public void buildNewClass(String preferredName, Optional<String> code) {
@@ -277,7 +285,9 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		this.ont_changes = changes;
 		this.newClass = newClass;
 		
-		mngr.applyChanges(ont_changes);
+		if (!this.dont_apply_changes) {
+			mngr.applyChanges(ont_changes);
+		}
     }
     
     

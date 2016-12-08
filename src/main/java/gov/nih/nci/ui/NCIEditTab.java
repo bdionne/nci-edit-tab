@@ -154,6 +154,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	
 	private boolean inBatchMode = false;
+	private ArrayList<OWLOntologyChange> batch_changes = new ArrayList<OWLOntologyChange>();
+	
+	public void applyChanges() {
+		if (!batch_changes.isEmpty()) {
+			this.getOWLEditorKit().getOWLModelManager().applyChanges(batch_changes);
+			this.batch_changes.clear();
+		}
+	}
+	
+	
 	
 	public void enableBatchMode() { 
 		inBatchMode = true;
@@ -1086,10 +1096,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	mngr.applyChanges(changes); 
     }
     
-    public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName, Optional<String> code) {
+    public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName, Optional<String> code, boolean dontApply) {
 
     	NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
-    			"Please enter a class name", OWLClass.class, prefName, code);
+    			"Please enter a class name", OWLClass.class, prefName, code, dontApply);
 
     	boolean proceed = false;
 
@@ -1102,6 +1112,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	if (proceed) {
     		OWLClass newClass = dlg.getNewClass();
     		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    		if (dontApply) {
+    			changes = dlg.getOntChanges();
+    		}
     		OWLModelManager mngr = getOWLModelManager();
     		OWLDataFactory df = mngr.getOWLDataFactory();
 
@@ -1117,8 +1130,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     				changes.add(new AddAxiom(mngr.getActiveOntology(), sem_typ_ax));
     			}
     		}
-    		
-    		mngr.applyChanges(changes);
+    		if (dontApply) {
+    			this.batch_changes.addAll(changes);
+    		} else {
+    			mngr.applyChanges(changes);
+    		}
 
     		return newClass;
     	} else {

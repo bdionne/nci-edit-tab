@@ -223,22 +223,17 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 			task.begin();
 			while (!cancelled && i < tpd.getTask().getProgressMax())
 			{
-                if (task.processTask(i++)) {
+                if (task.processTask(i)) {
                 	num_completed++;
                 }
 				
-                String message = "Completed " + (i+1) + " out of " + tpd.getTask().getProgressMax();
+                String message = "Completed " + (++i) + " out of " + tpd.getTask().getProgressMax();
 				tpd.setSubTaskMessage(message);
 				tpd.setProgress(i);
 				cancelled = tpd.isCancelled();
 
 				if (cancelled) break;
-				try {
-					Thread.sleep(700);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				
                 
 
 			}
