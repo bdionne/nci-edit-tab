@@ -220,7 +220,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 			//BatchLoadByNameTask.evs_time = 0;
 			long beg = System.currentTimeMillis();
 			//task.print("Processing:");
-			task.begin();
+			//task.begin();
 			while (!cancelled && i < tpd.getTask().getProgressMax())
 			{
                 if (task.processTask(i)) {
@@ -238,7 +238,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 
 			}
 			if (!cancelled) {
-			task.complete();
+			//task.complete();
 			}
 			long total = System.currentTimeMillis() - beg;
 			task.print("Total run time was: " + total + " ms");

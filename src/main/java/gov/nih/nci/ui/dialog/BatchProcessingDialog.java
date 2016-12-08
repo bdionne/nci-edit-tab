@@ -347,12 +347,15 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				
 
 				if (tpd != null) {
+					task.begin();
 					tpd.run();
 				}			
 
 				try {
+			        
 					tab.applyChanges();
 					tab.commitChanges();
+					task.complete();
 					task.closePrintWriter();
 				} catch (Exception e) {
 
