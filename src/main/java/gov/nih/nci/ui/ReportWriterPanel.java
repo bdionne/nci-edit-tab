@@ -54,6 +54,7 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 
 import edu.stanford.protege.csv.export.ui.ExportDialogPanel;
+import gov.nih.nci.ui.dialog.LQTExportDialog;
 import gov.nih.nci.ui.dialog.RepWriterConfigDialog;
 import gov.nih.nci.utils.QuickSortVecStrings;
 /**
@@ -320,7 +321,8 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		*/
 		boolean success = false;
 		try {
-			success = ExportDialogPanel.showDialog(oek, "", ocl, true);
+			//success = ExportDialogPanel.showDialog(oek, "", ocl, true);
+			success = LQTExportDialog.showDialog(oek, "", ocl, true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
