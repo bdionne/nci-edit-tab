@@ -39,14 +39,15 @@ public class BatchLoadTask extends BatchTask {
 			
 			String name = (String) w.elementAt(0);
 			String sup = (String) w.elementAt(1);
+			String code = codes.get(taskId);
 			
 			if (super.checkNoErrors(w, taskId)) {
-				tab.createNewChild(tab.getClass(sup), Optional.of(name), Optional.of(codes.get(taskId)), true);
+				tab.createNewChild(tab.getClass(sup), Optional.of(name), Optional.of(code), true);
 			} else {
 				return false;
 			}
 			
-			super.print("Creating " + name);
+			super.print("Creating:\t" + name + "\t" + code + "\t" + sup);
 			// TODO: Should we also record history?
 
 		} catch (Exception e) {

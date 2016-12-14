@@ -579,23 +579,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     private boolean switchMergeSourceTarget() {
-    	boolean switchMergeSourceTarget = false;
-    	String delims = "-";
     	String mergeSourceCode = merge_source.getIRI().getShortForm();
     	String mergeTargetCode = merge_target.getIRI().getShortForm();
-    	String[] sourceCdSplit = mergeSourceCode.split(delims);
-    	String[] targetCdSplit = mergeTargetCode.split(delims);
+    	return ((LocalHttpClient) clientSession.getActiveClient()).codeIsLessThan(mergeSourceCode, mergeTargetCode);
     	
-    	if (sourceCdSplit.length == 3 && targetCdSplit.length == 3) {
-    		if (sourceCdSplit[0].equals(targetCdSplit[0]) && sourceCdSplit[2].equals(targetCdSplit[2])) {
-    			int sourceCdNum = Integer.parseInt(sourceCdSplit[1]);
-    			int targetCdNum = Integer.parseInt(targetCdSplit[1]);
-    			if (sourceCdNum < targetCdNum) {
-    				switchMergeSourceTarget = true;
-    			}
-    		}
-    	}
-    	return switchMergeSourceTarget;
     }
     
     List<OWLOntologyChange> finalizeMerge() {
