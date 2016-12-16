@@ -1118,7 +1118,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			}
     		}
     		if (dontApply) {
-    			this.batch_changes.addAll(changes);
+    			batch_changes.addAll(changes);
     		} else {
     			mngr.applyChanges(changes);
     		}
@@ -2358,7 +2358,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return FULL_SYN;
     	
     }
-   
+    
+    public boolean validPrefName(String name) {
+    	if (name.contains("?") ||
+    			name.contains("!") ||
+    			name.contains("@") ||
+    			name.contains(":")) {
+    		return false;
+    	} else {
+    		return true;
+    	}
+    }
+
     
     
     

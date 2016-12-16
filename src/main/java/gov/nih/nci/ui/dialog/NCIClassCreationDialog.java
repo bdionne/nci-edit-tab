@@ -153,15 +153,16 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 
 
     public <T extends OWLEntity> boolean showDialog() {
-
-            int ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), this, this.preferredNameField);
-            if (ret == JOptionPane.OK_OPTION) {
-            	buildNewClass(getEntityName(), Optional.empty());            	
-                return true;
+    	int ret = JOptionPane.OK_OPTION;
+    	while (ret == JOptionPane.OK_OPTION) {
+    		ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), this, this.preferredNameField);
+    		if (ret == JOptionPane.OK_OPTION) {
+            	if (buildNewClass(getEntityName(), Optional.empty())) {
+            		return true;
+            	}
             }
-            else {
-                return false;
-            }
+    	} 
+    	return false;
     }
     
  
@@ -218,7 +219,17 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     public List<OWLOntologyChange> getOntChanges() {return ont_changes;}
     		
     
-    public void buildNewClass(String preferredName, Optional<String> code) {
+    public boolean buildNewClass(String preferredName, Optional<String> code) {
+    	
+    	if (preferredName == null || preferredName.equals("")) {
+    		JOptionPane.showMessageDialog(this, "Preferred name is required", "Warning", JOptionPane.WARNING_MESSAGE);
+    		return false;
+    	}
+    	
+    	if (!NCIEditTab.currentTab().validPrefName(preferredName)){
+    		JOptionPane.showMessageDialog(this, "Preferred name cannot contain :, !, ? or @", "Warning", JOptionPane.WARNING_MESSAGE);
+    		return false;    		
+    	}
     	
     	String gen_code = "";
     	
@@ -288,6 +299,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		if (!this.dont_apply_changes) {
 			mngr.applyChanges(ont_changes);
 		}
+		
+		return true;
     }
     
     

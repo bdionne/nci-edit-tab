@@ -71,6 +71,12 @@ public class BatchLoadTask extends BatchTask {
 			
 				
 				String name = (String) v.elementAt(0);
+				if (!tab.validPrefName(name)) {
+					String error_msg = " -- prefered name cannot contain special chars.";
+					w.add(error_msg);
+					System.out.println(error_msg);
+					
+				}
 				// TODO: Check that name doesn not already exist, need to look up by preferred name
 				String sup = (String) v.elementAt(1);
 				
