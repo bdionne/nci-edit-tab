@@ -306,14 +306,7 @@ public class LQTExportDialog extends JPanel {
 
     private ActionListener browseBtnListener = e -> {
         selectedFile = UIUtil.saveFile(this, "Choose CSV file location", "CSV file", Collections.singleton("csv"), "lucene-export.csv");
-        if(selectedFile != null) {
-        	/**
-            String filename;
-            if(!selectedFile.getName().endsWith(".csv")) {
-                filename = selectedFile.getAbsolutePath() + ".csv";
-                selectedFile = new File(filename);
-            }
-            **/
+        if(selectedFile != null) {        	
             fileLocationTxtField.setText(selectedFile.getAbsolutePath());
             checkInputs();
         }

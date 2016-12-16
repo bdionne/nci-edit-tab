@@ -18,6 +18,7 @@ samples/*.xml
 samples/thesaurus.owl
 samples/*.log
 samples/*.out
+samples
 
 
 *.csv
