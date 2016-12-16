@@ -333,8 +333,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		} else {
 			reportTextArea
 					.append("\nExported using the LQT configuration finished successfully.\n");
-			reportTextArea
-					.append("Exported file: HOW TO ADD THE NAME? \n");
 		}
 		return success;
 		
