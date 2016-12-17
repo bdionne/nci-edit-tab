@@ -19,6 +19,9 @@
         	</Component>
         	<Component label="ReportWriter">
         		<Property id="pluginId" value="nci-edit-tab.ReportWriter"/>
+        	</Component> 
+        	<Component label="BatchEditIRIs">
+        		<Property id="pluginId" value="nci-edit-tab.BatchEditIRIs"/>
         	</Component>        	      
         </CNode>         
     </VSNode>

@@ -71,6 +71,13 @@
         <category value="NCI Edit Tab"/>
     </extension>
 	
+	<extension id="BatchEditIRIs"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="BatchEditIRIs"/>
+        <class value="gov.nih.nci.ui.BatchEditIRIsViewComponent"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="NCI Edit Tab"/>
+    </extension>
 	
 	<extension id="Split"
                point="org.protege.editor.core.application.EditorKitMenuAction">
