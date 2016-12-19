@@ -7,7 +7,9 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -24,6 +26,8 @@ import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
+
+import org.protege.editor.owl.server.http.messages.History;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.ComplexEditTransferHandler;
@@ -246,6 +250,44 @@ public class ComplexEditPanel extends JPanel {
     		NCIEditTab.currentTab().putHistory(c, n, ComplexEditType.RETIRE.toString(), "");
     		
     	} 
+    	
+    }
+    
+    public List<History> createEVSHistory() {
+    	List<History> hist = new ArrayList<History>();
+    	String userId = NCIEditTab.currentTab().getUserId();
+    	
+    	OWLClass cls = null;
+    	OWLClass ref_cls = null;
+    	if (NCIEditTab.currentTab().isSplitting() ||
+    			NCIEditTab.currentTab().isCloning()) {
+    		cls = NCIEditTab.currentTab().getSplitSource();
+    		ref_cls = NCIEditTab.currentTab().getSplitTarget();
+    	} else {
+    		cls = NCIEditTab.currentTab().getMergeSource();
+    		ref_cls = NCIEditTab.currentTab().getMergeTarget();    		
+    	}
+    	String c = cls.getIRI().getShortForm();
+    	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
+    	String op = NCIEditTab.currentTab().getCurrentOp().toString();
+    	String ref = ref_cls.getIRI().getShortForm();
+    	String ref_n = NCIEditTab.currentTab().getRDFSLabel(ref_cls).get();
+    	if (NCIEditTab.currentTab().isSplitting()) {
+    		hist.add(new History(userId, c, n, op, c));
+    		hist.add(new History(userId, c, n, op, ref));
+    		hist.add(new History(userId, ref, ref_n, ComplexEditType.CREATE.toString(), ""));   		
+    	} else if (NCIEditTab.currentTab().isCloning()) {
+    		hist.add(new History(userId, ref, ref_n, ComplexEditType.CREATE.toString(), ""));
+    		
+    	} else if (NCIEditTab.currentTab().isMerging()) {
+    		hist.add(new History(userId, ref, ref_n, op, ref));
+    		hist.add(new History(userId, c, n, op, ref));
+    		hist.add(new History(userId, c, n, ComplexEditType.RETIRE.toString(), ""));
+    		
+    	} 
+    	
+    	return hist;
+    	
     	
     }
     

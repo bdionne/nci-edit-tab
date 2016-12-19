@@ -237,11 +237,37 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		}		
 	}
 	
+	private boolean isRestricted(OWLClass cls) {
+		if (cls.equals(NCIEditTabConstants.RETIRE_ROOT) ||
+				cls.equals(NCIEditTabConstants.PRE_MERGE_ROOT) ||
+				cls.equals(NCIEditTabConstants.PRE_RETIRE_ROOT) ||
+				NCIEditTab.currentTab().isRetired(cls) ||
+				cls.getIRI().getShortForm().equals("Thing") ||
+				cls.getIRI().getShortForm().equals("Retired_Concepts")) {
+			return true;
+		} else {
+			return false;
+		}		
+	}
+	
 	
 
 	@Override
 	public boolean canCreateNewChild() {
-		return (getSelectedEntities().size() == 1);
+		if (getSelectedEntities().size() == 1) {
+			if (NCIEditTab.currentTab().isWorkFlowManager()) {
+				return true;
+			} else {
+				// modeler can't create at top
+				if (isRestricted(getSelectedEntity())) {
+					return false;
+				} else {
+					return true;
+				}
+			}
+			
+		}
+		return false;
 	}
 
 	@Override

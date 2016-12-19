@@ -84,7 +84,7 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 
 			} else {
 				NCIEditTab.currentTab().setEditInProgress(false);
-				NCIEditTab.currentTab().setCurrentlyEditing(null);
+				//NCIEditTab.currentTab().setCurrentlyEditing(null);
 				//NCIEditTab.currentTab().refreshNavTree();
 				editPanel.disableButtons();
 			}

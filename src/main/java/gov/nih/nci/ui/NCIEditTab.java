@@ -181,7 +181,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void setEditInProgress(boolean b) {
 		editInProgress = b;
-		currentlyEditing = null;
+		//currentlyEditing = null;
 	}
 	
 	public void setCurrentlyEditing(OWLClass cls) { 
@@ -190,7 +190,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
 	
-	//private boolean isRetiring = false;
 	
 	private ComplexEditType current_op = null;
 	
@@ -342,6 +341,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private SessionRecorder history;
 	
 	private ClientSession clientSession = null;
+	
+	public String getUserId() {
+		return clientSession.getActiveClient().getUserInfo().getId();
+	}
 	
 	private OWLOntology ontology;
 	
@@ -859,13 +862,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     
     
-    public boolean isWorkFlowManager() {    	
-    	try {
-    		Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
-			return clientSession.getActiveClient().getActiveRoles().contains(wfm);
-		} catch (ClientRequestException e) {
-			e.printStackTrace();
-		}
+    public boolean isWorkFlowManager() { 
+    	if (clientSession.getActiveClient() != null) {
+    		try {
+    			Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
+    			return clientSession.getActiveClient().getActiveRoles().contains(wfm);
+    		} catch (ClientRequestException e) {
+    			e.printStackTrace();
+    		}
+    	}
     	return false;
     }
     
@@ -891,7 +896,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public boolean isSubClass(OWLClass sub, OWLClass sup) {
-    	//before ontology is open user may click on Thing
+       	//before ontology is open user may click on Thing
     	if (ontology != null) {
 
     		if ((sub != null) && sub.equals(sup)) {
