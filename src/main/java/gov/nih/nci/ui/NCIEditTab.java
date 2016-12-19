@@ -837,18 +837,23 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	} else {
     		current_op = PRERETIRE;
     	}
-    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE)); 
-    	
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE)); 
+
     }
     
     public void addComplex(OWLClass selectedClass) {
-    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.ADD_PROP));
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.ADD_PROP));
     	
     }
     
     public void selectClass(OWLClass cls) {
-    	this.currentlyEditing = cls;
-    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.SELECTED));
+    	currentlyEditing = cls;
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.SELECTED));
+    	
+    }
+    
+    public void classModified() {
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
     	
     }
     
@@ -909,7 +914,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void updateRetire() {
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
     	editInProgress = false;
-		refreshNavTree();
+		//refreshNavTree();
     	
     }
     
@@ -982,6 +987,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	String comment = "";
     	comment = type.name();
     	if (!this.inBatchMode) {
+    		// TODO: This class could be null
     		String label = getRDFSLabel(currentlyEditing).get();
     		if (type == MODIFY) {
     			comment = label + "(" +
@@ -1157,6 +1163,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     @Override
     public void stateChanged(HistoryManager source) {
+    	/**
     	if (history.getLoggedChanges().isEmpty()) {
 
     	} else {
@@ -1168,6 +1175,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     				fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));    			
     		}
     	}
+    	**/
     }
 	
 	public void resetHistory() {
@@ -2006,6 +2014,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
+    	if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT) ||
+    			operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
+    		if (!NCIEditTab.currentTab().validPrefName(ann_vals.get("Value"))) {
+    			JOptionPane.showMessageDialog(this, "Preferred name cannot contain :, !, ? or @", "Warning", JOptionPane.WARNING_MESSAGE);
+    			return false; 
+    		}
+    	}
 
     	if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT)) {
 

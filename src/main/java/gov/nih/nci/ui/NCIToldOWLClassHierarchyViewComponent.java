@@ -135,6 +135,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 				} else {
 					if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject())) {
 						NCIEditTab.currentTab().setCurrentlyEditing(null);
+						//NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
 
 					} else {
 						NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
@@ -245,18 +246,19 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 
 	@Override
 	public void createNewChild() {	
-				
+
 		OWLClass selectedClass = getSelectedEntity();
-	NCIEditTab.currentTab().enableBatchMode();
+		NCIEditTab.currentTab().enableBatchMode();
 		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty(), Optional.empty(), false);
-						
-		getTree().setSelectedOWLObject(newCls);
-		
-		NCIEditTab.currentTab().disableBatchMode();
-		
-		NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), ComplexEditType.MODIFY));
-		this.getTree().refreshComponent();
-		
+		if (newCls != null) {
+			getTree().setSelectedOWLObject(newCls);
+
+			NCIEditTab.currentTab().disableBatchMode();
+
+			NCIEditTab.currentTab().classModified();
+			this.getTree().refreshComponent();
+		}
+
 	}
 	
 	 protected OWLObjectHierarchyProvider<OWLClass> getHierarchyProvider() {

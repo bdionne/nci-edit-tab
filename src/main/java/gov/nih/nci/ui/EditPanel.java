@@ -1,6 +1,7 @@
 package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import javax.swing.event.DocumentListener;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.server.http.messages.History;
+import org.protege.editor.owl.ui.frame.AbstractOWLFrameSection;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -61,6 +63,7 @@ public class EditPanel extends JPanel {
     
     private JTextField prefNameText;
     private String origPref = "";
+    private JTextField iri;
     private JTextField codeText;
 	
 	private JPanel buttonPanel;
@@ -71,7 +74,14 @@ public class EditPanel extends JPanel {
     
     private DocumentListener doc_listen = null;
     
+    private boolean read_only = false;
+    
     public EditPanel(OWLEditorKit editorKit) {
+    	this(editorKit, false);    	
+    }
+    
+    public EditPanel(OWLEditorKit editorKit, boolean ro) {
+    	read_only = ro;
     	
         this.owlEditorKit = editorKit;
         
@@ -148,31 +158,35 @@ public class EditPanel extends JPanel {
         
         prefNameText.getDocument().addDocumentListener(doc_listen);
         
-        JPanel prefTxt = new JPanel();
-        prefTxt.setLayout(new BorderLayout());
+        JPanel topHeader = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
-        prefTxt.add(prefNamLabel, BorderLayout.WEST);
-        prefTxt.add(prefNameText, BorderLayout.CENTER);
+        topHeader.add(prefNamLabel);
+        topHeader.add(prefNameText);
+        
+        JLabel iriLabel = new JLabel("IRI fragment:");
+        iri = new JTextField("iri-short-form");
+        iri.setVisible(true);
+        iri.setEditable(false);
+       
+        topHeader.add(iriLabel);
+        topHeader.add(iri);
         
         JLabel classCode = new JLabel("Code");
         codeText = new JTextField("code");
         codeText.setVisible(true);
         codeText.setEditable(false);
-        
-        JPanel codeTxt = new JPanel();
-        codeTxt.setLayout(new BorderLayout());
-        
-        codeTxt.add(classCode, BorderLayout.WEST);
-        codeTxt.add(codeText, BorderLayout.EAST);
-        
-        prefTxt.add(codeTxt, BorderLayout.EAST);
-                
-        genPropPanel.add(prefTxt, BorderLayout.NORTH);
-        
+               
+        topHeader.add(classCode);
+        topHeader.add(codeText);
+      
         gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, 
-        		new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties));
-
-                
+        		new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties), read_only) {
+        	public void handleEdit() {
+        		super.handleEdit();
+        	    NCIEditTab.currentTab().classModified();
+        	}        	
+        };
+          
         JScrollPane generalSP = new JScrollPane(gen_props);//will add tree or list to it
         generalSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         
@@ -185,12 +199,24 @@ public class EditPanel extends JPanel {
         	createComplexPropertyTable((OWLAnnotationProperty) it.next());
         }        
         
-        list = new OWLFrameList<>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
+        list = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit)) {
+        	public void handleDelete() {
+        		super.handleDelete();
+        	    NCIEditTab.currentTab().classModified();
+        	}
+        	
+        	public void handleEdit() {
+        		super.handleEdit();
+        	    NCIEditTab.currentTab().classModified();
+        	}        	
+        };
         
         descrPane = new JScrollPane(list);// will add description list to it
         descrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
                 
         tabbedPane.addTab("Description", descrPane);
+        
+        add(topHeader, BorderLayout.NORTH);
                 
         add(tabbedPane, BorderLayout.CENTER);
 		
@@ -221,6 +247,8 @@ public class EditPanel extends JPanel {
     		} else {
     			codeText.setText("nocode");
     		}
+    		
+    		iri.setText(cls.getIRI().getShortForm());
 
     		List<PropertyTablePanel> tablePanelList = getPropertyTablePanelList();
     		for (PropertyTablePanel tablePanel : tablePanelList) {
@@ -306,9 +334,9 @@ public class EditPanel extends JPanel {
                 	NCIEditTab.currentTab().syncPrefName(prefNameText.getText());
                 	NCIEditTab.currentTab().commitChanges();
                 	submitHistory();
-                	origPref = prefNameText.getText();
-                	
-                	
+                	origPref = prefNameText.getText();                	
+                } else {
+                	saveButton.setEnabled(false);
                 }
             	
             }
