@@ -988,7 +988,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	comment = type.name();
     	if (!this.inBatchMode) {
     		// TODO: This class could be null
-    		String label = getRDFSLabel(currentlyEditing).get();
+    		String label = "";
+    		if (currentlyEditing != null) {
+    			label = getRDFSLabel(currentlyEditing).get();
+    		}
     		if (type == MODIFY) {
     			comment = label + "(" +
     					currentlyEditing.getIRI().getShortForm() + ") - " +
