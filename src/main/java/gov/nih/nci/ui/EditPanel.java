@@ -181,6 +181,12 @@ public class EditPanel extends JPanel {
       
         gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, 
         		new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties), read_only) {
+        	
+        	public void handleDelete() {
+        		super.handleDelete();
+        		NCIEditTab.currentTab().classModified();        		
+        	}
+        	
         	public void handleEdit() {
         		super.handleEdit();
         	    NCIEditTab.currentTab().classModified();
