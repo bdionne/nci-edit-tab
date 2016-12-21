@@ -45,24 +45,26 @@ public class BatchEditIRIsTableModel extends AbstractTableModel {
 	public BatchEditIRIsTableModel(OWLEditorKit k) {
 		owlEditKit = k;
 		ontology = k.getOWLModelManager().getActiveOntology();
+		initProps();
 	}
 	
-	public int getRowCount() {
+	private void initProps() {
 		props = new ArrayList<OWLProperty>();
 		annProps = ontology.getAnnotationPropertiesInSignature();		
 		objProps = ontology.getObjectPropertiesInSignature();
-		int rowCount = 0;
+		
 		if (annProps != null && !annProps.isEmpty()) {
-			rowCount += annProps.size();
 			props.addAll(asSortedList(annProps));		
 		}
 		
 		if (objProps != null && !objProps.isEmpty()) {
-			rowCount += objProps.size();
 			props.addAll(asSortedList(objProps));
 		}
-		return rowCount;
 		
+	}
+	
+	public int getRowCount() {
+		return annProps.size() + objProps.size(); 		
 	}
 
 
