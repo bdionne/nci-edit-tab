@@ -55,6 +55,8 @@ public class RetirePanel extends JPanel {
 	
     private Map<OWLAnnotationProperty, Set<String>> fixups;
     
+    private List<OWLClass> old_parents = null;
+    
     
     private OWLFrameList<OWLAnnotationSubject> upperPanelList;
     
@@ -154,6 +156,7 @@ public class RetirePanel extends JPanel {
     				NCIEditTab.currentTab().commitChanges();
     				submitHistory();
     				NCIEditTab.currentTab().completeRetire();
+    				old_parents = null;
     				upperPanelList.setRootObject(null);
         			usage_panel.setOWLEntity(null);
         			disableButtons();
@@ -165,7 +168,8 @@ public class RetirePanel extends JPanel {
     				
     			} else {
     				// proceed to retire
-    				if (NCIEditTab.currentTab().completeRetire(fixups)) {
+    				old_parents = NCIEditTab.currentTab().completeRetire(fixups); 
+    				if (!old_parents.isEmpty()) {
     					retireButton.setText("Save");    					
     				}
     				    				
@@ -207,7 +211,11 @@ public class RetirePanel extends JPanel {
     	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
     	String op = NCIEditTab.currentTab().getCurrentOp().toString();
     	String ref = "";
-    	NCIEditTab.currentTab().putHistory(c, n, op, ref);
+    	//NCIEditTab.currentTab().putHistory(c, n, op, ref);
+    	for (OWLClass clas : old_parents) {
+    		ref = clas.getIRI().getShortForm();
+    		NCIEditTab.currentTab().putHistory(c, n, op, ref);
+    	}
     }
     
     

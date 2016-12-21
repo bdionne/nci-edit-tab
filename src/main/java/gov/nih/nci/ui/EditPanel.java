@@ -383,8 +383,12 @@ public class EditPanel extends JPanel {
     	String c = cls.getIRI().getShortForm();
     	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
     	String op = ComplexEditType.MODIFY.toString();
+    	if (NCIEditTab.currentTab().isNew()) {
+    		op = ComplexEditType.CREATE.toString();
+    	}
     	String ref = "";
     	NCIEditTab.currentTab().putHistory(c, n, op, ref);
+    	NCIEditTab.currentTab().setNew(false);
     }
     
     

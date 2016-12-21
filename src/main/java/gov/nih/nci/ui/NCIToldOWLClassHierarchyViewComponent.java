@@ -243,7 +243,11 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	}
 	
 	private void splitOrCloneClass(boolean clone_p) {
-		NCIEditTab.currentTab().setOp(ComplexEditType.SPLIT);
+		if (clone_p) {
+			NCIEditTab.currentTab().setOp(ComplexEditType.CLONE);
+		} else {
+			NCIEditTab.currentTab().setOp(ComplexEditType.SPLIT);
+		}
 		NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class, Optional.empty(), Optional.empty());
 		if (dlg.showDialog()) {
@@ -305,6 +309,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 			NCIEditTab.currentTab().disableBatchMode();
 
 			NCIEditTab.currentTab().classModified();
+			NCIEditTab.currentTab().setNew(true);
 			this.getTree().refreshComponent();
 		}
 

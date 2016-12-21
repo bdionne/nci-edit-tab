@@ -152,6 +152,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private boolean editInProgress = false;
 	private OWLClass currentlyEditing = null;
+	private boolean isNew = false;
 	
 	
 	private boolean inBatchMode = false;
@@ -190,6 +191,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
+	
+	public void setNew(boolean b) {
+		isNew = b;
+	}
+	
+	public boolean isNew() {
+		return isNew;
+	}
 	
 	
 	private ComplexEditType current_op = null;
@@ -671,7 +680,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
-    public boolean completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {
+    public List<OWLClass> completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {
+    	
+    	List<OWLClass> old_parents = new ArrayList<OWLClass>();
     	
     	String user = clientSession.getActiveClient().getUserInfo().getName().toString();
     	String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -684,7 +695,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	List<OWLOntologyChange> changes = addNotes(editornote, designnote, class_to_retire);
     	if (changes.isEmpty()) {
     		fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));			
-			return false;    		
+			return old_parents;    		
     	}
     	
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();    	
@@ -693,6 +704,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
         for (OWLSubClassOfAxiom ax1 : sub_axioms) {
         	OWLClassExpression exp = ax1.getSuperClass();
+        	if (exp instanceof OWLClass) {
+        		old_parents.add((OWLClass) exp);
+        	}
         	changes = addParentRoleAssertions(changes, exp, class_to_retire);
         	changes.add(new RemoveAxiom(ontology, ax1));
         	
@@ -737,6 +751,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
         		changes.add(new RemoveAxiom(ontology, ax1));
         	}
+        	
+        	
 
 
         }
@@ -762,7 +778,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
         getOWLModelManager().applyChanges(changes);
         
-        return true;
+        return old_parents;
     }
     
     private List<OWLOntologyChange> addParentRoleAssertions(List<OWLOntologyChange> changes, OWLClassExpression exp, OWLClass cls) {
