@@ -340,7 +340,8 @@ public class EditPanel extends JPanel {
                 	NCIEditTab.currentTab().syncPrefName(prefNameText.getText());
                 	NCIEditTab.currentTab().commitChanges();
                 	submitHistory();
-                	origPref = prefNameText.getText();                	
+                	origPref = prefNameText.getText();
+                	//disableButtons();
                 } else {
                 	saveButton.setEnabled(false);
                 }

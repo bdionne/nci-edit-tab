@@ -13,8 +13,10 @@ import org.protege.editor.owl.ui.editor.OWLAnonymousIndividualAnnotationValueEdi
 import org.protege.editor.owl.ui.editor.OWLConstantEditor;
 import org.protege.editor.owl.ui.editor.OWLObjectEditor;
 import org.protege.editor.owl.ui.selector.OWLAnnotationPropertySelectorPanel;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
@@ -144,14 +146,17 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
 
 			@Override
 			public void stateChanged(ChangeEvent e) {				
-				OWLAnnotationProperty prop = annotationPropertySelector.getSelectedObject();
+				OWLAnnotationProperty prop = annotationPropertySelector.getSelectedObject();				
 				if (prop != null) {
-					if (enumEditor.isDataTypeCombobox(enumEditor.getDataType(prop))) {
-						enumEditor.setProp(prop);
-						for (int i = 0; i < editors.size(); i++) {
-							OWLObjectEditor<?> editor = editors.get(i);
-							if (editor instanceof EnumEditor) {
-								tabbedPane.setSelectedIndex(i);
+					IRI range = getDataType(prop);
+					if (range != null) {
+						if (enumEditor.isDataTypeCombobox(range)) {
+							enumEditor.setProp(prop);
+							for (int i = 0; i < editors.size(); i++) {
+								OWLObjectEditor<?> editor = editors.get(i);
+								if (editor instanceof EnumEditor) {
+									tabbedPane.setSelectedIndex(i);
+								}
 							}
 						}
 					}
@@ -168,6 +173,16 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
         result.add(anonIndividualEditor);
         result.add(enumEditor);
 		return result;
+	}
+    
+    private IRI getDataType(OWLAnnotationProperty prop) {
+		Set<OWLAnnotationPropertyRangeAxiom> types = 
+				owlEditorKit.getOWLModelManager().getActiveOntology().getAnnotationPropertyRangeAxioms(prop);
+		
+		for (OWLAnnotationPropertyRangeAxiom ax : types) {
+			return ax.getRange();
+		}
+		return null;
 	}
 
 
@@ -186,7 +201,7 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
             	if (editor.canEdit(annotation.getValue())) {
             		if (editor instanceof EnumEditor) {
             			EnumEditor eed = (EnumEditor) editor;                		
-            			if (eed.isDataTypeCombobox(eed.getDataType(annotation.getProperty()))) {                		
+            			if (eed.isDataTypeCombobox(getDataType(annotation.getProperty()))) {                		
             				eed.setProp(annotation.getProperty());
             				tabIndex = i;
             			}

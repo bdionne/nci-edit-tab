@@ -1,6 +1,5 @@
 package gov.nih.nci.ui;
 
-import static gov.nih.nci.ui.event.ComplexEditType.*;
 import static gov.nih.nci.ui.NCIEditTabConstants.CODE_PROP;
 import static gov.nih.nci.ui.NCIEditTabConstants.COMPLEX_PROPS;
 import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ASSOC;
@@ -11,9 +10,9 @@ import static gov.nih.nci.ui.NCIEditTabConstants.DEP_PARENT;
 import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ROLE;
 import static gov.nih.nci.ui.NCIEditTabConstants.DESIGN_NOTE;
 import static gov.nih.nci.ui.NCIEditTabConstants.EDITOR_NOTE;
+import static gov.nih.nci.ui.NCIEditTabConstants.FULL_SYN;
 import static gov.nih.nci.ui.NCIEditTabConstants.IMMUTABLE_PROPS;
 import static gov.nih.nci.ui.NCIEditTabConstants.LABEL_PROP;
-import static gov.nih.nci.ui.NCIEditTabConstants.FULL_SYN;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_SOURCE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
@@ -23,12 +22,17 @@ import static gov.nih.nci.ui.NCIEditTabConstants.PRE_RETIRE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.SEMANTIC_TYPE;
 import static gov.nih.nci.ui.NCIEditTabConstants.SPLIT_FROM;
+import static gov.nih.nci.ui.event.ComplexEditType.CLONE;
+import static gov.nih.nci.ui.event.ComplexEditType.MODIFY;
+import static gov.nih.nci.ui.event.ComplexEditType.PREMERGE;
+import static gov.nih.nci.ui.event.ComplexEditType.PRERETIRE;
+import static gov.nih.nci.ui.event.ComplexEditType.RETIRE;
+import static gov.nih.nci.ui.event.ComplexEditType.SPLIT;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +40,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -59,8 +62,6 @@ import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.UndoManagerListener;
-import org.protege.editor.owl.model.search.SearchResult;
-import org.protege.editor.owl.model.search.SearchResultHandler;
 import org.protege.editor.owl.server.api.CommitBundle;
 import org.protege.editor.owl.server.policy.CommitBundleImpl;
 import org.protege.editor.owl.server.versioning.Commit;
@@ -1864,9 +1865,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		
-		OWLLiteral lit_val = df.getOWLLiteral(value);
+		OWLLiteral val = df.getOWLLiteral(value);
+		//IRI val = IRI.create(value);
 		
-		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), lit_val);
+		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), val);
 		
 		changes.add(new AddAxiom(ontology, ax));
 		

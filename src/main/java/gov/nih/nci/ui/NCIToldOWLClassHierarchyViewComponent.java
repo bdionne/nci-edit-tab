@@ -8,6 +8,7 @@ import java.util.Optional;
 import javax.swing.FocusManager;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
@@ -77,13 +78,22 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent event) {
-				batchProcessPanel.setVisible(true);
-				BatchProcessingDialog dl = new BatchProcessingDialog(batchProcessPanel, NCIEditTab.currentTab());
-			}			
-			
+				if (!NCIEditTab.currentTab().isEditing()) {
+					batchProcessPanel.setVisible(true);
+					BatchProcessingDialog dl = new BatchProcessingDialog(batchProcessPanel, NCIEditTab.currentTab());
+				} else {
+					warn("Can't perform batch load/edit while editing in progress.");
+					
+				}
+			}
+
+			@Override
 			public void dispose() {
+				// TODO Auto-generated method stub
 				
 			}
+			
+			
 		}, "B", "B");
 		
 		addAction(new DisposableAction("Search", searchbutton.getIcon()) {
@@ -146,6 +156,11 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
         
         NCIEditTab.setNavTree(this);               
     }
+	
+	private void warn(String msg) {
+		JOptionPane.showMessageDialog(this, 
+				msg, "Warning", JOptionPane.WARNING_MESSAGE);
+	}
 	
 	@Override
 	protected OWLClass updateView(OWLClass selectedClass) {
@@ -254,6 +269,9 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 
 	@Override
 	public boolean canCreateNewChild() {
+		if (NCIEditTab.currentTab().isEditing()) {
+			return false;
+		}
 		if (getSelectedEntities().size() == 1) {
 			if (NCIEditTab.currentTab().isWorkFlowManager()) {
 				return true;
@@ -274,6 +292,11 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	public void createNewChild() {	
 
 		OWLClass selectedClass = getSelectedEntity();
+		if (NCIEditTab.currentTab().isEditing()) {
+			JOptionPane.showMessageDialog(this, 
+					"Can't create new class while edit in progress.", "Warning", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
 		NCIEditTab.currentTab().enableBatchMode();
 		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty(), Optional.empty(), false);
 		if (newCls != null) {
