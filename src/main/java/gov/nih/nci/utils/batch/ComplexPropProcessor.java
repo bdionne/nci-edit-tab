@@ -1,6 +1,8 @@
 package gov.nih.nci.utils.batch;
 
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -49,6 +51,7 @@ public class ComplexPropProcessor extends EditProcessor {
 				prop_value = (String) v.elementAt(3);
 
 				qualifiers = new HashMap<String, String>();
+				new_qualifiers = new HashMap<String, String>();
 
 				int pairs = 4;
 				while ((pairs < v.size()) &&
@@ -94,6 +97,22 @@ public class ComplexPropProcessor extends EditProcessor {
 						w.add(error_msg);
 						return w;
 					}
+					
+					if (tab.hasComplexPropertyValue(classToEdit, prop_iri,
+							new_prop_value, new_qualifiers)) {
+						String error_msg = " -- complex property " + "("
+								+ prop_iri + ", "
+								+ prop_value
+								+ ") already exists.";
+						w.add(error_msg);
+						return w;
+					}
+					
+					String new_qual_errors = checkQualifierTypes(prop_iri, new_qualifiers);
+					if (new_qual_errors != null) {
+						w.add(new_qual_errors);
+						return w;
+					}
 					break;				
 				case NEW:				
 					if (tab.hasComplexPropertyValue(classToEdit, prop_iri,
@@ -103,6 +122,11 @@ public class ComplexPropProcessor extends EditProcessor {
 								+ prop_value
 								+ ") already exists.";
 						w.add(error_msg);
+						return w;
+					}
+					String qual_errors = checkQualifierTypes(prop_iri, qualifiers);
+					if (qual_errors != null) {
+						w.add(qual_errors);
 						return w;
 					}
 					
@@ -137,231 +161,30 @@ public class ComplexPropProcessor extends EditProcessor {
 		
 		return true;
 	}
-
-		
-/**
-		try {
-
-			String attribute = (String) v.elementAt(2);
-			String attributename = (String) v.elementAt(3);
-			String attributevalue_1 = (String) v.elementAt(4);
-			String attributevalue_2 = (String) v.elementAt(5);
-
-			
-
-			Vector superclasses = new Vector();
-			
-			
-
-
-			if (operation.compareToIgnoreCase("new") == 0) {
-				
-				if (hostClass != null) {
-					if (attribute.compareToIgnoreCase("role") == 0) {
+	
+	private String checkQualifierTypes(String prop_iri, Map<String, String> qualifiers) {
+		String errors = "";
+		List<String> req_quals = tab.getRequiredQualifiers(prop_iri);
+		for (String rs : req_quals) {
+			String q_val = qualifiers.get(rs);
+			if (q_val != null) {
+				if (tab.checkType(rs, q_val)) {
 					
-						if (!supportedRoles.contains(attributename)) {
-							String error_msg = " -- role " + attributename
-									+ " is not identifiable.";
-							w.add(error_msg);
-						} else {
-							int pos = attributevalue_1.indexOf("|");
-							if (pos == -1) {
-								String error_msg = " -- missing modifier or filler.";
-								w.add(error_msg);
-							} else {
-								String filler = attributevalue_1.substring(
-										pos + 1, attributevalue_1.length());
-								
-								OWLClass targetClass = tab.getClass(filler);
-										
-								if (targetClass == null) {
-									String error_msg = " -- concept " + filler
-											+ " does not exist.";
-									w.add(error_msg);
-								} else {
-									
-									if (hasRole(hostClass,
-											attributename, targetClass)) {
-										String error_msg = " -- role already exists.";
-										w.add(error_msg);
-									}
-									
-
-								}
-								
-							}
-						}
-						
-					}
-
-					else if (attribute.compareToIgnoreCase("parent") == 0) {
-						
-						OWLClass superClass = tab.getClass(attributename);
-						if (superClass == null) {
-							String error_msg = " -- superconcept does not exist.";
-							w.add(error_msg);
-
-						} else {
-
-							if (tab.isPreMerged(superClass)
-									|| tab.isPreRetired(superClass)
-									|| tab.isRetired(superClass)) {
-								String error_msg = "superconcept cannot be premerged, preretired, or retired.";
-								w.add(error_msg);
-
-							}
-
-						}
-						
-
-					}
-
-					
-						
-					} else if (attribute.compareToIgnoreCase("association") == 0) {
-						if (!supportedAssociations.contains(attributename)) {
-							String error_msg = " -- association "
-									+ attributename + " is not identifiable.";
-							w.add(error_msg);
-						} else {
-							
-							OWLClass targetClass = tab.getClass(attributevalue_1);
-							
-							if (targetClass == null) {
-								
-								String error_msg = " -- concept "
-										+ attributevalue_1 + " does not exist.";
-								w.add(error_msg);
-								
-							} else {
-								if (hasAssociation(hostClass,
-										attributename, targetClass)) {
-									String error_msg = " -- association already exists.";
-									w.add(error_msg);
-								}
-							}
-							
-						}
-					}
+				} else {
+					errors += "value " + q_val + " of required qualifier: " + rs + " has invalid type. \n";					
 				}
 				
+			} else {
+				errors += "required qualifier missing: " + rs + "\n";
 			}
-
-			else if (operation.compareToIgnoreCase("edit") == 0
-					|| operation.compareToIgnoreCase("delete") == 0) {
-				if (hostClass != null) {
-					if (attribute.compareToIgnoreCase("parent") == 0) {
-						if (operation.compareToIgnoreCase("delete") == 0) {
-							
-							OWLClass superClass = tab.getClass(attributename);
-							if (superClass == null) {
-								String error_msg = " -- superconcept "
-										+ attributename + " does not exist.";
-								w.add(error_msg);
-							} else if (tab.getDirectSuperClasses(
-									hostClass).size() == 1) {
-								String error_msg = " -- can't delete last superconcept "
-										+ attributename;
-								w.add(error_msg);
-
-							}
-							
-
-						} else {
-							String error_msg = " -- edit parent action is not supported. Use delete and add actions instead.";
-							w.add(error_msg);
-						}
-					}
-
-					else if (attribute.compareTo("role") == 0) {
-						if (!supportedRoles.contains(attributename)) {
-							String error_msg = " -- role " + attributename
-									+ " is not identifiable.";
-							w.add(error_msg);
-						} else {
-							int pos = attributevalue_1.indexOf("|");
-							if (pos == -1) {
-								String error_msg = " -- missing modifier or filler.";
-								w.add(error_msg);
-							} else {
-								String filler = attributevalue_1.substring(
-										pos + 1, attributevalue_1.length());
-								
-								OWLClass targetClass = tab.getClass(filler);
-								
-								if (targetClass == null) {
-									String error_msg = " -- concept " + filler
-											+ " does not exist.";
-									w.add(error_msg);
-								} else {
-									if (!hasRole(hostClass,
-											attributename, targetClass)) {
-										String error_msg = " -- role does not exist.";
-										w.add(error_msg);
-
-									}
-
-									if (operation.compareTo("edit") == 0) {
-										pos = attributevalue_2.indexOf("|");
-										if (pos == -1) {
-											String error_msg = " -- missing modifier or filler.";
-											w.add(error_msg);
-										} else {
-											filler = attributevalue_2
-													.substring(pos + 1,
-															attributevalue_2
-																	.length());
-
-											targetClass = tab.getClass(filler);
-											if (targetClass == null) {
-												String error_msg = " -- concept "
-														+ filler
-														+ " does not exist.";
-												w.add(error_msg);
-											}
-										}
-									}
-								}
-								
-							}
-						}
-					} 
-					} else if (attribute.compareTo("association") == 0) {
-						if (!supportedAssociations.contains(attributename)) {
-							String error_msg = " -- association "
-									+ attributename + " is not identifiable.";
-							w.add(error_msg);
-						}
-
-						if (operation.compareToIgnoreCase("delete") == 0) {
-							
-							OWLClass targetClass = tab.getClass(attributevalue_1);
-							if (targetClass == null) {
-								String error_msg = " -- concept "
-										+ attributevalue_1 + " does not exist.";
-								w.add(error_msg);
-							} else {
-								if (!hasAssociation(hostClass,
-										attributename, targetClass)) {
-									String error_msg = " -- association does not exist.";
-									w.add(error_msg);
-								}
-							}
-							
-						} else {
-							String error_msg = " -- edit association action is not supported. Use delete and add actions instead.";
-							w.add(error_msg);
-						}
-					}
-				}				
-			}
-		} catch (Exception e) {
-			w.add("Exception caught" + e.toString());
 		}
-
-		return w;
+		if (errors.equals("")) {
+			return null;
+		} else {
+			return errors;
+		}		
 	}
-	**/
+
 	
 	
 	

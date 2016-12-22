@@ -74,6 +74,10 @@ public class SimplePropProcessor extends EditProcessor {
 						String error_msg = " -- property already exists.";
 						w.add(error_msg);
 					}
+					if (!checkBatchProperty(prop_iri, new_prop_value)) {
+						String error_msg = " -- property value has invalid type.";
+						w.add(error_msg);						
+					}
 					break;
 				case NEW:
 					prop_value = (String) v.elementAt(3);
@@ -82,14 +86,11 @@ public class SimplePropProcessor extends EditProcessor {
 						String error_msg = " -- property already exists.";
 						w.add(error_msg);
 					}
-					if (checkBatchProperty(
-							prop_iri, prop_value)
-							&& checkBatchPropertyNotFullSynPT(
-									prop_iri, prop_value)) {
-
-					} else {
-						// TODO: add some error messages here
-						//w.add(tab.getFilter().getErrorMessage());
+					if (!checkBatchProperty(
+							prop_iri, prop_value)) {
+						String error_msg = " -- property value has invalid type.";
+						w.add(error_msg);
+						
 					}
 					break;
 				default:
@@ -135,8 +136,7 @@ public class SimplePropProcessor extends EditProcessor {
 	
 	
 	private boolean checkBatchProperty(String propName, String value) {
-		// TODO:
-		return true;
+		return tab.checkType(propName, value);
 	}
 	
 	private boolean  checkBatchPropertyNotFullSynPT(String propName, String value) {

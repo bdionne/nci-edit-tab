@@ -1436,6 +1436,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return values.contains(value);		
 	}
 	
+	public boolean checkType(String propName, String value) {
+		OWLAnnotationProperty prop = lookUpShort(propName);
+		IRI type = getDataType(prop);
+		if (type.toString().endsWith("-enum")) {
+			List<String> vals = getEnumValues(type);
+			return vals.contains(value);			
+		}
+		// TODO: flesh out with more types as requirements come in
+		
+		return true;		
+	}
+	
 	public boolean hasParent(OWLClass cls, OWLClass par_cls, String type) {
 		if (type.equalsIgnoreCase("P")) {
 			Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
@@ -1704,6 +1716,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		getOWLModelManager().applyChanges(changes);
 
+	}
+	
+	public List<String> getRequiredQualifiers(String prop_iri) {
+		OWLAnnotationProperty prop = this.lookUpShort(prop_iri);
+		Set<OWLAnnotationProperty> req_props = getRequiredAnnotationsForAnnotation(prop);
+		List<String> res = new ArrayList<String>();
+		for (OWLAnnotationProperty p : req_props) {
+			res.add(p.getIRI().getShortForm());
+		}
+		return res;
 	}
 	
 	public boolean hasComplexPropertyValue(OWLClass cls, String propName, String value, Map<String, String> annotations) {

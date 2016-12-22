@@ -1,1 +1,4 @@
 C1008,new,Concept_In_Subset,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C200024
+C1008,delete,Semantic_Type,Food
+C1008,new,Semantic_Type,Activity
+C1008,modify,Semantic_Type,Activity,Foo
