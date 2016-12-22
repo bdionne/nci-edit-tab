@@ -64,11 +64,7 @@ public class BatchEditTask extends BatchTask {
 			
 			boolean retval = processor.processData(w);
 
-			if (retval) {
-				/**
-				tab.recordHistory(NCIEditTab.EVSHistoryAction.MODIFY, wrapper
-						.getOWLNamedClass(name), "");
-						*/
+			if (retval) {				
 				super.print("\t Done.");
 			} else {
 				super.print("\t Failed.");

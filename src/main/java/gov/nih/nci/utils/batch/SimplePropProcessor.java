@@ -106,7 +106,7 @@ public class SimplePropProcessor extends EditProcessor {
 	
 	public boolean processData(Vector<String> w) {
 		
-		boolean retval = false;
+		boolean retval = true;
 		
 		OWLAnnotationProperty ap = tab.lookUpShort(prop_iri);
 				
@@ -120,20 +120,7 @@ public class SimplePropProcessor extends EditProcessor {
 			possiblySyncPreferredTerm(classToEdit, ap, new_prop_value);			
 			break;
 		case NEW:
-			tab.addAnnotationToClass(classToEdit, ap, prop_value);
-			
-			/**
-			if (attributeName.compareToIgnoreCase(NCIEditTabConstants.ALTLABEL) == 0) {
-				OWLNamedClass hostClass = wrapper.getOWLNamedClass(name);
-				retval = wrapper.addAnnotationProperty(hostClass, NCIEditTab.ALTLABEL, 
-						owlModel.createRDFSLiteral(attributeValue, owlModel.getSystemFrames().getXmlLiteralType()));
-			} else {
-				retval = wrapper.addAnnotationProperty(name, attributeName,
-						attributeValue);
-				
-			}	
-			*/		
-			
+			tab.addAnnotationToClass(classToEdit, ap, prop_value);			
 			break;
 		default:
 			break;
@@ -159,46 +146,7 @@ public class SimplePropProcessor extends EditProcessor {
 	
 	public void possiblySyncPreferredTerm(OWLClass ocl, OWLAnnotationProperty prop,
 			String value) {
-		/**
-		if (name.compareTo(NCIEditTab.ALTLABEL) == 0) {
-
-			String tn = ComplexPropertyParser.getPtNciTermName(value);
-			if (tn != null) {
-				// need to mod preferred name and rdfs:label
-				OWLNamedClass cls = wrapper.getOWLNamedClass(cls_name);
-				String pn = wrapper.getPropertyValue(cls, NCIEditTab.PREFLABEL);
-				String rdl = wrapper.getPropertyValue(cls, "rdfs:label");
-				wrapper.modifyAnnotationProperty(cls_name,
-						NCIEditTab.PREFLABEL, pn, tn);
-				wrapper.modifyAnnotationProperty(cls_name, "rdfs:label", rdl,
-						tn);
-
-			}
-		} else if (name.compareTo(NCIEditTab.PREFLABEL) == 0) {
-
-			OWLNamedClass cls = wrapper.getOWLNamedClass(cls_name);
-			ArrayList<String> pvals = wrapper.getPropertyValues(cls,
-					NCIEditTab.ALTLABEL);
-			for (String s : pvals) {
-				String tn = ComplexPropertyParser.getPtNciTermName(s);
-				if (tn != null) {
-					HashMap<String, String> hm = ComplexPropertyParser
-							.parseXML(s);
-					String newfspt = ComplexPropertyParser.replaceFullSynValue(
-							hm, "term-name", value);
-					wrapper.modifyAnnotationProperty(cls_name,
-							NCIEditTab.ALTLABEL, s, newfspt);
-				}
-			}
-
-			String rdl = wrapper.getPropertyValue(cls, "rdfs:label");
-			wrapper
-					.modifyAnnotationProperty(cls_name, "rdfs:label", rdl,
-							value);
-
-		}
-		*/
-
+		
 	}
 
 }
