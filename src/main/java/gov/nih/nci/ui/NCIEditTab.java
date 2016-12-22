@@ -188,6 +188,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void setCurrentlyEditing(OWLClass cls) { 
 		currentlyEditing = cls;
+		//this.refreshNavTree();
 	}
 	
 	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
@@ -869,6 +870,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void selectClass(OWLClass cls) {
     	currentlyEditing = cls;
     	fireChange(new EditTabChangeEvent(this, ComplexEditType.SELECTED));
+    	//this.refreshNavTree();
     	
     }
     
@@ -1001,6 +1003,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			showErrorDialog("This should not occur", e.getMessage(), e);
 			}
     	}
+    	
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.COMMIT));
         
     }
     
@@ -1049,7 +1053,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
                 hist.getMetadataForRevision(hist.getHeadRevision()),
                 hist.getChangesForRevision(hist.getHeadRevision())));
 		JOptionPane.showMessageDialog(this, "Class saved successfully", "Class Save", JOptionPane.INFORMATION_MESSAGE);
-		fireChange(new EditTabChangeEvent(this, ComplexEditType.COMMIT));
+		
 		
     }
     

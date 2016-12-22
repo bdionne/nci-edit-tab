@@ -341,6 +341,7 @@ public class EditPanel extends JPanel {
                 	NCIEditTab.currentTab().commitChanges();
                 	submitHistory();
                 	origPref = prefNameText.getText();
+                	NCIEditTab.currentTab().refreshNavTree();
                 	//disableButtons();
                 } else {
                 	saveButton.setEnabled(false);
@@ -359,6 +360,7 @@ public class EditPanel extends JPanel {
             	NCIEditTab.currentTab().undoChanges();            	
             	NCIEditTab.currentTab().setEditInProgress(false);
             	NCIEditTab.currentTab().selectClass(NCIEditTab.currentTab().getCurrentlyEditing());
+            	NCIEditTab.currentTab().refreshNavTree();
             	disableButtons();
             	
             }
