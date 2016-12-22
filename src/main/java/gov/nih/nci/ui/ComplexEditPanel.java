@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -26,6 +27,8 @@ import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
+
+
 
 import org.protege.editor.owl.server.http.messages.History;
 
@@ -231,10 +234,24 @@ public class ComplexEditPanel extends JPanel {
     		cls = NCIEditTab.currentTab().getMergeSource();
     		ref_cls = NCIEditTab.currentTab().getMergeTarget();    		
     	}
-    	String c = cls.getIRI().getShortForm();
+    	String c;
+    	Optional<String> cs = NCIEditTab.currentTab().getCode(cls);
+    	if (cs.isPresent()) {
+    		c = cs.get();    		
+    	} else {
+    	  c = cls.getIRI().getShortForm();
+    	}
+    	
     	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
     	String op = NCIEditTab.currentTab().getCurrentOp().toString();
-    	String ref = ref_cls.getIRI().getShortForm();
+    	
+    	String ref;
+    	Optional<String> s_ref = NCIEditTab.currentTab().getCode(ref_cls);
+    	if (s_ref.isPresent()) {
+    		ref = s_ref.get();
+    	} else {
+    		ref = ref_cls.getIRI().getShortForm();
+    	}
     	String ref_n = NCIEditTab.currentTab().getRDFSLabel(ref_cls).get();
     	if (NCIEditTab.currentTab().isSplitting()) {
     		NCIEditTab.currentTab().putHistory(c, n, op, c);

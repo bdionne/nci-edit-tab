@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.JButton;
@@ -207,13 +208,26 @@ public class RetirePanel extends JPanel {
     
     public void submitHistory() {
     	OWLClass cls = this.classToRetire;
-    	String c = cls.getIRI().getShortForm();
+    	
+    	String c;
+    	Optional<String> cs = NCIEditTab.currentTab().getCode(cls);
+    	if (cs.isPresent()) {
+    		c = cs.get();    		
+    	} else {
+    	  c = cls.getIRI().getShortForm();
+    	}
+    	
     	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
     	String op = NCIEditTab.currentTab().getCurrentOp().toString();
     	String ref = "";
     	//NCIEditTab.currentTab().putHistory(c, n, op, ref);
     	for (OWLClass clas : old_parents) {
-    		ref = clas.getIRI().getShortForm();
+    		Optional<String> c_ref = NCIEditTab.currentTab().getCode(clas);
+    		if (c_ref.isPresent()) {
+    			ref = c_ref.get();
+    		} else {
+    			ref = clas.getIRI().getShortForm();
+    		}
     		NCIEditTab.currentTab().putHistory(c, n, op, ref);
     	}
     }

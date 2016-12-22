@@ -380,7 +380,15 @@ public class EditPanel extends JPanel {
     
     public void submitHistory() {
     	OWLClass cls = list.getRootObject();
-    	String c = cls.getIRI().getShortForm();
+    	
+    	String c;
+    	Optional<String> cs = NCIEditTab.currentTab().getCode(cls);
+    	if (cs.isPresent()) {
+    		c = cs.get();    		
+    	} else {
+    	  c = cls.getIRI().getShortForm();
+    	}
+    	
     	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
     	String op = ComplexEditType.MODIFY.toString();
     	if (NCIEditTab.currentTab().isNew()) {
