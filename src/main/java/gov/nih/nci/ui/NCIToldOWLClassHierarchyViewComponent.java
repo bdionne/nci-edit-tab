@@ -145,6 +145,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 				} else {
 					if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject())) {
 						NCIEditTab.currentTab().setCurrentlyEditing(null);
+						NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), ComplexEditType.READ));
 						//NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
 
 					} else {

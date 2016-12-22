@@ -22,7 +22,10 @@
         	</Component> 
         	<Component label="BatchEditIRIs">
         		<Property id="pluginId" value="nci-edit-tab.BatchEditIRIs"/>
-        	</Component>        	      
+        	</Component> 
+        	<Component label="ReadOnlyClass">
+        		<Property id="pluginId" value="nci-edit-tab.ReadOnlyClass"/>
+        	</Component>       	      
         </CNode>         
     </VSNode>
 </layout>

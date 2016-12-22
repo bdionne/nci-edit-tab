@@ -31,7 +31,7 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 	protected OWLClass updateView(OWLClass selectedClass) {
     	if (selectedClass != null) {
     		if (!NCIEditTab.currentTab().isRetired(selectedClass)) {
-        		return selectedClass;
+    			return selectedClass;
         	}
     		
     	} else {

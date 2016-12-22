@@ -78,6 +78,15 @@
         <headerColor value="@org.protege.ontologycolor"/>
         <category value="NCI Edit Tab"/>
     </extension>
+    
+    <extension id="ReadOnlyClass"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="ReadOnlyClass"/>
+        <class value="gov.nih.nci.ui.ReadOnlyClassViewComponent"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="NCI Edit Tab"/>
+        <instantiationType value="eager"/>
+    </extension>
 	
 	<extension id="Split"
                point="org.protege.editor.core.application.EditorKitMenuAction">
