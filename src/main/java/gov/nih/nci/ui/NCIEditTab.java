@@ -188,7 +188,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void setCurrentlyEditing(OWLClass cls) { 
 		currentlyEditing = cls;
-		//this.refreshNavTree();
+		this.refreshNavTree();
 	}
 	
 	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
@@ -1907,10 +1907,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		
-		OWLLiteral val = df.getOWLLiteral(value);
-		//IRI val = IRI.create(value);
+		OWLAxiom ax;
 		
-		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), val);
+		IRI type = this.getDataType(prop);
+		if (type.getShortForm().equals("anyURI")) {
+			IRI val;
+			if (value.startsWith("http:")) {
+				val = IRI.create(value);				
+			} else {
+				val = IRI.create(CODE_PROP.getIRI().getNamespace() + value);
+			}
+			
+			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), val);
+		} else {
+			OWLLiteral lval = df.getOWLLiteral(value);			
+			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), lval);			
+		}	
 		
 		changes.add(new AddAxiom(ontology, ax));
 		
