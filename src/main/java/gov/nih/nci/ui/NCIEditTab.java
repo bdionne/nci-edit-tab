@@ -1945,9 +1945,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public OWLClass getClass(String code) {
+		
 		OWLClass cls = null;
 		
-		IRI iri = IRI.create(CODE_PROP.getIRI().getNamespace() + code);
+		IRI iri;
+		if (code.startsWith("http:")) {
+			iri = IRI.create(code);			
+		} else {
+			iri = IRI.create(CODE_PROP.getIRI().getNamespace() + code);			
+		}
 		
 		Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
 		for (OWLEntity et : classes) {
