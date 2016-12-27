@@ -2,13 +2,19 @@ package gov.nih.nci.ui.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.BoxLayout;
+import javax.swing.InputVerifier;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -36,6 +42,7 @@ public class PropertyEditingDialog extends JPanel {
 	private Map<String, String> proplabelmap;
 	
 	private String type;
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
     public PropertyEditingDialog(String type, Map<String, String> proptype, Map<String, String> propvalue, Map<String, ArrayList<String>> propoptions, Map<String, String> proplabel){
     	
@@ -116,16 +123,22 @@ public class PropertyEditingDialog extends JPanel {
     	
     	JPanel panel = new JPanel(new BorderLayout());
     	
-    	JTextField textfield= new JTextField();
+    	String lableString = proplabelmap.get(prop);
+    	JTextField textfield;
+    	
+    	if (lableString.endsWith("Date")) {
+    		textfield = new JFormattedTextField(sdf);
+    		textfield.setInputVerifier(new DateInputVerifier());
+    	} else {
+    		textfield= new JTextField();
+    	}
     	textfield.setPreferredSize(new Dimension(180, 20));
-    	//if((type == NCIEditTabConstants.EDIT ||
-    			//type == NCIEditTabConstants.ADD) && propvaluemap != null){
+    	
     	if(type != NCIEditTabConstants.DELETE && propvaluemap != null){
     		textfield.setText(propvaluemap.get(prop));
     	}
     	
-    	//JLabel label = new JLabel(prop); 
-    	JLabel label = new JLabel(proplabelmap.get(prop));
+    	JLabel label = new JLabel(lableString);
     	label.setPreferredSize(new Dimension(180, 20));
     	
     	panel.add(label, BorderLayout.WEST);
@@ -136,6 +149,22 @@ public class PropertyEditingDialog extends JPanel {
     	propcomponentmap.put(prop, textfield);
     	
     	return panel;
+    }
+    
+    public class DateInputVerifier extends InputVerifier {
+        @Override
+        public boolean verify(JComponent input) {
+            String text = ((JTextField) input).getText();
+            try {
+            	Date formattedDate = sdf.parse(text);
+            	return true;
+            } catch (ParseException ex) {
+            
+            	JOptionPane.showMessageDialog(input, "Please enter Date using yyyy-MM-dd format.");
+            	return false;
+            }
+            
+        }
     }
     
     private JPanel createComboBoxPanel(String prop, String[] options){
