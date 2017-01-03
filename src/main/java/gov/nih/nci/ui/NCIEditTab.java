@@ -981,6 +981,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			
     			getOWLEditorKit().getSearchManager().updateIndex(changes);
     			
+    			fireChange(new EditTabChangeEvent(this, ComplexEditType.COMMIT));
+    			
     		} catch (ClientRequestException e) {
     			if (e instanceof LoginTimeoutException) {
                     showErrorDialog("Commit error", e.getMessage(), e);
@@ -1004,7 +1006,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			}
     	}
     	
-    	fireChange(new EditTabChangeEvent(this, ComplexEditType.COMMIT));
+    	
         
     }
     
