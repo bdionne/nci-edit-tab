@@ -22,6 +22,7 @@ import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -230,6 +231,13 @@ public class LQTExporter {
                 }
                 // now check if user selected annotations on this annotation
                 List<OWLEntity> deps = dependentAnnotations.get(property); 
+                if (deps == null) {
+                	deps = new ArrayList<OWLEntity>();
+                	Set<OWLAnnotation> quals = tab.getDependentAnnotations((OWLClass)entity,(OWLAnnotationProperty)property); 
+                	for (OWLAnnotation qualAnn : quals) {
+                		deps.add((OWLEntity)qualAnn.getProperty());
+                	}
+                }
                 if (deps != null) {
                 	if (!ax.getAnnotations().isEmpty()) {
                 		next_val += " " + getJsonObject(deps, ax.getAnnotations());
