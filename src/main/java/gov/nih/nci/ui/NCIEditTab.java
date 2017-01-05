@@ -165,8 +165,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		}
 	}
 	
-	
-	
 	public void enableBatchMode() { 
 		inBatchMode = true;
 		history.stopTalking();
@@ -911,7 +909,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public boolean isRetired(OWLClass cls) {
-    	return isSubClass(cls, RETIRE_ROOT);
+    	//return isSubClass(cls, RETIRE_ROOT);
+    	OWLAnnotationProperty deprecated = this.lookUpShort("deprecated");
+    	Optional<String> bool = this.getPropertyValue(cls, deprecated);
+    	if (bool.isPresent()) {
+    		return bool.get().equals("true");
+    	}
+    	return false;
     }
     
     public boolean isSubClass(OWLClass sub, OWLClass sup) {
