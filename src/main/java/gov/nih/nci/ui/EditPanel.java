@@ -22,8 +22,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.server.http.messages.History;
-import org.protege.editor.owl.ui.frame.AbstractOWLFrameSection;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
