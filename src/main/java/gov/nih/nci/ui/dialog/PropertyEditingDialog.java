@@ -2,19 +2,14 @@ package gov.nih.nci.ui.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+//import java.util.Set;
 
 import javax.swing.BoxLayout;
-import javax.swing.InputVerifier;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -25,7 +20,9 @@ import javax.swing.JTextField;
 import org.protege.editor.owl.OWLEditorKit;
 
 import org.protege.editor.owl.ui.UIHelper;
+//import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 
+//import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.NCIEditTabConstants;
 
 public class PropertyEditingDialog extends JPanel {
@@ -42,7 +39,9 @@ public class PropertyEditingDialog extends JPanel {
 	private Map<String, String> proplabelmap;
 	
 	private String type;
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	//private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	private static final String DEFINITION_REVIEWER_NAME = "Definition Reviewer Name";
+	private static final String DEFINITION_REVIEW_DATE = "Definition Review Date";
 	
     public PropertyEditingDialog(String type, Map<String, String> proptype, Map<String, String> propvalue, Map<String, ArrayList<String>> propoptions, Map<String, String> proplabel){
     	
@@ -124,14 +123,16 @@ public class PropertyEditingDialog extends JPanel {
     	JPanel panel = new JPanel(new BorderLayout());
     	
     	String lableString = proplabelmap.get(prop);
-    	JTextField textfield;
+    	JTextField textfield = new JTextField();
     	
-    	if (lableString.endsWith("Date")) {
-    		textfield = new JFormattedTextField(sdf);
-    		textfield.setInputVerifier(new DateInputVerifier());
-    	} else {
+    	//Set<OWLAnnotationProperty> immutable_props = NCIEditTab.currentTab().getImmutableProperties();
+    	if (DEFINITION_REVIEWER_NAME.equals(lableString) || DEFINITION_REVIEW_DATE.equals(lableString)) {
+    		textfield.setEditable(false);
+    		//textfield = new JFormattedTextField(sdf);
+    		//textfield.setInputVerifier(new DateInputVerifier());
+    	} /*else {
     		textfield= new JTextField();
-    	}
+    	}*/
     	textfield.setPreferredSize(new Dimension(180, 20));
     	
     	if(type != NCIEditTabConstants.DELETE && propvaluemap != null){
@@ -151,7 +152,7 @@ public class PropertyEditingDialog extends JPanel {
     	return panel;
     }
     
-    public class DateInputVerifier extends InputVerifier {
+    /*public class DateInputVerifier extends InputVerifier {
         @Override
         public boolean verify(JComponent input) {
             String text = ((JTextField) input).getText();
@@ -165,7 +166,7 @@ public class PropertyEditingDialog extends JPanel {
             }
             
         }
-    }
+    }*/
     
     private JPanel createComboBoxPanel(String prop, String[] options){
     	JPanel panel = new JPanel(new BorderLayout());
