@@ -22,6 +22,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.UIHelper;
 //import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 
+import gov.nih.nci.ui.NCIEditTab;
 //import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.NCIEditTabConstants;
 
@@ -125,8 +126,7 @@ public class PropertyEditingDialog extends JPanel {
     	String lableString = proplabelmap.get(prop);
     	JTextField textfield = new JTextField();
     	
-    	//Set<OWLAnnotationProperty> immutable_props = NCIEditTab.currentTab().getImmutableProperties();
-    	if (DEFINITION_REVIEWER_NAME.equals(lableString) || DEFINITION_REVIEW_DATE.equals(lableString)) {
+    	if( NCIEditTab.currentTab().isReadOnlyProperty(prop)) {
     		textfield.setEditable(false);
     		//textfield = new JFormattedTextField(sdf);
     		//textfield.setInputVerifier(new DateInputVerifier());
