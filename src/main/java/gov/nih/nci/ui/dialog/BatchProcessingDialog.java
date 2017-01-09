@@ -26,6 +26,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -318,6 +319,9 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 			else if (outfile == null || outfile.compareTo("") == 0) {				
 				return;
+			} else if (infile.equals(outfile)) {
+				JOptionPane.showMessageDialog(this, "Output file is same as input file. Please use different file name/extension.");
+            	
 			} else {
 				setVisible(false);
 				TaskProgressDialog tpd = null;
