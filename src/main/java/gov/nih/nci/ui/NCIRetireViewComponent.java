@@ -55,9 +55,12 @@ public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent imp
 				}
 
 			}
+		} else if (NCIEditTab.currentTab().isRetired(selectedClass)) {
+			this.retirePanel.setOWLClass(null);
+			return null;
 		}
+		
 		return selectedClass;
-
 	}
 
 	@Override

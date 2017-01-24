@@ -144,13 +144,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private Set<OWLAnnotationProperty> annProps = null;
 	
-	private OWLClass split_source;
-	private OWLClass split_target;
-	private OWLClass merge_source;
-	private OWLClass merge_target;
+	private OWLClass source;
+	private OWLClass target;
 	private OWLClass class_to_retire;
 	
 	private boolean editInProgress = false;
+	private OWLClass currentlySelected = null;
 	private OWLClass currentlyEditing = null;
 	private boolean isNew = false;
 	
@@ -181,15 +180,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void setEditInProgress(boolean b) {
 		editInProgress = b;
-		//currentlyEditing = null;
 	}
 	
-	public void setCurrentlyEditing(OWLClass cls) { 
+	public void setCurrentlyEditing(OWLClass cls, boolean refresh) { 
 		currentlyEditing = cls;
-		this.refreshNavTree();
+		if (refresh)
+			refreshNavTree();
 	}
 	
 	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
+	
+	public OWLClass getCurrentlySelected() { return currentlySelected; }
 	
 	public void setNew(boolean b) {
 		isNew = b;
@@ -223,7 +224,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public boolean isFree() {
-		return (!this.inComplexOp() && !this.isEditing());
+		return (!inComplexOp() && !isEditing());
 	}
 	
 	public void cancelRetire() {
@@ -238,22 +239,19 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			cancelSplit();
 		}
 		if (current_op == ComplexEditType.MERGE) {
-			cancelMerge();
-			
+			cancelMerge();			
 		}
-		current_op = null;
-		
+		current_op = null;		
 	}
 	
 	public void cancelSplit() {	
 		setEditInProgress(false);
 		// go back to previous selected class
-		setCurrentlyEditing(split_source);
-		//refreshNavTree();
+		setCurrentlyEditing(source, true);
 		undoChanges();
-		navTree.setSelectedEntity(split_source);
-		split_source = null;
-		split_target = null;
+		navTree.setSelectedEntity(source);
+		source = null;
+		target = null;
 		
 	}
 	
@@ -261,24 +259,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		setEditInProgress(false);
 		// go back to previous selected class
-		if (merge_source != null) {
-			
-			navTree.setSelectedEntity(merge_source);
-			
+		if (source != null) {			
+			navTree.setSelectedEntity(source);			
 		}
 		
-		if (merge_target != null) {
-			
-			navTree.setSelectedEntity(merge_target);
-			
+		if (target != null) {			
+			navTree.setSelectedEntity(target);			
 		}
-		
-		//refreshNavTree();
 		undoChanges();
 		
-		merge_source = null;
-		merge_target = null;
-		
+		source = null;
+		target = null;		
 	}
 	
 	public void completeOp() {
@@ -295,29 +286,24 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void completeSplit() {
 		setEditInProgress(false);
-		navTree.setSelectedEntity(split_source);
-		split_source = null;
-		split_target = null;		
+		navTree.setSelectedEntity(source);
+		source = null;
+		target = null;		
 	}
 	
 	public void completeMerge() {
 		setEditInProgress(false);
-		navTree.setSelectedEntity(merge_target);
-		merge_source = null;
-		merge_target = null;
-		
+		navTree.setSelectedEntity(target);
+		source = null;
+		target = null;		
 	}
 	
-	
-	
-	
-		
 	public OWLClass getSplitSource() {
-		return split_source;
+		return source;
 	}
 	
 	public OWLClass getSplitTarget() {
-		return split_target;
+		return target;
 	}
 	
 	public OWLClass getRetireClass() {
@@ -325,21 +311,21 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public OWLClass getMergeSource() {
-		return merge_source;
+		return source;
 	}
 	
 	public OWLClass getMergeTarget() {
-		return merge_target;
+		return target;
 	}
 	
 	public void setMergeSource(OWLClass cls) {
 		current_op = ComplexEditType.MERGE;
-		merge_source = cls;
+		source = cls;
 	}
 	
 	public void setMergeTarget(OWLClass cls) {
 		current_op = ComplexEditType.MERGE;
-		merge_target = cls;
+		target = cls;
 	}
 	
 	public boolean inComplexOp() {
@@ -358,9 +344,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private OWLOntology ontology;
 	
 	private static ArrayList<EditTabChangeListener> event_listeners = new ArrayList<EditTabChangeListener>();
-	
-	
-	
+		
 	public static void addListener(EditTabChangeListener l) {
 		event_listeners.add(l);
 	}
@@ -369,8 +353,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		event_listeners.remove(l);
 	}
 	
-	public void fireChange(EditTabChangeEvent ev) {
-		
+	public void fireChange(EditTabChangeEvent ev) {		
 		for (EditTabChangeListener l : event_listeners) {
 			l.handleChange(ev);
 		}		
@@ -444,8 +427,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Set<OWLAnnotationProperty> getOptionalAnnotationsForAnnotation(OWLAnnotationProperty annp) {
 		return optional_annotation_dependencies.get(annp);		
-	}
-	
+	}	
 	
     @Override
 	public void initialise() {    	
@@ -469,8 +451,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
      * 
      */
     public boolean readyMerge() {
-    	return (this.merge_source != null) &&
-    			(this.merge_target != null);
+    	return (this.source != null) &&
+    			(this.target != null);
     }
     
     public boolean canMerge() {
@@ -495,16 +477,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
     	
-    	if (isPreMerged(merge_source)) {
+    	if (isPreMerged(source)) {
     		
-    		Set<OWLAnnotationAssertionAxiom> props = ontology.getAnnotationAssertionAxioms(merge_source.getIRI());    		
+    		Set<OWLAnnotationAssertionAxiom> props = ontology.getAnnotationAssertionAxioms(source.getIRI());    		
     		for (OWLAnnotationAssertionAxiom p : props) {
     			if (p.getProperty().equals(MERGE_TARGET)) {
     				changes.add(new RemoveAxiom(ontology, p));
     			}
     			
     		}
-    		props = ontology.getAnnotationAssertionAxioms(merge_target.getIRI());    		
+    		props = ontology.getAnnotationAssertionAxioms(target.getIRI());    		
     		for (OWLAnnotationAssertionAxiom p : props) {
     			if (p.getProperty().equals(MERGE_SOURCE)) {
     				changes.add(new RemoveAxiom(ontology, p));
@@ -512,21 +494,21 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			
     		}
     		changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(),
-					df.getOWLSubClassOfAxiom(merge_source, RETIRE_ROOT))); 
+					df.getOWLSubClassOfAxiom(source, RETIRE_ROOT))); 
 			// finalize merge
 			// remove parents and roles, OLD_ROLE OLD_PARENT
 			// retarget inbound roles and children
 			// reuse retire logic for this
 			changes.addAll(finalizeMerge());
-			changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(merge_source.getIRI())));
+			changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(source.getIRI())));
     		
     	} else {
     		if (switchMergeSourceTarget()) {
     			int result = JOptionPane.showOptionDialog(null, "Retiring Concept is created after the Surviving Concept. Do you want to switch them?", 
 						"Switch Retiring and Surviving Concept", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 				if (result == JOptionPane.OK_OPTION) {
-					OWLClass temp = merge_target;
-	    			setMergeTarget(merge_source);
+					OWLClass temp = target;
+	    			setMergeTarget(source);
 	    			setMergeSource(temp);
 	    			this.fireChange(new EditTabChangeEvent(this, ComplexEditType.MERGE));
 					return false;
@@ -534,14 +516,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				
     		} 
     		// TODO:
-    		String editornote = "Merge into " + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")";
+    		String editornote = "Merge into " + getRDFSLabel(target).get() + "(" + target.getIRI().getShortForm() + ")";
     		editornote += ", " + clientSession.getActiveClient().getUserInfo().getName();
     		
-    		String designnote = "See '" + getRDFSLabel(merge_target).get() + "(" + merge_target.getIRI().getShortForm() + ")" + "'";
-
-    		//String prefix = "premerge_annotation";
+    		String designnote = "See '" + getRDFSLabel(target).get() + "(" + target.getIRI().getShortForm() + ")" + "'";
     		
-    		List<OWLOntologyChange> dcs = addNotes(editornote, designnote, merge_source);
+    		List<OWLOntologyChange> dcs = addNotes(editornote, designnote, source);
     		
     		if (dcs.isEmpty()) {
     			fireChange(new EditTabChangeEvent(this, ComplexEditType.MERGE));
@@ -550,30 +530,27 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		
     		changes.addAll(dcs);
     		
-    		changes.addAll(this.mergeAttrs());
+    		changes.addAll(mergeAttrs());
 
-            
-            
-    		// if workflow modeler, add MERGE_TARGET/SOURCE props and tree under pre-merged
-    		
+    		// if workflow modeler, add MERGE_TARGET/SOURCE props and tree under pre-merged    		
     		if (!isWorkFlowManager()) {
 
     			OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(MERGE_TARGET, 
-    					merge_source.getIRI(), 
-    					df.getOWLLiteral(merge_target.getIRI().getShortForm()));
+    					source.getIRI(), 
+    					df.getOWLLiteral(target.getIRI().getShortForm()));
     			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
 
     			ax = df.getOWLAnnotationAssertionAxiom(MERGE_SOURCE, 
-    					merge_target.getIRI(), 
-    					df.getOWLLiteral(merge_source.getIRI().getShortForm()));
+    					target.getIRI(), 
+    					df.getOWLLiteral(source.getIRI().getShortForm()));
     			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
 
     			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(),
-    					df.getOWLSubClassOfAxiom(merge_source, PRE_MERGE_ROOT))); 
+    					df.getOWLSubClassOfAxiom(source, PRE_MERGE_ROOT))); 
     		} else {
     			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(),
-    					df.getOWLSubClassOfAxiom(merge_source, RETIRE_ROOT)));
-    			changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(merge_source.getIRI())));
+    					df.getOWLSubClassOfAxiom(source, RETIRE_ROOT)));
+    			changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(source.getIRI())));
     			// finalize merge
     			// remove parents and roles, OLD_ROLE OLD_PARENT
     			// retarget inbound roles and children
@@ -591,10 +568,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     private boolean switchMergeSourceTarget() {
-    	String mergeSourceCode = merge_source.getIRI().getShortForm();
-    	String mergeTargetCode = merge_target.getIRI().getShortForm();
-    	return ((LocalHttpClient) clientSession.getActiveClient()).codeIsLessThan(mergeSourceCode, mergeTargetCode);
-    	
+    	Optional<String> mergeSourceCode = getCode(source);
+    	Optional<String> mergeTargetCode = getCode(target);
+    	if (mergeSourceCode.isPresent() &&
+    			mergeTargetCode.isPresent()) {
+    		return ((LocalHttpClient) clientSession.getActiveClient()).codeIsLessThan(mergeSourceCode.get(), mergeTargetCode.get());
+    	} else {
+    		return false;
+    	}
     }
     
     List<OWLOntologyChange> finalizeMerge() {
@@ -603,31 +584,29 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
     	
-    	changes.addAll((new ReferenceReplace(getOWLModelManager())).retargetRefs(merge_source, merge_target)); 
+    	changes.addAll((new ReferenceReplace(getOWLModelManager())).retargetRefs(source, target)); 
     	
     	
     	// from retire panel, refactor
-    	Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(merge_source);
+    	Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(source);
         
         for (OWLSubClassOfAxiom ax1 : sub_axioms) {
         	OWLClassExpression exp = ax1.getSuperClass();
-        	changes = addParentRoleAssertions(changes, exp, merge_source);
-        	changes.add(new RemoveAxiom(ontology, ax1));
-        	
+        	changes = addParentRoleAssertions(changes, exp, source);
+        	changes.add(new RemoveAxiom(ontology, ax1));        	
         }
         
-        Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(merge_source);
+        Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(source);
         
         for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
         	Set<OWLClassExpression> exps = ax1.getClassExpressions();
         	for (OWLClassExpression exp : exps) {
-        		changes = addParentRoleAssertions(changes, exp, merge_source);
+        		changes = addParentRoleAssertions(changes, exp, source);
         	}
-        	changes.add(new RemoveAxiom(ontology, ax1));
-        	
+        	changes.add(new RemoveAxiom(ontology, ax1));        	
         }  
         
-        Set<OWLAnnotationAssertionAxiom> assocs = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) merge_source.getIRI());
+        Set<OWLAnnotationAssertionAxiom> assocs = ontology.getAnnotationAssertionAxioms((OWLAnnotationSubject) source.getIRI());
         
         for (OWLAnnotationAssertionAxiom ax1 : assocs) {
         	
@@ -635,7 +614,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         		String val = ax1.getProperty().getIRI().getShortForm() + "|"
         				+ ax1.getValue().asIRI().get().getShortForm();
         		OWLLiteral lit =  df.getOWLLiteral(val);
-        		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, merge_source.getIRI(), lit);
+        		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, source.getIRI(), lit);
         		changes.add(new AddAxiom(ontology, ax));
         		changes.add(new RemoveAxiom(ontology, ax1));
         	}
@@ -648,12 +627,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 
     	Map<IRI, IRI> replacementIRIMap = new HashMap<>();
-    	replacementIRIMap.put(merge_source.getIRI(), merge_target.getIRI());
+    	replacementIRIMap.put(source.getIRI(), target.getIRI());
 
     	OWLObjectDuplicator dup = new OWLObjectDuplicator(getOWLModelManager().getOWLDataFactory(), replacementIRIMap);            
 
-    	changes.addAll(duplicateClassAxioms(merge_source, dup));            
-    	changes.addAll(duplicateAnnotations(merge_source, dup));
+    	changes.addAll(duplicateClassAxioms(source, dup));            
+    	changes.addAll(duplicateAnnotations(source, dup));
     	
     	return changes;
     }
@@ -750,26 +729,19 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
         		changes.add(new RemoveAxiom(ontology, ax1));
         	}
-        	
-        	
-
-
         }
         
         for (OWLAnnotationProperty p : fixups.keySet()) {
         	for (String s : fixups.get(p)) {
         		OWLLiteral val1 = df.getOWLLiteral(s);
         		OWLAxiom ax1 = df.getOWLAnnotationAssertionAxiom(p, class_to_retire.getIRI(), val1);
-        		changes.add(new AddAxiom(ontology, ax1));
-        		
-        	}
-        	
+        		changes.add(new AddAxiom(ontology, ax1));        		
+        	}        	
         }
         if (currentTab().isWorkFlowManager()) {
         	changes.add(new AddAxiom(ontology,
         			df.getOWLSubClassOfAxiom(class_to_retire, RETIRE_ROOT)));
         	changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(class_to_retire.getIRI())));
-
         } else {
         	changes.add(new AddAxiom(ontology,
         			df.getOWLSubClassOfAxiom(class_to_retire, PRE_RETIRE_ROOT))); 
@@ -856,28 +828,21 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	} else {
     		current_op = PRERETIRE;
     	}
-    	fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE)); 
-
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
     }
     
     public void addComplex(OWLClass selectedClass) {
-    	fireChange(new EditTabChangeEvent(this, ComplexEditType.ADD_PROP));
-    	
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.ADD_PROP));    	
     }
     
     public void selectClass(OWLClass cls) {
-    	currentlyEditing = cls;
-    	fireChange(new EditTabChangeEvent(this, ComplexEditType.SELECTED));
-    	//this.refreshNavTree();
-    	
+    	currentlySelected = cls;
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.SELECTED));    	
     }
     
     public void classModified() {
-    	fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));
-    	
-    }
-    
-    
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));    	
+    }   
     
     public boolean isWorkFlowManager() { 
     	if (clientSession.getActiveClient() != null) {
@@ -941,11 +906,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
-    public void updateRetire() {
-    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
+    public void updateRetire() {    	
     	editInProgress = false;
-		//refreshNavTree();
-    	
+    	navTree.setSelectedEntity(this.class_to_retire);
+    	navTree.refreshTree();
+    	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));    	
     }
     
     public void completeRetire() {
@@ -1032,14 +997,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     					type.name();
     		} else if (type == SPLIT)  {
     			comment = label + "(" +
-    					split_source.getIRI().getShortForm() + " -> " +
-    					split_target.getIRI().getShortForm() + ") - " +
+    					source.getIRI().getShortForm() + " -> " +
+    					target.getIRI().getShortForm() + ") - " +
     					type.name();
 
     		} else if (type == ComplexEditType.MERGE)  {
     			comment = label + "(" +
-    					merge_source.getIRI().getShortForm() + " -> " +
-    					merge_target.getIRI().getShortForm() + ") - " +
+    					source.getIRI().getShortForm() + " -> " +
+    					target.getIRI().getShortForm() + ") - " +
     					type.name();
 
     		} else if (type == ComplexEditType.RETIRE)  {
@@ -1114,16 +1079,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	changes.addAll(duplicateClassAxioms(selectedClass, dup));            
     	changes.addAll(duplicateAnnotations(selectedClass, dup));    	           
 
-    	split_source = selectedClass;
-    	split_target = newClass;
+    	source = selectedClass;
+    	target = newClass;
 
     	this.fireChange(new EditTabChangeEvent(this, current_op));
     	
     	setEditInProgress(true);
-		setCurrentlyEditing(split_target);
-		refreshNavTree();
+		setCurrentlyEditing(target, true);
+		
     	
-    	mngr.applyChanges(changes); 
+    	mngr.applyChanges(changes);
+    	refreshNavTree();
     }
     
     public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName, Optional<String> code, boolean dontApply) {
@@ -1200,6 +1166,52 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     @Override
     public void stateChanged(HistoryManager source) {
+    	List<OWLOntologyChange> changes = history.getUncommittedChanges();
+    	List<IRI>  subjects = findUniqueSubjects(changes);
+    	if (!subjects.isEmpty()) {
+    		OWLClass cls = null;
+    		if (getCurrentlyEditing() != null) {
+    			IRI currentIRI = getCurrentlyEditing().getIRI();
+    			if ((subjects.contains(currentIRI) && subjects.size() > 1 &&
+    					!isRetiring() &&
+    					!isSplitting() &&
+    					!isMerging() &&
+    					!isCloning()) ||
+    					subjects.size() > 2) {
+    				int result = JOptionPane.showOptionDialog(null, "Class already being edited. Do you want to proceed with this edit?", 
+    						"Proceed or stay with existing edit?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+    				if (result == JOptionPane.CANCEL_OPTION) {
+    					backOutChange(); 
+    					refreshNavTree();
+    				} else if (result == JOptionPane.OK_OPTION) {
+    					history.stopTalking();
+    					undoChanges();
+    					history.startTalking();
+    					setCurrentlyEditing(null, true);
+    					getOWLModelManager().applyChange(changes.get(changes.size() - 1));  			
+    					
+    				}
+    			}
+    		} else {
+    			// not editing anything yet
+    			// should only be one subject
+    			for (IRI iri : subjects) {
+        			Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
+        			for (OWLEntity ent : classes) {
+            			cls = ent.asOWLClass();
+            			
+            		}
+        			
+        		}
+    			setCurrentlyEditing(cls, true);
+        		classModified();
+    		} 		
+    	
+    	} else {
+    		if (changes.isEmpty()) {
+    			this.setCurrentlyEditing(null, true);
+    		}
+    	}
     	/**
     	if (history.getLoggedChanges().isEmpty()) {
 
@@ -1213,6 +1225,33 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}
     	}
     	**/
+    }
+    
+    private List<IRI> findUniqueSubjects(List<OWLOntologyChange> changes) {
+    	List<IRI> result = new ArrayList<IRI>();
+    	for (OWLOntologyChange change : changes) {
+    		if (change.isAxiomChange()) {
+    			
+    			OWLAxiom ax = change.getAxiom();
+    			IRI subj = null;
+    			
+    			if (ax instanceof OWLAnnotationAssertionAxiom) {
+    				subj = (IRI) ((OWLAnnotationAssertionAxiom) ax).getSubject();
+    				System.out.println("The subject is: " + subj);
+    				
+    			} else if (ax instanceof OWLSubClassOfAxiom) {
+    				subj = ((OWLSubClassOfAxiom) ax).getSubClass().asOWLClass().getIRI();
+    				System.out.println("The subject is: " + subj);    				
+    			}
+    			if (subj != null) {
+    				if (result.contains(subj)) {
+    				} else {
+    					result.add(subj);
+    				}
+    			}
+    		}
+    	}
+    	return result;
     }
 	
 	public void resetHistory() {
@@ -1460,37 +1499,31 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return true;		
 	}
 	
-	public boolean hasParent(OWLClass cls, OWLClass par_cls, String type) {
-		if (type.equalsIgnoreCase("P")) {
-			Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
-	        
-	        for (OWLSubClassOfAxiom ax1 : sub_axioms) {
-	        	OWLClassExpression exp = ax1.getSuperClass();
-	        	
-	        	if (getParent(exp, par_cls) != null) {
-	        		return true;
-	        	}        	
-	        	
-	        }
-	        return false;
-			
-		} else if (type.equalsIgnoreCase("D")) {
-			Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
-	        
-	        for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
-	        	Set<OWLClassExpression> exps = ax1.getClassExpressions();
-	        	for (OWLClassExpression exp : exps) {
-	        		if (getParent(exp, par_cls) != null) {
-		        		return true;
-		        	}
-	        		
-	        	}
-	        }
-	        return false;
-			
-		} else {
-			return false;
+	public boolean hasParent(OWLClass cls, OWLClass par_cls) {
+
+		Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
+
+		for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+			OWLClassExpression exp = ax1.getSuperClass();
+
+			if (getParent(exp, par_cls) != null) {
+				return true;
+			} 
 		}
+
+		// didn't find primitive parent, check defined
+
+		Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
+
+		for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+			Set<OWLClassExpression> exps = ax1.getClassExpressions();
+			for (OWLClassExpression exp : exps) {
+				if (getParent(exp, par_cls) != null) {
+					return true;
+				}
+			}
+		}
+		return false;	
 	}
 	
 	private OWLClass getParent(OWLClassExpression exp, OWLClass par_cls) {
@@ -1522,38 +1555,30 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	
-	public boolean hasRole(OWLClass cls, String roleName, String mod, String filler, String type) {
-		if (type.equalsIgnoreCase("P")) {
-			Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
-	        
-	        for (OWLSubClassOfAxiom ax1 : sub_axioms) {
-	        	OWLClassExpression exp = ax1.getSuperClass();
-	        	
-	        	if (getRole(exp, roleName, mod, filler) != null) {
-	        		return true;
-	        	}
-	        	
-	        	
-	        }
-	        return false;
-			
-		} else if (type.equalsIgnoreCase("D")) {
-			Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
-	        
-	        for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
-	        	Set<OWLClassExpression> exps = ax1.getClassExpressions();
-	        	for (OWLClassExpression exp : exps) {
-	        		if (getRole(exp, roleName, mod, filler) != null) {
-		        		return true;
-		        	}
-	        		
-	        	}
-	        }
-	        return false;
-			
-		} else {
-			return false;
+	public boolean hasRole(OWLClass cls, String roleName, String mod, String filler) {
+
+		Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
+
+		for (OWLSubClassOfAxiom ax1 : sub_axioms) {
+			OWLClassExpression exp = ax1.getSuperClass();
+
+			if (getRole(exp, roleName, mod, filler) != null) {
+				return true;
+			}        	
 		}
+		Set<OWLEquivalentClassesAxiom> equiv_axioms = ontology.getEquivalentClassesAxioms(cls);
+
+		for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
+			Set<OWLClassExpression> exps = ax1.getClassExpressions();
+			for (OWLClassExpression exp : exps) {
+				if (getRole(exp, roleName, mod, filler) != null) {
+					return true;
+				}
+
+			}
+		}
+		return false;	
+
 	}
 	
 	private OWLQuantifiedObjectRestriction getRole(OWLClassExpression exp, String roleName,
@@ -1607,40 +1632,33 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 	}
 	
-	public void removeParent(OWLClass cls, OWLClass par_cls, String type) {
+	public void removeParent(OWLClass cls, OWLClass par_cls) {
 		ParentRemover par_rem = new ParentRemover(getOWLEditorKit().getModelManager());
-		List<OWLOntologyChange> changes = par_rem.removeParent(cls, par_cls, type);
+		List<OWLOntologyChange> changes = par_rem.removeParent(cls, par_cls);
 		getOWLModelManager().applyChanges(changes);
 
 	}
 
-	public void addParent(OWLClass cls, OWLClass par_cls, String type) {
+	public void addParent(OWLClass cls, OWLClass par_cls) {
 		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		
-		OWLAxiom ax = null;		
-		
-		if (type.equalsIgnoreCase("P")) {
-			ax = df.getOWLSubClassOfAxiom(cls, par_cls);
-			
-		} else if (type.equalsIgnoreCase("D")) {
-			ax = df.getOWLEquivalentClassesAxiom(cls, par_cls);			
-		}
-		
+		OWLAxiom ax = df.getOWLSubClassOfAxiom(cls, par_cls);	
+				
 		changes.add(new AddAxiom(ontology, ax));
 		
 		this.getOWLEditorKit().getModelManager().applyChanges(changes);
 
 	}
 	
-	public void removeRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
+	public void removeRole(OWLClass cls, String roleName, String modifier, String filler) {
 		RoleReplacer role_rep = new RoleReplacer(getOWLEditorKit().getModelManager());
-		List<OWLOntologyChange> changes = role_rep.removeRole(cls, roleName, modifier, filler, type);
+		List<OWLOntologyChange> changes = role_rep.removeRole(cls, roleName, modifier, filler);
 		getOWLModelManager().applyChanges(changes);
 
 	}
 
-	public void addRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
+	public void addRole(OWLClass cls, String roleName, String modifier, String filler) {
 		
 		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
@@ -1656,15 +1674,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			exp = df.getOWLObjectAllValuesFrom(o_p, fill_cls);			
 		}
 		
-		OWLAxiom ax = null;
-		
-		
-		if (type.equalsIgnoreCase("P")) {
-			ax = df.getOWLSubClassOfAxiom(cls, exp);
-			
-		} else if (type.equalsIgnoreCase("D")) {
-			ax = df.getOWLEquivalentClassesAxiom(cls, exp);			
-		}
+		OWLAxiom ax = df.getOWLSubClassOfAxiom(cls, exp);
 		
 		changes.add(new AddAxiom(ontology, ax));
 		
@@ -1672,18 +1682,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 	}
 	
-	public void modifyRole(OWLClass cls, String roleName, String modifier, String filler, String type,
-			String new_modifier, String new_filler, String new_type) {
-		if (type.equals(new_type)) {
+	public void modifyRole(OWLClass cls, String roleName, String modifier, String filler,
+			String new_modifier, String new_filler) {
+		
 			// no type change
 			RoleReplacer role_rep = new RoleReplacer(getOWLModelManager());
-			List<OWLOntologyChange> changes = role_rep.modifyRole(cls, roleName, modifier, filler, type, 
-					new_modifier, new_filler, new_type);
+			List<OWLOntologyChange> changes = role_rep.modifyRole(cls, roleName, modifier, filler, 
+					new_modifier, new_filler);
 			this.getOWLEditorKit().getModelManager().applyChanges(changes);
-		} else {
-			removeRole(cls, roleName, modifier, filler, type);
-			addRole(cls, roleName, new_modifier, new_filler, new_type);
-		}
+		
 
 	}
 	
@@ -2159,9 +2166,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		changes.add(new AddAxiom(ontology, new_new_axiom));
 
     	}
-    	getOWLModelManager().applyChanges(changes);
+    	//getOWLModelManager().applyChanges(changes);
     	
-    	if (checkForDups(cls, complex_prop) && syncFullSyn(cls, complex_prop)) {
+    	if (checkForDups(cls, complex_prop) && syncFullSyn(cls, complex_prop, changes)) {     		
+    		getOWLModelManager().applyChanges(changes);
     		return true;
     	} else {
     		this.backOutChange();
@@ -2326,31 +2334,35 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     // that has the same value as the preferred_name property
     // TODO: Add FULL_SYN without creating cycle
     public void syncPrefName(String preferred_name) {
-    	List<OWLOntologyChange> changes = new ArrayList<>();
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	syncPrefName(this.currentlyEditing, preferred_name, changes);
+    }
+    
+    private void syncPrefName(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
-    	if (!getRDFSLabel(currentlyEditing).equals(preferred_name)) {
-    		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(currentlyEditing.getIRI())) {
+    	if (!getRDFSLabel(cls).equals(preferred_name)) {
+    		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
     			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
     				changes.add(new RemoveAxiom(ontology, ax));
     				OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
     				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
-    						.getOWLAnnotationAssertionAxiom(LABEL_PROP, currentlyEditing.getIRI(), pref_name_val);
+    						.getOWLAnnotationAssertionAxiom(LABEL_PROP, cls.getIRI(), pref_name_val);
     				changes.add(new AddAxiom(ontology, ax2));
     			} else if (ax.getProperty().equals(NCIEditTabConstants.PREF_NAME)) {
     				changes.add(new RemoveAxiom(ontology, ax));
     				OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
     				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
-    						.getOWLAnnotationAssertionAxiom(PREF_NAME, currentlyEditing.getIRI(), pref_name_val);
+    						.getOWLAnnotationAssertionAxiom(PREF_NAME, cls.getIRI(), pref_name_val);
     				changes.add(new AddAxiom(ontology, ax2));
     				
     			}
     			
     		}   		
     	}
-    	ontology.getOWLOntologyManager().applyChanges(changes);
+    	
     }
     
-    public boolean syncFullSyn(OWLClass cls, OWLAnnotationProperty prop) {
+    public boolean syncFullSyn(OWLClass cls, OWLAnnotationProperty prop, List<OWLOntologyChange> changes) {
     	OWLAnnotationProperty full_syn = getFullSyn();
     	if (!prop.equals(full_syn)) {
     		return true;
@@ -2370,7 +2382,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		JOptionPane.showMessageDialog(this, "One and only one PT with source NCI is allowed.", "Warning", JOptionPane.WARNING_MESSAGE);
     		return false;
     	} else {
-    		syncPrefName(assertions.get(0).getValue().asLiteral().get().getLiteral());
+    		syncPrefName(cls, assertions.get(0).getValue().asLiteral().get().getLiteral(), changes);
     		selectClass(cls);
     		return true;
     	}

@@ -128,7 +128,7 @@ public class EditPanel extends JPanel {
 				} else {
 					if (!NCIEditTab.currentTab().isEditing()) {
 						NCIEditTab.currentTab().setEditInProgress(true);
-						NCIEditTab.currentTab().setCurrentlyEditing(currentClass);						
+						NCIEditTab.currentTab().setCurrentlyEditing(currentClass, false);						
 						enableButtons();
 					}
 				}
@@ -182,12 +182,12 @@ public class EditPanel extends JPanel {
         	
         	public void handleDelete() {
         		super.handleDelete();
-        		NCIEditTab.currentTab().classModified();        		
+        		//NCIEditTab.currentTab().classModified();        		
         	}
         	
         	public void handleEdit() {
         		super.handleEdit();
-        	    NCIEditTab.currentTab().classModified();
+        	    //NCIEditTab.currentTab().classModified();
         	}        	
         };
           
@@ -206,12 +206,12 @@ public class EditPanel extends JPanel {
         list = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit)) {
         	public void handleDelete() {
         		super.handleDelete();
-        	    NCIEditTab.currentTab().classModified();
+        	    //NCIEditTab.currentTab().classModified();
         	}
         	
         	public void handleEdit() {
         		super.handleEdit();
-        	    NCIEditTab.currentTab().classModified();
+        	    //NCIEditTab.currentTab().classModified();
         	}        	
         };
         
@@ -290,7 +290,7 @@ public class EditPanel extends JPanel {
     		gen_props.setRootObject(null);
     		prefNameText.setText(null);
     		codeText.setText("nocode");
-    		this.genPropPanel.repaint();
+    		genPropPanel.repaint();
     	}
     	prefNameText.getDocument().addDocumentListener(doc_listen);
     }
@@ -307,7 +307,7 @@ public class EditPanel extends JPanel {
     			panel.createNewProp();
     		}
     	}
-    	this.setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
+    	setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
     }
     
     private void createComplexPropertyTable(OWLAnnotationProperty complexProperty) {

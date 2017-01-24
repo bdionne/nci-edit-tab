@@ -130,30 +130,41 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
         });
         getAssertedTree().setPopupMenuId(new PopupMenuId("[NCIAssertedClassHierarchy]")); 
         
+        
+        
+        
         getAssertedTree().addTreeSelectionListener(new TreeSelectionListener() {
 
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
-
-				if (NCIEditTab.currentTab().isRetiring()) {
-					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getRetireClass());	
-				} else if (NCIEditTab.currentTab().isEditing()) {
-					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getCurrentlyEditing());
-				} else if (NCIEditTab.currentTab().isSplitting()) {
-					// if merging or cloning splitting returns the same result
-					getTree().setSelectedOWLObject(NCIEditTab.currentTab().getSplitSource());
+				if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject())) {
+					NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), ComplexEditType.READ));
 				} else {
-					if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject())) {
-						//NCIEditTab.currentTab().setCurrentlyEditing(null);
-						NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), ComplexEditType.READ));
-						//NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
-
-					} else {
-						NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
-					}
-				}				
+					NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
+				}
+						
 			}        	
         });
+        
+        if (getInferredTree() != null) {
+        	getInferredTree().addTreeSelectionListener(new TreeSelectionListener() {
+
+    			@Override
+    			public void valueChanged(TreeSelectionEvent e) {
+    				if (getInferredTree().isVisible()) {
+    					if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject())) {
+    						NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), ComplexEditType.READ));
+    					} else {
+    						NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
+    					}
+    				}
+    				
+    			}        	
+            });
+        	
+        }
+        
+        
         
         NCIEditTab.setNavTree(this);               
     }
@@ -249,10 +260,11 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		} else {
 			NCIEditTab.currentTab().setOp(ComplexEditType.SPLIT);
 		}
+		OWLClass from_cls = getSelectedEntity();
 		NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
 				"Please enter a class name", OWLClass.class, Optional.empty(), Optional.empty());
 		if (dlg.showDialog()) {
-			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), getSelectedEntity(), clone_p);
+			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), from_cls, clone_p);
 			
 		}		
 	}
@@ -309,9 +321,10 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 
 			NCIEditTab.currentTab().disableBatchMode();
 
-			NCIEditTab.currentTab().classModified();
+			NCIEditTab.currentTab().setCurrentlyEditing(newCls, true);
 			NCIEditTab.currentTab().setNew(true);
 			this.getTree().refreshComponent();
+			NCIEditTab.currentTab().classModified();
 		}
 
 	}
@@ -329,7 +342,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 
 		@Override
 		public boolean canAddComplex() {
-			return isFree();
+			return true;
 		}
 
 		@Override

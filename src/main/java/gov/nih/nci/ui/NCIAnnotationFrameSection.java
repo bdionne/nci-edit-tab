@@ -14,6 +14,7 @@ import org.semanticweb.owlapi.model.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,7 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
     
     private Set<OWLAnnotationProperty> propsToExclude;
     private Set<OWLAnnotationProperty> readOnlyProps;
+    private NCIOWLAnnotationEditor editor = null;
 
 
     public NCIAnnotationFrameSection(OWLEditorKit editorKit, OWLFrame<? extends OWLAnnotationSubject> frame, Set<OWLAnnotationProperty> props,
@@ -78,7 +80,11 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
 
 
     public OWLObjectEditor<OWLAnnotation> getObjectEditor() {
-        return new NCIOWLAnnotationEditor(getOWLEditorKit(), NCIEditTab.currentTab().getComplexProperties());
+    	if (editor != null) {
+    	} else {
+    		editor = new NCIOWLAnnotationEditor(getOWLEditorKit(), propsToExclude);
+    	}
+    	return editor;
     }
 
 
@@ -110,7 +116,19 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
             if (obj instanceof OWLAnnotation) {
                 OWLAnnotation annot = (OWLAnnotation) obj;
                 OWLAxiom ax = getOWLDataFactory().getOWLAnnotationAssertionAxiom(getRootObject(), annot);
-                changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
+                
+                List<OWLObject> quals = objects.subList(1, objects.size());
+                Set<OWLAnnotation> q_as = new HashSet<OWLAnnotation>();
+                for (OWLObject o : quals) {
+                	q_as.add((OWLAnnotation) o);
+                	
+                }           
+                
+                
+                OWLAxiom new_ax = ax.getAxiomWithoutAnnotations().getAnnotatedAxiom(q_as);
+                
+                changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), new_ax));
+                
             } else {
                 return false;
             }

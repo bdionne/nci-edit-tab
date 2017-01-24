@@ -73,6 +73,8 @@ public class ComplexEditPanel extends JPanel {
     
     private JRadioButton mergeButton;
     
+    private JRadioButton dualButton;
+    
     private ButtonGroup radioButtonGroup;
     
     private JPanel buttonPanel;
@@ -89,8 +91,8 @@ public class ComplexEditPanel extends JPanel {
         this.lowerPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
         				NCIEditTab.currentTab().getImmutableProperties()));
-        this.lowerPanelClass = new OWLFrameList<>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
-        this.upperPanelClass = new OWLFrameList<>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
+        this.lowerPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
+        this.upperPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
         
         createUI();
     }
@@ -314,13 +316,16 @@ public class ComplexEditPanel extends JPanel {
     	splitButton = new JRadioButton("Split");
     	cloneButton = new JRadioButton("Copy");
     	mergeButton = new JRadioButton("Merge");
+    	dualButton = new JRadioButton("Dual Edits");
     	radioButtonGroup = new ButtonGroup();
     	radioButtonGroup.add(splitButton);
     	radioButtonGroup.add(cloneButton);
     	radioButtonGroup.add(mergeButton);
+    	radioButtonGroup.add(dualButton);
     	radioButtonPanel.add(splitButton);
     	radioButtonPanel.add(cloneButton);
     	radioButtonPanel.add(mergeButton);
+    	radioButtonPanel.add(dualButton);
     	
     	ActionListener cbl = new ActionListener() {
 
@@ -349,6 +354,7 @@ public class ComplexEditPanel extends JPanel {
     	splitButton.addActionListener(cbl);
     	mergeButton.addActionListener(cbl);
     	cloneButton.addActionListener(cbl);
+    	dualButton.addActionListener(cbl);
     	return radioButtonPanel;
     }
     
@@ -364,6 +370,10 @@ public class ComplexEditPanel extends JPanel {
     	return mergeButton.isSelected();
     }
     
+    public boolean isDualBtnSelected() {
+    	return dualButton.isSelected();
+    }
+    
     
     
     public void setEnableUnselectedRadioButtons(boolean enable) {
@@ -376,6 +386,9 @@ public class ComplexEditPanel extends JPanel {
     	}
     	if (!isMergeBtnSelected()) {
     		mergeButton.setEnabled(enable);
+    	}
+    	if (!isDualBtnSelected()) {
+    		dualButton.setEnabled(enable);
     	}
     	
     }
@@ -425,7 +438,7 @@ public class ComplexEditPanel extends JPanel {
     }
     
     private void checkStatus() {
-    	if (NCIEditTab.currentTab().readyMerge()) {
+    	if (NCIEditTab.currentTab().readyMerge() && isMergeBtnSelected()) {
     		saveButton.setText("Merge");
     		enableButtons();
     	} else {

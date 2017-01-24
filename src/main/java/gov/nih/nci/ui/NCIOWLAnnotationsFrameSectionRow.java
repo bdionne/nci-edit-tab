@@ -1,5 +1,8 @@
 package gov.nih.nci.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.protege.editor.owl.OWLEditorKit;
@@ -15,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 public class NCIOWLAnnotationsFrameSectionRow extends OWLAnnotationsFrameSectionRow {
 	
 	private Set<OWLAnnotationProperty> propsToExclude;
+	private NCIOWLAnnotationEditor editor = null;
 	
 	public NCIOWLAnnotationsFrameSectionRow(OWLEditorKit owlEditorKit, 
 			OWLFrameSection<OWLAnnotationSubject, OWLAnnotationAssertionAxiom, OWLAnnotation> section, 
@@ -22,6 +26,7 @@ public class NCIOWLAnnotationsFrameSectionRow extends OWLAnnotationsFrameSection
 			OWLAnnotationSubject rootObject, Set<OWLAnnotationProperty> exclude, OWLAnnotationAssertionAxiom axiom, boolean isEditable) {
 		super(owlEditorKit, section, ontology, rootObject, axiom, isEditable);
 		propsToExclude = exclude;
+		editor = (NCIOWLAnnotationEditor) section.getEditor();
 	}
 
 	public NCIOWLAnnotationsFrameSectionRow(OWLEditorKit owlEditorKit,
@@ -30,14 +35,24 @@ public class NCIOWLAnnotationsFrameSectionRow extends OWLAnnotationsFrameSection
 			Set<OWLAnnotationProperty> exclude, OWLAnnotationAssertionAxiom axiom) {
 		super(owlEditorKit, section, ontology, rootObject, axiom);
 		propsToExclude = exclude;
+		editor = (NCIOWLAnnotationEditor) section.getEditor();
 		// TODO Auto-generated constructor stub
 	}
 	
 	protected OWLObjectEditor<OWLAnnotation> getObjectEditor() {
-        NCIOWLAnnotationEditor editor = new NCIOWLAnnotationEditor(getOWLEditorKit(),
-        		propsToExclude);
         editor.setEditedObject(getAxiom().getAnnotation());
         return editor;
+    }
+	
+	protected List<OWLAnnotation> getObjects() {
+		OWLAnnotationAssertionAxiom ax = getAxiom();
+		Set<OWLAnnotation> anns = ax.getAnnotations();
+		List<OWLAnnotation> res = new ArrayList<OWLAnnotation>();
+		res.add(ax.getAnnotation());
+		for (OWLAnnotation an : anns) {
+			res.add(an);
+		}
+        return res;
     }
 	
 	

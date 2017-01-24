@@ -135,7 +135,7 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
         final OWLConstantEditor constantEditor = new OWLConstantEditor(owlEditorKit);
         // @@TODO add change listener
 
-        final OWLAnonymousIndividualAnnotationValueEditor anonIndividualEditor = new OWLAnonymousIndividualAnnotationValueEditor(owlEditorKit);
+        //final OWLAnonymousIndividualAnnotationValueEditor anonIndividualEditor = new OWLAnonymousIndividualAnnotationValueEditor(owlEditorKit);
         // @@TODO add change listener
         
         final IRITextEditor textEditor = new IRITextEditor(owlEditorKit);
@@ -170,7 +170,7 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
         result.add(constantEditor);
         result.add(iriEditor);
         result.add(textEditor);
-        result.add(anonIndividualEditor);
+        //result.add(anonIndividualEditor);
         result.add(enumEditor);
 		return result;
 	}

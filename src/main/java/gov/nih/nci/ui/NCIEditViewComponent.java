@@ -32,12 +32,10 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
     	if (selectedClass != null) {
     		if (!NCIEditTab.currentTab().isRetired(selectedClass)) {
     			return selectedClass;
-        	}
-    		
+        	}    		
     	} else {
     		editPanel.setSelectedClass(null);
-    	}
-    	
+    	}    	
         return null;
 	}
 
@@ -67,11 +65,11 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 			} else {
 				editPanel.enableButtons();
 				NCIEditTab.currentTab().setEditInProgress(true);
-				NCIEditTab.currentTab().setCurrentlyEditing(editPanel.getSelectedClass());
+				NCIEditTab.currentTab().setCurrentlyEditing(editPanel.getSelectedClass(), true);
 			}
 
 		} else if (event.isType(ComplexEditType.SELECTED)) {
-			editPanel.setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
+			editPanel.setSelectedClass(NCIEditTab.currentTab().getCurrentlySelected());
 			if (!NCIEditTab.currentTab().inComplexOp()) {
 				getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
 						"nci-edit-tab.EditView");

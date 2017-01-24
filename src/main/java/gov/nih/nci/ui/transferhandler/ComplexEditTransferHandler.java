@@ -29,8 +29,7 @@ public class ComplexEditTransferHandler extends TransferHandler {
 	}
 
 	public boolean canImport(TransferSupport support) {
-		if(!support.isDrop()) {
-			
+		if(!support.isDrop()) {			
 			return false;
 		}
 		if (NCIEditTab.currentTab().isRetiring() ||
@@ -82,7 +81,7 @@ public class ComplexEditTransferHandler extends TransferHandler {
 						"Can't split or clone a retired class.", "Warning", JOptionPane.WARNING_MESSAGE);
 				return false;
 			}
-		} else if (complexEditPanel.isMergeBtnSelected()) {	
+		} else if (complexEditPanel.isMergeBtnSelected() || complexEditPanel.isDualBtnSelected()) {	
 			// TODO: need check for canMerge here
 			complexEditPanel.dropOnComp(support.getComponent(), data.get(0));
 			complexEditPanel.setEnableUnselectedRadioButtons(false);

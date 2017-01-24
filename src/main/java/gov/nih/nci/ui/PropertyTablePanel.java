@@ -368,7 +368,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 						tableModel.getComplexProp(), axiom, data)) {
 					this.setSelectedCls(tableModel.getSelection());
 					done = true;
-					NCIEditTab.currentTab().classModified();
+					//NCIEditTab.currentTab().classModified();
 				}				
 
 			} else {
