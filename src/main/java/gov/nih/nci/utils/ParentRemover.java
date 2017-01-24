@@ -57,7 +57,7 @@ public class ParentRemover extends OwlClassExpressionVisitor {
 		dataFact = man.getOWLDataFactory();
 	}
 		
-	public List<OWLOntologyChange> removeParent(OWLClass cls, OWLClass par_cls, String type) {
+	public List<OWLOntologyChange> removeParent(OWLClass cls, OWLClass par_cls) {
 
 		this.cls = cls;
 		this.par_cls = par_cls;
@@ -65,48 +65,48 @@ public class ParentRemover extends OwlClassExpressionVisitor {
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		ont = owlModelManager.getActiveOntology();
 
-		if (type.equalsIgnoreCase("P")) {
-			Set<OWLSubClassOfAxiom> sub_axioms = ont.getSubClassAxiomsForSubClass(cls);
 
-			for (OWLSubClassOfAxiom ax : sub_axioms) {
-				OWLClassExpression exp = ax.getSuperClass();
+		Set<OWLSubClassOfAxiom> sub_axioms = ont.getSubClassAxiomsForSubClass(cls);
 
-				if (exp.isAnonymous()) {
-					OWLClassExpression child = ax.getSubClass();
-					OWLClassExpression new_exp = null;
-					exp.accept(this);
-					new_exp = this.getNewExpression();
-					if (new_exp != null) {
-						changes.add(new RemoveAxiom(ont, ax));
-						OWLSubClassOfAxiom new_ax = dataFact.getOWLSubClassOfAxiom(child, new_exp);
-						changes.add(new AddAxiom(ont, new_ax));
-					} else {
-						// exp may have been a singleton
-						changes.add(new RemoveAxiom(ont, ax));						
-					}
-				} else if (exp.asOWLClass().equals(par_cls)) {
-					changes.add(new RemoveAxiom(ont, ax));					
-				}
-			}
-		} else if (type.equalsIgnoreCase("D")) {
-			Set<OWLEquivalentClassesAxiom> eq_axioms = ont.getEquivalentClassesAxioms(cls);
+		for (OWLSubClassOfAxiom ax : sub_axioms) {
+			OWLClassExpression exp = ax.getSuperClass();
 
-			for (OWLEquivalentClassesAxiom eq : eq_axioms) {
-				changes.add(new RemoveAxiom(ont, eq));
-				Set<OWLClassExpression> newExps = new HashSet<OWLClassExpression>();
-				for (OWLClassExpression eq_exp : eq.getClassExpressions()) {
-					eq_exp.accept(this);
-					if (getNewExpression() != null) {
-						newExps.add(getNewExpression());
-					}
-				}
-				if (newExps.size() > 1) {
-					OWLEquivalentClassesAxiom new_ax = dataFact.getOWLEquivalentClassesAxiom(newExps);
+			if (exp.isAnonymous()) {
+				OWLClassExpression child = ax.getSubClass();
+				OWLClassExpression new_exp = null;
+				exp.accept(this);
+				new_exp = this.getNewExpression();
+				if (new_exp != null) {
+					changes.add(new RemoveAxiom(ont, ax));
+					OWLSubClassOfAxiom new_ax = dataFact.getOWLSubClassOfAxiom(child, new_exp);
 					changes.add(new AddAxiom(ont, new_ax));
+				} else {
+					// exp may have been a singleton
+					changes.add(new RemoveAxiom(ont, ax));						
 				}
-
+			} else if (exp.asOWLClass().equals(par_cls)) {
+				changes.add(new RemoveAxiom(ont, ax));					
 			}
 		}
+
+		Set<OWLEquivalentClassesAxiom> eq_axioms = ont.getEquivalentClassesAxioms(cls);
+
+		for (OWLEquivalentClassesAxiom eq : eq_axioms) {
+			changes.add(new RemoveAxiom(ont, eq));
+			Set<OWLClassExpression> newExps = new HashSet<OWLClassExpression>();
+			for (OWLClassExpression eq_exp : eq.getClassExpressions()) {
+				eq_exp.accept(this);
+				if (getNewExpression() != null) {
+					newExps.add(getNewExpression());
+				}
+			}
+			if (newExps.size() > 1) {
+				OWLEquivalentClassesAxiom new_ax = dataFact.getOWLEquivalentClassesAxiom(newExps);
+				changes.add(new AddAxiom(ont, new_ax));
+			}
+
+		}
+
 
 		return changes;
 

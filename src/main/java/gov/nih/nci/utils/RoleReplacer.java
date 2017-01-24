@@ -61,38 +61,40 @@ public class RoleReplacer extends OwlClassExpressionVisitor {
 		dataFact = man.getOWLDataFactory();
 	}
 		
-	public List<OWLOntologyChange> removeRole(OWLClass cls, String roleName, String modifier, String filler, String type) {
-		
+	public List<OWLOntologyChange> removeRole(OWLClass cls, String roleName, String modifier, String filler) {
+
 		operation = REMOVE;
 		this.roleName = roleName;
 		this.modifier = modifier;
 		this.filler = filler;
-		
+
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		ont = owlModelManager.getActiveOntology();
-		
-		if (type.equalsIgnoreCase("P")) {
-			Set<OWLSubClassOfAxiom> sub_axioms = ont.getSubClassAxiomsForSubClass(cls);
-	        
-			for (OWLSubClassOfAxiom ax : sub_axioms) {
-				OWLClassExpression exp = ax.getSuperClass();
 
-				if (exp.isAnonymous()) {
-					OWLClassExpression child = ax.getSubClass();
-					OWLClassExpression new_exp = null;
-					exp.accept(this);
-					new_exp = this.getNewExpression();
-					if (new_exp != null) {
-						changes.add(new RemoveAxiom(ont, ax));
-						OWLSubClassOfAxiom new_ax = dataFact.getOWLSubClassOfAxiom(child, new_exp);
-						changes.add(new AddAxiom(ont, new_ax));
-					} else {
-						// exp may have been a singleton
-						changes.add(new RemoveAxiom(ont, ax));						
-					}
+
+		Set<OWLSubClassOfAxiom> sub_axioms = ont.getSubClassAxiomsForSubClass(cls);
+
+		for (OWLSubClassOfAxiom ax : sub_axioms) {
+			OWLClassExpression exp = ax.getSuperClass();
+
+			if (exp.isAnonymous()) {
+				OWLClassExpression child = ax.getSubClass();
+				OWLClassExpression new_exp = null;
+				exp.accept(this);
+				new_exp = this.getNewExpression();
+				if (new_exp != null) {
+					changes.add(new RemoveAxiom(ont, ax));
+					OWLSubClassOfAxiom new_ax = dataFact.getOWLSubClassOfAxiom(child, new_exp);
+					changes.add(new AddAxiom(ont, new_ax));
+				} else {
+					// exp may have been a singleton
+					changes.add(new RemoveAxiom(ont, ax));						
 				}
 			}
-		} else if (type.equalsIgnoreCase("D")) {
+		}
+
+		if (changes.isEmpty()) {
+
 			Set<OWLEquivalentClassesAxiom> eq_axioms = ont.getEquivalentClassesAxioms(cls);
 
 			for (OWLEquivalentClassesAxiom eq : eq_axioms) {
@@ -110,48 +112,50 @@ public class RoleReplacer extends OwlClassExpressionVisitor {
 				}
 			}
 		}
-		
+
+
 		return changes;
-		
+
 	}
 	
 	// The assumption in modify is that the old and the new are of the same time, so they reamin in the same
 	// class expression
-	public List<OWLOntologyChange> modifyRole(OWLClass cls, String roleName, String modifier, String filler, String type,
-			String new_modifier, String new_filler, String new_type) {
-		
+	public List<OWLOntologyChange> modifyRole(OWLClass cls, String roleName, String modifier, String filler,
+			String new_modifier, String new_filler) {
+
 		operation = MOD;
-		
+
 		this.roleName = roleName;
 		this.modifier = modifier;
 		this.filler = filler;
 		this.new_filler = new_filler;
-		
-		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-		
-		ont = owlModelManager.getActiveOntology();
-		
-		if (type.equalsIgnoreCase("P")) {
-			Set<OWLSubClassOfAxiom> sub_axioms = ont.getSubClassAxiomsForSubClass(cls);
-	        
-			for (OWLSubClassOfAxiom ax : sub_axioms) {
-				OWLClassExpression exp = ax.getSuperClass();
 
-				if (exp.isAnonymous()) {
-					OWLClassExpression child = ax.getSubClass();
-					OWLClassExpression new_exp = null;
-					exp.accept(this);
-					new_exp = this.getNewExpression();
-					if (new_exp != null) {
-						changes.add(new RemoveAxiom(ont, ax));
-						OWLSubClassOfAxiom new_ax = dataFact.getOWLSubClassOfAxiom(child, new_exp);
-						changes.add(new AddAxiom(ont, new_ax));
-					}
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+
+		ont = owlModelManager.getActiveOntology();
+
+
+		Set<OWLSubClassOfAxiom> sub_axioms = ont.getSubClassAxiomsForSubClass(cls);
+
+		for (OWLSubClassOfAxiom ax : sub_axioms) {
+			OWLClassExpression exp = ax.getSuperClass();
+
+			if (exp.isAnonymous()) {
+				OWLClassExpression child = ax.getSubClass();
+				OWLClassExpression new_exp = null;
+				exp.accept(this);
+				new_exp = this.getNewExpression();
+				if (new_exp != null) {
+					changes.add(new RemoveAxiom(ont, ax));
+					OWLSubClassOfAxiom new_ax = dataFact.getOWLSubClassOfAxiom(child, new_exp);
+					changes.add(new AddAxiom(ont, new_ax));
 				}
 			}
-		} else if (type.equalsIgnoreCase("D")) {
+		}
+		if (changes.isEmpty()) {
+
 			Set<OWLEquivalentClassesAxiom> eq_axioms = ont.getEquivalentClassesAxioms(cls);
-			
+
 			for (OWLEquivalentClassesAxiom eq : eq_axioms) {
 				changes.add(new RemoveAxiom(ont, eq));
 				Set<OWLClassExpression> newExps = new HashSet<OWLClassExpression>();
@@ -163,9 +167,7 @@ public class RoleReplacer extends OwlClassExpressionVisitor {
 				changes.add(new AddAxiom(ont, new_ax));				
 			}
 		}
-		
 		return changes;
-		
 	}
 	
 	

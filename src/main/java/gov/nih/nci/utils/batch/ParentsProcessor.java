@@ -9,11 +9,9 @@ import gov.nih.nci.ui.NCIEditTab;
 public class ParentsProcessor extends EditProcessor {
 	
 	String parent_id = null;
-	String type = null;
 	OWLClass par_class = null;
 	
 	String new_parent_id = null;
-	String new_type = null;
 	OWLClass new_par_class = null;
 
 	public ParentsProcessor(NCIEditTab t) {
@@ -29,7 +27,6 @@ public class ParentsProcessor extends EditProcessor {
 			try {
 
 				parent_id = (String) v.elementAt(2);
-				type = (String) v.elementAt(3);
 				
 				par_class = tab.getClass(parent_id);
 				
@@ -42,7 +39,7 @@ public class ParentsProcessor extends EditProcessor {
 				
 				switch (operation) {
 				case DELETE:
-					if (!tab.hasParent(classToEdit, par_class, type)) {
+					if (!tab.hasParent(classToEdit, par_class)) {
 						String error_msg = " -- parent concept " + parent_id
 								+ " does not exist on class.";
 						w.add(error_msg);
@@ -50,15 +47,14 @@ public class ParentsProcessor extends EditProcessor {
 					}
 					break;
 				case MODIFY:
-					if (!tab.hasParent(classToEdit, par_class, type)) {
+					if (!tab.hasParent(classToEdit, par_class)) {
 						String error_msg = " -- parent concept " + parent_id
 								+ " does not exist on class.";
 						w.add(error_msg);
 						return w;
 					}
 					
-					new_parent_id = (String) v.elementAt(4);
-					new_type = (String) v.elementAt(5);					
+					new_parent_id = (String) v.elementAt(3);		
 					new_par_class = tab.getClass(new_parent_id);
 					
 					if (new_par_class == null) {
@@ -66,7 +62,7 @@ public class ParentsProcessor extends EditProcessor {
 								+ " does not exist.";
 						w.add(error_msg);
 						return w;
-					} else if (tab.hasParent(classToEdit, new_par_class, new_type)) {
+					} else if (tab.hasParent(classToEdit, new_par_class)) {
 						String error_msg = " -- new parent concept " + parent_id
 								+ " already exists as parent on class.";
 						w.add(error_msg);
@@ -75,7 +71,7 @@ public class ParentsProcessor extends EditProcessor {
 					}
 					break;
 				case NEW:
-					if (tab.hasParent(classToEdit, par_class, type)) {
+					if (tab.hasParent(classToEdit, par_class)) {
 						String error_msg = " -- new parent concept " + parent_id
 								+ " already exists as parent on class.";
 						w.add(error_msg);
@@ -97,15 +93,14 @@ public class ParentsProcessor extends EditProcessor {
 	public boolean processData(Vector<String> data) {
 		switch(operation) {
 		case DELETE:
-			tab.removeParent(classToEdit, par_class, type);
+			tab.removeParent(classToEdit, par_class);
 			break;
 		case MODIFY:
-			tab.removeParent(classToEdit, par_class, type);
-			tab.addParent(classToEdit, new_par_class, new_type);
-			
+			tab.removeParent(classToEdit, par_class);
+			tab.addParent(classToEdit, new_par_class);			
 			break;
 		case NEW:
-			tab.addParent(classToEdit, par_class, type);
+			tab.addParent(classToEdit, par_class);
 			break;
 		default:
 			break;			
