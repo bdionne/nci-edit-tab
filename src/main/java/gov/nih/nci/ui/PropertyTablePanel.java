@@ -8,7 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
@@ -27,6 +29,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import org.protege.editor.core.prefs.Preferences;
+import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -70,6 +74,8 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     
     private JButton deleteButton;
 
+    private Preferences prefs;
+    
     public PropertyTablePanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
         initialiseOWLView();
@@ -80,6 +86,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         this.owlEditorKit = editorKit;
         this.complexProp = complexProperty;
         this.tableName = tableName;
+        
         initialiseOWLView();
         createPopupMenu();
     }
@@ -99,7 +106,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         tableModel = new PropertyTableModel(owlEditorKit, complexProp);
         createButtons(this);
         createUI();
-        
+        prefs = tableModel.getPrefs();
     }
 
     public static void updateRowHeights(int column, int width, JTable table){
@@ -187,6 +194,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
             }
 
             newIndex = e.getToIndex();  
+                 
         }
 
         @Override
@@ -201,7 +209,19 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         public abstract void columnResized(int column, int newWidth);
     }
 
-
+    private void saveColumnNameOrder() {
+    	int colCount = propertyTable.getColumnCount();
+        List<String> colNames1 = new ArrayList<String>();
+        
+        for (int i = 0; i < colCount; i++) {
+        	String columnName1 = propertyTable.getColumnModel().getColumn(i).getHeaderValue().toString();
+        	colNames1.add(columnName1);
+        }
+        
+        String propName = NCIEditTab.currentTab().getRDFSLabel(tableModel.getComplexProp()).get();  
+        prefs.putStringList(propName, colNames1);
+    }
+    
     private void createUI() {
     	setLayout(new BorderLayout());
     	
@@ -214,6 +234,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         propertyTable.getTableHeader().setReorderingAllowed(true);
         propertyTable.setFillsViewportHeight(true);   
         propertyTable.setAutoCreateRowSorter(true);
+        tableModel.setPropertyTable(propertyTable);
         
         //set value column renderer
         TableColumnModel tcm = propertyTable.getColumnModel();
@@ -223,6 +244,8 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
             @Override
             public void columnMoved(int oldLocation, int newLocation) {
+            	saveColumnNameOrder();
+            	tableModel.fireTableDataChanged();  
             }
 
             @Override
@@ -350,7 +373,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 	public void createNewProp() {
 		
 		PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), tableModel.getDefaultPropertyValues(), 
-				tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
+				tableModel.getSelectedPropertyOptions(), tableModel.getDefaultSelectedPropertyLabel());
 		
 		this.showAndValidate(addedit, NCIEditTabConstants.ADD, null);
 		

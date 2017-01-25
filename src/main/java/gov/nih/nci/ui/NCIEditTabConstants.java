@@ -19,6 +19,8 @@ public class NCIEditTabConstants {
 	public static final String COMPLEX_PROPS = "complex_properties";
 	public static final String IMMUTABLE_PROPS = "immutable_properties";
 	
+	public static final String PROPTABLE_VALUE_COLUMN = "Value";
+	
 	public static OWLAnnotationProperty DEP_PARENT;
 	public static OWLAnnotationProperty DEP_CHILD;
 	public static OWLAnnotationProperty DEP_ROLE;

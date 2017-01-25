@@ -1,15 +1,17 @@
 package gov.nih.nci.ui;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import org.protege.editor.core.prefs.Preferences;
+import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -22,8 +24,6 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
-
-import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 
 
 public class PropertyTableModel extends AbstractTableModel {
@@ -38,15 +38,25 @@ public class PropertyTableModel extends AbstractTableModel {
 	
 	private OWLAnnotationProperty complexProp;
 	
+	private JTable propertyTable;
+	
+	public JTable getPropertyTable() {
+		return propertyTable;
+	}
+
+	public void setPropertyTable(JTable propertyTable) {
+		this.propertyTable = propertyTable;
+	}
+
 	public OWLAnnotationProperty getComplexProp() {
 		return complexProp;
 	}
 	
 	private Set<OWLAnnotationProperty> configuredAnnotations;
 	private List<OWLAnnotationProperty> requiredAnnotationsList;
-	private List<OWLAnnotation> annotations = new ArrayList<>();
+	private Map<String, List<OWLAnnotation>> annotations = new HashMap<String, List<OWLAnnotation>>();
 	
-	
+	private Preferences prefs;
 	
 	private List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
 	
@@ -57,14 +67,23 @@ public class PropertyTableModel extends AbstractTableModel {
 	public PropertyTableModel(OWLEditorKit k, OWLAnnotationProperty complexProperty) {
 		ont = k.getOWLModelManager().getActiveOntology();
 		complexProp = complexProperty;
+		String prefsID = getClass().toString() + NCIEditTab.currentTab().getRDFSLabel(complexProp).get();
+		prefs = PreferencesManager.getInstance().getApplicationPreferences(prefsID);
 		configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(complexProp);
 		requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(configuredAnnotations);
 	}
 
 
+	public Preferences getPrefs() {
+		return prefs;
+	}
+
 	public int getRowCount() {
 		if (annotations.size() > 0) {
-			return annotations.size() / getColumnCount();
+			Iterator iter = annotations.keySet().iterator();
+			while (iter.hasNext()) {	
+				return annotations.get(iter.next()).size();
+			}
 		}
 		return 0;
 		
@@ -81,23 +100,17 @@ public class PropertyTableModel extends AbstractTableModel {
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
 
-		int index = rowIndex * getColumnCount() + columnIndex; 
 		LiteralExtractor literalExtractor = new LiteralExtractor();
 
-		if ( index < annotations.size() ) {
-			OWLAnnotation annot = annotations.get(index);
-			if (annot == null) {
-				return null;
-			} else {
-				if (columnIndex == 0) {
+		if ( columnIndex < annotations.size() ) {
+			String columnName = this.getColumnName(columnIndex);
+			List<OWLAnnotation> annotList = annotations.get(columnName);
+			if ( annotList != null && rowIndex < annotList.size()) {
+				OWLAnnotation annot = annotations.get(columnName).get(rowIndex);
+				if (annot == null) {
+					return null;
+				} else {
 					return literalExtractor.getLiteral(annot.getValue());
-				}
-				for (OWLAnnotationProperty aprop : configuredAnnotations) {
-
-					if ( annot.getProperty().equals(aprop)) {
-						return literalExtractor.getLiteral(annot.getValue());
-					}
-
 				}
 			}
 		}
@@ -106,13 +119,34 @@ public class PropertyTableModel extends AbstractTableModel {
 
 	public Map<String, String> getSelectedPropertyLabel() {
 		Map<String, String> propertyLabels = new HashMap<String, String>();
+		int columnCount = getColumnCount();
+		
+		for (int i = 0; i < columnCount; i++) {
+			String columnName = this.getColumnName(i);
+			List<OWLAnnotation> annotList = annotations.get(columnName);
+			if ("Value".equals(columnName)) {
+				propertyLabels.put(columnName, columnName);
+			} else if (annotList != null && !annotList.isEmpty()) {
+				propertyLabels.put(annotList.get(0).getProperty().getIRI().getShortForm(), columnName);
+			} else {
+				propertyLabels.put(columnName, columnName);
+			}
+		}
+		
+		return propertyLabels;
+	}
+	
+	public Map<String, String> getDefaultSelectedPropertyLabel() {
+		Map<String, String> propertyLabels = new HashMap<String, String>();
 		propertyLabels.put("Value", "Value");
 		int columnCount = getColumnCount();
 		
 		for (int i = 1; i < columnCount; i++) {
 			String propShortForm = requiredAnnotationsList.get(i -1).getIRI().getShortForm();
-			propertyLabels.put(propShortForm, getColumnName(i));
+			String columnName = this.getDefaultColumnName(i);
+			propertyLabels.put(propShortForm, columnName);
 		}
+		
 		return propertyLabels;
 	}
 	
@@ -143,29 +177,37 @@ public class PropertyTableModel extends AbstractTableModel {
 			return propertyValues;
 		}
 		int columnCount = getColumnCount();
-		int startIndex = row * columnCount;
 		LiteralExtractor literalExtractor = new LiteralExtractor();
-		String propShortForm;
+		String propShortForm = null;
 		for (int i=0; i<columnCount; i++) {
-			if (i==0) {
-				propShortForm = "Value";
+			String columnName = this.getColumnName(i);
+			List<OWLAnnotation> annotList = annotations.get(columnName);
+			OWLAnnotation annot = null;
+			if (annotList != null && annotList.size() > row) {
+				annot = annotations.get(this.getColumnName(i)).get(row);
+				propShortForm = annot.getProperty().getIRI().getShortForm();
+				if (this.complexProp.getIRI().getShortForm().equals(propShortForm)) {
+					propShortForm = "Value";
+				}
 			} else {
-				propShortForm = requiredAnnotationsList.get(i-1).getIRI().getShortForm();
+				propShortForm = columnName;
 			}
-			OWLAnnotation annot = annotations.get(startIndex + i);
+			
 			if (annot != null) {
 				// TODO: temporarily hardcode this, certain annotations always use system defaults
 				// even when diting an existing row. We need to add this as a property of the annotation
 				// or otherwise distinguish in ghte config file
 				if (propShortForm.equals("Definition_Review_Date") ||
 						propShortForm.equals("Definition_Reviewer_Name")) {
-					OWLAnnotationProperty p = requiredAnnotationsList.get(i-1);
+					OWLAnnotationProperty p = annot.getProperty();
 					propertyValues.put(propShortForm,
 							NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(p)));
 				} else {
 
 					propertyValues.put(propShortForm, literalExtractor.getLiteral(annot.getValue()));
 				}
+			} else {
+				propertyValues.put(propShortForm, null);
 			}
 		}
 
@@ -252,9 +294,21 @@ public class PropertyTableModel extends AbstractTableModel {
 	}
 
 	public String getColumnName(int column) {
-
+		String complexPropName = NCIEditTab.currentTab().getRDFSLabel(getComplexProp()).get();
+		List<String> column_names = prefs.getStringList(complexPropName, new ArrayList<String>());
+		if (column_names != null && (!column_names.isEmpty())) {
+			return column_names.get(column);
+		} else {
+			if (column == 0) {
+				return NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
+			}
+			return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
+		}
+	}
+	
+	public String getDefaultColumnName(int column) {
 		if (column == 0) {
-			return "Value";
+			return NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
 		}
 		return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
 	}
@@ -270,16 +324,26 @@ public class PropertyTableModel extends AbstractTableModel {
 		if (selection != null) {
 			annotations.clear();
 			assertions.clear();
+			String key;
+			int count = 0;
 			for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selection, ont)) {
 				OWLAnnotation annot = ax.getAnnotation();
+				
 				if (annot.getProperty().equals(this.complexProp)) {
 					assertions.add(ax);
 					//annotations.add(annot);
 					if (annot.getValue() != null) {
-
-						annotations.add(annot);
+						key = NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
+						if (annotations.containsKey(key)) {
+							annotations.get(key).add(annot);
+						} else {
+							List<OWLAnnotation> annotList = new ArrayList<OWLAnnotation>();
+							annotList.add(annot);
+							annotations.put(key, annotList);
+						}
 					}
 					Set<OWLAnnotation> annotSet = ax.getAnnotations();
+					
 					for (OWLAnnotationProperty req_a : configuredAnnotations) {
 						OWLAnnotation found = null;
 						for (OWLAnnotation owl_a : annotSet) {
@@ -287,10 +351,30 @@ public class PropertyTableModel extends AbstractTableModel {
 								found = owl_a;
 							}
 						}
-						annotations.add(found);
+						if (found != null) {
+							key = NCIEditTab.currentTab().getRDFSLabel(found.getProperty()).get();
+							if (annotations.containsKey(key)) {
+								int size = annotations.get(key).size();
+								while (size < count) {
+									annotations.get(key).add(null);
+								}
+								annotations.get(key).add(found);
+							} else {
+								List<OWLAnnotation> annotList = new ArrayList<OWLAnnotation>();
+								int j = 0;
+								while (j < count) {
+									annotList.add(null);
+									j++;
+								}
+								annotList.add(found); 
+								annotations.put(key, annotList);
+							}
+						} 
+						
 					}
+					count++;
 				}
-
+				
 			}  
 			
 		} else {
