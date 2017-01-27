@@ -120,10 +120,11 @@ public class LQTExporter {
             rows.add(0, header);
         }
         if(includeCustomText) {
-            rows.add("\n\n" + customText);
+            rows.add(System.lineSeparator() +
+            		System.lineSeparator() + customText);
         }
         for (String row : rows) { // write results to file
-            fw.write(row + "\n");
+            fw.write(row + System.lineSeparator());
         }
         fw.flush();
         fw.close();
