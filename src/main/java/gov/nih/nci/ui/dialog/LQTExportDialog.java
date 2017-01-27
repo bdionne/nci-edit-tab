@@ -52,6 +52,7 @@ import edu.stanford.protege.csv.export.CsvExporterBuilder;
 import edu.stanford.protege.csv.export.ui.AddEntityToExportDialogPanel;
 import edu.stanford.protege.csv.export.ui.AddPropertyToExportDialogPanel;
 import edu.stanford.protege.csv.export.ui.CustomTextDialogPanel;
+import edu.stanford.protege.csv.export.ui.IncQualsOWLCellRenderer;
 import edu.stanford.protege.csv.export.ui.UiUtils;
 import gov.nih.nci.ui.LQTExporter;
 import gov.nih.nci.ui.OwlEntityListCellRenderer;
@@ -181,7 +182,7 @@ public class LQTExportDialog extends JPanel {
         };
         outputEntitiesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         outputEntitiesList.addListSelectionListener(outputListSelectionListener);
-        outputEntitiesList.setCellRenderer(new OwlEntityListCellRenderer(editorKit));
+        outputEntitiesList.setCellRenderer(new OwlEntityListCellRenderer(editorKit, dependentAnnotations));
         outputEntitiesList.addKeyListener(keyAdapter);
         outputEntitiesList.addMouseListener(mouseAdapter);
         outputEntitiesList.setVisibleRowCount(10);
@@ -229,7 +230,7 @@ public class LQTExportDialog extends JPanel {
         };
         propertiesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         propertiesList.addListSelectionListener(propertyListSelectionListener);
-        propertiesList.setCellRenderer(new OwlEntityListCellRenderer(editorKit));
+        propertiesList.setCellRenderer(new OwlEntityListCellRenderer(editorKit, dependentAnnotations));
         propertiesList.addKeyListener(keyAdapter);
         propertiesList.addMouseListener(mouseAdapter);
         propertiesList.setVisibleRowCount(5);
@@ -334,18 +335,23 @@ public class LQTExportDialog extends JPanel {
     }
 
     private void addProperty() {
-        AddPropertyToExportDialogPanel.showDialog(editorKit, getEntities(propertiesList)).ifPresent(owlEntities -> addEntitiesToList(owlEntities, propertiesList));
+        AddPropertyToExportDialogPanel.showDialog(editorKit, getEntities(propertiesList), dependentAnnotations).ifPresent(owlEntities -> addEntitiesToList(owlEntities, propertiesList));
     }
     
     private void addDepProps(OWLEntity ent) {
-        AddPropertyToExportDialogPanel.showDialog(editorKit, getEntities(propertiesList)).ifPresent(owlEntities -> addDepProps(owlEntities, ent));
+    	
+    	
+        AddPropertyToExportDialogPanel.showDialog(editorKit, getEntities(propertiesList),
+        		dependentAnnotations).ifPresent(owlEntities -> addDepProps(owlEntities, ent));
+        
+        
     }
 
     private void addDepProps(List<OWLEntity> entities, OWLEntity ent) {
-        dependentAnnotations.put(ent, entities);
-
+    	dependentAnnotations.put(ent, entities);
+    	addEntitiesToList(new ArrayList<OWLEntity>(), propertiesList);
     }
-    
+
     private void addEntitiesToList(List<OWLEntity> entities, JList list) {
         List items = getListItems(list);
         items.addAll(entities.stream().map(OwlEntityListItem::new).collect(Collectors.toList()));

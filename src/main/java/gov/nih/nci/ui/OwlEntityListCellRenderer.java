@@ -3,6 +3,8 @@ package gov.nih.nci.ui;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.awt.Component;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.swing.DefaultListCellRenderer;
@@ -12,14 +14,16 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.renderer.OWLCellRenderer;
 import org.semanticweb.owlapi.model.OWLEntity;
 
+import edu.stanford.protege.csv.export.ui.IncQualsOWLCellRenderer;
 import gov.nih.nci.ui.dialog.LQTExportDialog;
 
 public class OwlEntityListCellRenderer extends DefaultListCellRenderer {
 	    private static final long serialVersionUID = 5153646254115550535L;
-	    private OWLCellRenderer owlCellRenderer;
+	    private IncQualsOWLCellRenderer owlCellRenderer;
 
-	    public OwlEntityListCellRenderer(@Nonnull OWLEditorKit editorKit) {
-	        owlCellRenderer = new OWLCellRenderer(checkNotNull(editorKit));
+	    public OwlEntityListCellRenderer(@Nonnull OWLEditorKit editorKit, 
+	    		Map<OWLEntity, List<OWLEntity>> depMap) {
+	        owlCellRenderer = new IncQualsOWLCellRenderer(editorKit, depMap);
 	    }
 
 	    @Override
