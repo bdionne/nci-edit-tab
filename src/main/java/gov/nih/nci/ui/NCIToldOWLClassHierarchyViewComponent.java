@@ -137,7 +137,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
-				if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject())) {
+				if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject()) &&
+						!NCIEditTab.currentTab().isRetiring()) {
 					NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), ComplexEditType.READ));
 				} else {
 					NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
