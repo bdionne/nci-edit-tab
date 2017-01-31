@@ -2393,7 +2393,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			} 
     		}
     	}
-    	if (assertions.size() != 1) {
+    	// check the new change
+    	checkPtNciFullSyn(changes, assertions);
+    	
+    	if ((assertions.size() != 1)) {
     		JOptionPane.showMessageDialog(this, "One and only one PT with source NCI is allowed.", "Warning", JOptionPane.WARNING_MESSAGE);
     		return false;
     	} else {
@@ -2402,6 +2405,32 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		return true;
     	}
     }
+    
+    private void checkPtNciFullSyn(List<OWLOntologyChange> changes, List<OWLAnnotationAssertionAxiom> assertions) {
+    	for (OWLOntologyChange c : changes) {
+    		if (c.isAddAxiom()) {
+    			OWLAxiom ax = c.getAxiom();
+    			OWLAnnotationAssertionAxiom aax = (OWLAnnotationAssertionAxiom) ax;
+    			if ((getAnnotationValue(aax, "term-group").equals("PT")) &&
+    					(getAnnotationValue(aax, "term-source").equals("NCI"))) {
+    				assertions.add(aax);
+    				
+    			}  			
+    		} else if (c.isRemoveAxiom()) {
+    			OWLAxiom ax = c.getAxiom();
+    			OWLAnnotationAssertionAxiom aax = (OWLAnnotationAssertionAxiom) ax;
+    			if ((getAnnotationValue(aax, "term-group").equals("PT")) &&
+    					(getAnnotationValue(aax, "term-source").equals("NCI"))) {
+    				//new action was a delete, so remove one, doesn't matter which
+    				assertions.remove(0);
+    				
+    			} 
+    			
+    		}
+    	}
+    }
+    
+    
     
     // true means there are no dups, all ok    
     public boolean checkForDups(OWLClass cls, OWLAnnotationProperty prop) {
