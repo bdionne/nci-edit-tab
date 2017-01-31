@@ -127,7 +127,9 @@ public class PropertyTableModel extends AbstractTableModel {
 			if ("Value".equals(columnName)) {
 				propertyLabels.put(columnName, columnName);
 			} else if (annotList != null && !annotList.isEmpty()) {
-				propertyLabels.put(annotList.get(0).getProperty().getIRI().getShortForm(), columnName);
+				if (annotList.get(0) != null) {
+					propertyLabels.put(annotList.get(0).getProperty().getIRI().getShortForm(), columnName);
+				}
 			} else {
 				propertyLabels.put(columnName, columnName);
 			}
@@ -185,9 +187,13 @@ public class PropertyTableModel extends AbstractTableModel {
 			OWLAnnotation annot = null;
 			if (annotList != null && annotList.size() > row) {
 				annot = annotations.get(this.getColumnName(i)).get(row);
-				propShortForm = annot.getProperty().getIRI().getShortForm();
-				if (this.complexProp.getIRI().getShortForm().equals(propShortForm)) {
-					propShortForm = "Value";
+				if (annot != null) {
+					propShortForm = annot.getProperty().getIRI().getShortForm();
+					if (this.complexProp.getIRI().getShortForm().equals(propShortForm)) {
+						propShortForm = "Value";
+					}
+				} else {
+					propShortForm = columnName;
 				}
 			} else {
 				propShortForm = columnName;
@@ -355,7 +361,7 @@ public class PropertyTableModel extends AbstractTableModel {
 							key = NCIEditTab.currentTab().getRDFSLabel(found.getProperty()).get();
 							if (annotations.containsKey(key)) {
 								int size = annotations.get(key).size();
-								while (size < count) {
+								while (size++ < count) {
 									annotations.get(key).add(null);
 								}
 								annotations.get(key).add(found);

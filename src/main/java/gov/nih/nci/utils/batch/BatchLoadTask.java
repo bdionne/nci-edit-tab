@@ -78,6 +78,13 @@ public class BatchLoadTask extends BatchTask {
 					
 				}
 				// TODO: Check that name doesn not already exist, need to look up by preferred name
+				
+				if (tab.existsPrefName(name)) {
+					String error_msg = " -- a class with this preferred name already exists.";
+					w.add(error_msg);
+					System.out.println(error_msg);
+					
+				}
 				String sup = (String) v.elementAt(1);
 				
 				if (tab.getClass(sup) == null) {

@@ -33,6 +33,7 @@ import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,6 +72,7 @@ import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 import org.protege.editor.owl.ui.renderer.OWLEntityAnnotationValueRenderer;
 import org.protege.editor.owl.ui.renderer.OWLModelManagerEntityRenderer;
 import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
+import org.protege.editor.search.lucene.SearchContext;
 import org.protege.owlapi.inference.cls.ChildClassExtractor;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -101,6 +103,7 @@ import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLProperty;
 import org.semanticweb.owlapi.model.OWLQuantifiedObjectRestriction;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
@@ -113,6 +116,18 @@ import edu.stanford.protege.metaproject.api.Project;
 import edu.stanford.protege.metaproject.api.ProjectOptions;
 import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.impl.RoleIdImpl;
+import edu.stanford.protege.search.lucene.tab.engine.BasicQuery;
+import edu.stanford.protege.search.lucene.tab.engine.FilteredQuery;
+import edu.stanford.protege.search.lucene.tab.engine.NegatedQuery;
+import edu.stanford.protege.search.lucene.tab.engine.NestedQuery;
+import edu.stanford.protege.search.lucene.tab.engine.QueryType;
+import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
+import edu.stanford.protege.search.lucene.tab.engine.SearchTabResultHandler;
+import edu.stanford.protege.search.lucene.tab.ui.BasicQueryPanel;
+import edu.stanford.protege.search.lucene.tab.ui.MatchCriteria;
+import edu.stanford.protege.search.lucene.tab.ui.NegatedQueryPanel;
+import edu.stanford.protege.search.lucene.tab.ui.NestedQueryPanel;
+import edu.stanford.protege.search.lucene.tab.ui.QueryPanel;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
@@ -843,7 +858,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void classModified() {
     	fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));    	
     }   
-    
+    	
     public boolean isWorkFlowManager() { 
     	if (clientSession.getActiveClient() != null) {
     		try {
@@ -2473,6 +2488,54 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	} else {
     		return true;
     	}
+    }
+    
+    public boolean existsPrefName(String name) {
+    	SearchTabManager searchManager = (SearchTabManager) getOWLEditorKit().getSearchManager();
+        
+        BasicQuery.Factory queryFactory = new BasicQuery.Factory(new SearchContext(getOWLEditorKit()), searchManager);
+        
+        
+        OWLProperty property = NCIEditTabConstants.LABEL_PROP;
+        QueryType queryType = QueryType.EXACT_MATCH_STRING;
+        String value = name;
+        
+        BasicQuery basicQuery = queryFactory.createQuery(property, queryType, value);
+        
+        FilteredQuery.Builder builder = new FilteredQuery.Builder();
+        builder.add(basicQuery);
+        FilteredQuery userQuery = builder.build(true);
+        
+        class MySearchTabResultHandler implements SearchTabResultHandler {
+        	private boolean exists = false;
+        	
+        	private boolean ready = false;
+
+			public void searchFinished(Collection<OWLEntity> searchResults) {
+				exists = !searchResults.isEmpty();
+				ready = true;
+			}
+			
+			public boolean exists() { return exists; }
+			public boolean ready() { return ready; }
+        	
+        };
+        
+        MySearchTabResultHandler srh = new MySearchTabResultHandler();
+        
+        searchManager.performSearch(userQuery, srh);
+        
+        while (!srh.ready()) {
+        	try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+        
+        
+    	return srh.exists(); 
     }
 
     
