@@ -353,15 +353,17 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 			}
 			else if(button.getType() == NCIEditTabConstants.DELETE){
 				int viewRow = propertyTable.getSelectedRow();
-				int modelRow = propertyTable.convertRowIndexToModel(viewRow);
-				if (modelRow >= 0) {
-					int ret = JOptionPane.showConfirmDialog(this, "Please confirm if you want to delete the selected property!", "Delete Confirmation", JOptionPane.OK_CANCEL_OPTION);
-					if (ret == JOptionPane.OK_OPTION) {
-						NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.DELETE, tableModel.getSelection(), 
-								tableModel.getComplexProp(), tableModel.getAssertion(modelRow), null);
-						
-						setSelectedCls(tableModel.getSelection());
-						
+				if (viewRow != -1) {
+					int modelRow = propertyTable.convertRowIndexToModel(viewRow);
+					if (modelRow >= 0) {
+						int ret = JOptionPane.showConfirmDialog(this, "Please confirm if you want to delete the selected property!", "Delete Confirmation", JOptionPane.OK_CANCEL_OPTION);
+						if (ret == JOptionPane.OK_OPTION) {
+							NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.DELETE, tableModel.getSelection(), 
+									tableModel.getComplexProp(), tableModel.getAssertion(modelRow), null);
+
+							setSelectedCls(tableModel.getSelection());
+
+						}
 					}
 				}
 				//todo - delete seleted table row from table, update view
