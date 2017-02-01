@@ -175,7 +175,8 @@ public class ComplexPropProcessor extends EditProcessor {
 				}
 				
 			} else {
-				errors += "required qualifier missing: " + rs + "\n";
+				//errors += "required qualifier missing: " + rs + "\n";
+				// not necessarily an error, we'll add the default
 			}
 		}
 		if (errors.equals("")) {

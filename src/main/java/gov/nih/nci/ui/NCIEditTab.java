@@ -1741,6 +1741,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			if (val != null) {
 				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
 				anns.add(new_ann);
+			} else if (is_required(prop)) {
+				String def_val = getDefaultValue(getDataType(prop));
+				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(def_val));
+				anns.add(new_ann);				
 			}
 		}
 
@@ -1757,9 +1761,21 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		Set<OWLAnnotationProperty> req_props = getRequiredAnnotationsForAnnotation(prop);
 		List<String> res = new ArrayList<String>();
 		for (OWLAnnotationProperty p : req_props) {
-			res.add(p.getIRI().getShortForm());
+			if (isRequired(p)) {
+				res.add(p.getIRI().getShortForm());
+			}
 		}
 		return res;
+	}
+	
+	private boolean isRequired(OWLAnnotationProperty prop) {
+		OWLAnnotationProperty defawlt = this.lookUpShort("required");
+		Optional<String> def_prop = this.getPropertyValue(prop, defawlt);
+		if (def_prop.isPresent()) {
+			return (def_prop.get().equals("true"));
+
+		}
+		return false;
 	}
 	
 	public boolean hasComplexPropertyValue(OWLClass cls, String propName, String value, Map<String, String> annotations) {
