@@ -184,13 +184,15 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 						.getSelectedFile().getAbsolutePath()));
 				while ((s = inFile.readLine()) != null) {
 					s = s.trim();
-					OWLClass foo = this.tab.getClass(s); 
-					if (foo != null) {
-						ocl.add(foo);
-					} else {
-						reportTextArea
-						.append("\nOWLNamedClass does not exist for code:" + s);
-						
+					if (!s.equals("")) {
+						OWLClass foo = this.tab.getClass(s); 
+						if (foo != null) {
+							ocl.add(foo);
+						} else {
+							reportTextArea
+							.append("\nOWLNamedClass does not exist for code:" + s);
+
+						}
 					}
 
 				}
@@ -208,45 +210,13 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 				e.printStackTrace();
 			}
 
-/**
-			NCIExportToCsvAction exportAction = new NCIExportToCsvAction(tab
-					.getKnowledgeBase(), configPanel, true) {
-
-				public static final long serialVersionUID = 123456772L;
-
-				public Collection<Instance> getInstancesToExport() {
-					Collection<Instance> allClassesToExport = new ArrayList<Instance>();
-					List<Cls> selectedClsesInPanel = new ArrayList<Cls>(
-							getExportConfigurationPanel()
-									.getExportedClassesInPanel());
-					Collections.sort(selectedClsesInPanel,
-							new FrameComparator());
-					for (Cls cls : selectedClsesInPanel) {
-						allClassesToExport.add(cls);
-
-					}
-					return allClassesToExport;
-
-				}
-
-				protected ArrayList<Cls> getInitialExportClses() {
-					return ocl;
-
-				}
-
-			};
-
-			exportAction.actionPerformed(null);
-			boolean success = exportAction.exportCompletedSuccessful();
-			*/
 			if (!success) {
 				reportTextArea
 						.append("\nExport with LQT configuration did not complete.");
 			} else {
 				reportTextArea
 						.append("\nExported using the LQT configuration finished successfully.\n");
-				reportTextArea
-						.append("Exported file: HOW TO ADD THE NAME? \n");
+				
 			}
 			return success;
 
