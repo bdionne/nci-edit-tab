@@ -168,6 +168,10 @@ public class ComplexPropProcessor extends EditProcessor {
 		for (String rs : req_quals) {
 			String q_val = qualifiers.get(rs);
 			if (q_val != null) {
+				if (tab.isReadOnlyProperty(rs)) {
+					errors += "required qualifier: " + rs + " is immutable. \n";	
+					
+				}
 				if (tab.checkType(rs, q_val)) {
 					
 				} else {
