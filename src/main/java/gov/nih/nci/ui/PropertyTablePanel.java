@@ -8,6 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +31,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.core.prefs.Preferences;
-import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -236,16 +238,11 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         propertyTable.setAutoCreateRowSorter(true);
         tableModel.setPropertyTable(propertyTable);
         
-        //set value column renderer
-        TableColumnModel tcm = propertyTable.getColumnModel();
-        TableColumn tc = tcm.getColumn(0);  //first column is Value column that requires multiline renderer
-        tc.setCellRenderer(new MultiLineCellRenderer()); 
         ColumnListener cl = new ColumnListener(){
 
             @Override
             public void columnMoved(int oldLocation, int newLocation) {
-            	saveColumnNameOrder();
-            	tableModel.fireTableDataChanged();  
+            	
             }
 
             @Override
@@ -268,6 +265,12 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
             }
           });*/
 
+        ProtegeManager.getInstance().getFrame(this.owlEditorKit.getOWLWorkspace()).addWindowListener(new WindowAdapter(){
+        	public void windowClosing(WindowEvent e) {
+        		saveColumnNameOrder();
+        	}
+        });
+        
         sp = new JScrollPane(propertyTable);
         createLabelHeader(tableName, addButton, editButton, deleteButton);
         add(tableHeaderPanel, BorderLayout.NORTH);
@@ -281,6 +284,17 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     	return tableModel.hasAnnotation();
     }
 
+    private TableColumn getValueColumn() {
+    	TableColumnModel tcm = propertyTable.getColumnModel();
+    	int colCount = tcm.getColumnCount();
+    	for( int i = 0; i < colCount; i++ ) {
+    		TableColumn tc = tcm.getColumn(i);
+    		if (tc.getHeaderValue().equals(NCIEditTabConstants.PROPTABLE_VALUE_COLUMN)) {
+    			return tc;
+    		}
+    	}
+    	return null;
+    }
     public void setSelectedCls(OWLClass cls) {
     	tableModel.setSelection(cls);
 
@@ -288,7 +302,8 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     		tableHeaderPanel.setVisible(true);
     		sp.setVisible(true);
     		tableModel.fireTableDataChanged();  
-    		TableColumn c = propertyTable.getColumnModel().getColumn(0);
+    		
+    		TableColumn c = getValueColumn();
     		updateRowHeights(0, c.getWidth(), propertyTable);
     		 
     	} else {
