@@ -56,7 +56,7 @@ public class ComplexPropProcessor extends EditProcessor {
 				int pairs = 4;
 				while ((pairs < v.size()) &&
 						(v.elementAt(pairs) != null) &&
-						(v.elementAt(pairs) != prop_iri)) {
+						!v.elementAt(pairs).equals(prop_iri)) {
 					String ann = v.elementAt(pairs++);
 					if (v.elementAt(pairs) != null) {
 						// ok, we have two more
@@ -69,10 +69,11 @@ public class ComplexPropProcessor extends EditProcessor {
 				if (operation.equals(EditOp.MODIFY)) {
 					// prop_id is only a delimiter to break while loop above
 					new_prop_value = v.elementAt(++pairs);
+					pairs++;
 
 					while ((pairs < v.size()) &&
 							(v.elementAt(pairs) != null) &&
-							(v.elementAt(pairs) != prop_iri)) {
+							!v.elementAt(pairs).equals(prop_iri)) {
 						String ann = v.elementAt(pairs++);
 						if (v.elementAt(pairs) != null) {
 							// ok, we have two more
