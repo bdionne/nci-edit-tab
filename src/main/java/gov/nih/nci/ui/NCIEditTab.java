@@ -1257,6 +1257,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			} else if (ax instanceof OWLSubClassOfAxiom) {
     				subj = ((OWLSubClassOfAxiom) ax).getSubClass().asOWLClass().getIRI();
     				System.out.println("The subject is: " + subj);    				
+    			} else if (ax instanceof OWLEquivalentClassesAxiom) {
+    				Set<OWLClassExpression> exps = ((OWLEquivalentClassesAxiom) ax).getClassExpressions();
+    				for (OWLClassExpression exp : exps) {
+    					if (exp instanceof OWLClass) {
+    						subj = exp.asOWLClass().getIRI();
+    						break;
+    					}
+    				}
+    				System.out.println("The subject is: " + subj);
+    		
     			}
     			if (subj != null) {
     				if (result.contains(subj)) {
