@@ -67,6 +67,11 @@
     	    <artifactId>lucene-search-tab</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+        	<groupId>edu.stanford.protege</groupId>
+    	    <artifactId>csv-export-plugin</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
 	</dependencies>
 	
 	<build>

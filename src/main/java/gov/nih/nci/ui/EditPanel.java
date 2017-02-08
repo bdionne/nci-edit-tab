@@ -404,6 +404,9 @@ public class EditPanel extends JPanel {
     public void disposeView() {
     	list.dispose();
     	gen_props.dispose();
+    	for(PropertyTablePanel propTable : tablePanelList) {
+    		propTable.dispose();
+    	}
     }
     
     public void enableButtons() {
