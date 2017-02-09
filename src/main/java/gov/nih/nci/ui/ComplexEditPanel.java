@@ -173,6 +173,8 @@ public class ComplexEditPanel extends JPanel {
             		
             		if (NCIEditTab.currentTab().merge()) {
             			saveButton.setText("Save");
+            			owlEditorKit.getWorkspace().getViewManager().bringViewToFront(
+            		               "nci-edit-tab.ComplexEditView");
             		}
             	} else {
             		NCIEditTab.currentTab().commitChanges();
