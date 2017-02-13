@@ -1276,7 +1276,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     				System.out.println("The subject is: " + subj);
     		
     			}
-    			if (subj != null) {
+    			if (subj != null && subj instanceof OWLClass) {
     				if (result.contains(subj)) {
     				} else {
     					result.add(subj);
