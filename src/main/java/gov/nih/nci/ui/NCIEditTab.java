@@ -1184,8 +1184,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	@Override
 	public void operationPerformed(CommitOperationEvent event) {
-		resetHistory();
-		
+		resetHistory();		
 	}
 
     @Override
