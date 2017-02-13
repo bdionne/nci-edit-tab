@@ -58,6 +58,7 @@ import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.event.ClientSessionListener;
 import org.protege.editor.owl.client.event.CommitOperationEvent;
+import org.protege.editor.owl.client.event.CommitOperationListener;
 import org.protege.editor.owl.client.ui.UserLoginPanel;
 import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -138,7 +139,7 @@ import gov.nih.nci.utils.ParentRemover;
 import gov.nih.nci.utils.ReferenceReplace;
 import gov.nih.nci.utils.RoleReplacer;
 
-public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionListener, UndoManagerListener {
+public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionListener, UndoManagerListener, CommitOperationListener {
 	private static final Logger log = Logger.getLogger(NCIEditTab.class);
 	private static final long serialVersionUID = -4896884982262745722L;
 	
@@ -1035,7 +1036,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		CommitBundle commitBundle = new CommitBundleImpl(base, commit);
 		ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
 		clientSession.getActiveVersionOntology().update(hist);
-		resetHistory();
+		// handled by commit listener
+		//resetHistory();
 		clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
                 hist.getHeadRevision(),
                 hist.getMetadataForRevision(hist.getHeadRevision()),
@@ -1167,6 +1169,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void addListeners() {
 		clientSession.addListener(this);
+		clientSession.addCommitOperationListener(this);
 		history.addUndoManagerListener(this);
 	}
 	
@@ -1177,6 +1180,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			initProperties();
 			fireUpViews();
 		}
+	}
+	
+	@Override
+	public void operationPerformed(CommitOperationEvent event) {
+		resetHistory();
+		
 	}
 
     @Override
@@ -2608,6 +2617,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
     	return srh.exists(); 
     }
+
+	
 
     
     
