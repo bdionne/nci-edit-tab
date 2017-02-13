@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+
 import gov.nih.nci.ui.NCIEditTab;
 
 public class ComplexPropProcessor extends EditProcessor {
@@ -163,8 +165,14 @@ public class ComplexPropProcessor extends EditProcessor {
 		return true;
 	}
 	
+	
+	
 	private String checkQualifierTypes(String prop_iri, Map<String, String> qualifiers) {
 		String errors = "";
+		if (tab.isNCIPtFullSyn(prop_iri, qualifiers)) {
+			errors += "only one NCI/PT FULL_SYN allowed. \n";
+			
+		}
 		List<String> req_quals = tab.getRequiredQualifiers(prop_iri);
 		for (String rs : req_quals) {
 			String q_val = qualifiers.get(rs);

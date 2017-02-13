@@ -2456,6 +2456,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     }
     
+    public boolean isNCIPtFullSyn(String prop_iri, Map<String, String> qualifiers) {
+    	OWLAnnotationProperty p = lookUpShort(prop_iri);
+    	boolean isIt = false;
+    	if (p.equals(getFullSyn())) {
+    		String tg = qualifiers.get("term-group");
+    		String ts = qualifiers.get("term-source");
+    		if (tg != null &&
+    				ts != null &&
+    				tg.equals("PT") &&
+    				ts.equals("NCI")) {
+    			isIt = true;
+    		}
+    	}
+    	return isIt;
+    }
+    
     
     
     // true means there are no dups, all ok    
