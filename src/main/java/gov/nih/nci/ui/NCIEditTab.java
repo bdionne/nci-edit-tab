@@ -1191,7 +1191,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void stateChanged(HistoryManager source) {
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
     	List<IRI>  subjects = findUniqueSubjects(changes);
-    	if (!subjects.isEmpty()) {
+    	if (!subjects.isEmpty() && subjectsContainClasses(subjects)) {
     		OWLClass cls = null;
     		if (getCurrentlyEditing() != null) {
     			IRI currentIRI = getCurrentlyEditing().getIRI();
@@ -1219,15 +1219,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			// not editing anything yet
     			// should only be one subject
     			for (IRI iri : subjects) {
-        			Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
-        			for (OWLEntity ent : classes) {
-            			cls = ent.asOWLClass();
-            			
-            		}
-        			
-        		}
-    			setCurrentlyEditing(cls, true);
-        		classModified();
+    				Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
+    				for (OWLEntity ent : classes) {
+    					if (ent.isOWLClass()) {
+    						cls = ent.asOWLClass();
+    					}
+    				}
+
+    			}
+    			if (cls != null) {
+    				setCurrentlyEditing(cls, true);
+    				classModified();
+    			}
     		} 		
     	
     	} else {
@@ -1235,19 +1238,20 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			this.setCurrentlyEditing(null, true);
     		}
     	}
-    	/**
-    	if (history.getLoggedChanges().isEmpty()) {
+    	
+    }
+    
+    private boolean subjectsContainClasses(List<IRI> subjects) {
+    	for (IRI iri : subjects) {
+			Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
+			for (OWLEntity ent : classes) {
+				if (ent.isOWLClass()) {
+					return true;
+				}
+			}
 
-    	} else {
-    		if (!inBatchMode) {
-    			// TODO: Need to filter out events coming from Annotation and Entities tabs
-    			//if (editInProgress)
-    			if (!inComplexOp() ||
-    					isRetiring())
-    				fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));    			
-    		}
-    	}
-    	**/
+		}
+    	return false;
     }
     
     private List<IRI> findUniqueSubjects(List<OWLOntologyChange> changes) {
@@ -1276,7 +1280,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     				System.out.println("The subject is: " + subj);
     		
     			}
-    			if (subj != null && subj instanceof OWLClass) {
+    			if (subj != null) {
     				if (result.contains(subj)) {
     				} else {
     					result.add(subj);
