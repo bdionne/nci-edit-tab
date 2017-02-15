@@ -56,7 +56,7 @@ public class PropertyTableModel extends AbstractTableModel {
 	private List<OWLAnnotationProperty> requiredAnnotationsList;
 	private Map<String, List<OWLAnnotation>> annotations = new HashMap<String, List<OWLAnnotation>>();
 	
-	private Preferences prefs;
+	//private Preferences prefs;
 	
 	private List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
 	
@@ -68,15 +68,17 @@ public class PropertyTableModel extends AbstractTableModel {
 		ont = k.getOWLModelManager().getActiveOntology();
 		complexProp = complexProperty;
 		String prefsID = getClass().toString() + NCIEditTab.currentTab().getRDFSLabel(complexProp).get();
-		prefs = PreferencesManager.getInstance().getApplicationPreferences(prefsID);
+		//prefs = PreferencesManager.getInstance().getApplicationPreferences(prefsID);
 		configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(complexProp);
 		requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(configuredAnnotations);
 	}
 
 
+	/**
 	public Preferences getPrefs() {
 		return prefs;
 	}
+	**/
 
 	public int getRowCount() {
 		if (annotations.size() > 0) {
@@ -301,8 +303,13 @@ public class PropertyTableModel extends AbstractTableModel {
 
 	public String getColumnName(int column) {
 		String complexPropName = NCIEditTab.currentTab().getRDFSLabel(getComplexProp()).get();
+		if (column == 0) {
+			return NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
+		}
+		return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
+		/**
 		List<String> column_names = prefs.getStringList(complexPropName, new ArrayList<String>());
-		if (column_names != null && (!column_names.isEmpty())) {
+		if (column_names != null && (!column_names.isEmpty()) && (column < column_names.size())) {
 			return column_names.get(column);
 		} else {
 			if (column == 0) {
@@ -310,6 +317,7 @@ public class PropertyTableModel extends AbstractTableModel {
 			}
 			return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
 		}
+		**/
 	}
 	
 	public String getDefaultColumnName(int column) {

@@ -76,7 +76,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     
     private JButton deleteButton;
 
-    private Preferences prefs;
+    //private Preferences prefs;
     
     public PropertyTablePanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
@@ -108,7 +108,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         tableModel = new PropertyTableModel(owlEditorKit, complexProp);
         createButtons(this);
         createUI();
-        prefs = tableModel.getPrefs();
+        //prefs = tableModel.getPrefs();
     }
 
     public static void updateRowHeights(int column, int width, JTable table){
@@ -221,7 +221,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         }
         
         String propName = NCIEditTab.currentTab().getRDFSLabel(tableModel.getComplexProp()).get();  
-        prefs.putStringList(propName, colNames1);
+        //prefs.putStringList(propName, colNames1);
     }
     
     private void createUI() {
