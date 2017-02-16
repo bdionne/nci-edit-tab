@@ -23,11 +23,13 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
@@ -247,23 +249,15 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
             @Override
             public void columnResized(int column, int newWidth) {
-                updateRowHeights(column, newWidth, propertyTable);
+            	TableColumn c = propertyTable.getColumnModel().getColumn(column);
+                c.setCellRenderer(new RowHeightCellRenderer());
+                updateRowHeights(column, c.getWidth(), propertyTable);
             }
 
         };
 
         propertyTable.getColumnModel().addColumnModelListener(cl);
         propertyTable.getTableHeader().addMouseListener(cl);
-
-        /*propertyTable.getModel().addTableModelListener(new TableModelListener() {
-
-            public void tableChanged(TableModelEvent e) {
-            	if(e.getColumn() == 0){
-            		TableColumn c = propertyTable.getColumnModel().getColumn(0);
-            		updateRowHeights(0, c.getWidth(), propertyTable);
-            	}
-            }
-          });*/
 
         ProtegeManager.getInstance().getFrame(this.owlEditorKit.getOWLWorkspace()).addWindowListener(new WindowAdapter(){
         	public void windowClosing(WindowEvent e) {
@@ -304,13 +298,40 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     		tableModel.fireTableDataChanged();  
     		
     		TableColumn c = getValueColumn();
-    		updateRowHeights(0, c.getWidth(), propertyTable);
+    		c.setCellRenderer(new RowHeightCellRenderer());
+    		updateRowHeights(c.getModelIndex(), c.getWidth(), propertyTable);
     		 
     	} else {
     		tableHeaderPanel.setVisible(false);
     		sp.setVisible(false);
     	}
     	
+    }
+    
+    class RowHeightCellRenderer extends JTextArea  implements TableCellRenderer {
+    	
+        public Component getTableCellRendererComponent (JTable table,
+                                                        Object value,
+                                                        boolean isSelected,
+                                                        boolean hasFocus,
+                                                        int row,
+                                                        int column ) {
+            
+        	setLineWrap(true);
+            setWrapStyleWord(true);
+            
+            if(isSelected) {
+                this.setBackground(table.getSelectionBackground());
+                this.setForeground(table.getSelectionForeground());
+            } else {
+                this.setBackground(table.getBackground());
+                this.setForeground(table.getForeground());
+            }
+            
+            setText((String) value);
+            
+            return this;
+        }
     }
 
     private void createLabelHeader(String labeltext, JButton b1, JButton b2, JButton b3){
