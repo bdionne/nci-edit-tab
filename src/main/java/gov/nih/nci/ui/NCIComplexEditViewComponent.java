@@ -67,8 +67,11 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 					NCIEditTab.currentTab().getSplitTarget());
 			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
 					"nci-edit-tab.ComplexEditView");
-			if (!event.isType(ComplexEditType.CLONE)) {
+			if (event.isType(ComplexEditType.SPLIT)) {
 				complexEditPanel.setSplit();
+			} else if (event.isType(ComplexEditType.CLONE)) {
+				complexEditPanel.setClone();
+				
 			}
 			complexEditPanel.setEnableUnselectedRadioButtons(false);
 			complexEditPanel.enableButtons();

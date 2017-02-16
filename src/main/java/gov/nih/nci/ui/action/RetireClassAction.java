@@ -18,21 +18,15 @@ public class RetireClassAction extends FocusedComponentAction<RetireClassTarget>
 	protected Class<RetireClassTarget> initialiseAction() {
         return RetireClassTarget.class;
     }
-
-
-    protected boolean canPerform() {
-        return getCurrentTarget().canRetireClass();
+	
+	protected boolean canPerform() {
+    	return (getCurrentTarget() != null && getCurrentTarget().canRetireClass());
     }
     
     public void actionPerformed(ActionEvent e) {
-        getCurrentTarget().retireClass();
+    	// if focus has been lost and popup not updated, target will be null
+    	if (getCurrentTarget() != null) {
+    		getCurrentTarget().retireClass();
+    	}
     }
-
-
-    
-
-	
-
-	
-
 }

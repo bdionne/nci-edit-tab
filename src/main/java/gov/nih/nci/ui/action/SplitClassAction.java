@@ -20,14 +20,17 @@ public class SplitClassAction extends FocusedComponentAction<SplitClassTarget> {
     }
 
 
-    protected boolean canPerform() {
-        return getCurrentTarget().canSplitClass();
-    }
+	protected boolean canPerform() {
+		return (getCurrentTarget() != null && getCurrentTarget().canSplitClass());
+	}
 
 
-    public void actionPerformed(ActionEvent e) {
-        getCurrentTarget().splitClass();
-    }
+	public void actionPerformed(ActionEvent e) {
+		// if focus has been lost and popup not updated, target will be null
+		if (getCurrentTarget() != null) {
+			getCurrentTarget().splitClass();
+		}
+	}
 
 	
 

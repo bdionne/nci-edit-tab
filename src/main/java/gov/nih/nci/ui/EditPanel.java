@@ -302,12 +302,14 @@ public class EditPanel extends JPanel {
     public void addNewComplexProp() {
     	ComplexPropChooser chooser = new ComplexPropChooser(NCIEditTab.currentTab().getComplexProperties());
     	OWLAnnotationProperty c_prop = chooser.showDialog(owlEditorKit, "Choosing Complex Property");
-    	for (PropertyTablePanel panel : tablePanelList) {
-    		if (panel.getComplexProp().equals(c_prop)) {
-    			panel.createNewProp();
+    	if (c_prop != null) {
+    		for (PropertyTablePanel panel : tablePanelList) {
+    			if (panel.getComplexProp().equals(c_prop)) {
+    				panel.createNewProp();
+    			}
     		}
+    		setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
     	}
-    	setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
     }
     
     private void createComplexPropertyTable(OWLAnnotationProperty complexProperty) {

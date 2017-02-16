@@ -18,13 +18,16 @@ public class AddComplexAction extends FocusedComponentAction<AddComplexTarget> {
         return AddComplexTarget.class;
     }
 
-
+    
     protected boolean canPerform() {
-        return getCurrentTarget().canAddComplex();
+    	return (getCurrentTarget() != null && getCurrentTarget().canAddComplex());
     }
     
     public void actionPerformed(ActionEvent e) {
-        getCurrentTarget().addComplex();
+    	// if focus has been lost and popup not updated, target will be null
+    	if (getCurrentTarget() != null) {
+    		getCurrentTarget().addComplex();
+    	}
     }
 
 

@@ -68,6 +68,10 @@ public class ComplexEditPanel extends JPanel {
     public void setSplit() {
     	splitButton.setSelected(true);
     }
+    
+    public void setClone() {
+    	cloneButton.setSelected(true);
+    }
 
     private JRadioButton cloneButton;
     

@@ -27,7 +27,6 @@ import org.semanticweb.owlapi.model.OWLObject;
 
 import gov.nih.nci.ui.action.AddComplexTarget;
 import gov.nih.nci.ui.action.CloneClassTarget;
-import gov.nih.nci.ui.action.MergeClassTarget;
 import gov.nih.nci.ui.action.RetireClassTarget;
 import gov.nih.nci.ui.action.SplitClassTarget;
 import gov.nih.nci.ui.dialog.BatchProcessingDialog;
@@ -36,7 +35,7 @@ import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 
 public class NCIToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarchyViewComponent
-implements CreateNewChildTarget, SplitClassTarget, CloneClassTarget, MergeClassTarget,
+implements CreateNewChildTarget, SplitClassTarget, CloneClassTarget,
 RetireClassTarget, AddComplexTarget, SelectionDriver {
 	
 	private static final Icon ADD_SUB_ICON = OWLIcons.getIcon("class.add.sub.png");
@@ -218,17 +217,6 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		this.getTree().refreshComponent();	
 	}
 
-	@Override
-	public boolean canMergeClass() {
-		return (getSelectedEntities().size() == 2 &&
-				NCIEditTab.currentTab().canMerge() &&
-				isFree());
-	}
-
-	@Override
-	public void mergeClass() {
-		System.out.println("OK, do the merge....");
-	}
 
 	@Override
 	public boolean canCloneClass() {
@@ -244,7 +232,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 
 	@Override
 	public boolean canSplitClass() {
-		return (getSelectedEntities().size() == 1 &&
+		return (isInAssertedMode() &&
+				getSelectedEntities().size() == 1 &&
 				NCIEditTab.currentTab().canSplit(getSelectedEntity()) &&
 				isFree());
 	}
@@ -267,7 +256,9 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		if (dlg.showDialog()) {
 			NCIEditTab.currentTab().splitClass(dlg.getNewClass(), from_cls, clone_p);
 			
-		}		
+		} else {
+			NCIEditTab.currentTab().setOp(null);			
+		}
 	}
 	
 	private boolean isRestricted(OWLClass cls) {

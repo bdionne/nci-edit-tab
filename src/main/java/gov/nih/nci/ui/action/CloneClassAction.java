@@ -21,11 +21,14 @@ public class CloneClassAction extends FocusedComponentAction<CloneClassTarget> {
 
 
     protected boolean canPerform() {
-        return getCurrentTarget().canCloneClass();
+    	return (getCurrentTarget() != null && getCurrentTarget().canCloneClass());
     }
     
     public void actionPerformed(ActionEvent e) {
-        getCurrentTarget().cloneClass();
+    	// if focus has been lost and popup not updated, target will be null
+    	if (getCurrentTarget() != null) {
+    		getCurrentTarget().cloneClass();
+    	}
     }
 
 
