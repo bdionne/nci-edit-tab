@@ -20,6 +20,7 @@ import static gov.nih.nci.ui.NCIEditTabConstants.PREF_NAME;
 import static gov.nih.nci.ui.NCIEditTabConstants.PRE_MERGE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.PRE_RETIRE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
+import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_CONCEPTS_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.SEMANTIC_TYPE;
 import static gov.nih.nci.ui.NCIEditTabConstants.SPLIT_FROM;
 import static gov.nih.nci.ui.event.ComplexEditType.CLONE;
@@ -473,21 +474,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public boolean canMerge() {
     	return true;
-    }
-    
-    public boolean canMerge(OWLClass cls) {
-    	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(MERGE.getId()); 
-    	if (can) {
-    		if (isPreMerged(cls)) {
-    			return isWorkFlowManager();    			
-    		} else if (isPreRetired(cls)) {
-    			return false;
-    		} else if (isRetired(cls)) {
-    			return false;
-    		}
-    	}
-    	return can;
-    }
+    }    
     
     public boolean merge() {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
@@ -825,7 +812,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
      * review and only an admin user can do so. 
      * 
      */
-    public boolean canRetire(OWLClass cls) {
+    public boolean canRetire(OWLClass cls) { 
+    	
+    	if (cls.equals(PRE_RETIRE_ROOT) ||
+    			cls.equals(PRE_MERGE_ROOT) ||
+    			cls.equals(RETIRE_ROOT) ||
+    			cls.equals(RETIRE_CONCEPTS_ROOT)) {
+    		return false;    				
+    	}
+
     	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(NCIEditTabConstants.RETIRE.getId()); 
     	if (can) {
     		if (isPreRetired(cls)) {
@@ -835,6 +830,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}
     	}
     	return can;
+
     }
     
     public void retire(OWLClass selectedClass) {
@@ -889,8 +885,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return isSubClass(cls, PRE_MERGE_ROOT);    	
     }
     
+    public boolean isRetireRoot(OWLClass cls) {
+    	return cls.equals(RETIRE_ROOT);    	
+    }
+    
+    public boolean isRetireConceptsRoot(OWLClass cls) {
+    	return cls.equals(RETIRE_CONCEPTS_ROOT);    	
+    }
+    
     public boolean isRetired(OWLClass cls) {
-    	//return isSubClass(cls, RETIRE_ROOT);
     	if (cls != null) {
     		OWLAnnotationProperty deprecated = this.lookUpShort("deprecated");
     		Optional<String> bool = getPropertyValue(cls, deprecated);
@@ -934,10 +937,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         current_op = null;
     }
     
-    public boolean canSplit(OWLClass cls) {
+    public boolean isNotSpecialRoot(OWLClass cls) {
     	return !(isPreRetired(cls) || isRetired(cls)
-    			|| isPreMerged(cls));
+    			|| isPreMerged(cls) || isRetireRoot(cls) 
+    			|| isRetireConceptsRoot(cls));
     }
+    
+    
     
     public void undoChanges() {
     	while (history.canUndo()) {
@@ -1157,7 +1163,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
         
     public boolean canClone(OWLClass cls) {
-    	return canSplit(cls);
+    	return isNotSpecialRoot(cls);
     }
 
 	@Override
@@ -1399,6 +1405,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					PRE_MERGE_ROOT = findOWLClass("premerged_root", opts);
 					PRE_RETIRE_ROOT = findOWLClass("preretired_root", opts);
 					RETIRE_ROOT  = findOWLClass("retired_root", opts);
+					RETIRE_CONCEPTS_ROOT  = findOWLClass("retired_concepts_root", opts);
 					
 					DESIGN_NOTE = getSingleProperty("design_note", opts);
 					EDITOR_NOTE = getSingleProperty("editor_note", opts);	

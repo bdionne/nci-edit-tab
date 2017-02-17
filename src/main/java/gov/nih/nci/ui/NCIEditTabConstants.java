@@ -44,7 +44,9 @@ public class NCIEditTabConstants {
 	
 	public static OWLClass PRE_RETIRE_ROOT;
 	public static OWLClass PRE_MERGE_ROOT;
+
 	public static OWLClass RETIRE_ROOT;
+	public static OWLClass RETIRE_CONCEPTS_ROOT;
 	
 	
 	

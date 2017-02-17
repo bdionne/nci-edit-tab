@@ -59,7 +59,7 @@ public class ComplexEditTransferHandler extends TransferHandler {
 		
 		if (complexEditPanel.isSplitBtnSelected() || complexEditPanel.isCloneBtnSelected()) {
 			boolean clone_p = complexEditPanel.isCloneBtnSelected(); 
-			if (NCIEditTab.currentTab().canSplit(data.get(0))) {
+			if (NCIEditTab.currentTab().isNotSpecialRoot(data.get(0))) {
 				// if you can split you can clone
 				if (clone_p) {
 					NCIEditTab.currentTab().setOp(ComplexEditType.CLONE);

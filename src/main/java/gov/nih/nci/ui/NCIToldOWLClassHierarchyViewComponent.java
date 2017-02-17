@@ -234,7 +234,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	public boolean canSplitClass() {
 		return (isInAssertedMode() &&
 				getSelectedEntities().size() == 1 &&
-				NCIEditTab.currentTab().canSplit(getSelectedEntity()) &&
+				NCIEditTab.currentTab().isNotSpecialRoot(getSelectedEntity()) &&
 				isFree());
 	}
 
@@ -334,7 +334,10 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 
 		@Override
 		public boolean canAddComplex() {
-			return true;
+			return (getSelectedEntities().size() == 1 &&
+					NCIEditTab.currentTab().isNotSpecialRoot(getSelectedEntity()) &&
+					!NCIEditTab.currentTab().isRetired(getSelectedEntity()));
+					
 		}
 
 		@Override
