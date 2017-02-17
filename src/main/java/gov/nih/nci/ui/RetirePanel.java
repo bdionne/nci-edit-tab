@@ -235,6 +235,10 @@ public class RetirePanel extends JPanel {
     
     public void approveRetire() {
     	
+    	if (old_parents == null) {
+    		old_parents = new ArrayList<OWLClass>();
+    	}
+    	
     	ont = NCIEditTab.currentTab().getOWLModelManager().getActiveOntology();
     	
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
@@ -243,6 +247,7 @@ public class RetirePanel extends JPanel {
     	for (OWLSubClassOfAxiom s : subs) {
     		if (s.getSuperClass().asOWLClass().equals(PRE_RETIRE_ROOT)) {
     			changes.add(new RemoveAxiom(ont, s));
+    			old_parents.add(s.getSuperClass().asOWLClass());
     		}
     	}
     	changes.add(new AddAxiom(mngr.getActiveOntology(),
