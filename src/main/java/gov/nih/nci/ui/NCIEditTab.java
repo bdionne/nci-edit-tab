@@ -1679,7 +1679,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public void removeParent(OWLClass cls, OWLClass par_cls) {
 		ParentRemover par_rem = new ParentRemover(getOWLEditorKit().getModelManager());
 		List<OWLOntologyChange> changes = par_rem.removeParent(cls, par_cls);
-		getOWLModelManager().applyChanges(changes);
+		
+		if (inBatchMode) {
+			batch_changes.addAll(changes);
+		} else {
+			getOWLEditorKit().getModelManager().applyChanges(changes);
+		}
 
 	}
 
@@ -1691,14 +1696,23 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				
 		changes.add(new AddAxiom(ontology, ax));
 		
-		this.getOWLEditorKit().getModelManager().applyChanges(changes);
+		if (inBatchMode) {
+			batch_changes.addAll(changes);
+		} else {
+			getOWLEditorKit().getModelManager().applyChanges(changes);
+		}
 
 	}
 	
 	public void removeRole(OWLClass cls, String roleName, String modifier, String filler) {
 		RoleReplacer role_rep = new RoleReplacer(getOWLEditorKit().getModelManager());
 		List<OWLOntologyChange> changes = role_rep.removeRole(cls, roleName, modifier, filler);
-		getOWLModelManager().applyChanges(changes);
+		
+		if (inBatchMode) {
+			batch_changes.addAll(changes);
+		} else {
+			getOWLEditorKit().getModelManager().applyChanges(changes);
+		}
 
 	}
 
@@ -1722,7 +1736,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		changes.add(new AddAxiom(ontology, ax));
 		
-		this.getOWLEditorKit().getModelManager().applyChanges(changes);
+
+		if (inBatchMode) {
+			batch_changes.addAll(changes);
+		} else {
+			getOWLEditorKit().getModelManager().applyChanges(changes);
+		}
 
 	}
 	
@@ -1733,9 +1752,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			RoleReplacer role_rep = new RoleReplacer(getOWLModelManager());
 			List<OWLOntologyChange> changes = role_rep.modifyRole(cls, roleName, modifier, filler, 
 					new_modifier, new_filler);
-			this.getOWLEditorKit().getModelManager().applyChanges(changes);
-		
-
+			
+			if (inBatchMode) {
+				batch_changes.addAll(changes);
+			} else {
+				getOWLEditorKit().getModelManager().applyChanges(changes);
+			}
 	}
 	
 	public void removeComplexAnnotationProperty(OWLClass cls, String propName, 
@@ -1888,21 +1910,24 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 	public Optional<String> getCode(OWLNamedObject oobj) {
 		// TODO: fall back to IRI if no label
-		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP)) {
-			OWLAnnotationValue av = annotation.getValue();
-			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
-			if (ol.isPresent()) {
-				return Optional.of(ol.get().getLiteral());
+		if (oobj != null) {
+			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP)) {
+				OWLAnnotationValue av = annotation.getValue();
+				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				if (ol.isPresent()) {
+					return Optional.of(ol.get().getLiteral());
+				}
 			}
+
+			if (!topOrBot(oobj)) {
+
+				JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " should have a code property, using IRI short form instead",
+						"Warning", JOptionPane.WARNING_MESSAGE);
+			}
+			return Optional.of(oobj.getIRI().getShortForm());
+		} else {
+			return Optional.empty();
 		}
-
-		if (!topOrBot(oobj)) {
-
-			JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " should have a code property, using IRI short form instead",
-					"Warning", JOptionPane.WARNING_MESSAGE);
-		}
-		return Optional.of(oobj.getIRI().getShortForm());
-
 	}
 	
 	public Optional<OWLAnnotationValue> getSemanticType(OWLClass cls) {
@@ -2001,7 +2026,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		changes.add(new AddAxiom(ontology, ax));
 		
-		this.getOWLEditorKit().getModelManager().applyChanges(changes);
+		if (inBatchMode) {
+			batch_changes.addAll(changes);
+		} else {
+			getOWLEditorKit().getModelManager().applyChanges(changes);
+		}
+		
 	}
 	
 	public void removeAnnotationToClass(OWLClass ocl, OWLAnnotationProperty prop, String value) {
@@ -2015,7 +2045,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		changes.add(new RemoveAxiom(ontology, ax));
 		
-		this.getOWLEditorKit().getModelManager().applyChanges(changes);
+		if (inBatchMode) {
+			batch_changes.addAll(changes);
+		} else {
+			getOWLEditorKit().getModelManager().applyChanges(changes);
+		}
 		
 	}
 	
