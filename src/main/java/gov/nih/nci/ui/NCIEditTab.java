@@ -2195,7 +2195,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
     	if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT) ||
     			operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
-    		if (!NCIEditTab.currentTab().validPrefName(ann_vals.get("Value"))) {
+    		if (complex_prop.equals(getFullSyn()) &&
+    				!NCIEditTab.currentTab().validPrefName(ann_vals.get("Value"))) {
     			JOptionPane.showMessageDialog(this, "Preferred name cannot contain :, !, ? or @", "Warning", JOptionPane.WARNING_MESSAGE);
     			return false; 
     		}
