@@ -367,7 +367,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
 			if(button.getType() == NCIEditTabConstants.ADD){
 				PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.ADD, tableModel.getSelectedPropertyType(), 
-						tableModel.getDefaultPropertyValues(), tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
+						tableModel.getDefaultPropertyValues(), tableModel.getSelectedPropertyOptions(), tableModel.getDefaultSelectedPropertyLabel());
 				
 				this.showAndValidate(addedit, NCIEditTabConstants.ADD, null);
 								
@@ -380,7 +380,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 					Map selectedPropertyMap = new HashMap();
 					
 					PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValues(modelRow), 
-							tableModel.getSelectedPropertyOptions(), tableModel.getSelectedPropertyLabel());
+							tableModel.getSelectedPropertyOptions(), tableModel.getDefaultSelectedPropertyLabel());
 					
 					this.showAndValidate(addedit, NCIEditTabConstants.EDIT, tableModel.getAssertion(modelRow));					
 				}
