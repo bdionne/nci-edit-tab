@@ -112,27 +112,21 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
 
     public boolean dropObjects(List<OWLObject> objects) {
         List<OWLOntologyChange> changes = new ArrayList<>();
-        for (OWLObject obj : objects) {
-            if (obj instanceof OWLAnnotation) {
-                OWLAnnotation annot = (OWLAnnotation) obj;
-                OWLAxiom ax = getOWLDataFactory().getOWLAnnotationAssertionAxiom(getRootObject(), annot);
-                
-                List<OWLObject> quals = objects.subList(1, objects.size());
-                Set<OWLAnnotation> q_as = new HashSet<OWLAnnotation>();
-                for (OWLObject o : quals) {
-                	q_as.add((OWLAnnotation) o);
-                	
-                }           
-                
-                
-                OWLAxiom new_ax = ax.getAxiomWithoutAnnotations().getAnnotatedAxiom(q_as);
-                
-                changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), new_ax));
-                
-            } else {
-                return false;
-            }
-        }
+        OWLAnnotation annot = (OWLAnnotation) objects.get(0);
+        OWLAxiom ax = getOWLDataFactory().getOWLAnnotationAssertionAxiom(getRootObject(), annot);
+        
+        List<OWLObject> quals = objects.subList(1, objects.size());
+        
+        Set<OWLAnnotation> q_as = new HashSet<OWLAnnotation>();
+        for (OWLObject o : quals) {
+        	q_as.add((OWLAnnotation) o);
+        	
+        } 
+        
+        OWLAxiom new_ax = ax.getAxiomWithoutAnnotations().getAnnotatedAxiom(q_as);
+        
+        changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), new_ax));
+       
         getOWLModelManager().applyChanges(changes);
         return true;
     }
