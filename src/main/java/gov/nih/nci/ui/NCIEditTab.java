@@ -2267,7 +2267,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		getOWLModelManager().applyChanges(changes);
     		return true;
     	} else {
-    		this.backOutChange();
+    		//this.backOutChange();
     		return false;
     	}
     	
