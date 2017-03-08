@@ -158,6 +158,23 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
 									tabbedPane.setSelectedIndex(i);
 								}
 							}
+						} else if (range.getShortForm().equals("anyURI")) {
+							for (int i = 0; i < editors.size(); i++) {
+								OWLObjectEditor<?> editor = editors.get(i);
+								if (editor instanceof IRIFromEntityEditor) {
+									tabbedPane.setSelectedIndex(i);
+								}
+							}
+							
+						} else if (range.getShortForm().equals("string") ||
+								range.getShortForm().equals("textArea")) {
+							for (int i = 0; i < editors.size(); i++) {
+								OWLObjectEditor<?> editor = editors.get(i);
+								if (editor instanceof OWLConstantEditor) {
+									tabbedPane.setSelectedIndex(i);
+								}
+							}
+							
 						}
 					}
 				}
