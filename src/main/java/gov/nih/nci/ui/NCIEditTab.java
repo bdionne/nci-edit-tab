@@ -2614,9 +2614,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public boolean validPrefName(String name) {
     	if (name.contains("?") ||
-    			name.contains("!") ||
-    			name.contains("@") ||
-    			name.contains(":")) {
+    			name.contains("!")) {
     		return false;
     	} else {
     		return true;
