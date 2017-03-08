@@ -292,7 +292,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		boolean success = false;
 		try {
 			//success = ExportDialogPanel.showDialog(oek, "", ocl, true);
-			success = LQTExportDialog.showDialog(oek, "", ocl, true);
+			success = ExportDialogPanel.showDialog(oek, "", ocl, true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -553,7 +553,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		}
 
 		catch (InterruptedException e) {
-			updateStatus(0);
+			//updateStatus(0);
 			return "Interrupted";
 		}
 
