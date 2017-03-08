@@ -2457,6 +2457,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
+    private boolean isQualsPTNCI(OWLAnnotationAssertionAxiom ax) {
+    	return ((getAnnotationValue(ax, "term-group").equals("PT") ||
+				getAnnotationValue(ax, "term-group").equals("AQ") ||
+				getAnnotationValue(ax, "term-group").equals("HD")) &&
+				getAnnotationValue(ax, "term-source").equals("NCI"));
+    	
+    }
+    
     public boolean syncFullSyn(OWLClass cls, OWLAnnotationProperty prop, List<OWLOntologyChange> changes) {
     	OWLAnnotationProperty full_syn = getFullSyn();
     	if (!prop.equals(full_syn)) {
@@ -2467,8 +2475,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     	for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
     		if (ax.getProperty().equals(full_syn)) {
-    			if ((getAnnotationValue(ax, "term-group").equals("PT")) &&
-    					(getAnnotationValue(ax, "term-source").equals("NCI"))) {
+    			if (isQualsPTNCI(ax)) {
     				assertions.add(ax);
     			} 
     		}
@@ -2491,16 +2498,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		if (c.isAddAxiom()) {
     			OWLAxiom ax = c.getAxiom();
     			OWLAnnotationAssertionAxiom aax = (OWLAnnotationAssertionAxiom) ax;
-    			if ((getAnnotationValue(aax, "term-group").equals("PT")) &&
-    					(getAnnotationValue(aax, "term-source").equals("NCI"))) {
+    			if (isQualsPTNCI(aax)) {
     				assertions.add(aax);
     				
     			}  			
     		} else if (c.isRemoveAxiom()) {
     			OWLAxiom ax = c.getAxiom();
     			OWLAnnotationAssertionAxiom aax = (OWLAnnotationAssertionAxiom) ax;
-    			if ((getAnnotationValue(aax, "term-group").equals("PT")) &&
-    					(getAnnotationValue(aax, "term-source").equals("NCI"))) {
+    			if (isQualsPTNCI(aax)) {
     				//new action was a delete, so remove one, doesn't matter which
     				assertions.remove(0);
     				
@@ -2518,7 +2523,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		String ts = qualifiers.get("term-source");
     		if (tg != null &&
     				ts != null &&
-    				tg.equals("PT") &&
+    				(tg.equals("PT") ||
+    						tg.equals("AQ") ||
+    						tg.equals("HD"))
+    						&&
     				ts.equals("NCI")) {
     			isIt = true;
     		}
