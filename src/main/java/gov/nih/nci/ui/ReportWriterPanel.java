@@ -46,15 +46,11 @@ import org.protege.editor.owl.ui.UIHelper;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.model.RemoveAxiom;
 
 import edu.stanford.protege.csv.export.ui.ExportDialogPanel;
-import gov.nih.nci.ui.dialog.LQTExportDialog;
+//import gov.nih.nci.ui.dialog.LQTExportDialog;
 import gov.nih.nci.ui.dialog.RepWriterConfigDialog;
 import gov.nih.nci.utils.QuickSortVecStrings;
 /**
