@@ -150,9 +150,7 @@ public class ComplexEditPanel extends JPanel {
     	lowerSplitPane.setTransferHandler(new ComplexEditTransferHandler(this));
         
         JSplitPane splitPane3 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upperPanel, lowerPanel);
-        
-        //splitPane3.setTransferHandler(new ListTransferHandler(this));
-       
+               
 		splitPane3.setOneTouchExpandable(true);
 		splitPane3.setDividerLocation(280);
 
