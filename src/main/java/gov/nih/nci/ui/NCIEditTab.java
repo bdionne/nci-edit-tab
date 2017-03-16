@@ -130,6 +130,7 @@ import edu.stanford.protege.search.lucene.tab.ui.MatchCriteria;
 import edu.stanford.protege.search.lucene.tab.ui.NegatedQueryPanel;
 import edu.stanford.protege.search.lucene.tab.ui.NestedQueryPanel;
 import edu.stanford.protege.search.lucene.tab.ui.QueryPanel;
+import gov.nih.nci.ui.action.ComplexOperation;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
@@ -155,19 +156,19 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public static void setNavTree(NCIToldOWLClassHierarchyViewComponent t) { navTree = t;}
 	
 	public void refreshNavTree() {
-		navTree.setSelectedEntity(this.currentlyEditing);
+		navTree.setSelectedEntity(current_op.getCurrentlyEditing());
 		navTree.refreshTree();
 	}
 	
 	private Set<OWLAnnotationProperty> annProps = null;
 	
-	private OWLClass source;
-	private OWLClass target;
+	//private OWLClass source;
+	//private OWLClass target;
 	private OWLClass class_to_retire;
 	
 	private boolean editInProgress = false;
 	private OWLClass currentlySelected = null;
-	private OWLClass currentlyEditing = null;
+	//private OWLClass currentlyEditing = null;
 	private boolean isNew = false;
 	
 	
@@ -200,12 +201,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public void setCurrentlyEditing(OWLClass cls, boolean refresh) { 
-		currentlyEditing = cls;
+		current_op.setCurrentlyEditing(cls);
 		if (refresh)
 			refreshNavTree();
 	}
 	
-	public OWLClass getCurrentlyEditing() { return currentlyEditing; }
+	public OWLClass getCurrentlyEditing() { return current_op.getCurrentlyEditing(); }
 	
 	public OWLClass getCurrentlySelected() { return currentlySelected; }
 	
@@ -218,26 +219,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	
-	private ComplexEditType current_op = null;
+	//private ComplexEditType current_op = null;
+	private ComplexOperation current_op = new ComplexOperation();
 	
 	public void setOp(ComplexEditType op) {
-		current_op = op;
-	}
-	
-	public boolean isRetiring() {
-		return (current_op == RETIRE || current_op == PRERETIRE);
-	}
-	
-	public boolean isMerging() {
-		return (current_op == ComplexEditType.MERGE || current_op == PREMERGE);
-	}
-	
-	public boolean isSplitting() {
-		return (current_op == ComplexEditType.SPLIT);
-	}
-	
-	public boolean isCloning() {
-		return (current_op == ComplexEditType.CLONE);
+		current_op.setType(op);
 	}
 	
 	public boolean isFree() {
@@ -252,23 +238,24 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public void cancelOp() {
-		if (current_op == SPLIT || current_op == CLONE) {
+		ComplexEditType t = current_op.getType();
+		if (t == SPLIT || t == CLONE) {
 			cancelSplit();
 		}
-		if (current_op == ComplexEditType.MERGE) {
+		if (t == ComplexEditType.MERGE) {
 			cancelMerge();			
 		}
-		current_op = null;		
+		current_op = new ComplexOperation();		
 	}
 	
 	public void cancelSplit() {	
 		setEditInProgress(false);
 		// go back to previous selected class
-		setCurrentlyEditing(source, true);
+		OWLClass s = current_op.getSource();
+		setCurrentlyEditing(s, true);
 		undoChanges();
-		navTree.setSelectedEntity(source);
-		source = null;
-		target = null;
+		navTree.setSelectedEntity(s);
+		current_op.cancelSplit();
 		
 	}
 	
@@ -276,77 +263,62 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		setEditInProgress(false);
 		// go back to previous selected class
-		if (source != null) {			
-			navTree.setSelectedEntity(source);			
+		if (current_op.getSource() != null) {			
+			navTree.setSelectedEntity(current_op.getSource());			
 		}
 		
-		if (target != null) {			
-			navTree.setSelectedEntity(target);			
+		if (current_op.getTarget() != null) {			
+			navTree.setSelectedEntity(current_op.getTarget());			
 		}
 		undoChanges();
-		
-		source = null;
-		target = null;		
+		current_op.cancelMerge();
+			
 	}
 	
 	public void completeOp() {
-		if (current_op == SPLIT || current_op == CLONE) {
+		ComplexEditType t = current_op.getType();
+		if (t == SPLIT || t == CLONE) {
 			completeSplit();
 		}
-		if (current_op == ComplexEditType.MERGE) {
+		if (t == ComplexEditType.MERGE) {
 			completeMerge();
 			
 		}
-		current_op = null;
+		current_op = new ComplexOperation();
 		
 	}
 	
 	public void completeSplit() {
 		setEditInProgress(false);
-		navTree.setSelectedEntity(source);
-		source = null;
-		target = null;		
+		navTree.setSelectedEntity(current_op.getSource());
+		current_op.completeSplit();
+			
 	}
 	
 	public void completeMerge() {
 		setEditInProgress(false);
-		navTree.setSelectedEntity(target);
-		source = null;
-		target = null;		
-	}
-	
-	public OWLClass getSplitSource() {
-		return source;
-	}
-	
-	public OWLClass getSplitTarget() {
-		return target;
+		navTree.setSelectedEntity(current_op.getTarget());
+		current_op.completeMerge();
+			
 	}
 	
 	public OWLClass getRetireClass() {
 		return class_to_retire;		
 	}
 	
-	public OWLClass getMergeSource() {
-		return source;
-	}
-	
-	public OWLClass getMergeTarget() {
-		return target;
-	}
 	
 	public void setMergeSource(OWLClass cls) {
-		current_op = ComplexEditType.MERGE;
-		source = cls;
+		current_op.setType(ComplexEditType.MERGE);
+		current_op.setSource(cls);
 	}
 	
 	public void setMergeTarget(OWLClass cls) {
-		current_op = ComplexEditType.MERGE;
-		target = cls;
+		current_op.setType(ComplexEditType.MERGE);
+		current_op.setTarget(cls);
 	}
 	
 	public boolean inComplexOp() {
-		return current_op != null;
+		return current_op.inComplexOp();
 	}
 		
 	// use undo/redo facility
@@ -468,8 +440,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
      * 
      */
     public boolean readyMerge() {
-    	return (this.source != null) &&
-    			(this.target != null);
+    	return current_op.readyToMerge();
     }
     
     public boolean canMerge() {
@@ -479,6 +450,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public boolean merge() {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
+    	
+    	OWLClass source = current_op.getSource();
+    	OWLClass target = current_op.getTarget();
     	
     	if (isPreMerged(source)) {
     		
@@ -571,8 +545,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     private boolean switchMergeSourceTarget() {
-    	Optional<String> mergeSourceCode = getCode(source);
-    	Optional<String> mergeTargetCode = getCode(target);
+    	Optional<String> mergeSourceCode = getCode(current_op.getSource());
+    	Optional<String> mergeTargetCode = getCode(current_op.getTarget());
     	if (mergeSourceCode.isPresent() &&
     			mergeTargetCode.isPresent()) {
     		return ((LocalHttpClient) clientSession.getActiveClient()).codeIsLessThan(mergeSourceCode.get(), mergeTargetCode.get());
@@ -582,6 +556,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     List<OWLOntologyChange> finalizeMerge() {
+    	
+    	OWLClass source = current_op.getSource();
+    	OWLClass target = current_op.getTarget();
     	
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	
@@ -626,6 +603,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public List<OWLOntologyChange> mergeAttrs() {
+    	
+    	OWLClass source = current_op.getSource();
+    	OWLClass target = current_op.getTarget();
 
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 
@@ -836,9 +816,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void retire(OWLClass selectedClass) {
     	class_to_retire = selectedClass;
     	if (isWorkFlowManager()) {
-    		current_op = RETIRE;
+    		current_op.setType(RETIRE);
     	} else {
-    		current_op = PRERETIRE;
+    		current_op.setType(PRERETIRE);
     	}
     	fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
     }
@@ -934,7 +914,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void completeRetire() {
     	class_to_retire = null;
-        current_op = null;
+        current_op = new ComplexOperation();
     }
     
     public boolean isNotSpecialRoot(OWLClass cls) {
@@ -960,7 +940,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void commitChanges() {
     	
-    	ComplexEditType type = getCurrentOp();
+    	ComplexEditType type = getCurrentOp().getType();
     	if (type == null) {
     		type = ComplexEditType.MODIFY;
     	}
@@ -1008,6 +988,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	String comment = "";
     	comment = type.name();
     	if (!this.inBatchMode) {
+    		OWLClass source = current_op.getSource();
+        	OWLClass target = current_op.getTarget();
+        	OWLClass currentlyEditing = current_op.getCurrentlyEditing();
     		// TODO: This class could be null
     		String label = "";
     		if (currentlyEditing != null) {
@@ -1073,7 +1056,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     
     
-    public ComplexEditType getCurrentOp() {
+    public ComplexOperation getCurrentOp() {
     	return this.current_op;
     }
     
@@ -1102,13 +1085,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	changes.addAll(duplicateClassAxioms(selectedClass, dup));            
     	changes.addAll(duplicateAnnotations(selectedClass, dup));    	           
 
-    	source = selectedClass;
-    	target = newClass;
+    	current_op.setSource(selectedClass);
+    	current_op.setTarget(newClass);
 
-    	this.fireChange(new EditTabChangeEvent(this, current_op));
+    	this.fireChange(new EditTabChangeEvent(this, current_op.getType()));
     	
     	setEditInProgress(true);
-		setCurrentlyEditing(target, true);
+		setCurrentlyEditing(current_op.getTarget(), true);
 		
     	
     	mngr.applyChanges(changes);
@@ -1202,10 +1185,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		if (getCurrentlyEditing() != null) {
     			IRI currentIRI = getCurrentlyEditing().getIRI();
     			if ((subjects.contains(currentIRI) && subjects.size() > 1 &&
-    					!isRetiring() &&
-    					!isSplitting() &&
-    					!isMerging() &&
-    					!isCloning()) ||
+    					!current_op.isRetiring() &&
+    					!current_op.isSplitting() &&
+    					!current_op.isMerging() &&
+    					!current_op.isCloning()) ||
     					subjects.size() > 2) {
     				int result = JOptionPane.showOptionDialog(null, "Class already being edited. Do you want to proceed with this edit?", 
     						"Proceed or stay with existing edit?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
@@ -2430,7 +2413,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     // TODO: Add FULL_SYN without creating cycle
     public void syncPrefName(String preferred_name) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	syncPrefName(this.currentlyEditing, preferred_name, changes);
+    	syncPrefName(current_op.getCurrentlyEditing(), preferred_name, changes);
     }
     
     private void syncPrefName(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {

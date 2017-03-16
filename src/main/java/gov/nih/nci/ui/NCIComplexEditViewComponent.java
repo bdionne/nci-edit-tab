@@ -63,8 +63,8 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 	public void handleChange(EditTabChangeEvent event) {
 		if (event.isType(ComplexEditType.SPLIT) ||
 				event.isType(ComplexEditType.CLONE)) {
-			complexEditPanel.setRootObjects(NCIEditTab.currentTab().getSplitSource(),
-					NCIEditTab.currentTab().getSplitTarget());
+			complexEditPanel.setRootObjects(getOpSource(),
+					getOpTarget());
 			getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
 					"nci-edit-tab.ComplexEditView");
 			if (event.isType(ComplexEditType.SPLIT)) {
@@ -76,13 +76,21 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 			complexEditPanel.setEnableUnselectedRadioButtons(false);
 			complexEditPanel.enableButtons();
 		} else if (event.isType(ComplexEditType.MERGE)) {
-			complexEditPanel.setRootObjects(NCIEditTab.currentTab().getMergeSource(), NCIEditTab.currentTab().getMergeTarget());
+			complexEditPanel.setRootObjects(getOpSource(), getOpTarget());
 		} else if (event.isType(ComplexEditType.MODIFY)) {
-			if (NCIEditTab.currentTab().getSplitSource() != null ||
-					NCIEditTab.currentTab().getSplitTarget() != null) {
+			if (getOpSource() != null ||
+					getOpTarget() != null) {
 				complexEditPanel.enableButtons();
 			}
 		}
+	}
+	
+	private OWLClass getOpSource() {
+		return NCIEditTab.currentTab().getCurrentOp().getSource();
+	}
+	
+	private OWLClass getOpTarget() {
+		return NCIEditTab.currentTab().getCurrentOp().getTarget();
 	}
 	
 	

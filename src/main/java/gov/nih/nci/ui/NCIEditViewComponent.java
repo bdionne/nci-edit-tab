@@ -59,9 +59,9 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 	        add(editPanel);
 			
 		} else if (event.isType(ComplexEditType.MODIFY)) { 
-			if (NCIEditTab.currentTab().isSplitting() ||
-					NCIEditTab.currentTab().isMerging() ||
-					NCIEditTab.currentTab().isCloning()) {
+			if (NCIEditTab.currentTab().getCurrentOp().isSplitting() ||
+					NCIEditTab.currentTab().getCurrentOp().isMerging() ||
+					NCIEditTab.currentTab().getCurrentOp().isCloning()) {
 			} else {
 				editPanel.enableButtons();
 				NCIEditTab.currentTab().setEditInProgress(true);
@@ -78,7 +78,7 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 		} else if (event.isType(ComplexEditType.COMMIT)) { 
 			
 			// need to test other ops here? I guess ok as merge/clone are eq
-			if (NCIEditTab.currentTab().isSplitting()) {
+			if (NCIEditTab.currentTab().getCurrentOp().isSplitting()) {
 
 			} else {
 				NCIEditTab.currentTab().setEditInProgress(false);

@@ -48,7 +48,7 @@ public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent imp
 		if (retirePanel.getRetiringClass() != null) {
 			if (!selectedClass.equals(retirePanel.getRetiringClass())) {
 				// switch to edit tab to edit reference to retiring class
-				if (NCIEditTab.currentTab().isRetiring()) {
+				if (NCIEditTab.currentTab().getCurrentOp().isRetiring()) {
 					NCIEditTab.currentTab().selectClass(selectedClass);
 					getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
 							"nci-edit-tab.EditView");

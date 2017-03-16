@@ -232,13 +232,13 @@ public class ComplexEditPanel extends JPanel {
     public void submitHistory() {
     	OWLClass cls = null;
     	OWLClass ref_cls = null;
-    	if (NCIEditTab.currentTab().isSplitting() ||
-    			NCIEditTab.currentTab().isCloning()) {
-    		cls = NCIEditTab.currentTab().getSplitSource();
-    		ref_cls = NCIEditTab.currentTab().getSplitTarget();
+    	if (isSplitting() ||
+    			isCloning()) {
+    		cls = NCIEditTab.currentTab().getCurrentOp().getSource();
+    		ref_cls = NCIEditTab.currentTab().getCurrentOp().getTarget();
     	} else {
-    		cls = NCIEditTab.currentTab().getMergeSource();
-    		ref_cls = NCIEditTab.currentTab().getMergeTarget();    		
+    		cls = NCIEditTab.currentTab().getCurrentOp().getSource();
+    		ref_cls = NCIEditTab.currentTab().getCurrentOp().getTarget();    		
     	}
     	String c;
     	Optional<String> cs = NCIEditTab.currentTab().getCode(cls);
@@ -259,15 +259,15 @@ public class ComplexEditPanel extends JPanel {
     		ref = ref_cls.getIRI().getShortForm();
     	}
     	String ref_n = NCIEditTab.currentTab().getRDFSLabel(ref_cls).get();
-    	if (NCIEditTab.currentTab().isSplitting()) {
+    	if (isSplitting()) {
     		NCIEditTab.currentTab().putHistory(c, n, op, c);
     		NCIEditTab.currentTab().putHistory(c, n, op, ref);
     		NCIEditTab.currentTab().putHistory(ref, ref_n, ComplexEditType.CREATE.toString(), "");
     		
-    	} else if (NCIEditTab.currentTab().isCloning()) {
+    	} else if (isCloning()) {
     		NCIEditTab.currentTab().putHistory(ref, ref_n, ComplexEditType.CREATE.toString(), "");
     		
-    	} else if (NCIEditTab.currentTab().isMerging()) {
+    	} else if (isMerging()) {
     		NCIEditTab.currentTab().putHistory(ref, ref_n, op, ref);
     		NCIEditTab.currentTab().putHistory(c, n, op, ref);
     		NCIEditTab.currentTab().putHistory(c, n, ComplexEditType.RETIRE.toString(), "");
@@ -282,27 +282,27 @@ public class ComplexEditPanel extends JPanel {
     	
     	OWLClass cls = null;
     	OWLClass ref_cls = null;
-    	if (NCIEditTab.currentTab().isSplitting() ||
-    			NCIEditTab.currentTab().isCloning()) {
-    		cls = NCIEditTab.currentTab().getSplitSource();
-    		ref_cls = NCIEditTab.currentTab().getSplitTarget();
+    	if (isSplitting() ||
+    			isCloning()) {
+    		cls = NCIEditTab.currentTab().getCurrentOp().getSource();
+    		ref_cls = NCIEditTab.currentTab().getCurrentOp().getTarget();
     	} else {
-    		cls = NCIEditTab.currentTab().getMergeSource();
-    		ref_cls = NCIEditTab.currentTab().getMergeTarget();    		
+    		cls = NCIEditTab.currentTab().getCurrentOp().getSource();
+    		ref_cls = NCIEditTab.currentTab().getCurrentOp().getTarget();    		
     	}
     	String c = cls.getIRI().getShortForm();
     	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
     	String op = NCIEditTab.currentTab().getCurrentOp().toString();
     	String ref = ref_cls.getIRI().getShortForm();
     	String ref_n = NCIEditTab.currentTab().getRDFSLabel(ref_cls).get();
-    	if (NCIEditTab.currentTab().isSplitting()) {
+    	if (isSplitting()) {
     		hist.add(new History(userId, c, n, op, c));
     		hist.add(new History(userId, c, n, op, ref));
     		hist.add(new History(userId, ref, ref_n, ComplexEditType.CREATE.toString(), ""));   		
-    	} else if (NCIEditTab.currentTab().isCloning()) {
+    	} else if (isCloning()) {
     		hist.add(new History(userId, ref, ref_n, ComplexEditType.CREATE.toString(), ""));
     		
-    	} else if (NCIEditTab.currentTab().isMerging()) {
+    	} else if (isMerging()) {
     		hist.add(new History(userId, ref, ref_n, op, ref));
     		hist.add(new History(userId, c, n, op, ref));
     		hist.add(new History(userId, c, n, ComplexEditType.RETIRE.toString(), ""));
@@ -336,7 +336,7 @@ public class ComplexEditPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JRadioButton sb = (JRadioButton) e.getSource();
-				if (NCIEditTab.currentTab().isRetiring()) {
+				if (isRetiring()) {
 					JOptionPane.showMessageDialog(new Frame(), "Retirement in progress.", "Warning", JOptionPane.WARNING_MESSAGE);
 					radioButtonGroup.clearSelection();
 				} else {
@@ -474,6 +474,22 @@ public class ComplexEditPanel extends JPanel {
     	saveButton.setEnabled(false);
     	clearButton.setEnabled(false);
     	
+    }
+    
+    private boolean isSplitting() {
+    	return NCIEditTab.currentTab().getCurrentOp().isSplitting();
+    }
+    
+    private boolean isCloning() {
+    	return NCIEditTab.currentTab().getCurrentOp().isCloning();
+    }
+    
+    private boolean isMerging() {
+    	return NCIEditTab.currentTab().getCurrentOp().isMerging();
+    }
+    
+    private boolean isRetiring() {
+    	return NCIEditTab.currentTab().getCurrentOp().isRetiring();
     }
 	
 	

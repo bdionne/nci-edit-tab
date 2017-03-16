@@ -30,7 +30,7 @@ public class RetireTransferHandler extends TransferHandler {
 		if(!support.isDrop()) {
 			return false;
 		}
-		if (NCIEditTab.currentTab().isRetiring() ||
+		if (NCIEditTab.currentTab().getCurrentOp().isRetiring() ||
 				NCIEditTab.currentTab().isEditing()) {
 			return false;
 		}

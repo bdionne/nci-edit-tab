@@ -270,7 +270,7 @@ public class EditPanel extends JPanel {
     			gen_props.setRootObject(cls.getIRI());
     		}
 
-    		if (NCIEditTab.currentTab().isRetiring()) {
+    		if (NCIEditTab.currentTab().getCurrentOp().isRetiring()) {
     			tabbedPane.setSelectedComponent(descrPane);
 
     		}
@@ -372,7 +372,7 @@ public class EditPanel extends JPanel {
 	}
     
     public boolean shouldSave() {
-    	if (NCIEditTab.currentTab().isRetiring()) {
+    	if (NCIEditTab.currentTab().getCurrentOp().isRetiring()) {
     		NCIEditTab.currentTab().updateRetire();
     		return false;
     	} else {

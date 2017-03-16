@@ -137,7 +137,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
 				if (NCIEditTab.currentTab().isRetired(getTree().getSelectedOWLObject()) &&
-						!NCIEditTab.currentTab().isRetiring()) {
+						!NCIEditTab.currentTab().getCurrentOp().isRetiring()) {
 					NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), ComplexEditType.READ));
 				} else {
 					NCIEditTab.currentTab().selectClass(getTree().getSelectedOWLObject());
@@ -353,7 +353,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 				@Override
 				public String render(String in) {
 
-					if (NCIEditTab.currentTab().isRetiring()) {
+					if (NCIEditTab.currentTab().getCurrentOp().isRetiring()) {
 						OWLClass cls = NCIEditTab.currentTab().getRetireClass();
 						if (cls != null) {
 							String orig = 
@@ -375,8 +375,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 						}
 
 					}
-					if (NCIEditTab.currentTab().isSplitting()) {
-						OWLClass cls = NCIEditTab.currentTab().getSplitSource(); 
+					if (NCIEditTab.currentTab().getCurrentOp().isSplitting()) {
+						OWLClass cls = NCIEditTab.currentTab().getCurrentOp().getSource(); 
 						if (cls != null) {
 							String orig = 
 									getOWLEditorKit().getOWLModelManager().getRendering(cls);
