@@ -1185,11 +1185,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		if (getCurrentlyEditing() != null) {
     			IRI currentIRI = getCurrentlyEditing().getIRI();
     			if ((subjects.contains(currentIRI) && subjects.size() > 1 &&
-    					!current_op.isRetiring() &&
-    					!current_op.isSplitting() &&
-    					!current_op.isMerging() &&
-    					!current_op.isCloning()) ||
-    					subjects.size() > 2) {
+    					!current_op.inComplexOp()) ||
+    					(subjects.size() > 2 &&
+    							!current_op.isRetiring())) {
     				int result = JOptionPane.showOptionDialog(null, "Class already being edited. Do you want to proceed with this edit?", 
     						"Proceed or stay with existing edit?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
     				if (result == JOptionPane.CANCEL_OPTION) {
