@@ -232,7 +232,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void cancelRetire() {
 		class_to_retire = null;
-		current_op = null;
+		current_op = new ComplexOperation();
 		editInProgress = false;
 		refreshNavTree();
 	}
