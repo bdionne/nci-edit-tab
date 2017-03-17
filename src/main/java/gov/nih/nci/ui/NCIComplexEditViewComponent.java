@@ -82,6 +82,10 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 					getOpTarget() != null) {
 				complexEditPanel.enableButtons();
 			}
+		} else if (event.isType(ComplexEditType.RESET)) {
+			complexEditPanel.reset();
+			
+			
 		}
 	}
 	

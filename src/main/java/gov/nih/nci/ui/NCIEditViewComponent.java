@@ -75,17 +75,10 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 						"nci-edit-tab.EditView");
 			}
 
-		} else if (event.isType(ComplexEditType.COMMIT)) { 
+		} else if (event.isType(ComplexEditType.COMMIT) ||
+				event.isType(ComplexEditType.RESET)) { 
+			editPanel.disableButtons();
 			
-			// need to test other ops here? I guess ok as merge/clone are eq
-			if (NCIEditTab.currentTab().getCurrentOp().isSplitting()) {
-
-			} else {
-				NCIEditTab.currentTab().setEditInProgress(false);
-				//NCIEditTab.currentTab().setCurrentlyEditing(null);
-				//NCIEditTab.currentTab().refreshNavTree();
-				editPanel.disableButtons();
-			}
 		}		
 	}
 

@@ -207,20 +207,9 @@ public class ComplexEditPanel extends JPanel {
 			 
             public void actionPerformed(ActionEvent e)
             {
-            	setEnableUnselectedRadioButtons(true);
-            	//Execute when button is pressed
-            	upperPanelAnn.setRootObject(null);
-            	lowerPanelAnn.setRootObject(null);
-            	upperPanelClass.setRootObject(null);
-            	lowerPanelClass.setRootObject(null);
-            	radioButtonGroup.clearSelection();
-            	
-            	upperLabel.setText("Source");
-            	lowerLabel.setText("Target");
-            	
-            	saveButton.setText("Save");
+            	reset();
             	NCIEditTab.currentTab().cancelOp();
-            	disableButtons();
+            	
             }
         });     
 		
@@ -228,6 +217,23 @@ public class ComplexEditPanel extends JPanel {
 		buttonPanel.add(clearButton);
 		return buttonPanel;
 	}
+    
+    public void reset() {
+
+    	setEnableUnselectedRadioButtons(true);
+    	//Execute when button is pressed
+    	upperPanelAnn.setRootObject(null);
+    	lowerPanelAnn.setRootObject(null);
+    	upperPanelClass.setRootObject(null);
+    	lowerPanelClass.setRootObject(null);
+    	radioButtonGroup.clearSelection();
+    	
+    	upperLabel.setText("Source");
+    	lowerLabel.setText("Target");
+    	
+    	saveButton.setText("Save");    	
+    	disableButtons();
+    }
     
     public void submitHistory() {
     	OWLClass cls = null;
@@ -343,13 +349,19 @@ public class ComplexEditPanel extends JPanel {
 					if (sb.equals(mergeButton)) {
 						upperLabel.setText("Retiring Concept");
 						lowerLabel.setText("Surviving Concept");
+						//setOp(ComplexEditType.MERGE);
 					} else if (sb.equals(splitButton)) {
 						upperLabel.setText("Split From");
 						lowerLabel.setText("Split To");
+						//setOp(ComplexEditType.SPLIT);
 					} else if (sb.equals(cloneButton)) {
 						upperLabel.setText("Clone From");
 						lowerLabel.setText("Clone To");
+						//setOp(ComplexEditType.CLONE);
 
+					} else if (sb.equals(dualButton)) {
+						//setOp(ComplexEditType.DUAL);
+						
 					}
 				}
 			}
@@ -490,6 +502,11 @@ public class ComplexEditPanel extends JPanel {
     
     private boolean isRetiring() {
     	return NCIEditTab.currentTab().getCurrentOp().isRetiring();
+    }
+    
+    private void setOp(ComplexEditType op) {
+    	NCIEditTab.currentTab().getCurrentOp().setType(op);
+    	
     }
 	
 	

@@ -1,16 +1,18 @@
 package gov.nih.nci.ui.action;
 
-import static gov.nih.nci.ui.event.ComplexEditType.PREMERGE;
-import static gov.nih.nci.ui.event.ComplexEditType.PRERETIRE;
-import static gov.nih.nci.ui.event.ComplexEditType.RETIRE;
+import static gov.nih.nci.ui.event.ComplexEditType.*;
+
+import java.util.List;
 
 import org.semanticweb.owlapi.model.OWLClass;
+
+import com.github.jsonldjava.core.RDFDataset.IRI;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 
 public class ComplexOperation {
 	
-	private ComplexEditType type = ComplexEditType.EDIT;
+	private ComplexEditType type = EDIT;
 	
 	public void setType(ComplexEditType t) { type = t; }
 	public ComplexEditType getType() { return type; }
@@ -87,6 +89,60 @@ public class ComplexOperation {
 	
 	public boolean inComplexOp() {
 		return type != ComplexEditType.EDIT;
+	}
+	
+	public boolean isChangedEditFocus(List<OWLClass> subjects) {
+		if ((type == EDIT) && (subjects.size() > 1)) {
+			// can only edit one at a time
+			return true;			
+		}
+		if ((type == EDIT) && (currently_editing == null) && (subjects.size() == 1)) {
+			// first edit, no change in focus
+			currently_editing = subjects.get(0);
+			return false;			
+		}
+		
+		if ((type == EDIT) && (subjects.size() == 1) && (currently_editing.equals(subjects.get(0)))) {
+			// subsequent edits, no change in focus
+			return false;			
+		}
+		
+		if ((type == EDIT) && (subjects.size() == 1) && (!currently_editing.equals(subjects.get(0)))) {
+			// new subject edited, change in focus
+			return true;			
+		}
+		
+		if (((type == SPLIT) || (type == CLONE)) && (currently_editing == null) && (subjects.size() == 1)) {
+			// initial state
+			currently_editing = subjects.get(0);
+			return false;
+		} else if ((type == SPLIT) || (type == CLONE)) {
+			for (OWLClass c : subjects) {
+				if (!(c.equals(source) ||
+						c.equals(target))) {
+					return true;
+				}
+			}
+		} 
+		
+		if (type == MERGE) {
+			if ((source == null) || (target == null)) {
+				return true;
+			}
+			// check intitial state
+			if (currently_editing == null) {
+				currently_editing = subjects.get(0);
+			}
+			for (OWLClass c : subjects) {
+				if (!(c.equals(source) ||
+						c.equals(target))) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+		
 	}
 
 }

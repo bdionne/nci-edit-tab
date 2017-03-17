@@ -4,6 +4,7 @@ public enum ComplexEditType {
 	SELECTED,
 	READ,
 	EDIT,
+	DUAL,
 	MODIFY,
 	SPLIT,
 	PREMERGE,
@@ -14,5 +15,6 @@ public enum ComplexEditType {
 	ADD_PROP,
 	INIT_PROPS,
 	COMMIT,
+	RESET,
 	CREATE
 }

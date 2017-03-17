@@ -296,7 +296,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		this.ont_changes = changes;
 		this.newClass = newClass;
 		
-		if (!this.dont_apply_changes) {
+		if (!dont_apply_changes) {
 			mngr.applyChanges(ont_changes);
 		}
 		

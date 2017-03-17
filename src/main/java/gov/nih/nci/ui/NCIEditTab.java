@@ -835,6 +835,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void classModified() {
     	fireChange(new EditTabChangeEvent(this, ComplexEditType.MODIFY));    	
     }   
+    
+    public void resetState() {
+    	fireChange(new EditTabChangeEvent(this, ComplexEditType.RESET));
+    	current_op = new ComplexOperation();
+    }
     	
     public boolean isWorkFlowManager() { 
     	if (clientSession.getActiveClient() != null) {
@@ -1179,93 +1184,65 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     @Override
     public void stateChanged(HistoryManager source) {
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
-    	List<IRI>  subjects = findUniqueSubjects(changes);
-    	if (!subjects.isEmpty() && subjectsContainClasses(subjects)) {
-    		OWLClass cls = null;
-    		if (getCurrentlyEditing() != null) {
-    			IRI currentIRI = getCurrentlyEditing().getIRI();
-    			if ((subjects.contains(currentIRI) && subjects.size() > 1 &&
-    					!current_op.inComplexOp()) ||
-    					(subjects.size() > 2 &&
-    							!current_op.isRetiring())) {
-    				int result = JOptionPane.showOptionDialog(null, "Class already being edited. Do you want to proceed with this edit?", 
-    						"Proceed or stay with existing edit?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-    				if (result == JOptionPane.CANCEL_OPTION) {
-    					backOutChange(); 
-    					refreshNavTree();
-    				} else if (result == JOptionPane.OK_OPTION) {
-    					history.stopTalking();
-    					undoChanges();
-    					history.startTalking();
-    					setCurrentlyEditing(null, true);
-    					getOWLModelManager().applyChange(changes.get(changes.size() - 1));  			
-    					
-    				}
+    	List<OWLClass>  subjects = findUniqueSubjects(changes);
+    	if (!subjects.isEmpty()) {
+    		if (current_op.isChangedEditFocus(subjects)) {
+    			int result = JOptionPane.showOptionDialog(null, "Class already being edited. Do you want to proceed with this edit?", 
+    					"Proceed or stay with existing edit?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+    			if (result == JOptionPane.CANCEL_OPTION) {
+    				backOutChange(); 
+    				refreshNavTree();
+    			} else if (result == JOptionPane.OK_OPTION) {
+    				history.stopTalking();
+    				undoChanges();
+    				history.startTalking();
+    				resetState();
+    				getOWLModelManager().applyChange(changes.get(changes.size() - 1));  			
+
     			}
     		} else {
-    			// not editing anything yet
-    			// should only be one subject
-    			for (IRI iri : subjects) {
-    				Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
-    				for (OWLEntity ent : classes) {
-    					if (ent.isOWLClass()) {
-    						cls = ent.asOWLClass();
-    					}
-    				}
-
-    			}
-    			if (cls != null) {
-    				setCurrentlyEditing(cls, true);
-    				classModified();
-    			}
-    		} 		
-    	
-    	} else {
-    		if (changes.isEmpty()) {
-    			this.setCurrentlyEditing(null, true);
+    			setCurrentlyEditing(current_op.getCurrentlyEditing(), true);
+    			classModified();
+    			
     		}
+    	} else {            	
+        	setEditInProgress(false);
+        	selectClass(getCurrentlyEditing());
+        	refreshNavTree();
+        	resetState();
     	}
     	
+    	
     }
     
-    private boolean subjectsContainClasses(List<IRI> subjects) {
-    	for (IRI iri : subjects) {
-			Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
-			for (OWLEntity ent : classes) {
-				if (ent.isOWLClass()) {
-					return true;
-				}
-			}
-
-		}
-    	return false;
-    }
-    
-    private List<IRI> findUniqueSubjects(List<OWLOntologyChange> changes) {
-    	List<IRI> result = new ArrayList<IRI>();
+    private List<OWLClass> findUniqueSubjects(List<OWLOntologyChange> changes) {
+    	List<OWLClass> result = new ArrayList<OWLClass>();
     	for (OWLOntologyChange change : changes) {
     		if (change.isAxiomChange()) {
     			
     			OWLAxiom ax = change.getAxiom();
-    			IRI subj = null;
+    			OWLClass subj = null;
     			
     			if (ax instanceof OWLAnnotationAssertionAxiom) {
-    				subj = (IRI) ((OWLAnnotationAssertionAxiom) ax).getSubject();
-    				System.out.println("The subject is: " + subj);
-    				
+    				IRI iri = (IRI) ((OWLAnnotationAssertionAxiom) ax).getSubject();
+    				Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
+    				for (OWLEntity ent : classes) {
+    					if (ent.isOWLClass()) {
+    						subj = ent.asOWLClass();
+    						// take the first, it should be unique
+    						break;
+    					}
+    				}    				
     			} else if (ax instanceof OWLSubClassOfAxiom) {
-    				subj = ((OWLSubClassOfAxiom) ax).getSubClass().asOWLClass().getIRI();
-    				System.out.println("The subject is: " + subj);    				
+    				subj = ((OWLSubClassOfAxiom) ax).getSubClass().asOWLClass();
     			} else if (ax instanceof OWLEquivalentClassesAxiom) {
     				Set<OWLClassExpression> exps = ((OWLEquivalentClassesAxiom) ax).getClassExpressions();
     				for (OWLClassExpression exp : exps) {
     					if (exp instanceof OWLClass) {
-    						subj = exp.asOWLClass().getIRI();
+    						subj = exp.asOWLClass();
     						break;
     					}
     				}
-    				System.out.println("The subject is: " + subj);
-    		
     			}
     			if (subj != null) {
     				if (result.contains(subj)) {
