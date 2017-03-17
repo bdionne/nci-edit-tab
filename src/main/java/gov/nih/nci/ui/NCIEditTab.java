@@ -164,7 +164,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	//private OWLClass source;
 	//private OWLClass target;
-	private OWLClass class_to_retire;
+	//private OWLClass class_to_retire;
 	
 	private boolean editInProgress = false;
 	private OWLClass currentlySelected = null;
@@ -231,7 +231,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public void cancelRetire() {
-		class_to_retire = null;
 		current_op = new ComplexOperation();
 		editInProgress = false;
 		refreshNavTree();
@@ -303,7 +302,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public OWLClass getRetireClass() {
-		return class_to_retire;		
+		return current_op.getRetireClass();		
 	}
 	
 	
@@ -651,7 +650,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	String editornote = "Retired on: " + timestamp + " by " + user;
         String designnote = "Retired on: " + timestamp;
         // TODO: removing prefix, discuss with Gilberto, I think it's unnecessary
-        //String prefix = "preretire_annotation";        
+        //String prefix = "preretire_annotation"; 
+        
+        OWLClass class_to_retire = current_op.getRetireClass();
         
     	List<OWLOntologyChange> changes = addNotes(editornote, designnote, class_to_retire);
     	if (changes.isEmpty()) {
@@ -814,7 +815,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public void retire(OWLClass selectedClass) {
-    	class_to_retire = selectedClass;
+    	current_op.setRetireClass(selectedClass);
     	if (isWorkFlowManager()) {
     		current_op.setType(RETIRE);
     	} else {
@@ -912,13 +913,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void updateRetire() {    	
     	editInProgress = false;
-    	navTree.setSelectedEntity(this.class_to_retire);
+    	navTree.setSelectedEntity(current_op.getRetireClass());
     	navTree.refreshTree();
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));    	
     }
     
     public void completeRetire() {
-    	class_to_retire = null;
         current_op = new ComplexOperation();
     }
     
@@ -1019,7 +1019,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     		} else if (type == ComplexEditType.RETIRE)  {
     			comment = label + "(" +
-    					this.class_to_retire.getIRI().getShortForm() + ") - " +
+    					current_op.getRetireClass().getIRI().getShortForm() + ") - " +
     					type.name();
 
     		}

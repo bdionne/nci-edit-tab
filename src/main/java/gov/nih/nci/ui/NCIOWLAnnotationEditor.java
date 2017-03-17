@@ -217,8 +217,9 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
             	// because we don't know the type of the editor we need to test
             	if (editor.canEdit(annotation.getValue())) {
             		if (editor instanceof EnumEditor) {
-            			EnumEditor eed = (EnumEditor) editor;                		
-            			if (eed.isDataTypeCombobox(getDataType(annotation.getProperty()))) {                		
+            			EnumEditor eed = (EnumEditor) editor;
+            			IRI iri = getDataType(annotation.getProperty()); 
+            			if ((iri != null) && eed.isDataTypeCombobox(iri)) {                		
             				eed.setProp(annotation.getProperty());
             				tabIndex = i;
             			}

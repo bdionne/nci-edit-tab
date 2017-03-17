@@ -1,12 +1,17 @@
 package gov.nih.nci.ui.action;
 
-import static gov.nih.nci.ui.event.ComplexEditType.*;
+import static gov.nih.nci.ui.event.ComplexEditType.CLONE;
+import static gov.nih.nci.ui.event.ComplexEditType.EDIT;
+import static gov.nih.nci.ui.event.ComplexEditType.MERGE;
+import static gov.nih.nci.ui.event.ComplexEditType.PREMERGE;
+import static gov.nih.nci.ui.event.ComplexEditType.PRERETIRE;
+import static gov.nih.nci.ui.event.ComplexEditType.RETIRE;
+import static gov.nih.nci.ui.event.ComplexEditType.SPLIT;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.semanticweb.owlapi.model.OWLClass;
-
-import com.github.jsonldjava.core.RDFDataset.IRI;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 
@@ -30,6 +35,12 @@ public class ComplexOperation {
 	private OWLClass currently_editing = null;
 	public void setCurrentlyEditing(OWLClass c) { currently_editing = c; }
 	public OWLClass getCurrentlyEditing() { return currently_editing; }
+	
+	private List<OWLClass> already_seen = null;
+	
+	private OWLClass class_to_retire = null;
+	public OWLClass getRetireClass() { return class_to_retire; }
+	public void setRetireClass(OWLClass c) { class_to_retire = c; }
 	
 	
 	public ComplexOperation() {
@@ -139,6 +150,24 @@ public class ComplexOperation {
 					return true;
 				}
 			}
+		}
+		
+		if (type == RETIRE) {
+			// check intitial state
+			if (currently_editing == null) {
+				currently_editing = subjects.get(0);
+				already_seen = new ArrayList<OWLClass>();
+			} else {
+				already_seen.add(currently_editing);
+				for (OWLClass c : subjects) {
+					if (!already_seen.contains(c)) {
+						currently_editing = c;
+						break;
+					}
+				}
+				
+			}
+
 		}
 		
 		return false;
