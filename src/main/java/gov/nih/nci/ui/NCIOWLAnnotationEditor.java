@@ -176,6 +176,14 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
 							}
 							
 						}
+					} else {
+						// default if there's no type
+						for (int i = 0; i < editors.size(); i++) {
+							OWLObjectEditor<?> editor = editors.get(i);
+							if (editor instanceof OWLConstantEditor) {
+								tabbedPane.setSelectedIndex(i);
+							}
+						}
 					}
 				}
 			}
