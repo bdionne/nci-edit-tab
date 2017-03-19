@@ -16,7 +16,7 @@ public class FileBackingStorePrefsFactory implements PreferencesFactory {
 	 
 	  Preferences rootPreferences;
 	  public static final String SYSTEM_PROPERTY_FILE =
-	    "org.protege.editor.core.prefs.FileBackingStorePrefsFactory.file";
+	    "gov.nih.nci.utils.prefs.PrefsFactory.file";
 	 
 	  public Preferences systemRoot()
 	  {
