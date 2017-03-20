@@ -20,6 +20,7 @@ public class FilePrefs extends AbstractPreferences {
 	 
 	  private Map<String, String> root;
 	  private Map<String, FilePrefs> children;
+	  private List<String> children_names;
 	  private boolean isRemoved = false;
 	 
 	  public FilePrefs(AbstractPreferences parent, String name)
@@ -30,6 +31,7 @@ public class FilePrefs extends AbstractPreferences {
 	 
 	    root = new TreeMap<String, String>();
 	    children = new TreeMap<String, FilePrefs>();
+	    children_names = new ArrayList<String>();
 	 
 	    try {
 	      sync();
@@ -79,7 +81,8 @@ public class FilePrefs extends AbstractPreferences {
 	 
 	  protected String[] childrenNamesSpi() throws BackingStoreException
 	  {
-	    return children.keySet().toArray(new String[children.keySet().size()]);
+		  return children_names.toArray(new String[children_names.size()]);
+	    //return children.keySet().toArray(new String[children.keySet().size()]);
 	  }
 	 
 	  protected FilePrefs childSpi(String name)
@@ -116,8 +119,10 @@ public class FilePrefs extends AbstractPreferences {
 	          if (propKey.startsWith(path)) {
 	            String subKey = propKey.substring(path.length());
 	            // Only load immediate descendants
-	            if (subKey.indexOf('.') == -1) {
+	            if (subKey.indexOf('/') == -1) {
 	              root.put(subKey, p.getProperty(propKey));
+	            } else {
+	            	children_names.add(subKey.substring(0,subKey.indexOf('/')));
 	            }
 	          }
 	        }
@@ -134,7 +139,7 @@ public class FilePrefs extends AbstractPreferences {
 	    if (parent == null) return;
 	 
 	    parent.getPath(sb);
-	    sb.append(name()).append('.');
+	    sb.append(name()).append('/');
 	  }
 	 
 	  protected void flushSpi() throws BackingStoreException
@@ -161,7 +166,7 @@ public class FilePrefs extends AbstractPreferences {
 	            if (propKey.startsWith(path)) {
 	              String subKey = propKey.substring(path.length());
 	              // Only do immediate descendants
-	              if (subKey.indexOf('.') == -1) {
+	              if (subKey.indexOf('/') == -1) {
 	                toRemove.add(propKey);
 	              }
 	            }
