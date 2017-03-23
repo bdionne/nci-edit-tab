@@ -306,13 +306,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	
-	public void setMergeSource(OWLClass cls) {
-		current_op.setType(ComplexEditType.MERGE);
+	public void setSource(OWLClass cls) {
+		//current_op.setType(ComplexEditType.MERGE);
 		current_op.setSource(cls);
 	}
 	
-	public void setMergeTarget(OWLClass cls) {
-		current_op.setType(ComplexEditType.MERGE);
+	public void setTarget(OWLClass cls) {
+		//current_op.setType(ComplexEditType.MERGE);
 		current_op.setTarget(cls);
 	}
 	
@@ -484,8 +484,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 						"Switch Retiring and Surviving Concept", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 				if (result == JOptionPane.OK_OPTION) {
 					OWLClass temp = target;
-	    			setMergeTarget(source);
-	    			setMergeSource(temp);
+	    			setTarget(source);
+	    			setSource(temp);
 	    			this.fireChange(new EditTabChangeEvent(this, ComplexEditType.MERGE));
 					return false;
 				} 
@@ -841,6 +841,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	fireChange(new EditTabChangeEvent(this, ComplexEditType.RESET));
     	current_op = new ComplexOperation();
     }
+   
     	
     public boolean isWorkFlowManager() { 
     	if (clientSession.getActiveClient() != null) {
@@ -1237,11 +1238,20 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     				subj = ((OWLSubClassOfAxiom) ax).getSubClass().asOWLClass();
     			} else if (ax instanceof OWLEquivalentClassesAxiom) {
     				Set<OWLClassExpression> exps = ((OWLEquivalentClassesAxiom) ax).getClassExpressions();
+    				OWLClass tmp = null;
+    				boolean found_existing_subject = false;
     				for (OWLClassExpression exp : exps) {
     					if (exp instanceof OWLClass) {
-    						subj = exp.asOWLClass();
-    						break;
+    						if (result.contains(exp.asOWLClass())) {
+    							found_existing_subject = true;
+    							break;    							
+    						} else {
+    							tmp = exp.asOWLClass();
+    						}
     					}
+    				}
+    				if (!found_existing_subject) {
+    					subj = tmp;
     				}
     			}
     			if (subj != null) {
@@ -2173,7 +2183,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     				OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), df.getOWLLiteral(new_val));
     				new_anns.add(new_ann); 
-    			}
+    			} 
     		}
 
 
@@ -2186,6 +2196,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(new_val));
     				new_anns.add(new_ann);
 
+    			} else {
+    				if (is_required(prop)) {
+    					JOptionPane.showMessageDialog(this, "Complex property missing required qualifier " +
+    							prop.getIRI().getShortForm(), "Warning", JOptionPane.WARNING_MESSAGE);
+    					return false; 
+    				}
     			}
     		}
 
@@ -2210,6 +2226,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
     				anns.add(new_ann);
 
+    			}  else {
+    				if (is_required(prop)) {
+    					JOptionPane.showMessageDialog(this, "Complex property missing required qualifier " +
+    							prop.getIRI().getShortForm(), "Warning", JOptionPane.WARNING_MESSAGE);
+    					return false; 
+    				}
     			}
     		}
 

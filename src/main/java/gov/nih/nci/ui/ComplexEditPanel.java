@@ -23,6 +23,9 @@ import javax.swing.JSplitPane;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.frame.OWLAnnotationsFrame;
+import org.protege.editor.owl.ui.frame.OWLFrameObject;
+import org.protege.editor.owl.ui.frame.OWLFrameSection;
+import org.protege.editor.owl.ui.frame.OWLFrameSectionRow;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
@@ -91,7 +94,8 @@ public class ComplexEditPanel extends JPanel {
         this.owlEditorKit = editorKit;
         this.upperPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
-        				NCIEditTab.currentTab().getImmutableProperties()));        
+        				NCIEditTab.currentTab().getImmutableProperties()));
+           
         this.lowerPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
         				NCIEditTab.currentTab().getImmutableProperties()));
@@ -429,18 +433,18 @@ public class ComplexEditPanel extends JPanel {
     		setRootObjects(cls, target);
     		
     		
-    		NCIEditTab.currentTab().setMergeTarget(target);   		
-    		NCIEditTab.currentTab().setMergeSource(cls);
+    		NCIEditTab.currentTab().setTarget(target);   		
+    		NCIEditTab.currentTab().setSource(cls);
     		
     	} else if (c.equals(this.upperSplitPane)) {
     		this.upperPanelAnn.setRootObject(cls.getIRI());
     		this.upperPanelClass.setRootObject(cls);
-    		NCIEditTab.currentTab().setMergeSource(cls);
+    		NCIEditTab.currentTab().setSource(cls);
     		
     	} else {
     		this.lowerPanelAnn.setRootObject(cls.getIRI());
     		this.lowerPanelClass.setRootObject(cls);
-    		NCIEditTab.currentTab().setMergeTarget(cls);
+    		NCIEditTab.currentTab().setTarget(cls);
     		
     	}
     	
@@ -454,6 +458,12 @@ public class ComplexEditPanel extends JPanel {
     }
     
     private void checkStatus() {
+    	if (isMergeBtnSelected()) {
+    		NCIEditTab.currentTab().getCurrentOp().setType(ComplexEditType.MERGE);
+    	}
+    	if (isDualBtnSelected()) {
+    		NCIEditTab.currentTab().getCurrentOp().setType(ComplexEditType.DUAL);
+    	}
     	if (NCIEditTab.currentTab().readyMerge() && isMergeBtnSelected()) {
     		saveButton.setText("Merge");
     		enableButtons();
@@ -461,8 +471,7 @@ public class ComplexEditPanel extends JPanel {
     		enableClear();
     	}
     }
-
-
+    
 	public void setRootObjects(OWLClass top, OWLClass bot) {
 		this.upperPanelAnn.setRootObject(top.getIRI());
 		this.upperPanelClass.setRootObject(top);
@@ -476,10 +485,9 @@ public class ComplexEditPanel extends JPanel {
     	clearButton.setEnabled(true);
     	
     }
-	
+		
 	public void enableClear() {
-    	clearButton.setEnabled(true);
-    	
+    	clearButton.setEnabled(true);    	
     }
     
     public void disableButtons() {

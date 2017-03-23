@@ -1,12 +1,6 @@
 package gov.nih.nci.ui.action;
 
-import static gov.nih.nci.ui.event.ComplexEditType.CLONE;
-import static gov.nih.nci.ui.event.ComplexEditType.EDIT;
-import static gov.nih.nci.ui.event.ComplexEditType.MERGE;
-import static gov.nih.nci.ui.event.ComplexEditType.PREMERGE;
-import static gov.nih.nci.ui.event.ComplexEditType.PRERETIRE;
-import static gov.nih.nci.ui.event.ComplexEditType.RETIRE;
-import static gov.nih.nci.ui.event.ComplexEditType.SPLIT;
+import static gov.nih.nci.ui.event.ComplexEditType.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +130,7 @@ public class ComplexOperation {
 			}
 		} 
 		
-		if (type == MERGE) {
+		if (type == MERGE || type == DUAL) {
 			if ((source == null) || (target == null)) {
 				return true;
 			}
