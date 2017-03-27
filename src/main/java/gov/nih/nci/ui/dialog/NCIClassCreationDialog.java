@@ -33,6 +33,7 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.entity.CustomOWLEntityFactory;
 import org.protege.editor.owl.model.entity.OWLEntityCreationException;
 import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
+import org.protege.editor.owl.model.find.OWLEntityFinder;
 import org.protege.editor.owl.ui.UIHelper;
 import org.protege.editor.owl.ui.clsdescriptioneditor.ExpressionEditorPreferences;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -157,10 +158,25 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	while (ret == JOptionPane.OK_OPTION) {
     		ret = new UIHelper(owlEditorKit).showValidatingDialog("Create a new " + type.getSimpleName(), this, this.preferredNameField);
     		if (ret == JOptionPane.OK_OPTION) {
-            	if (buildNewClass(getEntityName(), Optional.empty())) {
-            		return true;
-            	}
-            }
+    			OWLEntityFinder finder = owlEditorKit.getOWLModelManager().getOWLEntityFinder();
+    			Set<OWLClass> entities = finder.getMatchingOWLClasses(getEntityName());
+    			if (!entities.isEmpty()) {
+    				int allow = JOptionPane.showConfirmDialog(this, "Preferred name already exists", "warning",
+    						JOptionPane.OK_CANCEL_OPTION);
+    				if (allow == JOptionPane.OK_OPTION) {
+    					if (buildNewClass(getEntityName(), Optional.empty())) {
+    						return true;
+    					}
+
+    				}    				
+    			} else {
+    				if (buildNewClass(getEntityName(), Optional.empty())) {
+    					return true;
+    				}
+    			}
+
+
+    		}
     	} 
     	return false;
     }
@@ -189,17 +205,18 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
             entityIRIField.setText(iriString);
         }
         catch (RuntimeException | OWLEntityCreationException e) {
+        	// safely ignore these, as the name is checked later
             Throwable cause = e.getCause();
             if (cause != null) {
-                if(cause instanceof OWLOntologyCreationException) {
-                    messageArea.setText("Entity already exists");
+                if(cause instanceof OWLEntityCreationException) {
+                    //messageArea.setText("Entity already exists");
                 }
                 else {
-                    messageArea.setText(cause.getMessage());
+                    //messageArea.setText(cause.getMessage());
                 }
             }
             else {
-                messageArea.setText(e.getMessage());
+                //messageArea.setText(e.getMessage());
             }
         }
 
