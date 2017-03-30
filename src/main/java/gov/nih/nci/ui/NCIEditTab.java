@@ -1,5 +1,4 @@
 package gov.nih.nci.ui;
-
 import static gov.nih.nci.ui.NCIEditTabConstants.CODE_PROP;
 import static gov.nih.nci.ui.NCIEditTabConstants.COMPLEX_PROPS;
 import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ASSOC;
@@ -13,22 +12,16 @@ import static gov.nih.nci.ui.NCIEditTabConstants.EDITOR_NOTE;
 import static gov.nih.nci.ui.NCIEditTabConstants.FULL_SYN;
 import static gov.nih.nci.ui.NCIEditTabConstants.IMMUTABLE_PROPS;
 import static gov.nih.nci.ui.NCIEditTabConstants.LABEL_PROP;
-import static gov.nih.nci.ui.NCIEditTabConstants.MERGE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_SOURCE;
 import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
 import static gov.nih.nci.ui.NCIEditTabConstants.PREF_NAME;
 import static gov.nih.nci.ui.NCIEditTabConstants.PRE_MERGE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.PRE_RETIRE_ROOT;
-import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_CONCEPTS_ROOT;
+import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.SEMANTIC_TYPE;
 import static gov.nih.nci.ui.NCIEditTabConstants.SPLIT_FROM;
-import static gov.nih.nci.ui.event.ComplexEditType.CLONE;
-import static gov.nih.nci.ui.event.ComplexEditType.MODIFY;
-import static gov.nih.nci.ui.event.ComplexEditType.PREMERGE;
-import static gov.nih.nci.ui.event.ComplexEditType.PRERETIRE;
-import static gov.nih.nci.ui.event.ComplexEditType.RETIRE;
-import static gov.nih.nci.ui.event.ComplexEditType.SPLIT;
+import static gov.nih.nci.ui.event.ComplexEditType.*;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
 import java.time.LocalDateTime;
@@ -120,16 +113,9 @@ import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.impl.RoleIdImpl;
 import edu.stanford.protege.search.lucene.tab.engine.BasicQuery;
 import edu.stanford.protege.search.lucene.tab.engine.FilteredQuery;
-import edu.stanford.protege.search.lucene.tab.engine.NegatedQuery;
-import edu.stanford.protege.search.lucene.tab.engine.NestedQuery;
 import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabResultHandler;
-import edu.stanford.protege.search.lucene.tab.ui.BasicQueryPanel;
-import edu.stanford.protege.search.lucene.tab.ui.MatchCriteria;
-import edu.stanford.protege.search.lucene.tab.ui.NegatedQueryPanel;
-import edu.stanford.protege.search.lucene.tab.ui.NestedQueryPanel;
-import edu.stanford.protege.search.lucene.tab.ui.QueryPanel;
 import gov.nih.nci.ui.action.ComplexOperation;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
@@ -162,13 +148,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private Set<OWLAnnotationProperty> annProps = null;
 	
-	//private OWLClass source;
-	//private OWLClass target;
-	//private OWLClass class_to_retire;
-	
 	private boolean editInProgress = false;
 	private OWLClass currentlySelected = null;
-	//private OWLClass currentlyEditing = null;
 	private boolean isNew = false;
 	
 	
@@ -218,8 +199,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return isNew;
 	}
 	
-	
-	//private ComplexEditType current_op = null;
 	private ComplexOperation current_op = new ComplexOperation();
 	
 	public void setOp(ComplexEditType op) {
@@ -2700,16 +2679,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void submitRetireHistory() {
     	OWLClass cls = current_op.getRetireClass();
-    	
+
     	String c = getCodeOrIRI(cls);
-    	
+
     	String n = getRDFSLabel(cls).get();
     	String op = getCurrentOp().toString();
     	String ref = "";
-    	//NCIEditTab.currentTab().putHistory(c, n, op, ref);
-    	for (OWLClass clas : current_op.getRetireParents()) {
-    		ref = getCodeOrIRI(clas);
-    		putHistory(c, n, op, ref);
+    	if (current_op.getRetireParents() != null) {
+    		for (OWLClass clas : current_op.getRetireParents()) {
+    			ref = getCodeOrIRI(clas);
+    			putHistory(c, n, op, ref);
+    		}
     	}
     }
     

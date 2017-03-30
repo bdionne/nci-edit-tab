@@ -48,24 +48,7 @@ public class NCIEditTabConstants {
 	public static OWLClass RETIRE_ROOT;
 	public static OWLClass RETIRE_CONCEPTS_ROOT;
 	
-	
-	
-	public static final Operation MERGE = factory.getSystemOperation(
-            factory.getOperationId("merge"), factory.getName("Merge"),
-            factory.getDescription("Accept a proposed merge of two classes"), OperationType.WRITE, Operation.Scope.POLICY);
-    
-    public static final Operation SPLIT = factory.getSystemOperation(
-            factory.getOperationId("split"), factory.getName("Split"),
-            factory.getDescription("Split two classes"), OperationType.WRITE, Operation.Scope.POLICY);
-    
-    public static final Operation CLONE = factory.getSystemOperation(
-            factory.getOperationId("clone"), factory.getName("Clone"),
-            factory.getDescription("Clone an existing class"), OperationType.WRITE, Operation.Scope.POLICY);
-    
-    public static final Operation PRE_RETIRE = factory.getSystemOperation(
-            factory.getOperationId("pre-retire"), factory.getName("Pre-retire"),
-            factory.getDescription("Propose the retirement of a class"), OperationType.WRITE, Operation.Scope.POLICY);
-    
+	// from metaproject, needed to check if user can retire
     public static final Operation RETIRE = factory.getSystemOperation(
             factory.getOperationId("retire"), factory.getName("Retire"),
             factory.getDescription("Accept a proposed retirement of a class"), OperationType.WRITE, Operation.Scope.POLICY);
