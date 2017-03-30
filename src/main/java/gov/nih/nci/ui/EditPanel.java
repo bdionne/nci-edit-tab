@@ -339,7 +339,6 @@ public class EditPanel extends JPanel {
                 if (shouldSave()) {
                 	NCIEditTab.currentTab().syncPrefName(prefNameText.getText());
                 	NCIEditTab.currentTab().commitChanges();
-                	submitHistory();
                 	origPref = prefNameText.getText();
                 	NCIEditTab.currentTab().refreshNavTree();
                 	//disableButtons();
@@ -359,7 +358,7 @@ public class EditPanel extends JPanel {
             {
             	NCIEditTab.currentTab().undoChanges();            	
             	NCIEditTab.currentTab().setEditInProgress(false);
-            	NCIEditTab.currentTab().selectClass(NCIEditTab.currentTab().getCurrentlyEditing());
+            	//NCIEditTab.currentTab().selectClass(NCIEditTab.currentTab().getCurrentlySelected());
             	NCIEditTab.currentTab().refreshNavTree();
             	disableButtons();
             	
@@ -380,26 +379,7 @@ public class EditPanel extends JPanel {
     	}
     }
     
-    public void submitHistory() {
-    	OWLClass cls = list.getRootObject();
-    	
-    	String c;
-    	Optional<String> cs = NCIEditTab.currentTab().getCode(cls);
-    	if (cs.isPresent()) {
-    		c = cs.get();    		
-    	} else {
-    	  c = cls.getIRI().getShortForm();
-    	}
-    	
-    	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
-    	String op = ComplexEditType.MODIFY.toString();
-    	if (NCIEditTab.currentTab().isNew()) {
-    		op = ComplexEditType.CREATE.toString();
-    	}
-    	String ref = "";
-    	NCIEditTab.currentTab().putHistory(c, n, op, ref);
-    	NCIEditTab.currentTab().setNew(false);
-    }
+    
     
     
     

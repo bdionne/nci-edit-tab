@@ -184,11 +184,9 @@ public class ComplexEditPanel extends JPanel {
             		}
             	} else {
             		NCIEditTab.currentTab().commitChanges();
-            		submitHistory();
             		NCIEditTab.currentTab().completeOp();
             		
             		setEnableUnselectedRadioButtons(true);
-                	//Execute when button is pressed
                 	upperPanelAnn.setRootObject(null);
                 	lowerPanelAnn.setRootObject(null);
                 	upperPanelClass.setRootObject(null);
@@ -238,92 +236,6 @@ public class ComplexEditPanel extends JPanel {
     	saveButton.setText("Save");    	
     	disableButtons();
     }
-    
-    public void submitHistory() {
-    	OWLClass cls = null;
-    	OWLClass ref_cls = null;
-    	if (isSplitting() ||
-    			isCloning()) {
-    		cls = NCIEditTab.currentTab().getCurrentOp().getSource();
-    		ref_cls = NCIEditTab.currentTab().getCurrentOp().getTarget();
-    	} else {
-    		cls = NCIEditTab.currentTab().getCurrentOp().getSource();
-    		ref_cls = NCIEditTab.currentTab().getCurrentOp().getTarget();    		
-    	}
-    	String c;
-    	Optional<String> cs = NCIEditTab.currentTab().getCode(cls);
-    	if (cs.isPresent()) {
-    		c = cs.get();    		
-    	} else {
-    	  c = cls.getIRI().getShortForm();
-    	}
-    	
-    	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
-    	String op = NCIEditTab.currentTab().getCurrentOp().toString();
-    	
-    	String ref;
-    	Optional<String> s_ref = NCIEditTab.currentTab().getCode(ref_cls);
-    	if (s_ref.isPresent()) {
-    		ref = s_ref.get();
-    	} else {
-    		ref = ref_cls.getIRI().getShortForm();
-    	}
-    	String ref_n = NCIEditTab.currentTab().getRDFSLabel(ref_cls).get();
-    	if (isSplitting()) {
-    		NCIEditTab.currentTab().putHistory(c, n, op, c);
-    		NCIEditTab.currentTab().putHistory(c, n, op, ref);
-    		NCIEditTab.currentTab().putHistory(ref, ref_n, ComplexEditType.CREATE.toString(), "");
-    		
-    	} else if (isCloning()) {
-    		NCIEditTab.currentTab().putHistory(ref, ref_n, ComplexEditType.CREATE.toString(), "");
-    		
-    	} else if (isMerging()) {
-    		NCIEditTab.currentTab().putHistory(ref, ref_n, op, ref);
-    		NCIEditTab.currentTab().putHistory(c, n, op, ref);
-    		NCIEditTab.currentTab().putHistory(c, n, ComplexEditType.RETIRE.toString(), "");
-    		
-    	} 
-    	
-    }
-    
-    public List<History> createEVSHistory() {
-    	List<History> hist = new ArrayList<History>();
-    	String userId = NCIEditTab.currentTab().getUserId();
-    	
-    	OWLClass cls = null;
-    	OWLClass ref_cls = null;
-    	if (isSplitting() ||
-    			isCloning()) {
-    		cls = NCIEditTab.currentTab().getCurrentOp().getSource();
-    		ref_cls = NCIEditTab.currentTab().getCurrentOp().getTarget();
-    	} else {
-    		cls = NCIEditTab.currentTab().getCurrentOp().getSource();
-    		ref_cls = NCIEditTab.currentTab().getCurrentOp().getTarget();    		
-    	}
-    	String c = cls.getIRI().getShortForm();
-    	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
-    	String op = NCIEditTab.currentTab().getCurrentOp().toString();
-    	String ref = ref_cls.getIRI().getShortForm();
-    	String ref_n = NCIEditTab.currentTab().getRDFSLabel(ref_cls).get();
-    	if (isSplitting()) {
-    		hist.add(new History(userId, c, n, op, c));
-    		hist.add(new History(userId, c, n, op, ref));
-    		hist.add(new History(userId, ref, ref_n, ComplexEditType.CREATE.toString(), ""));   		
-    	} else if (isCloning()) {
-    		hist.add(new History(userId, ref, ref_n, ComplexEditType.CREATE.toString(), ""));
-    		
-    	} else if (isMerging()) {
-    		hist.add(new History(userId, ref, ref_n, op, ref));
-    		hist.add(new History(userId, c, n, op, ref));
-    		hist.add(new History(userId, c, n, ComplexEditType.RETIRE.toString(), ""));
-    		
-    	} 
-    	
-    	return hist;
-    	
-    	
-    }
-    
     private JPanel createRadioButtonPanel() {
     	
     	radioButtonPanel = new JPanel();
@@ -496,25 +408,8 @@ public class ComplexEditPanel extends JPanel {
     	
     }
     
-    private boolean isSplitting() {
-    	return NCIEditTab.currentTab().getCurrentOp().isSplitting();
-    }
-    
-    private boolean isCloning() {
-    	return NCIEditTab.currentTab().getCurrentOp().isCloning();
-    }
-    
-    private boolean isMerging() {
-    	return NCIEditTab.currentTab().getCurrentOp().isMerging();
-    }
-    
     private boolean isRetiring() {
     	return NCIEditTab.currentTab().getCurrentOp().isRetiring();
-    }
-    
-    private void setOp(ComplexEditType op) {
-    	NCIEditTab.currentTab().getCurrentOp().setType(op);
-    	
     }
 	
 	

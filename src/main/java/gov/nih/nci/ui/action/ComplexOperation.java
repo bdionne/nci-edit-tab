@@ -36,6 +36,11 @@ public class ComplexOperation {
 	public OWLClass getRetireClass() { return class_to_retire; }
 	public void setRetireClass(OWLClass c) { class_to_retire = c; }
 	
+	private List<OWLClass> retire_parents = null;
+	public List<OWLClass> getRetireParents() { return retire_parents; }
+	public void setRetireParents(List<OWLClass> p) { retire_parents = p; }
+	
+	
 	
 	public ComplexOperation() {
 		
@@ -65,6 +70,10 @@ public class ComplexOperation {
 	
 	public boolean isCloning() {
 		return (type == ComplexEditType.CLONE);
+	}
+	
+	public boolean isDual() {
+		return (type == ComplexEditType.DUAL);
 	}
 	
 	public void cancelSplit() {
@@ -166,6 +175,10 @@ public class ComplexOperation {
 		
 		return false;
 		
+	}
+	
+	public String toString() {
+		return type.toString();
 	}
 
 }

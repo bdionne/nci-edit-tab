@@ -155,7 +155,6 @@ public class RetirePanel extends JPanel {
     			} else if (retireButton.getText().equals("Save")) {
     				// TODO: refactor and move type check to edit tab
     				NCIEditTab.currentTab().commitChanges();
-    				submitHistory();
     				NCIEditTab.currentTab().completeRetire();
     				old_parents = null;
     				upperPanelList.setRootObject(null);
@@ -169,7 +168,8 @@ public class RetirePanel extends JPanel {
     				
     			} else {
     				// proceed to retire
-    				old_parents = NCIEditTab.currentTab().completeRetire(fixups); 
+    				NCIEditTab.currentTab().completeRetire(fixups); 
+    				old_parents = NCIEditTab.currentTab().getCurrentOp().getRetireParents();
     				if (!old_parents.isEmpty()) {
     					retireButton.setText("Save");    					
     				}
@@ -206,31 +206,7 @@ public class RetirePanel extends JPanel {
     	JOptionPane.showMessageDialog(this, "Can't retire until all usages are repaired", "Warning", JOptionPane.WARNING_MESSAGE);    	
     }
     
-    public void submitHistory() {
-    	OWLClass cls = this.classToRetire;
-    	
-    	String c;
-    	Optional<String> cs = NCIEditTab.currentTab().getCode(cls);
-    	if (cs.isPresent()) {
-    		c = cs.get();    		
-    	} else {
-    	  c = cls.getIRI().getShortForm();
-    	}
-    	
-    	String n = NCIEditTab.currentTab().getRDFSLabel(cls).get();
-    	String op = NCIEditTab.currentTab().getCurrentOp().toString();
-    	String ref = "";
-    	//NCIEditTab.currentTab().putHistory(c, n, op, ref);
-    	for (OWLClass clas : old_parents) {
-    		Optional<String> c_ref = NCIEditTab.currentTab().getCode(clas);
-    		if (c_ref.isPresent()) {
-    			ref = c_ref.get();
-    		} else {
-    			ref = clas.getIRI().getShortForm();
-    		}
-    		NCIEditTab.currentTab().putHistory(c, n, op, ref);
-    	}
-    }
+    
     
     
     public void approveRetire() {

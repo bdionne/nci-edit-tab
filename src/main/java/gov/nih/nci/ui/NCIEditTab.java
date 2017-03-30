@@ -640,7 +640,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
-    public List<OWLClass> completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {
+    public void completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {
     	
     	List<OWLClass> old_parents = new ArrayList<OWLClass>();
     	
@@ -656,8 +656,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
     	List<OWLOntologyChange> changes = addNotes(editornote, designnote, class_to_retire);
     	if (changes.isEmpty()) {
-    		fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));			
-			return old_parents;    		
+    		fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
+    		current_op.setRetireParents(old_parents);
+    		return;
     	}
     	
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();    	
@@ -733,7 +734,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
         getOWLModelManager().applyChanges(changes);
         
-        return old_parents;
+        current_op.setRetireParents(old_parents);
     }
     
     private List<OWLOntologyChange> addParentRoleAssertions(List<OWLOntologyChange> changes, OWLClassExpression exp, OWLClass cls) {
@@ -1018,6 +1019,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     					target.getIRI().getShortForm() + ") - " +
     					type.name();
 
+    		} else if (type == ComplexEditType.DUAL)  {
+    			comment = label + "(" +
+    					source.getIRI().getShortForm() + " & " +
+    					target.getIRI().getShortForm() + ") - " +
+    					type.name();
+
     		} else if (type == ComplexEditType.RETIRE)  {
     			comment = label + "(" +
     					current_op.getRetireClass().getIRI().getShortForm() + ") - " +
@@ -1031,8 +1038,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		CommitBundle commitBundle = new CommitBundleImpl(base, commit);
 		ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
 		clientSession.getActiveVersionOntology().update(hist);
-		// handled by commit listener
-		//resetHistory();
+		// submit history after the commit but before you broadcast the news
+		submitHistory();
 		clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
                 hist.getHeadRevision(),
                 hist.getMetadataForRevision(hist.getHeadRevision()),
@@ -2648,6 +2655,91 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
     	return srh.exists(); 
     }
+    
+    public void submitHistory() {
+    	if (current_op.isRetiring()) {
+    		submitRetireHistory();
+    	} else if (current_op.isCloning() || current_op.isSplitting() ||
+    			current_op.isMerging() || current_op.isDual()) {
+    		submitComplexHistory();
+    	} else {
+    		submitEditHistory();
+    	}
+    }
+    
+    
+    public void submitComplexHistory() {
+    	
+    	OWLClass cls = getCurrentOp().getSource();
+		OWLClass ref_cls = getCurrentOp().getTarget();
+    	
+    	String c = getCodeOrIRI(cls);
+    	
+    	String n = getRDFSLabel(cls).get();
+    	String op = getCurrentOp().toString();
+    	
+    	String ref = getCodeOrIRI(ref_cls);
+    	
+    	String ref_n = getRDFSLabel(ref_cls).get();
+    	if (current_op.isSplitting()) {
+    		putHistory(c, n, op, c);
+    		putHistory(c, n, op, ref);
+    		putHistory(ref, ref_n, ComplexEditType.CREATE.toString(), "");    		
+    	} else if (current_op.isCloning()) {
+    		putHistory(ref, ref_n, ComplexEditType.CREATE.toString(), "");    		
+    	} else if (current_op.isMerging()) {
+    		putHistory(ref, ref_n, op, ref);
+    		putHistory(c, n, op, ref);
+    		putHistory(c, n, ComplexEditType.RETIRE.toString(), "");    		
+    	} else if (current_op.isDual()) {
+    		putHistory(c, n, ComplexEditType.MODIFY.toString(), "");
+    		putHistory(ref, ref_n, ComplexEditType.MODIFY.toString(), "");    		
+    	}
+    	
+    }
+    
+    public void submitRetireHistory() {
+    	OWLClass cls = current_op.getRetireClass();
+    	
+    	String c = getCodeOrIRI(cls);
+    	
+    	String n = getRDFSLabel(cls).get();
+    	String op = getCurrentOp().toString();
+    	String ref = "";
+    	//NCIEditTab.currentTab().putHistory(c, n, op, ref);
+    	for (OWLClass clas : current_op.getRetireParents()) {
+    		ref = getCodeOrIRI(clas);
+    		putHistory(c, n, op, ref);
+    	}
+    }
+    
+    
+    public void submitEditHistory() {
+    	OWLClass cls = current_op.getCurrentlyEditing();
+    	
+    	String c = getCodeOrIRI(cls);
+    	
+    	String n = getRDFSLabel(cls).get();
+    	String op = ComplexEditType.MODIFY.toString();
+    	if (isNew()) {
+    		op = ComplexEditType.CREATE.toString();
+    	}
+    	String ref = "";
+    	putHistory(c, n, op, ref);
+    	setNew(false);
+    }
+    
+    private String getCodeOrIRI(OWLClass cls) {
+    	String c;
+    	Optional<String> cs = getCode(cls);
+    	if (cs.isPresent()) {
+    		c = cs.get();    		
+    	} else {
+    	  c = cls.getIRI().getShortForm();
+    	}
+    	return c;
+    }
+    
 
 	
 
