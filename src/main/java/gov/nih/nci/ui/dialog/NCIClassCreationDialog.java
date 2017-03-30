@@ -161,14 +161,28 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     			OWLEntityFinder finder = owlEditorKit.getOWLModelManager().getOWLEntityFinder();
     			Set<OWLClass> entities = finder.getMatchingOWLClasses(getEntityName());
     			if (!entities.isEmpty()) {
-    				int allow = JOptionPane.showConfirmDialog(this, "Preferred name already exists", "warning",
-    						JOptionPane.OK_CANCEL_OPTION);
-    				if (allow == JOptionPane.OK_OPTION) {
-    					if (buildNewClass(getEntityName(), Optional.empty())) {
-    						return true;
+    				boolean c_exists = false;
+    			
+    				for (OWLClass c : entities) {
+    					if (owlEditorKit.getModelManager().getRendering(c).equals(getEntityName())) {
+    						c_exists = true;
+    						break;
     					}
+    				}
+    				if (c_exists) {
+    					int allow = JOptionPane.showConfirmDialog(this, "Preferred name already exists", "warning",
+    							JOptionPane.OK_CANCEL_OPTION);
+    					if (allow == JOptionPane.OK_OPTION) {
+    						if (buildNewClass(getEntityName(), Optional.empty())) {
+    							return true;
+    						}
 
-    				}    				
+    					} 
+    				} else {
+    					if (buildNewClass(getEntityName(), Optional.empty())) {
+							return true;
+						}
+    				}
     			} else {
     				if (buildNewClass(getEntityName(), Optional.empty())) {
     					return true;
