@@ -659,6 +659,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
         	Set<OWLClassExpression> exps = ax1.getClassExpressions();
         	for (OWLClassExpression exp : exps) {
+        		if (exp instanceof OWLClass) {
+            		old_parents.add((OWLClass) exp);
+            	}
         		changes = addParentRoleAssertions(changes, exp, class_to_retire);
         	}
         	changes.add(new RemoveAxiom(ontology, ax1));
