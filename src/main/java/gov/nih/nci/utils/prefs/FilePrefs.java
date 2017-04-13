@@ -96,7 +96,7 @@ public class FilePrefs extends AbstractPreferences {
 	  }
 	 
 	 
-	  protected void syncSpi() throws BackingStoreException
+	  protected synchronized void syncSpi() throws BackingStoreException
 	  {
 	    if (isRemoved()) return;
 	 
@@ -104,7 +104,7 @@ public class FilePrefs extends AbstractPreferences {
 	 
 	    if (!file.exists()) return;
 	 
-	    synchronized (file) {
+	    //synchronized (file) {
 	      Properties p = new Properties();
 	      try {
 	        p.load(new FileInputStream(file));
@@ -131,7 +131,7 @@ public class FilePrefs extends AbstractPreferences {
 	        throw new BackingStoreException(e);
 	      }
 	    }
-	  }
+	  //}
 	 
 	  private void getPath(StringBuilder sb)
 	  {
@@ -142,11 +142,11 @@ public class FilePrefs extends AbstractPreferences {
 	    sb.append(name()).append('/');
 	  }
 	 
-	  protected void flushSpi() throws BackingStoreException
+	  protected synchronized void flushSpi() throws BackingStoreException
 	  {
 	    final File file = FileBackingStorePrefsFactory.getPreferencesFile();
 	 
-	    synchronized (file) {
+	    //synchronized (file) {
 	      Properties p = new Properties();
 	      try {
 	 
@@ -190,7 +190,7 @@ public class FilePrefs extends AbstractPreferences {
 	      catch (IOException e) {
 	        throw new BackingStoreException(e);
 	      }
-	    }
+	    //}
 	  }
 
 }
