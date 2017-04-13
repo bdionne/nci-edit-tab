@@ -23,8 +23,7 @@ public class FilePrefs extends AbstractPreferences {
 	  private List<String> children_names;
 	  private boolean isRemoved = false;
 	 
-	  public FilePrefs(AbstractPreferences parent, String name)
-	  {
+	  public FilePrefs(AbstractPreferences parent, String name) {
 	    super(parent, name);
 	 
 	    log.info("Instantiating node " + name);
@@ -41,8 +40,7 @@ public class FilePrefs extends AbstractPreferences {
 	    }
 	  }
 	 
-	  protected void putSpi(String key, String value)
-	  {
+	  synchronized protected void putSpi(String key, String value) {
 	    root.put(key, value);
 	    try {
 	      flush();
@@ -52,13 +50,11 @@ public class FilePrefs extends AbstractPreferences {
 	    }
 	  }
 	 
-	  protected String getSpi(String key)
-	  {
+	  synchronized protected String getSpi(String key) {
 	    return root.get(key);
 	  }
 	 
-	  protected void removeSpi(String key)
-	  {
+	  synchronized protected void removeSpi(String key) {
 	    root.remove(key);
 	    try {
 	      flush();
@@ -68,25 +64,20 @@ public class FilePrefs extends AbstractPreferences {
 	    }
 	  }
 	 
-	  protected void removeNodeSpi() throws BackingStoreException
-	  {
+	  synchronized protected void removeNodeSpi() throws BackingStoreException {
 	    isRemoved = true;
 	    flush();
 	  }
 	 
-	  protected String[] keysSpi() throws BackingStoreException
-	  {
+	  synchronized protected String[] keysSpi() throws BackingStoreException {
 	    return root.keySet().toArray(new String[root.keySet().size()]);
 	  }
 	 
-	  protected String[] childrenNamesSpi() throws BackingStoreException
-	  {
+	  synchronized protected String[] childrenNamesSpi() throws BackingStoreException {
 		  return children_names.toArray(new String[children_names.size()]);
-	    //return children.keySet().toArray(new String[children.keySet().size()]);
 	  }
 	 
-	  protected FilePrefs childSpi(String name)
-	  {
+	  synchronized protected FilePrefs childSpi(String name) {
 	    FilePrefs child = children.get(name);
 	    if (child == null || child.isRemoved()) {
 	      child = new FilePrefs(this, name);
@@ -96,42 +87,41 @@ public class FilePrefs extends AbstractPreferences {
 	  }
 	 
 	 
-	  protected synchronized void syncSpi() throws BackingStoreException
-	  {
-	    if (isRemoved()) return;
-	 
-	    final File file = FileBackingStorePrefsFactory.getPreferencesFile();
-	 
-	    if (!file.exists()) return;
-	 
-	    //synchronized (file) {
-	      Properties p = new Properties();
-	      try {
-	        p.load(new FileInputStream(file));
-	 
-	        StringBuilder sb = new StringBuilder();
-	        getPath(sb);
-	        String path = sb.toString();
-	 
-	        final Enumeration<?> pnen = p.propertyNames();
-	        while (pnen.hasMoreElements()) {
-	          String propKey = (String) pnen.nextElement();
-	          if (propKey.startsWith(path)) {
-	            String subKey = propKey.substring(path.length());
-	            // Only load immediate descendants
-	            if (subKey.indexOf('/') == -1) {
-	              root.put(subKey, p.getProperty(propKey));
-	            } else {
-	            	children_names.add(subKey.substring(0,subKey.indexOf('/')));
-	            }
-	          }
-	        }
-	      }
-	      catch (IOException e) {
-	        throw new BackingStoreException(e);
-	      }
-	    }
-	  //}
+	  protected synchronized void syncSpi() throws BackingStoreException {
+		  
+		  if (isRemoved()) return;
+
+		  final File file = FileBackingStorePrefsFactory.getPreferencesFile();
+
+		  if (!file.exists()) return;
+
+		  Properties p = new Properties();
+		  try {
+			  p.load(new FileInputStream(file));
+
+			  StringBuilder sb = new StringBuilder();
+			  getPath(sb);
+			  String path = sb.toString();
+
+			  final Enumeration<?> pnen = p.propertyNames();
+			  while (pnen.hasMoreElements()) {
+				  String propKey = (String) pnen.nextElement();
+				  if (propKey.startsWith(path)) {
+					  String subKey = propKey.substring(path.length());
+					  // Only load immediate descendants
+					  if (subKey.indexOf('/') == -1) {
+						  root.put(subKey, p.getProperty(propKey));
+					  } else {
+						  children_names.add(subKey.substring(0,subKey.indexOf('/')));
+					  }
+				  }
+			  }
+		  }
+		  catch (IOException e) {
+			  throw new BackingStoreException(e);
+		  }
+	  }
+	  
 	 
 	  private void getPath(StringBuilder sb)
 	  {
@@ -142,55 +132,65 @@ public class FilePrefs extends AbstractPreferences {
 	    sb.append(name()).append('/');
 	  }
 	 
-	  protected synchronized void flushSpi() throws BackingStoreException
-	  {
-	    final File file = FileBackingStorePrefsFactory.getPreferencesFile();
-	 
-	    //synchronized (file) {
-	      Properties p = new Properties();
-	      try {
-	 
-	        StringBuilder sb = new StringBuilder();
-	        getPath(sb);
-	        String path = sb.toString();
-	 
-	        if (file.exists()) {
-	          p.load(new FileInputStream(file));
-	 
-	          List<String> toRemove = new ArrayList<String>();
-	 
-	          // Make a list of all direct children of this node to be removed
-	          final Enumeration<?> pnen = p.propertyNames();
-	          while (pnen.hasMoreElements()) {
-	            String propKey = (String) pnen.nextElement();
-	            if (propKey.startsWith(path)) {
-	              String subKey = propKey.substring(path.length());
-	              // Only do immediate descendants
-	              if (subKey.indexOf('/') == -1) {
-	                toRemove.add(propKey);
-	              }
-	            }
-	          }
-	 
-	          // Remove them now that the enumeration is done with
-	          for (String propKey : toRemove) {
-	            p.remove(propKey);
-	          }
-	        }
-	 
-	        // If this node hasn't been removed, add back in any values
-	        if (!isRemoved) {
-	          for (String s : root.keySet()) {
-	            p.setProperty(path + s, root.get(s));
-	          }
-	        }
-	 
-	        p.store(new FileOutputStream(file), "FilePreferences");
-	      }
-	      catch (IOException e) {
-	        throw new BackingStoreException(e);
-	      }
-	    //}
+	  protected synchronized void flushSpi() throws BackingStoreException {
+		  
+		  final File file = FileBackingStorePrefsFactory.getPreferencesFile();
+
+
+		  try {
+
+			  StringBuilder sb = new StringBuilder();
+			  getPath(sb);
+			  String path = sb.toString();
+			  Properties p = new Properties();
+			  if (file.exists()) {
+				  
+				  p.load(new FileInputStream(file));
+
+				  List<String> toRemove = new ArrayList<String>();
+
+				  // Make a list of all direct children of this node to be removed
+				  final Enumeration<?> pnen = p.propertyNames();
+				  while (pnen.hasMoreElements()) {
+					  String propKey = (String) pnen.nextElement();
+					  if (propKey.startsWith(path)) {
+						  String subKey = propKey.substring(path.length());
+						  // Only do immediate descendants
+						  if (subKey.indexOf('/') == -1) {
+							  //System.out.println("Adding key to remove " + propKey + " path " +
+						  //path);
+							  toRemove.add(propKey);
+						  }
+					  }
+				  }
+
+				  // Remove them now that the enumeration is done with
+				  for (String propKey : toRemove) {
+					  //System.out.println("Removing  " + propKey);
+					  p.remove(propKey);
+				  }
+
+
+				  // If this node hasn't been removed, add back in any values
+				  if (!isRemoved) {
+					  for (String s : root.keySet()) {
+						  //System.out.println("Adding  " + s);
+						  p.setProperty(path + s, root.get(s));
+					  }
+				  }
+				  
+			  }
+			  if (p.size() > 0) {
+				  p.store(new FileOutputStream(file), "FilePreferences");
+			  } else {
+				  System.out.println("what happened");
+				  p.store(new FileOutputStream(file), "FilePreferences");
+				  System.out.println("wrote empty file");
+			  }
+		  }
+		  catch (IOException e) {
+			  throw new BackingStoreException(e);
+		  }
 	  }
 
 }

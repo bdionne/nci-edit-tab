@@ -23,7 +23,7 @@ public class FileBackingStorePrefsFactory implements PreferencesFactory {
 	    return userRoot();
 	  }
 	 
-	  public Preferences userRoot()
+	  public synchronized Preferences userRoot()
 	  {
 	    if (rootPreferences == null) {
 	      log.info("Instantiating root preferences");
@@ -35,7 +35,7 @@ public class FileBackingStorePrefsFactory implements PreferencesFactory {
 	 
 	  private static File preferencesFile;
 	 
-	  public static File getPreferencesFile()
+	  public static synchronized File getPreferencesFile()
 	  {
 	    if (preferencesFile == null) {
 	      String prefsFile = System.getProperty(SYSTEM_PROPERTY_FILE);
