@@ -40,7 +40,7 @@ public class FileBackingStorePrefsFactory implements PreferencesFactory {
 	    if (preferencesFile == null) {
 	      String prefsFile = System.getProperty(SYSTEM_PROPERTY_FILE);
 	      if (prefsFile == null || prefsFile.length() == 0) {
-	        prefsFile = System.getProperty("user.home") + File.separator + ".fileprefs";
+	        prefsFile = ".fileprefs";
 	      }
 	      preferencesFile = new File(prefsFile).getAbsoluteFile();
 	      log.info("Preferences file is " + preferencesFile);
