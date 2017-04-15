@@ -94,7 +94,6 @@
                         <Bundle-Vendor>Dionne Associates, LLC.</Bundle-Vendor>
                         <Import-Package>
                             edu.stanford.protege.search.*,
-                        	edu.stanford.protege.csv.export.*,
                         	org.protege.owlapi.inference.cls.*,
                         	org.protege.editor.owl.client.*,                        	
                         	okhttp3.*,                     	                                                    
