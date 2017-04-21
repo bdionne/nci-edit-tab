@@ -2400,25 +2400,56 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void syncPrefName(String preferred_name) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	syncPrefName(current_op.getCurrentlyEditing(), preferred_name, changes);
+    	ontology.getOWLOntologyManager().applyChanges(changes);
     }
     
     private void syncPrefName(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
     	if (!getRDFSLabel(cls).equals(preferred_name)) {
+    		OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
     		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
     			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
     				changes.add(new RemoveAxiom(ontology, ax));
-    				OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
+    				
     				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
     						.getOWLAnnotationAssertionAxiom(LABEL_PROP, cls.getIRI(), pref_name_val);
     				changes.add(new AddAxiom(ontology, ax2));
     			} else if (ax.getProperty().equals(NCIEditTabConstants.PREF_NAME)) {
     				changes.add(new RemoveAxiom(ontology, ax));
-    				OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
     				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
     						.getOWLAnnotationAssertionAxiom(PREF_NAME, cls.getIRI(), pref_name_val);
     				changes.add(new AddAxiom(ontology, ax2));
     				
+    			} else if (ax.getProperty().equals(NCIEditTabConstants.FULL_SYN)) {
+    				if (isQualsPTNCI(ax)) {
+    					changes.add(new RemoveAxiom(ontology, ax));
+    					
+    					OWLDataFactory df = ontology.getOWLOntologyManager().getOWLDataFactory();
+    					
+    					OWLAxiom new_axiom = 
+    							df.getOWLAnnotationAssertionAxiom(NCIEditTabConstants.FULL_SYN, cls.getIRI(), pref_name_val);
+    					
+    					Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
+    					Set<OWLAnnotationProperty> req_props = NCIEditTab.currentTab()
+    							.getRequiredAnnotationsForAnnotation(NCIEditTabConstants.FULL_SYN);    					
+    					for (OWLAnnotationProperty prop : req_props) {
+    						
+    						String val = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(prop));
+    						if (val == null) {
+    							val = "No_Default";
+
+    						}
+    						OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+    						anns.add(new_ann);
+
+
+    					}    					
+    					OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
+    							
+    					changes.add(new AddAxiom(ontology, new_new_axiom));
+    					
+    					
+    				}
     			}
     			
     		}   		
