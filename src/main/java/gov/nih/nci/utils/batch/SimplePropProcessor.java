@@ -113,10 +113,10 @@ public class SimplePropProcessor extends EditProcessor {
 				
 		switch (operation) {
 		case DELETE:
-			tab.removeAnnotationToClass(classToEdit, ap, prop_value);
+			tab.removeAnnotationFromClass(classToEdit, ap, prop_value);
 			break;
 		case MODIFY:
-			tab.removeAnnotationToClass(classToEdit, ap, prop_value);
+			tab.removeAnnotationFromClass(classToEdit, ap, prop_value);
 			tab.addAnnotationToClass(classToEdit, ap, new_prop_value);
 			possiblySyncPreferredTerm(classToEdit, ap, new_prop_value);			
 			break;

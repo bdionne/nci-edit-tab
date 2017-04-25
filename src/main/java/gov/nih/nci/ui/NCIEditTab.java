@@ -1021,7 +1021,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		ChangeHistory hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
 		clientSession.getActiveVersionOntology().update(hist);
 		// submit history after the commit but before you broadcast the news
-		submitHistory();
+		if (!inBatchMode) 
+			submitHistory();
 		clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
                 hist.getHeadRevision(),
                 hist.getMetadataForRevision(hist.getHeadRevision()),
@@ -1934,10 +1935,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		  
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), prop)) {
 			OWLAnnotationValue av = annotation.getValue();
-			com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
-			if (ol.isPresent()) {
-				values.add(ol.get().getLiteral());
-			}   
+			if (av instanceof IRI) {
+				values.add(av.toString());
+			} else {
+				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				if (ol.isPresent()) {
+					values.add(ol.get().getLiteral());
+				} 
+			}
 		}
 		
 		return values;		  
@@ -1991,14 +1996,25 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 	}
 	
-	public void removeAnnotationToClass(OWLClass ocl, OWLAnnotationProperty prop, String value) {
+	public void removeAnnotationFromClass(OWLClass ocl, OWLAnnotationProperty prop, String value) {
 		
 		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		
-		OWLLiteral lit_val = df.getOWLLiteral(value);
+	
 		
-		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), lit_val);
+		OWLAxiom ax = null;
+		
+		IRI dtyp = this.getDataType(prop);
+		if (dtyp.getShortForm().equals("anyURI")) {
+			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), IRI.create(value));			
+		} else if (dtyp.getShortForm().equals("string")) {
+			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), df.getOWLLiteral(value));			
+		} else {
+			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), df.getOWLLiteral(value,
+					df.getOWLDatatype(dtyp)));
+			
+		}
 		
 		changes.add(new RemoveAxiom(ontology, ax));
 		
