@@ -24,19 +24,21 @@ public class NCIClassSearcher implements ClassSearcher {
 	public OWLClass searchFor(Component parent) {		
 
 		final JButton okButton = new JButton( "OK" );
-		
+
 		LuceneQueryPanel panel = new LuceneQueryPanel(oek, LuceneQueryPanel.LuceneTabLayout.VERTICAL, okButton);
 		panel.setPreferredSize(new Dimension(600, 400));	
-		                		
-	    int response = JOptionPaneEx.showDialogUsingOkButton(parent,
-	    		"Lucene Query Dialog", panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, okButton);
-	    OWLClass output = null;
-	    if (response == JOptionPane.OK_OPTION) {
-	        output = panel.getSelectedEntity().asOWLClass();
-	    }	    
-	    panel.dispose();
-	    return output;
-	    
+
+		int response = JOptionPaneEx.showDialogUsingOkButton(parent,
+				"Lucene Query Dialog", panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, okButton);
+		OWLClass output = null;
+		if (response == JOptionPane.OK_OPTION) {
+			if (panel.getSelectedEntity() != null) {
+				output = panel.getSelectedEntity().asOWLClass();
+			}
+		}	    
+		panel.dispose();
+		return output;
+
 	}
 
 }
