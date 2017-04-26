@@ -150,6 +150,18 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     public String getEntityName() {
         return preferredNameField.getText().trim();
     }
+    
+    private String possiblyEscape(String s) {
+    	if (s.startsWith("'") &&
+    			s.endsWith("'")) {
+    		return s;    		
+    	}
+    	if (s.split(" ").length > 1) {
+    		return "'" + s + "'";
+    	} else {
+    		return s;
+    	}
+    }
 
 
 
@@ -164,7 +176,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     				boolean c_exists = false;
     			
     				for (OWLClass c : entities) {
-    					if (owlEditorKit.getModelManager().getRendering(c).equals(getEntityName())) {
+    					if (owlEditorKit.getModelManager().getRendering(c).equals(possiblyEscape(getEntityName()))) {
     						c_exists = true;
     						break;
     					}
