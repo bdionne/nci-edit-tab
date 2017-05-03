@@ -46,6 +46,7 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
 
 
     protected void clear() {
+    	//this.getRows().clear();
     }
 
 

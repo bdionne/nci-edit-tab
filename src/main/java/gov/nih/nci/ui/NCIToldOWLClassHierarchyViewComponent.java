@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
 import org.protege.editor.core.ui.view.DisposableAction;
@@ -187,9 +188,20 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	
 	@Override
 	public void setSelectedEntity(OWLClass entity) {
+		if (entity != null) {
 
-		getTree().setSelectedOWLObject(entity);		
-		NCIEditTab.currentTab().selectClass(entity);
+			getTree().setSelectedOWLObject(entity);	
+		
+			TreePath tp = getTree().getSelectionPath();
+			if (tp != null) {				
+				TreePath ptp = tp.getParentPath();
+				getTree().collapsePath(ptp);
+				getTree().expandPath(ptp);
+				getTree().setSelectionPath(tp);
+			}
+			//getTree().setSelectedOWLObject(entity);	
+			NCIEditTab.currentTab().selectClass(entity);
+		}
 
 	} 
 	

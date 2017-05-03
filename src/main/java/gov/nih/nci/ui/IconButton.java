@@ -14,7 +14,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import org.protege.editor.core.ui.error.ErrorLogPanel;
-import org.protege.editor.owl.client.diff.ui.GuiUtils;
+import org.protege.editor.owl.client.util.GuiUtils;
 
 public class IconButton extends JButton {
 	
