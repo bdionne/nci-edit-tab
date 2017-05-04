@@ -67,7 +67,6 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
 		}
 	};
 
-
     public NCIOWLAnnotationEditor(OWLEditorKit owlEditorKit, Set<OWLAnnotationProperty> filterProps) {
         this.owlEditorKit = owlEditorKit;
         tabbedPane = new JTabbedPane();
@@ -133,11 +132,7 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
         iriEditor.addSelectionListener(changeListener);
 
         final OWLConstantEditor constantEditor = new OWLConstantEditor(owlEditorKit);
-        // @@TODO add change listener
-
-        //final OWLAnonymousIndividualAnnotationValueEditor anonIndividualEditor = new OWLAnonymousIndividualAnnotationValueEditor(owlEditorKit);
-        // @@TODO add change listener
-        
+     
         final IRITextEditor textEditor = new IRITextEditor(owlEditorKit);
         textEditor.addStatusChangedListener(mergedVerificationListener);
         
@@ -195,7 +190,6 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
         result.add(constantEditor);
         result.add(iriEditor);
         result.add(textEditor);
-        //result.add(anonIndividualEditor);
         result.add(enumEditor);
 		return result;
 	}
@@ -216,12 +210,14 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
     }
 
 
-    public boolean setEditedObject(OWLAnnotation annotation) {
+    @SuppressWarnings("unchecked")
+	public boolean setEditedObject(OWLAnnotation annotation) {
         int tabIndex = -1;
         if (annotation != null) {
             annotationPropertySelector.setSelection(annotation.getProperty());
             for (int i = 0; i < editors.size(); i++) {
-            	OWLObjectEditor editor = editors.get(i);
+            	@SuppressWarnings("rawtypes")
+				OWLObjectEditor editor = editors.get(i);
             	// because we don't know the type of the editor we need to test
             	if (editor.canEdit(annotation.getValue())) {
             		if (editor instanceof EnumEditor) {
