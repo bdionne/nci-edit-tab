@@ -233,7 +233,7 @@ public class EditPanel extends JPanel {
     	prefNameText.getDocument().removeDocumentListener(doc_listen);
     	if (cls != null) {
 
-    		this.currentClass = cls;
+    		currentClass = cls;
 
     		Optional<String> ps = NCIEditTab.currentTab().getRDFSLabel(cls);
 
@@ -291,6 +291,7 @@ public class EditPanel extends JPanel {
     		prefNameText.setText(null);
     		codeText.setText("nocode");
     		genPropPanel.repaint();
+    		currentClass = null;
     	}
     	prefNameText.getDocument().addDocumentListener(doc_listen);
     }
