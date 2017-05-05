@@ -24,10 +24,12 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -259,6 +261,14 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         propertyTable.getColumnModel().addColumnModelListener(cl);
         propertyTable.getTableHeader().addMouseListener(cl);
 
+        DefaultTableCellRenderer alignRenderer = new DefaultTableCellRenderer();
+        alignRenderer.setVerticalAlignment(SwingConstants.TOP);
+        alignRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        int ccount = propertyTable.getColumnModel().getColumnCount();
+        for (int i=0; i<ccount; i++) {
+        	propertyTable.getColumnModel().getColumn(i).setCellRenderer(alignRenderer);
+        }
+        
         ProtegeManager.getInstance().getFrame(this.owlEditorKit.getOWLWorkspace()).addWindowListener(new WindowAdapter(){
         	public void windowClosing(WindowEvent e) {
         		saveColumnNameOrder();
