@@ -156,10 +156,27 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private boolean inBatchMode = false;
 	private ArrayList<OWLOntologyChange> batch_changes = new ArrayList<OWLOntologyChange>();
 	
+	private ArrayList<List<String>> batch_history = new ArrayList<List<String>>();
+	
+	private void addBatchHistory(OWLClass cls, String n, ComplexEditType typ) {
+		
+		String c = cls.getIRI().getShortForm().toString();
+		List<String> rec = new ArrayList<String>();
+		rec.add(c);
+		rec.add(n);
+		rec.add(typ.toString());
+		rec.add("");
+		
+		batch_history.add(rec);
+	}
+	
 	public void applyChanges() {
 		if (!batch_changes.isEmpty()) {
 			this.getOWLEditorKit().getOWLModelManager().applyChanges(batch_changes);
 			this.batch_changes.clear();
+			for (List<String> rec : batch_history) {
+				this.putHistory(rec.get(0), rec.get(1), rec.get(2), rec.get(3));
+			}
 		}
 	}
 	
@@ -1130,6 +1147,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}
     		if (dontApply) {
     			batch_changes.addAll(changes);
+    			addBatchHistory(newClass, prefName.get(), CREATE);
     		} else {
     			mngr.applyChanges(changes);
     		}
@@ -1640,6 +1658,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		if (inBatchMode) {
 			batch_changes.addAll(changes);
+			addBatchHistory(cls, this.getRDFSLabel(cls).get(), MODIFY);
 		} else {
 			getOWLEditorKit().getModelManager().applyChanges(changes);
 		}
@@ -1656,6 +1675,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		if (inBatchMode) {
 			batch_changes.addAll(changes);
+			addBatchHistory(cls, this.getRDFSLabel(cls).get(), MODIFY);
 		} else {
 			getOWLEditorKit().getModelManager().applyChanges(changes);
 		}
@@ -1668,6 +1688,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		if (inBatchMode) {
 			batch_changes.addAll(changes);
+			addBatchHistory(cls, this.getRDFSLabel(cls).get(), MODIFY);
 		} else {
 			getOWLEditorKit().getModelManager().applyChanges(changes);
 		}
@@ -1697,6 +1718,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 		if (inBatchMode) {
 			batch_changes.addAll(changes);
+			addBatchHistory(cls, this.getRDFSLabel(cls).get(), MODIFY);
 		} else {
 			getOWLEditorKit().getModelManager().applyChanges(changes);
 		}
@@ -1713,6 +1735,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			
 			if (inBatchMode) {
 				batch_changes.addAll(changes);
+				addBatchHistory(cls, this.getRDFSLabel(cls).get(), MODIFY);
 			} else {
 				getOWLEditorKit().getModelManager().applyChanges(changes);
 			}
@@ -1855,12 +1878,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				}
 			}
 		}
-
+        
 		if (!topOrBot(oobj)) {
 
 			JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " requires an rdfs:label, using IRI short form instead",
 					"Warning", JOptionPane.WARNING_MESSAGE);
 		}
+		
 		return Optional.of(oobj.getIRI().getShortForm());
 
 
@@ -1990,6 +2014,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		if (inBatchMode) {
 			batch_changes.addAll(changes);
+			this.addBatchHistory(ocl, this.getRDFSLabel(ocl).get(), MODIFY);
 		} else {
 			getOWLEditorKit().getModelManager().applyChanges(changes);
 		}
@@ -2020,6 +2045,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		if (inBatchMode) {
 			batch_changes.addAll(changes);
+			addBatchHistory(ocl, this.getRDFSLabel(ocl).get(), MODIFY);
 		} else {
 			getOWLEditorKit().getModelManager().applyChanges(changes);
 		}
