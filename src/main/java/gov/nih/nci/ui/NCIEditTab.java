@@ -41,6 +41,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
+import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.LocalHttpClient.UserType;
@@ -56,6 +57,7 @@ import org.protege.editor.owl.client.event.CommitOperationListener;
 import org.protege.editor.owl.client.ui.UserLoginPanel;
 import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.find.OWLEntityFinder;
 import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.UndoManagerListener;
 import org.protege.editor.owl.server.api.CommitBundle;
@@ -116,6 +118,7 @@ import edu.stanford.protege.search.lucene.tab.engine.FilteredQuery;
 import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabResultHandler;
+import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
 import gov.nih.nci.ui.action.ComplexOperation;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
@@ -2683,9 +2686,29 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	private boolean exists = false;
         	
         	private boolean ready = false;
+        	
+        	private OWLModelManager mgr;
+        	
+        	private String searchString;
+        	
+        	public MySearchTabResultHandler(OWLEditorKit kit, String str) {
+        		mgr = kit.getModelManager();
+        		searchString = str;
+        	}
 
 			public void searchFinished(Collection<OWLEntity> searchResults) {
-				exists = !searchResults.isEmpty();
+				OWLEntityFinder finder = mgr.getOWLEntityFinder();
+	        	Set<OWLEntity> foundEntities = new HashSet<OWLEntity>();
+				Set<OWLEntity> ents = finder.getMatchingOWLEntities(searchString);
+        		for (OWLEntity ent : ents) {
+        			String cs = mgr.getRendering(ent);
+        			String ucs = unescape(cs);
+        			if (ucs.toLowerCase().equals(searchString.toLowerCase())) {
+        				foundEntities.add(ent);
+        			}
+        		}
+
+				exists = !foundEntities.isEmpty();
 				ready = true;
 			}
 			
@@ -2694,7 +2717,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	
         };
         
-        MySearchTabResultHandler srh = new MySearchTabResultHandler();
+        MySearchTabResultHandler srh = new MySearchTabResultHandler(getOWLEditorKit(), name);
         
         searchManager.performSearch(userQuery, srh);
         
@@ -2709,6 +2732,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
         
     	return srh.exists(); 
+    }
+    
+    private String unescape(String s) {
+    	if (s.startsWith("'") &&
+    			s.endsWith("'")) {
+    		return s.substring(1, s.length() - 1);
+    	}
+    	return s;
     }
     
     public void submitHistory() {
