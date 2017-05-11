@@ -1,9 +1,11 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.List;
 import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import gov.nih.nci.ui.NCIEditTab;
 
@@ -117,8 +119,7 @@ public class SimplePropProcessor extends EditProcessor {
 			break;
 		case MODIFY:
 			tab.removeAnnotationFromClass(classToEdit, ap, prop_value);
-			tab.addAnnotationToClass(classToEdit, ap, new_prop_value);
-			possiblySyncPreferredTerm(classToEdit, ap, new_prop_value);			
+			tab.addAnnotationToClass(classToEdit, ap, new_prop_value);		
 			break;
 		case NEW:
 			tab.addAnnotationToClass(classToEdit, ap, prop_value);			
@@ -139,14 +140,6 @@ public class SimplePropProcessor extends EditProcessor {
 		return tab.checkType(propName, value);
 	}
 	
-	private boolean  checkBatchPropertyNotFullSynPT(String propName, String value) {
-		// TODO:
-		return true;
-	}
 	
-	public void possiblySyncPreferredTerm(OWLClass ocl, OWLAnnotationProperty prop,
-			String value) {
-		
-	}
 
 }

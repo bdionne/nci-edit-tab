@@ -2016,6 +2016,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		changes.add(new AddAxiom(ontology, ax));
 		
+		if (prop.equals(NCIEditTabConstants.PREF_NAME)) {
+			syncPrefName(ocl, value, changes);
+		}
+		
 		if (inBatchMode) {
 			batch_changes.addAll(changes);
 			this.addBatchHistory(ocl, this.getRDFSLabel(ocl).get(), MODIFY);
