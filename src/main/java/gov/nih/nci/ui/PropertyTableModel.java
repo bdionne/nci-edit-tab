@@ -316,7 +316,6 @@ public class PropertyTableModel extends AbstractTableModel {
 			annotations.clear();
 			assertions.clear();
 			String key;
-			int count = 0;
 			for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selection, ont)) {
 				OWLAnnotation annot = ax.getAnnotation();
 				
@@ -335,6 +334,17 @@ public class PropertyTableModel extends AbstractTableModel {
 					Set<OWLAnnotation> annotSet = ax.getAnnotations();
 					
 					for (OWLAnnotationProperty req_a : configuredAnnotations) {
+						key = NCIEditTab.currentTab().getRDFSLabel(req_a).get();
+						
+						// first make sure we have a columns list for this prop
+						if (annotations.containsKey(key)) {
+							
+						} else {
+							List<OWLAnnotation> aList = new ArrayList<OWLAnnotation>();
+							annotations.put(key,  aList);							
+						}
+						
+						// now check if a value exists in this row
 						OWLAnnotation found = null;
 						for (OWLAnnotation owl_a : annotSet) {
 							if (req_a.equals(owl_a.getProperty())) {
@@ -342,31 +352,13 @@ public class PropertyTableModel extends AbstractTableModel {
 							}
 						}
 						if (found != null) {
-							key = NCIEditTab.currentTab().getRDFSLabel(found.getProperty()).get();
-							if (annotations.containsKey(key)) {
-								int size = annotations.get(key).size();
-								while (size++ < count) {
-									annotations.get(key).add(null);
-								}
-								annotations.get(key).add(found);
-							} else {
-								List<OWLAnnotation> annotList = new ArrayList<OWLAnnotation>();
-								int j = 0;
-								while (j < count) {
-									annotList.add(null);
-									j++;
-								}
-								annotList.add(found); 
-								annotations.put(key, annotList);
-							}
-						} 
-						
+							annotations.get(key).add(found);
+						} else {
+							annotations.get(key).add(null);
+						}						
 					}
-					count++;
-				}
-				
-			}  
-			
+				}				
+			} 			
 		} else {
 			annotations.clear();
 		}
