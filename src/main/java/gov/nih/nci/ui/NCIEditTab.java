@@ -2231,7 +2231,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		for (OWLAnnotationProperty prop : req_props) {
     			String new_val = ann_vals.get(prop.getIRI().getShortForm());
 
-    			if (!new_val.isEmpty()) {
+    			if (new_val != null && !new_val.isEmpty()) {
     				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(new_val));
     				new_anns.add(new_ann);
 
@@ -2261,7 +2261,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     		for (OWLAnnotationProperty prop : req_props) {
     			String val = ann_vals.get(prop.getIRI().getShortForm());
-    			if (!val.isEmpty()) {
+    			if (val != null && !val.isEmpty()) {
     				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
     				anns.add(new_ann);
 
