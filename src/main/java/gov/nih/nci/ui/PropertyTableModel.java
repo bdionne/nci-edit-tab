@@ -56,8 +56,6 @@ public class PropertyTableModel extends AbstractTableModel {
 	private List<OWLAnnotationProperty> requiredAnnotationsList;
 	private Map<String, List<OWLAnnotation>> annotations = new HashMap<String, List<OWLAnnotation>>();
 	
-	//private Preferences prefs;
-	
 	private List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
 	
 	public OWLAnnotationAssertionAxiom getAssertion(int idx) {
@@ -67,22 +65,14 @@ public class PropertyTableModel extends AbstractTableModel {
 	public PropertyTableModel(OWLEditorKit k, OWLAnnotationProperty complexProperty) {
 		ont = k.getOWLModelManager().getActiveOntology();
 		complexProp = complexProperty;
-		String prefsID = getClass().toString() + NCIEditTab.currentTab().getRDFSLabel(complexProp).get();
-		//prefs = PreferencesManager.getInstance().getApplicationPreferences(prefsID);
 		configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(complexProp);
 		requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(configuredAnnotations);
 	}
 
 
-	/**
-	public Preferences getPrefs() {
-		return prefs;
-	}
-	**/
-
 	public int getRowCount() {
 		if (annotations.size() > 0) {
-			Iterator iter = annotations.keySet().iterator();
+			Iterator<String> iter = annotations.keySet().iterator();
 			while (iter.hasNext()) {	
 				return annotations.get(iter.next()).size();
 			}
@@ -269,7 +259,6 @@ public class PropertyTableModel extends AbstractTableModel {
 
 	private boolean isDataTypeCombobox( IRI dataType ) {
 		boolean result = false;
-		//if (!isDataTypeTextArea(dataType) && !isDataTypeTextField(dataType)) {
 		if (dataType.toString().endsWith("enum")) {
 			result = true;
 		}
@@ -302,22 +291,11 @@ public class PropertyTableModel extends AbstractTableModel {
 	}
 
 	public String getColumnName(int column) {
-		String complexPropName = NCIEditTab.currentTab().getRDFSLabel(getComplexProp()).get();
 		if (column == 0) {
 			return NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
 		}
 		return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
-		/**
-		List<String> column_names = prefs.getStringList(complexPropName, new ArrayList<String>());
-		if (column_names != null && (!column_names.isEmpty()) && (column < column_names.size())) {
-			return column_names.get(column);
-		} else {
-			if (column == 0) {
-				return NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
-			}
-			return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
-		}
-		**/
+		
 	}
 	
 	public String getDefaultColumnName(int column) {
@@ -328,8 +306,7 @@ public class PropertyTableModel extends AbstractTableModel {
 	}
 
 	public void setSelection(OWLClass cls) {
-
-		this.selection = cls;
+		selection = cls;
 		loadAnnotations();
 	}
 
@@ -345,7 +322,6 @@ public class PropertyTableModel extends AbstractTableModel {
 				
 				if (annot.getProperty().equals(this.complexProp)) {
 					assertions.add(ax);
-					//annotations.add(annot);
 					if (annot.getValue() != null) {
 						key = NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
 						if (annotations.containsKey(key)) {
