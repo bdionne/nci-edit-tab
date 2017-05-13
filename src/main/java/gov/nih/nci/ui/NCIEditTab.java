@@ -2017,7 +2017,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		changes.add(new AddAxiom(ontology, ax));
 		
 		if (prop.equals(NCIEditTabConstants.PREF_NAME)) {
-			syncPrefName(ocl, value, changes);
+			syncPrefNameLabelFullSyn(ocl, value, changes);
 		}
 		
 		if (inBatchMode) {
@@ -2449,11 +2449,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     // TODO: Add FULL_SYN without creating cycle
     public void syncPrefName(String preferred_name) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	syncPrefName(current_op.getCurrentlyEditing(), preferred_name, changes);
+    	syncPrefNameLabelFullSyn(current_op.getCurrentlyEditing(), preferred_name, changes);
     	ontology.getOWLOntologyManager().applyChanges(changes);
     }
     
-    private void syncPrefName(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
+    private void syncPrefNameLabelFullSyn(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
     	if (!getRDFSLabel(cls).equals(preferred_name)) {
     		OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
@@ -2479,21 +2479,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     					OWLAxiom new_axiom = 
     							df.getOWLAnnotationAssertionAxiom(NCIEditTabConstants.FULL_SYN, cls.getIRI(), pref_name_val);
     					
-    					Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
-    					Set<OWLAnnotationProperty> req_props = NCIEditTab.currentTab()
-    							.getRequiredAnnotationsForAnnotation(NCIEditTabConstants.FULL_SYN);    					
-    					for (OWLAnnotationProperty prop : req_props) {
-    						
-    						String val = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(prop));
-    						if (val == null) {
-    							val = "No_Default";
-
-    						}
-    						OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
-    						anns.add(new_ann);
-
-
-    					}    					
+    					Set<OWLAnnotation> anns = ax.getAnnotations();    					
+    					  					
     					OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
     							
     					changes.add(new AddAxiom(ontology, new_new_axiom));
@@ -2505,6 +2492,27 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}   		
     	}
     	
+    }
+    
+    private void syncPrefNameLabel(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
+    	//retrieve rdfs:label and adjust if needed
+    	if (!getRDFSLabel(cls).equals(preferred_name)) {
+    		OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
+    		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
+    			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
+    				changes.add(new RemoveAxiom(ontology, ax));
+    				
+    				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
+    						.getOWLAnnotationAssertionAxiom(LABEL_PROP, cls.getIRI(), pref_name_val);
+    				changes.add(new AddAxiom(ontology, ax2));
+    			} else if (ax.getProperty().equals(NCIEditTabConstants.PREF_NAME)) {
+    				changes.add(new RemoveAxiom(ontology, ax));
+    				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
+    						.getOWLAnnotationAssertionAxiom(PREF_NAME, cls.getIRI(), pref_name_val);
+    				changes.add(new AddAxiom(ontology, ax2));    				
+    			}    			
+    		}   		
+    	}    	
     }
     
     private boolean isQualsPTNCI(OWLAnnotationAssertionAxiom ax) {
@@ -2537,7 +2545,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		JOptionPane.showMessageDialog(this, "One and only one PT with source NCI is allowed.", "Warning", JOptionPane.WARNING_MESSAGE);
     		return false;
     	} else {
-    		syncPrefName(cls, assertions.get(0).getValue().asLiteral().get().getLiteral(), changes);
+    		syncPrefNameLabel(cls, assertions.get(0).getValue().asLiteral().get().getLiteral(), changes);
     		selectClass(cls);
     		return true;
     	}
@@ -2557,7 +2565,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			OWLAnnotationAssertionAxiom aax = (OWLAnnotationAssertionAxiom) ax;
     			if (isQualsPTNCI(aax)) {
     				//new action was a delete, so remove one, doesn't matter which
-    				assertions.remove(0);
+    				assertions.remove(aax);
     				
     			} 
     			
