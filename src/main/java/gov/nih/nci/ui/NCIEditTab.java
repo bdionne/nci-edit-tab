@@ -2218,7 +2218,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		for (OWLAnnotation annax : anns) {
     			String cv = annax.getProperty().getIRI().getShortForm();
     			String new_val = ann_vals.get(cv);
-    			if (!new_val.isEmpty()) {
+    			if (new_val != null && !new_val.isEmpty()) {
 
     				OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), df.getOWLLiteral(new_val));
     				new_anns.add(new_ann); 
