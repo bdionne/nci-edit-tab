@@ -115,6 +115,7 @@ import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.impl.RoleIdImpl;
 import edu.stanford.protege.search.lucene.tab.engine.BasicQuery;
 import edu.stanford.protege.search.lucene.tab.engine.FilteredQuery;
+import edu.stanford.protege.search.lucene.tab.engine.IndexDirMapper;
 import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabResultHandler;
@@ -428,7 +429,19 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		addListeners();
 		
-		getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(this.getOWLEditorKit()));		
+		getOWLEditorKit().getOWLWorkspace().setClassSearcher(new NCIClassSearcher(getOWLEditorKit()));
+		
+		((SearchTabManager) getOWLEditorKit().getSearchManager()).getSearchContext().setIndexDirMapper(
+				new IndexDirMapper() {
+
+					@Override
+					public String getIndexDirId(OWLOntology ont) {
+						return clientSession.getActiveProject().get();
+						
+					}
+					
+				});
+		
 	}
     
    

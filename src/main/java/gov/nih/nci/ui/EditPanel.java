@@ -61,14 +61,13 @@ public class EditPanel extends JPanel {
     
     private JTextField prefNameText;
     private String origPref = "";
+    private String newPref = "";
     private JTextField iri;
     private JTextField codeText;
 	
 	private JPanel buttonPanel;
 	
-	private JButton saveButton;
-    
-    private JButton cancelButton;
+	private JButton saveButton, cancelButton;
     
     private DocumentListener doc_listen = null;
     
@@ -124,6 +123,7 @@ public class EditPanel extends JPanel {
 					if (!NCIEditTab.currentTab().isEditing()) {
 						disableButtons();
 					}
+					newPref = "";
 
 				} else {
 					if (!NCIEditTab.currentTab().isEditing()) {
@@ -131,6 +131,7 @@ public class EditPanel extends JPanel {
 						NCIEditTab.currentTab().setCurrentlyEditing(currentClass, false);						
 						enableButtons();
 					}
+					newPref = prefNameText.getText();
 				}
 			}
 
@@ -140,11 +141,13 @@ public class EditPanel extends JPanel {
 					if (!NCIEditTab.currentTab().isEditing()) {
 						disableButtons();
 					}
+					newPref = "";
 
 				} else {
 					if (!NCIEditTab.currentTab().isEditing()) {
 						enableButtons();
 					}
+					newPref = prefNameText.getText();
 				}
 
 			}
@@ -338,7 +341,10 @@ public class EditPanel extends JPanel {
             {
             	// Do the save
                 if (shouldSave()) {
-                	NCIEditTab.currentTab().syncPrefName(prefNameText.getText());
+                	if (!newPref.equals("")) {
+                		NCIEditTab.currentTab().syncPrefName(newPref);                		
+                	}
+                	
                 	NCIEditTab.currentTab().commitChanges();
                 	origPref = prefNameText.getText();
                 	NCIEditTab.currentTab().refreshNavTree();
