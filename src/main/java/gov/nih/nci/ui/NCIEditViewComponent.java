@@ -69,10 +69,14 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 			}
 
 		} else if (event.isType(ComplexEditType.SELECTED)) {
-			editPanel.setSelectedClass(NCIEditTab.currentTab().getCurrentlySelected());
-			if (!NCIEditTab.currentTab().inComplexOp()) {
-				getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
-						"nci-edit-tab.EditView");
+			if (NCIEditTab.currentTab().isRetired(NCIEditTab.currentTab().getCurrentlySelected())) {
+
+			} else {
+				editPanel.setSelectedClass(NCIEditTab.currentTab().getCurrentlySelected());
+				if (!NCIEditTab.currentTab().inComplexOp()) {
+					getOWLEditorKit().getWorkspace().getViewManager().bringViewToFront(
+							"nci-edit-tab.EditView");
+				}
 			}
 
 		} else if (event.isType(ComplexEditType.COMMIT) ||
