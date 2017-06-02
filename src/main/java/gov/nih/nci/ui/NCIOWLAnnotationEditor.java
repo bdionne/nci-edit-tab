@@ -1,5 +1,18 @@
 package gov.nih.nci.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import org.protege.editor.core.ui.util.InputVerificationStatusChangedListener;
 import org.protege.editor.core.ui.util.VerifiedInputEditor;
 import org.protege.editor.owl.OWLEditorKit;
@@ -9,7 +22,6 @@ import org.protege.editor.owl.ui.editor.AbstractOWLObjectEditor;
 import org.protege.editor.owl.ui.editor.EnumEditor;
 import org.protege.editor.owl.ui.editor.IRIFromEntityEditor;
 import org.protege.editor.owl.ui.editor.IRITextEditor;
-import org.protege.editor.owl.ui.editor.OWLAnonymousIndividualAnnotationValueEditor;
 import org.protege.editor.owl.ui.editor.OWLConstantEditor;
 import org.protege.editor.owl.ui.editor.OWLObjectEditor;
 import org.protege.editor.owl.ui.selector.OWLAnnotationPropertySelectorPanel;
@@ -21,14 +33,6 @@ import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Author: Matthew Horridge<br>

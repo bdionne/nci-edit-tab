@@ -52,6 +52,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.Namespaces;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import gov.nih.nci.ui.NCIEditTab;
 import static gov.nih.nci.ui.NCIEditTabConstants.*;
@@ -301,8 +302,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		final OWLDataFactory df = mngr.getOWLDataFactory();
 		
 
-		OWLLiteral con = df.getOWLLiteral(gen_code);
-		OWLLiteral pref_name_val = df.getOWLLiteral(preferredName);
+		OWLLiteral con = df.getOWLLiteral(gen_code, OWL2Datatype.RDF_PLAIN_LITERAL);
+		OWLLiteral pref_name_val = df.getOWLLiteral(preferredName, OWL2Datatype.RDF_PLAIN_LITERAL);
 
 		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(CODE_PROP, newClass.getIRI(), con);
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
@@ -325,7 +326,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 				val = "No_Default";
 
 			}
-			OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+			OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL));
 			anns.add(new_ann);
 
 

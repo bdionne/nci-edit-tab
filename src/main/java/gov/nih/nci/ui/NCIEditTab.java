@@ -106,6 +106,7 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.OWLObjectDuplicator;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import edu.stanford.protege.metaproject.api.AuthToken;
 import edu.stanford.protege.metaproject.api.Operation;
@@ -1780,7 +1781,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		OWLAnnotationProperty complex_prop = lookUpShort(propName);
 		
-		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), df.getOWLLiteral(value));
+		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), 
+				df.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL));
 
 		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
 		Set<OWLAnnotationProperty> req_props = getConfiguredAnnotationsForAnnotation(complex_prop);
@@ -1788,11 +1790,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		for (OWLAnnotationProperty prop : req_props) {
 			String val = annotations.get(prop.getIRI().getShortForm());
 			if (val != null) {
-				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
+						df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL));
 				anns.add(new_ann);
 			} else if (is_required(prop)) {
 				String def_val = getDefaultValue(getDataType(prop));
-				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(def_val));
+				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
+						df.getOWLLiteral(def_val, OWL2Datatype.RDF_PLAIN_LITERAL));
 				anns.add(new_ann);				
 			}
 		}
@@ -2023,9 +2027,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			
 			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), val);
 		} else {
-			OWLLiteral lval = df.getOWLLiteral(value);			
-			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), lval);			
-		}	
+			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), df.getOWLLiteral(value,
+					OWL2Datatype.RDF_PLAIN_LITERAL));
+			
+		} 
 		
 		changes.add(new AddAxiom(ontology, ax));
 		
@@ -2054,12 +2059,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		IRI dtyp = this.getDataType(prop);
 		if (dtyp.getShortForm().equals("anyURI")) {
 			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), IRI.create(value));			
-		} else if (dtyp.getShortForm().equals("string")) {
-			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), df.getOWLLiteral(value));			
 		} else {
 			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), df.getOWLLiteral(value,
-					df.getOWLDatatype(dtyp)));
-			
+					OWL2Datatype.RDF_PLAIN_LITERAL));
 		}
 		
 		changes.add(new RemoveAxiom(ontology, ax));
@@ -2233,7 +2235,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			String new_val = ann_vals.get(cv);
     			if (new_val != null && !new_val.isEmpty()) {
 
-    				OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), df.getOWLLiteral(new_val));
+    				OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), 
+    						df.getOWLLiteral(new_val, OWL2Datatype.RDF_PLAIN_LITERAL));
     				new_anns.add(new_ann); 
     			} 
     		}
@@ -2245,7 +2248,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			String new_val = ann_vals.get(prop.getIRI().getShortForm());
 
     			if (new_val != null && !new_val.isEmpty()) {
-    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(new_val));
+    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
+    						df.getOWLLiteral(new_val,OWL2Datatype.RDF_PLAIN_LITERAL));
     				new_anns.add(new_ann);
 
     			} else {
@@ -2258,7 +2262,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}
 
     		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(old_axiom.getProperty(), cls.getIRI(),
-    				df.getOWLLiteral(ann_vals.get("Value")), new_anns);
+    				df.getOWLLiteral(ann_vals.get("Value"), OWL2Datatype.RDF_PLAIN_LITERAL), new_anns);
 
 
     		changes.add(new RemoveAxiom(ontology, old_axiom));
@@ -2267,7 +2271,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		changes.add(new RemoveAxiom(ontology, old_axiom));
 
     	} else if (operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
-    		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), df.getOWLLiteral(ann_vals.get("Value")));
+    		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), 
+    				df.getOWLLiteral(ann_vals.get("Value"), OWL2Datatype.RDF_PLAIN_LITERAL));
 
     		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
     		Set<OWLAnnotationProperty> req_props = getConfiguredAnnotationsForAnnotation(complex_prop);
@@ -2275,7 +2280,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		for (OWLAnnotationProperty prop : req_props) {
     			String val = ann_vals.get(prop.getIRI().getShortForm());
     			if (val != null && !val.isEmpty()) {
-    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, df.getOWLLiteral(val));
+    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
+    						df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL));
     				anns.add(new_ann);
 
     			}  else {
@@ -2510,7 +2516,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     private void syncPrefNameLabel(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
     	if (!getRDFSLabel(cls).equals(preferred_name)) {
-    		OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name);
+    		OWLLiteral pref_name_val = 
+    				ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name, OWL2Datatype.RDF_PLAIN_LITERAL);
     		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
     			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
     				changes.add(new RemoveAxiom(ontology, ax));
