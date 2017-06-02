@@ -358,51 +358,43 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 			NCIEditTab.currentTab().addComplex(selectedClass);
 		}
 
+		
 		@Override
 		protected UserRendering getUserRenderer() {
 			return new UserRendering() {
 
 				@Override
-				public String render(String in) {
-
+				public String render(Object object, String in) {
 					if (NCIEditTab.currentTab().getCurrentOp().isRetiring()) {
 						OWLClass cls = NCIEditTab.currentTab().getRetireClass();
 						if (cls != null) {
-							String orig = 
-									getOWLEditorKit().getOWLModelManager().getRendering(cls);
-							if (in.equals(orig)) {
+							if (cls.equals(object)) {
 								return in + "(retiring...)";
 							}
-						}
+						}						
 					};
 
-					if (NCIEditTab.currentTab().isEditing()) {
+					if (NCIEditTab.currentTab().isEditing()) {						
 						OWLClass cls = NCIEditTab.currentTab().getCurrentlyEditing(); 
 						if (cls != null) {
-							String orig = 
-									getOWLEditorKit().getOWLModelManager().getRendering(cls);
-							if (in.equals(orig)) {
+							if (cls.equals(object)) {
 								return in + "(editing...)";
 							}
 						}
-
 					}
 					if (NCIEditTab.currentTab().getCurrentOp().isSplitting()) {
 						OWLClass cls = NCIEditTab.currentTab().getCurrentOp().getSource(); 
 						if (cls != null) {
-							String orig = 
-									getOWLEditorKit().getOWLModelManager().getRendering(cls);
-							if (in.equals(orig)) {
-								return in + "(splitting...)";
+							if (cls.equals(object)) {
+								return in + "(splitting...)";								
 							}
-						}
-
+						}				
 					}
 					return in;
 				}
-
 			};
 		}
+		
 
 		@Override
 		public Component asComponent() {
@@ -413,6 +405,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		    public Optional<OWLObject> getSelection() {
 		        return Optional.ofNullable(getSelectedEntity());
 		    }
+
+			
 
 		
 
