@@ -153,13 +153,18 @@ public class PropertyTableModel extends AbstractTableModel {
 		for (int i = 1; i < columnCount; i++) {
 			String propShortForm = requiredAnnotationsList.get(i -1).getIRI().getShortForm();
 			dataType = NCIEditTab.currentTab().getDataType(requiredAnnotationsList.get(i -1));
+			
+			if (dataType != null) {
 
-			if (isDataTypeTextArea(dataType)) {
-				propertyTypes.put(propShortForm, "TextArea");
-			} else if (isDataTypeTextField(dataType)) {
-				propertyTypes.put(propShortForm, "TextField");
-			} else if (isDataTypeCombobox(dataType)) {
-				propertyTypes.put(propShortForm, "ComboBox");
+				if (isDataTypeTextArea(dataType)) {
+					propertyTypes.put(propShortForm, "TextArea");
+				} else if (isDataTypeTextField(dataType)) {
+					propertyTypes.put(propShortForm, "TextField");
+				} else if (isDataTypeCombobox(dataType)) {
+					propertyTypes.put(propShortForm, "ComboBox");
+				}
+			} else {
+				propertyTypes.put(propShortForm, "TextField");				
 			}
 		}
 		return propertyTypes;
@@ -259,8 +264,10 @@ public class PropertyTableModel extends AbstractTableModel {
 
 	private boolean isDataTypeCombobox( IRI dataType ) {
 		boolean result = false;
-		if (dataType.toString().endsWith("enum")) {
-			result = true;
+		if (dataType != null) {
+			if (dataType.toString().endsWith("enum")) {
+				result = true;
+			}
 		}
 		return result;
 	}
