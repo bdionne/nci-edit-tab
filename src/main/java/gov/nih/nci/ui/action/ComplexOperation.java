@@ -57,11 +57,11 @@ public class ComplexOperation {
 	}
 	
 	public boolean isRetiring() {
-		return (type == RETIRE || type == PRERETIRE);
+		return (type == RETIRE);
 	}
 	
 	public boolean isMerging() {
-		return (type == ComplexEditType.MERGE || type == PREMERGE);
+		return (type == ComplexEditType.MERGE);
 	}
 	
 	public boolean isSplitting() {

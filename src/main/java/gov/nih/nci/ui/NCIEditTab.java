@@ -456,7 +456,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return current_op.readyToMerge();
     }
     
-    public boolean canMerge() {
+    public boolean canMerge(OWLClass cls) {
+    	if (!isWorkFlowManager()) {
+    		if (isSubClass(cls, PRE_MERGE_ROOT)) {
+    			return false;
+    		}
+    	}
     	return true;
     }    
     
@@ -836,11 +841,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void retire(OWLClass selectedClass) {
     	current_op.setRetireClass(selectedClass);
-    	if (isWorkFlowManager()) {
-    		current_op.setType(RETIRE);
-    	} else {
-    		current_op.setType(PRERETIRE);
-    	}
+    	current_op.setType(RETIRE);
     	fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
     }
     

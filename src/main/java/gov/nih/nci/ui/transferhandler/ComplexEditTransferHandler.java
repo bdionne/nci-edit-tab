@@ -82,7 +82,12 @@ public class ComplexEditTransferHandler extends TransferHandler {
 				return false;
 			}
 		} else if (complexEditPanel.isMergeBtnSelected() || complexEditPanel.isDualBtnSelected()) {	
-			// TODO: need check for canMerge here
+			if (complexEditPanel.isMergeBtnSelected() && !NCIEditTab.currentTab().canMerge(data.get(0))) {
+				JOptionPane.showMessageDialog(complexEditPanel, 
+						"Can't merge, only a manager can do this.", "Warning", JOptionPane.WARNING_MESSAGE);
+				return false;
+				
+			}
 			complexEditPanel.dropOnComp(support.getComponent(), data.get(0));
 			complexEditPanel.setEnableUnselectedRadioButtons(false);
 			
