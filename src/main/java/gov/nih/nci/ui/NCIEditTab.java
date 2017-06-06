@@ -762,10 +762,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			// noop
     		} else {
     			OWLClass ocl  = (OWLClass) exp;
-    			String name = ocl.getIRI().getShortForm();
-    			OWLLiteral val = df.getOWLLiteral(name);
-    			OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_PARENT, cls.getIRI(), val);
-    			changes.add(new AddAxiom(ontology, ax));  
+    			if (!ocl.equals(PRE_MERGE_ROOT)) {
+    				String name = ocl.getIRI().getShortForm();
+    				OWLLiteral val = df.getOWLLiteral(name);
+    				OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_PARENT, cls.getIRI(), val);
+    				changes.add(new AddAxiom(ontology, ax)); 
+    			}
     		}
     	} else if (exp instanceof OWLQuantifiedObjectRestriction) {
     		OWLQuantifiedObjectRestriction qobj = (OWLQuantifiedObjectRestriction) exp;
@@ -847,8 +849,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public void selectClass(OWLClass cls) {
-    	currentlySelected = cls;
-    	fireChange(new EditTabChangeEvent(this, ComplexEditType.SELECTED));    	
+    	if (cls != null) {
+    		currentlySelected = cls;
+    		fireChange(new EditTabChangeEvent(this, ComplexEditType.SELECTED)); 
+    	}
     }
     
     public void classModified() {
@@ -2468,13 +2472,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     // TODO: Add FULL_SYN without creating cycle
     public void syncPrefName(String preferred_name) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	syncPrefNameLabelFullSyn(current_op.getCurrentlyEditing(), preferred_name, changes);
-    	ontology.getOWLOntologyManager().applyChanges(changes);
+    	if (current_op.getCurrentlyEditing() != null) {
+    		syncPrefNameLabelFullSyn(current_op.getCurrentlyEditing(), preferred_name, changes);
+    		ontology.getOWLOntologyManager().applyChanges(changes);
+    	}
     }
     
     private void syncPrefNameLabelFullSyn(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
-    	if (!getRDFSLabel(cls).equals(preferred_name)) {
+       	if (!getRDFSLabel(cls).equals(preferred_name)) {
     		OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name, OWL2Datatype.RDF_PLAIN_LITERAL);
     		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
     			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
