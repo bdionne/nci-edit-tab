@@ -32,6 +32,8 @@ import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 /**
@@ -283,7 +285,14 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
             OWLAnnotationValue obj = getSelectedEditor().getEditedObject();
 
             if (obj != null) {
-            	return dataFactory.getOWLAnnotation(property, obj);
+            	if (obj instanceof OWLLiteral) {
+            		String val = ((OWLLiteral) obj).getLiteral();
+            		OWLAnnotationValue newobj = dataFactory.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL);
+            		return dataFactory.getOWLAnnotation(property, newobj);
+            	} else {
+            		return dataFactory.getOWLAnnotation(property, obj);
+            	}
+            	
             }
         }
         return null;

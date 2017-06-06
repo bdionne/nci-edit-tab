@@ -532,12 +532,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     			OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(MERGE_TARGET, 
     					source.getIRI(), 
-    					df.getOWLLiteral(target.getIRI().getShortForm()));
+    					df.getOWLLiteral(target.getIRI().getShortForm(), OWL2Datatype.RDF_PLAIN_LITERAL));
     			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
 
     			ax = df.getOWLAnnotationAssertionAxiom(MERGE_SOURCE, 
     					target.getIRI(), 
-    					df.getOWLLiteral(source.getIRI().getShortForm()));
+    					df.getOWLLiteral(source.getIRI().getShortForm(), OWL2Datatype.RDF_PLAIN_LITERAL));
     			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
 
     			changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(),
@@ -611,7 +611,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	if (isAssociation(ax1.getProperty())) {
         		String val = ax1.getProperty().getIRI().getShortForm() + "|"
         				+ ax1.getValue().asIRI().get().getShortForm();
-        		OWLLiteral lit =  df.getOWLLiteral(val);
+        		OWLLiteral lit =  df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL);
         		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, source.getIRI(), lit);
         		changes.add(new AddAxiom(ontology, ax));
         		changes.add(new RemoveAxiom(ontology, ax1));
@@ -647,11 +647,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		editornote = dlg.getEditorNote();
     		designnote = dlg.getDesignNote();
 
-    		OWLLiteral val = df.getOWLLiteral(editornote);
+    		OWLLiteral val = df.getOWLLiteral(editornote, OWL2Datatype.RDF_PLAIN_LITERAL);
     		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(EDITOR_NOTE, cls.getIRI(), val);
     		changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
 
-    		val = df.getOWLLiteral(designnote);
+    		val = df.getOWLLiteral(designnote, OWL2Datatype.RDF_PLAIN_LITERAL);
     		ax = df.getOWLAnnotationAssertionAxiom(DESIGN_NOTE, cls.getIRI(), val);
     		changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
     	}
@@ -730,7 +730,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
         		String val = ax1.getProperty().getIRI().getShortForm() + "|"
         				+ ax1.getValue().asIRI().get().getShortForm();
-        		OWLLiteral lit = df.getOWLLiteral(val);
+        		OWLLiteral lit = df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL);
         		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, class_to_retire.getIRI(), lit);
         		changes.add(new AddAxiom(ontology, ax));
 
@@ -740,7 +740,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
         for (OWLAnnotationProperty p : fixups.keySet()) {
         	for (String s : fixups.get(p)) {
-        		OWLLiteral val1 = df.getOWLLiteral(s);
+        		OWLLiteral val1 = df.getOWLLiteral(s, OWL2Datatype.RDF_PLAIN_LITERAL);
         		OWLAxiom ax1 = df.getOWLAnnotationAssertionAxiom(p, class_to_retire.getIRI(), val1);
         		changes.add(new AddAxiom(ontology, ax1));        		
         	}        	
@@ -769,7 +769,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			OWLClass ocl  = (OWLClass) exp;
     			if (!ocl.equals(PRE_MERGE_ROOT)) {
     				String name = ocl.getIRI().getShortForm();
-    				OWLLiteral val = df.getOWLLiteral(name);
+    				OWLLiteral val = df.getOWLLiteral(name, OWL2Datatype.RDF_PLAIN_LITERAL);
     				OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_PARENT, cls.getIRI(), val);
     				changes.add(new AddAxiom(ontology, ax)); 
     			}
@@ -793,7 +793,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}
     		String val = qobj.getProperty().asOWLObjectProperty().getIRI().getShortForm() + "|"
     				+ quant + "|" + fval;
-    		OWLLiteral lit = df.getOWLLiteral(val);
+    		OWLLiteral lit = df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL);
     		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ROLE, cls.getIRI(), lit);
     		changes.add(new AddAxiom(ontology, ax));
     	} else if (exp instanceof OWLObjectIntersectionOf) {
