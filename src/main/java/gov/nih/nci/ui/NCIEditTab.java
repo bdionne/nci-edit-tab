@@ -2005,6 +2005,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		  
 	}
 	
+	public OWLLiteral getPropertyValueLiteral(OWLNamedObject oobj, OWLAnnotationProperty prop, String value) {
+		 
+		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(oobj.getIRI())) {
+			if (ax.getProperty().equals(prop)) {
+				com.google.common.base.Optional<OWLLiteral> ol = ax.getAnnotation().getValue().asLiteral();
+				if (ol.isPresent()) {
+					if (ol.get().getLiteral().equals(value)) {
+						return ol.get();
+					}
+				}
+				
+			}
+		}
+		return null;		  
+	}
+	
 	public Optional<String> getPropertyValue(OWLNamedObject oobj, OWLAnnotationProperty prop) {
 		  
 		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), prop)) {
@@ -2071,8 +2087,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		if (dtyp.getShortForm().equals("anyURI")) {
 			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), IRI.create(value));			
 		} else {
-			ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), df.getOWLLiteral(value,
-					OWL2Datatype.RDF_PLAIN_LITERAL));
+			OWLLiteral ol = getPropertyValueLiteral(ocl, prop, value);
+			if (ol != null) {
+				ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(), ol);
+			} else {
+				ax = df.getOWLAnnotationAssertionAxiom(prop, ocl.getIRI(),
+						df.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL));
+				
+			}
 		}
 		
 		changes.add(new RemoveAxiom(ontology, ax));
