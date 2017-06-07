@@ -1109,7 +1109,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	if (clone_p) {
     		
     	} else {
-    		OWLLiteral fromCode = df.getOWLLiteral(selectedClass.getIRI().getShortForm());
+    		OWLLiteral fromCode = df.getOWLLiteral(selectedClass.getIRI().getShortForm(), OWL2Datatype.RDF_PLAIN_LITERAL);
     		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(SPLIT_FROM, newClass.getIRI(), fromCode);
     		changes.add(new AddAxiom(ontology, ax));
     	}
