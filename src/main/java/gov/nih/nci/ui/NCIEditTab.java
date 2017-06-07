@@ -39,6 +39,7 @@ import java.util.UUID;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
 import org.apache.log4j.Logger;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.owl.OWLEditorKit;
@@ -380,7 +381,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		List<String> codes = new ArrayList<String>(); 
 		
 		try {
-			codes = cl.getCodes(no);
+			codes = cl.getCodes(no, clientSession.getActiveProject());
 		} catch (Exception e) {
 			codes.add(UUID.randomUUID().toString());
 		}
@@ -870,7 +871,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	if (clientSession.getActiveClient() != null) {
     		try {
     			Role wfm = ((LocalHttpClient) clientSession.getActiveClient()).getRole(new RoleIdImpl("mp-project-manager"));
-    			return clientSession.getActiveClient().getActiveRoles().contains(wfm);
+    			return clientSession.getActiveClient().getActiveRoles(clientSession.getActiveProject()).contains(wfm);
     		} catch (ClientRequestException e) {
     			e.printStackTrace();
     		}
@@ -1079,7 +1080,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void putHistory(String c, String n, String op, String ref) {
     	try {
-			((LocalHttpClient) clientSession.getActiveClient()).putEVSHistory(c, n, op, ref);
+			((LocalHttpClient) clientSession.getActiveClient()).putEVSHistory(c, n, op, ref, clientSession.getActiveProject());
 		} catch (ClientRequestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1306,7 +1307,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {
-			Project project = lhc.getCurrentProject();
+			Project project = null;
+			try {
+				project = lhc.getCurrentConfig().getProject(clientSession.getActiveProject());
+			} catch (UnknownProjectIdException e) {
+				e.printStackTrace();
+			}
 
 			if (project != null) {
 				// get all annotations from ontology to use for lookup
@@ -1423,7 +1429,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			}
 			try {
 
-				for (Operation op : clientSession.getActiveClient().getActiveOperations()) {
+				for (Operation op : clientSession.getActiveClient().getActiveOperations(clientSession.getActiveProject())) {
 					//System.out.println(op.toString());
 
 				}

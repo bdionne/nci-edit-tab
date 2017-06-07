@@ -41,7 +41,6 @@ import gov.nih.nci.utils.batch.BatchEditTask;
 import gov.nih.nci.utils.batch.BatchLoadTask;
 import gov.nih.nci.utils.batch.BatchTask;
 import gov.nih.nci.utils.batch.BatchTask.TaskType;
-import javafx.scene.shape.Box;
 
 /**
  * @Author: NGIT, Kim Ong; Iris Guo
