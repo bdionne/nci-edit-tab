@@ -24,6 +24,7 @@
         <headerColor value="@org.protege.classcolor"/>
         <category value="@org.protege.classcategory"/>
         <navigates value="@org.protege.classcategory"/>
+        <instantiationType value="eager"/>
     </extension>
     <!--
      <extension id="PropertyTableView"
