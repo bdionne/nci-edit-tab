@@ -242,6 +242,7 @@ public class EditPanel extends JPanel {
 
     		if (ps.isPresent()) {
     			origPref = ps.get();
+    			newPref = "";
     			prefNameText.setText(ps.get());    	     
     		} else {
     			prefNameText.setText("Missing");
