@@ -831,15 +831,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(
     		NCIEditTabConstants.RETIRE.getId(), projectId);
-    	if (can) {
-    		if (isPreRetired(cls)) {
-    			return isWorkFlowManager();    			
-    		} else if (isRetired(cls)) {
-    			return false;
-    		}
-    	}
-    	return can;
+			if (!can) {
+				return false;
+			}
 
+			if (isPreRetired(cls)) {
+				return isWorkFlowManager();
+			} else {
+				return !isRetired(cls);
+			}
     }
     
     public void retire(OWLClass selectedClass) {
