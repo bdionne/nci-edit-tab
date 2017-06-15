@@ -39,6 +39,7 @@ import java.util.UUID;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import edu.stanford.protege.metaproject.api.*;
 import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
 import org.apache.log4j.Logger;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
@@ -109,11 +110,6 @@ import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.OWLObjectDuplicator;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
-import edu.stanford.protege.metaproject.api.AuthToken;
-import edu.stanford.protege.metaproject.api.Operation;
-import edu.stanford.protege.metaproject.api.Project;
-import edu.stanford.protege.metaproject.api.ProjectOptions;
-import edu.stanford.protege.metaproject.api.Role;
 import edu.stanford.protege.metaproject.impl.RoleIdImpl;
 import edu.stanford.protege.search.lucene.tab.engine.BasicQuery;
 import edu.stanford.protege.search.lucene.tab.engine.FilteredQuery;
@@ -828,7 +824,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		return false;    				
     	}
 
-    	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(NCIEditTabConstants.RETIRE.getId()); 
+			ProjectId projectId = clientSession.getActiveProject();
+			if (projectId == null) {
+				return false;
+			}
+
+    	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(
+    		NCIEditTabConstants.RETIRE.getId(), projectId);
     	if (can) {
     		if (isPreRetired(cls)) {
     			return isWorkFlowManager();    			
