@@ -10,7 +10,7 @@
 
 	<groupId>gov.nih.nci</groupId>
 	<artifactId>nci-edit-tab</artifactId>
-	<version>0.6.3-SNAPSHOT</version>
+	<version>0.6.5-SNAPSHOT</version>
 	<name>Edit Tab</name> 
 	<description>An editing tab for NCI's complex editing operations</description>
 	<packaging>bundle</packaging>
@@ -65,7 +65,7 @@
         <dependency>
         	<groupId>edu.stanford.protege</groupId>
     	    <artifactId>lucene-search-tab</artifactId>
-            <version>1.0.4-SNAPSHOT</version>
+            <version>1.0.5-SNAPSHOT</version>
         </dependency>
 	</dependencies>
 	
