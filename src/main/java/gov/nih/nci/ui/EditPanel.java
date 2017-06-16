@@ -27,6 +27,7 @@ import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import gov.nih.nci.ui.dialog.ComplexPropChooser;
 import gov.nih.nci.ui.event.ComplexEditType;
@@ -145,6 +146,8 @@ public class EditPanel extends JPanel {
 
 				} else {
 					if (!NCIEditTab.currentTab().isEditing()) {
+						NCIEditTab.currentTab().setEditInProgress(true);
+						NCIEditTab.currentTab().setCurrentlyEditing(currentClass, false);
 						enableButtons();
 					}
 					newPref = prefNameText.getText();
@@ -341,16 +344,19 @@ public class EditPanel extends JPanel {
             public void actionPerformed(ActionEvent e)
             {
             	// Do the save
-                if (shouldSave()) {
-                	if (!newPref.equals("")) {
-                		NCIEditTab.currentTab().syncPrefName(newPref);                		
-                	}
-                	
-                	NCIEditTab.currentTab().commitChanges();
-                	origPref = prefNameText.getText();
-                	NCIEditTab.currentTab().refreshNavTree();
-                	//disableButtons();
-                } else {
+            	if (shouldSave()) {
+            		if (NCIEditTab.currentTab().syncFullSyn(NCIEditTab.currentTab().getCurrentlyEditing())) {
+
+            			if (!newPref.equals("")) {
+            				NCIEditTab.currentTab().syncPrefName(newPref);                		
+            			}
+
+            			NCIEditTab.currentTab().commitChanges();
+            			origPref = prefNameText.getText();
+            			NCIEditTab.currentTab().refreshNavTree();
+            		}
+            		//disableButtons();
+            	} else {
                 	saveButton.setEnabled(false);
                 }
             	
