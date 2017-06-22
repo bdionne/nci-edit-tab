@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -34,7 +32,6 @@ import org.apache.log4j.Logger;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 
-import edu.stanford.protege.csv.export.CsvExporterBuilder;
 import gov.nih.nci.ui.BatchProcessOutputPanel;
 import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.utils.batch.BatchEditTask;
@@ -61,6 +58,10 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	
 	public static final String FILE_DELIMITER = ",", PROPERTY_VALUES_DELIMITER = "\t";
 	protected static final String LAST_USED_FOLDER = "";
+	protected static final String LAST_BATCH_TYPE = "";
+	private static final String[] BATCH_TYPE_ITEMS = new String[] {
+			BatchTask.TaskType.LOAD +"", BatchTask.TaskType.EDIT_SIMPLE_PROPS + "", BatchTask.TaskType.EDIT_COMPLEX_PROPS + "", 
+			BatchTask.TaskType.EDIT_PARENTS + "", BatchTask.TaskType.EDIT_ROLES + ""};
 	
 	NCIEditTab tab;
 
@@ -68,6 +69,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 	String infile;
 	String outfile;
+	int btindex;
 	
 	File inputFolder;
 
@@ -80,6 +82,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 		
 		this.infile = "";
 		this.outfile = "";
+		this.btindex = 0;
 
 		setModal(true);
 
@@ -174,15 +177,23 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			filePanel.add(createFileField("Output File", "out","output"), BorderLayout.CENTER);
 
 			container.add(filePanel, BorderLayout.NORTH);
-
-			batchType = new JComboBox<BatchTask.TaskType>();
-			batchType.addItem(BatchTask.TaskType.LOAD);
-			batchType.addItem(BatchTask.TaskType.EDIT_SIMPLE_PROPS);
-			batchType.addItem(BatchTask.TaskType.EDIT_COMPLEX_PROPS);
-			batchType.addItem(BatchTask.TaskType.EDIT_PARENTS);
-			batchType.addItem(BatchTask.TaskType.EDIT_ROLES);
+			
+			batchType = new JComboBox(BATCH_TYPE_ITEMS);
+			
+			Preferences prefs = PreferencesManager.getInstance().getApplicationPreferences(getClass());   		  
+			btindex = prefs.getInt(LAST_BATCH_TYPE, 0);
+			if( btindex >= 0 && btindex <= 4 ) {
+				batchType.setSelectedItem(BATCH_TYPE_ITEMS[btindex]); 
+			}
 		
-			batchType.addActionListener(this);
+			batchType.addActionListener(new ActionListener() {
+
+				  public void actionPerformed(ActionEvent e) {
+					  
+					  prefs.putInt(LAST_BATCH_TYPE, batchType.getSelectedIndex());
+					  
+				  }
+			  });
 			
 			
 			JPanel labelcombopanel = new JPanel();
