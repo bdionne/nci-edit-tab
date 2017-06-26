@@ -1334,7 +1334,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				
 				
 
-				Optional<ProjectOptions> options = project.getOptions();
+				com.google.common.base.Optional<ProjectOptions> options = project.getOptions();
 				
 				Set<String> not_found_props = new HashSet<String>();
 
