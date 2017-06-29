@@ -16,6 +16,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.apache.log4j.Logger;
+import org.protege.editor.core.prefs.Preferences;
+import org.protege.editor.core.prefs.PreferencesManager;
 
 import gov.nih.nci.ui.dialog.BatchProcessingDialog;
 
@@ -28,6 +30,7 @@ public class BatchProcessOutputPanel extends JPanel implements ActionListener{
 	private JButton savebutton;
 	private JButton clearbutton;
 	private JButton closebutton;
+	protected static final String LAST_SAVED_FOLDER = "";
 	
 	public BatchProcessOutputPanel(){
 		createUI();
@@ -63,10 +66,15 @@ public class BatchProcessOutputPanel extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == savebutton){
 			String outputStr = textarea.getText();
-			JFileChooser fc = new JFileChooser();
+			Preferences prefs = PreferencesManager.getInstance().getApplicationPreferences(getClass());   
+			JFileChooser fc = new JFileChooser(prefs.getString(LAST_SAVED_FOLDER, new File(".").getAbsolutePath()));
+			
 			//to do - add file filter
 			int select = fc.showSaveDialog(BatchProcessOutputPanel.this);
 			if (select == JFileChooser.APPROVE_OPTION) {
+				
+				prefs.putString(LAST_SAVED_FOLDER, fc.getSelectedFile().getParent());
+				
 	            File file = fc.getSelectedFile();
 	            String outputfile = file.getAbsolutePath();
 	            try {
