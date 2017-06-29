@@ -245,7 +245,7 @@ public abstract class BatchTask {
 			if ((i < toks.length) && !(toks[i].compareTo("") == 0)) {
 				elem = toks[i];
 			}
-			tokenValues.addElement(elem);
+			tokenValues.addElement(elem.trim());
 		}
 		return tokenValues;
 	}
