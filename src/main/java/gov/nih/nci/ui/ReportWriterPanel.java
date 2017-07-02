@@ -41,6 +41,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 //import javax.swing.SwingWorker;
 
+import org.protege.editor.core.prefs.Preferences;
+import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.UIHelper;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -135,6 +137,8 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 	JTextArea reportTextArea = null;
 
 	private ReportWriterConfigPanel configPanel;
+	
+	protected static final String LAST_USED_FOLDER = "Enter file of identifiers";
 
 	private enum ExportType {
 		CLASSIC, LQTEXPORT, FILEINPUT
@@ -167,10 +171,12 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 	
 	protected boolean onInputFileExport() {
 		
-		JFileChooser chooser = new JFileChooser("Enter file of identifiers");
+		Preferences prefs = PreferencesManager.getInstance().getApplicationPreferences(getClass());   
+		JFileChooser chooser = new JFileChooser(prefs.getString(LAST_USED_FOLDER, new File(".").getAbsolutePath()));
+		
 		int returnVal = chooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-
+			prefs.putString(LAST_USED_FOLDER, chooser.getSelectedFile().getParent());
 			final List<OWLEntity> ocl = new ArrayList<OWLEntity>();
 
 			BufferedReader inFile = null;
