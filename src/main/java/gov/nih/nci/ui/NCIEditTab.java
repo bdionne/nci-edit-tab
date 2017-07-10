@@ -1,26 +1,6 @@
 package gov.nih.nci.ui;
-import static gov.nih.nci.ui.NCIEditTabConstants.CODE_PROP;
-import static gov.nih.nci.ui.NCIEditTabConstants.COMPLEX_PROPS;
-import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ASSOC;
-import static gov.nih.nci.ui.NCIEditTabConstants.DEP_CHILD;
-import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ASSOC;
-import static gov.nih.nci.ui.NCIEditTabConstants.DEP_IN_ROLE;
-import static gov.nih.nci.ui.NCIEditTabConstants.DEP_PARENT;
-import static gov.nih.nci.ui.NCIEditTabConstants.DEP_ROLE;
-import static gov.nih.nci.ui.NCIEditTabConstants.DESIGN_NOTE;
-import static gov.nih.nci.ui.NCIEditTabConstants.EDITOR_NOTE;
-import static gov.nih.nci.ui.NCIEditTabConstants.FULL_SYN;
-import static gov.nih.nci.ui.NCIEditTabConstants.IMMUTABLE_PROPS;
-import static gov.nih.nci.ui.NCIEditTabConstants.LABEL_PROP;
-import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_SOURCE;
-import static gov.nih.nci.ui.NCIEditTabConstants.MERGE_TARGET;
-import static gov.nih.nci.ui.NCIEditTabConstants.PREF_NAME;
-import static gov.nih.nci.ui.NCIEditTabConstants.PRE_MERGE_ROOT;
-import static gov.nih.nci.ui.NCIEditTabConstants.PRE_RETIRE_ROOT;
-import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_CONCEPTS_ROOT;
-import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
-import static gov.nih.nci.ui.NCIEditTabConstants.SEMANTIC_TYPE;
-import static gov.nih.nci.ui.NCIEditTabConstants.SPLIT_FROM;
+import static gov.nih.nci.ui.NCIEditTabConstants.*;
+
 import static gov.nih.nci.ui.event.ComplexEditType.*;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
@@ -656,25 +636,24 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
-    public void completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {
+    public boolean completeRetire(Map<OWLAnnotationProperty, Set<String>> fixups) {
     	
-    	List<OWLClass> old_parents = new ArrayList<OWLClass>();
+    	//List<OWLClass> old_parents = new ArrayList<OWLClass>();
     	
     	String user = clientSession.getActiveClient().getUserInfo().getName().toString();
     	String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
     	
     	String editornote = "Retired on: " + timestamp + " by " + user;
         String designnote = "Retired on: " + timestamp;
-        // TODO: removing prefix, discuss with Gilberto, I think it's unnecessary
-        //String prefix = "preretire_annotation"; 
+        
         
         OWLClass class_to_retire = current_op.getRetireClass();
         
     	List<OWLOntologyChange> changes = addNotes(editornote, designnote, class_to_retire);
     	if (changes.isEmpty()) {
     		fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
-    		current_op.setRetireParents(old_parents);
-    		return;
+    		//current_op.setRetireParents(old_parents);
+    		return false;
     	}
     	
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();    	
@@ -683,9 +662,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
         for (OWLSubClassOfAxiom ax1 : sub_axioms) {
         	OWLClassExpression exp = ax1.getSuperClass();
-        	if (exp instanceof OWLClass) {
-        		old_parents.add((OWLClass) exp);
-        	}
+        	
         	changes = addParentRoleAssertions(changes, exp, class_to_retire);
         	changes.add(new RemoveAxiom(ontology, ax1));
         	
@@ -696,9 +673,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         for (OWLEquivalentClassesAxiom ax1 : equiv_axioms) {
         	Set<OWLClassExpression> exps = ax1.getClassExpressions();
         	for (OWLClassExpression exp : exps) {
-        		if (exp instanceof OWLClass) {
-            		old_parents.add((OWLClass) exp);
-            	}
+        		
         		changes = addParentRoleAssertions(changes, exp, class_to_retire);
         	}
         	changes.add(new RemoveAxiom(ontology, ax1));
@@ -746,6 +721,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	changes.add(new AddAxiom(ontology,
         			df.getOWLSubClassOfAxiom(class_to_retire, RETIRE_ROOT)));
         	changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(class_to_retire.getIRI())));
+        	if (DEPR_CONCEPT_STATUS_PROP != null) {
+        		changes.add(new AddAxiom(ontology,
+        				df.getOWLAnnotationAssertionAxiom(DEPR_CONCEPT_STATUS_PROP, class_to_retire.getIRI(),
+        						df.getOWLLiteral(DEPR_CONCEPT_STATUS_VALUE, OWL2Datatype.RDF_PLAIN_LITERAL))));
+        		
+        	}
         } else {
         	changes.add(new AddAxiom(ontology,
         			df.getOWLSubClassOfAxiom(class_to_retire, PRE_RETIRE_ROOT))); 
@@ -753,7 +734,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         
         getOWLModelManager().applyChanges(changes);
         
-        current_op.setRetireParents(old_parents);
+        return true;
+        
+        //current_op.setRetireParents(old_parents);
     }
     
     private List<OWLOntologyChange> addParentRoleAssertions(List<OWLOntologyChange> changes, OWLClassExpression exp, OWLClass cls) {
@@ -810,6 +793,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
+    public boolean isUneditableRoot(OWLClass cls) {
+    	if (cls.equals(PRE_RETIRE_ROOT) ||
+    			cls.equals(PRE_MERGE_ROOT) ||
+    			cls.equals(RETIRE_ROOT) ||
+    			cls.equals(RETIRE_CONCEPTS_ROOT)) {
+    		return true;    				
+    	}
+    	return false;
+    	
+    	
+    }
+    
     /** Anyone can pre-retire so there is no need for a separate pre-retire step. There is just retire.
      * If the class is already a chle of the "PreRetired" root class, then the retirement is ready for
      * review and only an admin user can do so. 
@@ -817,10 +812,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
      */
     public boolean canRetire(OWLClass cls) { 
     	
-    	if (cls.equals(PRE_RETIRE_ROOT) ||
-    			cls.equals(PRE_MERGE_ROOT) ||
-    			cls.equals(RETIRE_ROOT) ||
-    			cls.equals(RETIRE_CONCEPTS_ROOT)) {
+    	if (isUneditableRoot(cls)) {
     		return false;    				
     	}
 
@@ -844,7 +836,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public void retire(OWLClass selectedClass) {
     	current_op.setRetireClass(selectedClass);
-    	current_op.setType(RETIRE);
+    	current_op.setType(ComplexEditType.RETIRE);
     	fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
     }
     
@@ -1424,6 +1416,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					PREF_NAME = getSingleProperty("pref_name", opts);
 					
 					SEMANTIC_TYPE = getSingleProperty("semantic_type", opts); 
+					
+					Set<String> depr_con = opts.getValues("deprecated_concept_status");
+					if (!depr_con.isEmpty()) {
+						for (String s : depr_con) {
+							if (s.startsWith("http")) {
+								DEPR_CONCEPT_STATUS_PROP = lookUp(s);								
+							} else {
+								DEPR_CONCEPT_STATUS_VALUE = s;
+							}
+						}
+					}
 					
 					
 				}
@@ -2743,6 +2746,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public void submitHistory() {
+    	if ((current_op.isRetiring() || current_op.isMerging()) &&
+    			(isWorkFlowModeler() && !isWorkFlowManager())) {
+    		// don't record merges and retirements until approved
+    		return;
+    	}
     	if (current_op.isRetiring()) {
     		submitRetireHistory();
     	} else if (current_op.isCloning() || current_op.isSplitting() ||
@@ -2784,6 +2792,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
+    List<String> getRetiredParents(OWLClass cls) {
+    	return this.getPropertyValues(cls, DEP_PARENT);
+    }
+    
     public void submitRetireHistory() {
     	OWLClass cls = current_op.getRetireClass();
 
@@ -2791,10 +2803,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     	String n = getRDFSLabel(cls).get();
     	String op = getCurrentOp().toString();
-    	String ref = "";
-    	if (current_op.getRetireParents() != null) {
-    		for (OWLClass clas : current_op.getRetireParents()) {
-    			ref = getCodeOrIRI(clas);
+    	
+    	if (getRetiredParents(cls) != null) {
+    		for (String s : getRetiredParents(cls)) {
+    			String ref = getCodeOrIRI(getClass(s));
     			putHistory(c, n, op, ref);
     		}
     	}

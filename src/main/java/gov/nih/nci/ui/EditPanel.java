@@ -236,8 +236,9 @@ public class EditPanel extends JPanel {
     }
     
     public void setSelectedClass(OWLClass cls) {
-    	prefNameText.getDocument().removeDocumentListener(doc_listen);
-    	if (cls != null) {
+    	
+    	prefNameText.getDocument().removeDocumentListener(doc_listen);    	
+    	if (cls != null && !NCIEditTab.currentTab().isUneditableRoot(cls)) {   		
 
     		currentClass = cls;
 

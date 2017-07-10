@@ -1,5 +1,7 @@
 package gov.nih.nci.ui;
 
+import static gov.nih.nci.ui.NCIEditTabConstants.DEPR_CONCEPT_STATUS_PROP;
+import static gov.nih.nci.ui.NCIEditTabConstants.DEPR_CONCEPT_STATUS_VALUE;
 import static gov.nih.nci.ui.NCIEditTabConstants.PRE_RETIRE_ROOT;
 import static gov.nih.nci.ui.NCIEditTabConstants.RETIRE_ROOT;
 
@@ -10,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.JButton;
@@ -31,8 +32,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
-import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.RetireTransferHandler;
 import gov.nih.nci.utils.ReferenceFinder;
 
@@ -55,9 +56,6 @@ public class RetirePanel extends JPanel {
 	public OWLClass getRetiringClass() { return classToRetire; }
 	
     private Map<OWLAnnotationProperty, Set<String>> fixups;
-    
-    private List<OWLClass> old_parents = null;
-    
     
     private OWLFrameList<OWLAnnotationSubject> upperPanelList;
     
@@ -154,26 +152,24 @@ public class RetirePanel extends JPanel {
     				warnUsages();
     			} else if (retireButton.getText().equals("Save")) {
     				// TODO: refactor and move type check to edit tab
+    	
     				NCIEditTab.currentTab().commitChanges();
-    				NCIEditTab.currentTab().completeRetire();
-    				old_parents = null;
+    				
     				upperPanelList.setRootObject(null);
         			usage_panel.setOWLEntity(null);
         			disableButtons();
-        			NCIEditTab.currentTab().selectClass(NCIEditTabConstants.RETIRE_ROOT);
+        			NCIEditTab.currentTab().selectClass(classToRetire);
         			NCIEditTab.currentTab().refreshNavTree();
+        			NCIEditTab.currentTab().completeRetire();
     			} else if (retireButton.getText().equals("Approve")) {
     				approveRetire();
     				
     				
     			} else {
     				// proceed to retire
-    				NCIEditTab.currentTab().completeRetire(fixups); 
-    				old_parents = NCIEditTab.currentTab().getCurrentOp().getRetireParents();
-    				if (!old_parents.isEmpty()) {
-    					retireButton.setText("Save");    					
-    				}
-    				    				
+    				if (NCIEditTab.currentTab().completeRetire(fixups)) {
+    					retireButton.setText("Save");
+    				}			
     			}
 
 
@@ -193,7 +189,6 @@ public class RetirePanel extends JPanel {
     			NCIEditTab.currentTab().undoChanges();
     			NCIEditTab.currentTab().cancelRetire();
     			disableButtons();
-    			// TODO: What? lowerPanelList.setRootObject(null);
     		}
     	});     
 
@@ -211,10 +206,6 @@ public class RetirePanel extends JPanel {
     
     public void approveRetire() {
     	
-    	if (old_parents == null) {
-    		old_parents = new ArrayList<OWLClass>();
-    	}
-    	
     	ont = NCIEditTab.currentTab().getOWLModelManager().getActiveOntology();
     	
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
@@ -223,16 +214,22 @@ public class RetirePanel extends JPanel {
     	for (OWLSubClassOfAxiom s : subs) {
     		if (s.getSuperClass().asOWLClass().equals(PRE_RETIRE_ROOT)) {
     			changes.add(new RemoveAxiom(ont, s));
-    			old_parents.add(s.getSuperClass().asOWLClass());
+    			//old_parents.add(s.getSuperClass().asOWLClass());
     		}
     	}
     	changes.add(new AddAxiom(mngr.getActiveOntology(),
     			df.getOWLSubClassOfAxiom(classToRetire, RETIRE_ROOT)));
     	changes.add(new AddAxiom(mngr.getActiveOntology(), df.getDeprecatedOWLAnnotationAssertionAxiom(classToRetire.getIRI())));
+    	if (DEPR_CONCEPT_STATUS_PROP != null) {
+    		changes.add(new AddAxiom(mngr.getActiveOntology(),
+    				df.getOWLAnnotationAssertionAxiom(DEPR_CONCEPT_STATUS_PROP, classToRetire.getIRI(),
+    						df.getOWLLiteral(DEPR_CONCEPT_STATUS_VALUE, OWL2Datatype.RDF_PLAIN_LITERAL))));
+    		
+    	}
     	
     	mngr.applyChanges(changes);
         
-        this.retireButton.setText("Save");
+        retireButton.setText("Save");
     	
     	
     }

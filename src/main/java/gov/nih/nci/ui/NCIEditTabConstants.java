@@ -40,6 +40,9 @@ public class NCIEditTabConstants {
 	public static OWLAnnotationProperty FULL_SYN;
 	public static OWLAnnotationProperty PREF_NAME;
 	
+	public static OWLAnnotationProperty DEPR_CONCEPT_STATUS_PROP = null;
+	public static String DEPR_CONCEPT_STATUS_VALUE;
+	
 	public static OWLAnnotationProperty SEMANTIC_TYPE;
 	
 	public static OWLClass PRE_RETIRE_ROOT;
