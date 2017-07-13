@@ -352,9 +352,10 @@ public class EditPanel extends JPanel {
             				NCIEditTab.currentTab().syncPrefName(newPref);                		
             			}
 
-            			NCIEditTab.currentTab().commitChanges();
-            			origPref = prefNameText.getText();
-            			NCIEditTab.currentTab().refreshNavTree();
+            			if (NCIEditTab.currentTab().commitChanges()) {
+            				origPref = prefNameText.getText();
+            				NCIEditTab.currentTab().refreshNavTree();
+            			}
             		}
             		//disableButtons();
             	} else {

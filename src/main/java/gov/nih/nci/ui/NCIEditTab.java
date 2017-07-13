@@ -962,7 +962,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     }
     
-    public void commitChanges() {
+    public boolean commitChanges() {
     	
     	ComplexEditType type = getCurrentOp().getType();
     	if (type == null) {
@@ -980,6 +980,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			
     			fireChange(new EditTabChangeEvent(this, ComplexEditType.COMMIT));
     			
+    			return true;
+    			
     		} catch (ClientRequestException e) {
     			if (e instanceof LoginTimeoutException) {
                     showErrorDialog("Commit error", e.getMessage(), e);
@@ -987,24 +989,27 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
                     if (authToken.isPresent() && authToken.get().isAuthorized()) {
                     	try {
 							doCommit(changes, type);
+							
+							return true;
 						} catch (Exception e1) {
 							
 							showErrorDialog("Retry of commit failed", e1.getMessage(), e1);
+							return false;
 						}
                         
                     }
                 }
                 else {
                     showErrorDialog("Commit error", e.getMessage(), e);
+                    return false;
                 }
     			
     		} catch (AuthorizationException e) {
     			showErrorDialog("This should not occur", e.getMessage(), e);
+    			return false;
 			}
     	}
-    	
-    	
-        
+    	return false;        
     }
     
     private void doCommit(List<OWLOntologyChange> changes, ComplexEditType type) throws ClientRequestException, 

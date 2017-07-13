@@ -183,20 +183,21 @@ public class ComplexEditPanel extends JPanel {
             		               "nci-edit-tab.ComplexEditView");
             		}
             	} else {
-            		NCIEditTab.currentTab().commitChanges();
-            		NCIEditTab.currentTab().completeOp();
-            		
-            		setEnableUnselectedRadioButtons(true);
-                	upperPanelAnn.setRootObject(null);
-                	lowerPanelAnn.setRootObject(null);
-                	upperPanelClass.setRootObject(null);
-                	lowerPanelClass.setRootObject(null);
-                	radioButtonGroup.clearSelection();
-                	
-                	upperLabel.setText("Source");
-                	lowerLabel.setText("Target");
-                	
-            		disableButtons();
+            		if (NCIEditTab.currentTab().commitChanges()) {
+            			NCIEditTab.currentTab().completeOp();
+
+            			setEnableUnselectedRadioButtons(true);
+            			upperPanelAnn.setRootObject(null);
+            			lowerPanelAnn.setRootObject(null);
+            			upperPanelClass.setRootObject(null);
+            			lowerPanelClass.setRootObject(null);
+            			radioButtonGroup.clearSelection();
+
+            			upperLabel.setText("Source");
+            			lowerLabel.setText("Target");
+
+            			disableButtons();
+            		}
             	}
             	
             }
