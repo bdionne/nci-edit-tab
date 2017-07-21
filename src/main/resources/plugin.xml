@@ -12,6 +12,15 @@
 		<editorKitId value="OWLEditorKit"/>
 		<defaultViewConfigFileName value="edit-tab-config.xml"/>
    </extension>
+   
+   <extension id="InferencesTab"
+               point="org.protege.editor.core.application.WorkspaceTab">
+        <label value="Inference Results"/>
+        <class value="org.protege.editor.owl.ui.OWLWorkspaceViewsTab"/>
+        <editorKitId value="OWLEditorKit"/>
+        <index value="Y"/>
+        <defaultViewConfigFileName value="viewconfig-inferencestab.xml"/>
+    </extension>
 
 
 	<!-- View -->
@@ -25,6 +34,14 @@
         <category value="@org.protege.classcategory"/>
         <navigates value="@org.protege.classcategory"/>
         <instantiationType value="eager"/>
+    </extension>
+    
+    <extension id="InferredTreeView"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="Inferred Navigation Hierachy"/>
+        <class value="gov.nih.nci.ui.InferredTreeView"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="Inference Results"/>
     </extension>
     <!--
      <extension id="PropertyTableView"
