@@ -150,7 +150,9 @@ public class ComplexOperation {
 			for (OWLClass c : subjects) {
 				if (!(c.equals(source) ||
 						c.equals(target))) {
-					return true;
+					if (type == DUAL) {
+						return true;
+					}
 				}
 			}
 		}
