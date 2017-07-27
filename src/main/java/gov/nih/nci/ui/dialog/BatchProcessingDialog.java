@@ -14,8 +14,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -59,9 +61,9 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	public static final String FILE_DELIMITER = ",", PROPERTY_VALUES_DELIMITER = "\t";
 	protected static final String LAST_USED_FOLDER = "";
 	protected static final String LAST_BATCH_TYPE = "";
-	private static final String[] BATCH_TYPE_ITEMS = new String[] {
-			BatchTask.TaskType.LOAD +"", BatchTask.TaskType.EDIT_SIMPLE_PROPS + "", BatchTask.TaskType.EDIT_COMPLEX_PROPS + "", 
-			BatchTask.TaskType.EDIT_PARENTS + "", BatchTask.TaskType.EDIT_ROLES + ""};
+	
+	private List<TaskType> batch_type_items = new ArrayList<TaskType>();
+	
 	
 	NCIEditTab tab;
 
@@ -178,12 +180,23 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 			container.add(filePanel, BorderLayout.NORTH);
 			
-			batchType = new JComboBox(BATCH_TYPE_ITEMS);
+			batch_type_items.add(BatchTask.TaskType.LOAD);
+			batch_type_items.add(BatchTask.TaskType.EDIT_SIMPLE_PROPS);
+			batch_type_items.add(BatchTask.TaskType.EDIT_COMPLEX_PROPS);
+			batch_type_items.add(BatchTask.TaskType.EDIT_PARENTS);
+			batch_type_items.add(BatchTask.TaskType.EDIT_ROLES);
+			
+			batchType = new JComboBox<TaskType>();
+			
+			for (TaskType t : batch_type_items) {
+				batchType.addItem(t);
+			}
 			
 			Preferences prefs = PreferencesManager.getInstance().getApplicationPreferences(getClass());   		  
 			btindex = prefs.getInt(LAST_BATCH_TYPE, 0);
 			if( btindex >= 0 && btindex <= 4 ) {
-				batchType.setSelectedItem(BATCH_TYPE_ITEMS[btindex]); 
+				batchType.setSelectedItem(batch_type_items.get(btindex)); 
+				edit_type = (TaskType) batchType.getSelectedItem();
 			}
 		
 			batchType.addActionListener(new ActionListener() {
@@ -191,6 +204,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				  public void actionPerformed(ActionEvent e) {
 					  
 					  prefs.putInt(LAST_BATCH_TYPE, batchType.getSelectedIndex());
+					  edit_type = (TaskType) batchType.getSelectedItem();
 					  
 				  }
 			  });
@@ -315,9 +329,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		Object action = event.getSource();
 
-		if (action == batchType) {
-			edit_type = (TaskType) batchType.getSelectedItem();
-		} else if (action == fCancelButton) {
+		if (action == fCancelButton) {
 			dispose();
 		} else if (action == fStartButton) {
 			infile = getInfile();
