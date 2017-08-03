@@ -50,6 +50,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 import edu.stanford.protege.csv.export.ui.ExportDialogPanel;
 //import gov.nih.nci.ui.dialog.LQTExportDialog;
@@ -86,7 +87,8 @@ import gov.nih.nci.protegex.util.QuickSortVecStrings;
 import gov.nih.nci.utils.SwingWorker;
 
 /**
- * @author bitdiddle
+ * @author Bob Dionne
+ * @author Yinghua Xu
  * 
  */
 public class ReportWriterPanel extends JPanel implements ActionListener
@@ -98,17 +100,11 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 	private JButton configure = null;
 
-	JButton startButton;
+	JButton clearButton;
 
-	JButton interruptButton;
-
-	boolean interrupted;
-
-	private JProgressBar progress;
 
 	int iCtr = 0;
-
-	SwingWorker worker;
+	
 
 	PrintWriter pw = null;
 
@@ -116,7 +112,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 	File exportFile = null;
 
-	private int max;
 
 	private Vector<String> classList;
 
@@ -208,7 +203,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			try {
 				success = ExportDialogPanel.showDialog(oek, "", ocl, true);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -216,6 +210,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 				reportTextArea
 						.append("\nExport with LQT configuration did not complete.");
 			} else {
+				reportTextArea.append("\nNo of classes processed: " + ocl.size() + "\n");
 				reportTextArea
 						.append("\nExported using the LQT configuration finished successfully.\n");
 				
@@ -232,84 +227,60 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			JOptionPane.showMessageDialog(this, "Please select a root concept for the report \n", "Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}
-		List<OWLEntity> ocl = new ArrayList<OWLEntity>();
-		ocl.add(selected);
-		/**
-		ExportToCsvUtil.setExportBrowserText(false);
-		ExportToCsvUtil.setExportMetadata(true);
-		ExportToCsvUtil.setExportSuperclass(true);
+		List<OWLEntity> ocl = fetchDownClosure(selected);
+		
 
-		NCIExportToCsvAction exportAction = new NCIExportToCsvAction(tab
-				.getKnowledgeBase(), configPanel, true) {
-			public static final long serialVersionUID = 122256792L;
-
-			public Collection<Instance> getInstancesToExport() {
-				Collection<Instance> allClassesToExport = new LinkedHashSet<Instance>();
-				List<Cls> selectedClsesInPanel = new ArrayList<Cls>(
-						getExportConfigurationPanel()
-								.getExportedClassesInPanel());
-				Collections.sort(selectedClsesInPanel, new FrameComparator());
-				for (Cls cls : selectedClsesInPanel) {
-					allClassesToExport.add(cls);
-					List<Cls> subclasses = new ArrayList<Cls>(cls
-							.getSubclasses());
-					Collections.sort(subclasses, new FrameComparator());
-					for (Iterator<Cls> iterator = subclasses.iterator(); iterator
-							.hasNext();) {
-						Cls subclas = (Cls) iterator.next();
-						if (subclas instanceof RDFResource
-								&& !((RDFResource) subclas).isAnonymous()) {
-							allClassesToExport.add(subclas);
-						}
-					}
-				}
-				return allClassesToExport;
-			}
-
-			@Override
-			protected Collection<Cls> getInitialExportClses() {
-				Collection selection = tab.getSelection();
-				Collection<Cls> res = new ArrayList<Cls>();
-				if (selection == null || selection.size() == 0) {
-					return res;
-				} else {
-					Iterator it = selection.iterator();
-					while (it.hasNext()) {
-						FrameWithBrowserText fbt = (FrameWithBrowserText) it
-								.next();
-						res.add((Cls) fbt.getFrame());
-					}
-				}
-				res.remove(tab.getOWLModel().getOWLThingClass()); // owl:Thing
-				// is
-				// always
-				// there?!
-				return res;
-			}
-		};
-
-		exportAction.actionPerformed(null);
-		boolean success = exportAction.exportCompletedSuccessful();
-		*/
 		boolean success = false;
 		try {
-			//success = ExportDialogPanel.showDialog(oek, "", ocl, true);
-			success = ExportDialogPanel.showDialog(oek, "", ocl, true);
+			success = ExportDialogPanel.showDialog(oek, "", ocl, false);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (!success) {
 			reportTextArea
 					.append("\nExport with LQT configuration did not complete.");
 		} else {
+			reportTextArea.append("\nNo of classes processed: " + ocl.size() + "\n");
 			reportTextArea
 					.append("\nExported using the LQT configuration finished successfully.\n");
 		}
 		return success;
 		
 	}
+	
+	private List<OWLEntity> fetchDownClosure(OWLClass e) {
+    	List<OWLEntity> res = new ArrayList<OWLEntity>();
+    	
+    	res.add(e);
+    	
+        List<OWLClass> subClasses = tab.getDirectSubClasses(e);
+        Collections.sort(subClasses, new Comparator<OWLClass>() {
 
+			public int compare(OWLClass o1, OWLClass o2) {
+				// single quotes are used by Protege-OWL when the browser
+				// text has space in it, but they are displayed without the
+				// quotes
+				// this messes up the sort order
+				String s1 = o1.getIRI().getShortForm();
+				String s2 = o2.getIRI().getShortForm();
+				if (s1.startsWith("'")) {
+					s1 = s1.substring(1, s1.length() - 1);
+				}
+				if (s2.startsWith("'")) {
+					s2 = s2.substring(1, s2.length() - 1);
+				}
+				return s1.compareTo(s2);
+			}
+
+		});
+        for (OWLClass sub : subClasses) {
+        	res.addAll(fetchDownClosure(sub));
+        }
+        return res;
+
+    }
+
+	
 	protected boolean onReportWriterClassicExport() {
 		if ((selected == null) || selected.isTopEntity()) {
 			JOptionPane.showMessageDialog(this, "Please select a root concept for the report \n", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -338,13 +309,16 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 			root = selected;
 
-			startButton.setEnabled(true);
-			configure.setEnabled(false);
+			reportTextArea.append((String) generateReport());
+			reportTextArea
+			.append("\nExported using the classis configuration finished successfully.\n");
+			
 
 		}
 		return true;
 		
 	}
+
 
 
 	public void enableReportButton(boolean enabled) {
@@ -375,21 +349,11 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 		configure = new JButton("Configure");
 		configure.addActionListener(this);
+		
+		clearButton = new JButton("Clear");
+		clearButton.addActionListener(clearListener);
+		clearButton.setEnabled(true);
 
-		startButton = new JButton("Start");
-		startButton.addActionListener(startListener);
-		startButton.setEnabled(false);
-
-		interruptButton = new JButton("Cancel");
-		interruptButton.addActionListener(interruptListener);
-		interruptButton.setEnabled(false);
-
-		progress = new JProgressBar();
-		// JLabel progress_msg = new JLabel("foo");
-		progress.setPreferredSize(new Dimension(250, 10));
-		progress.setMinimum(0);
-		progress.setMaximum(100);
-		progress.setValue(0);
 
 		JPanel textAreaPanel = new JPanel(new BorderLayout());
 		reportTextArea = new JTextArea(25, 45);
@@ -400,9 +364,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		JPanel buttonPanel = new JPanel();
 
 		buttonPanel.add(configure);
-		buttonPanel.add(startButton);
-		buttonPanel.add(interruptButton);
-		buttonPanel.add(progress);
+		buttonPanel.add(clearButton);
 
 		configure.setEnabled(true);
 
@@ -417,12 +379,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		add(box);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	public void actionPerformed(ActionEvent arg0) {
 		showConfigDialog();
 	}
@@ -444,17 +400,11 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			e.printStackTrace();
 		}
 	}
-	
-	
-	private HashMap<OWLClass, OWLClass> alreadySeen = new HashMap<OWLClass, OWLClass>();
-
 	private String getClsData(PrintWriter pw, OWLClass superCls,
 			int level, int maxLevel, boolean withAttributes, String attrid) 
 
 	{
 
-		if (interrupted)
-			return "Cancelled";
 		if (maxLevel != -1 && level > maxLevel)
 			return "";
 
@@ -491,7 +441,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			}
 
 			
-			if (withAttributes && (alreadySeen.get(superCls) == null)) {
+			if (withAttributes) {
 				getSlots(superCls, tabString);				
 			}
 			
@@ -500,20 +450,8 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			classList.clear();
 
 			iCtr++;
-			// System.out.println("foo         foo              foo " + iCtr);
-
-			final int peg = iCtr;
-			updateStatus(peg);
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			Thread.sleep(50);
-
-			alreadySeen.put(superCls, superCls);
 			
 			List<OWLClass> subclasses = tab.getDirectSubClasses(superCls);
-
-			
 
 			Collections.sort(subclasses, new Comparator<OWLClass>() {
 
@@ -540,24 +478,14 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			level++;
 			for (OWLClass sub : subclasses) {
 				if (sub.getIRI().getShortForm().compareTo(superCls.getIRI().getShortForm()) != 0) {
-					if (alreadySeen.get(sub) != null) {
-						
-					} else {
-						reportTextArea.append("adding next level\n");
-
-						getClsData(pw, sub, level,
-								maxLevel, withAttributes, attrid);
-						
-					}
+					getClsData(pw, sub, level,
+							maxLevel, withAttributes, attrid);
+				
 				}
 			}
 			
 		}
 
-		catch (InterruptedException e) {
-			//updateStatus(0);
-			return "Interrupted";
-		}
 
 		catch (Exception e) {			
 			return "Error";
@@ -664,166 +592,25 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 	}
 	
-	void updateStatus(final int i) {
-		Runnable doSetProgressBarValue = new Runnable() {
-			public void run() {
-				reportTextArea.append("" + i + " out of " + max
-						+ " completed.\n");
-				progress.setValue(i);
-			}
-		};
-		SwingUtilities.invokeLater(doSetProgressBarValue);
-	}
 
+	
 	Object generateReport() {
-		//rwp.initializeProgressBar();
-		iCtr = 0;
 		
+		iCtr = 0;
 	    getClsData(pw, root, 0, maxlevel, withAttributes, attrsId);
 		
-
-		if (interrupted) {
-			progress.setValue(0);
-			startButton.setEnabled(false);
-			interruptButton.setEnabled(false);
-			configure.setEnabled(true);
-			return "Report generation cancelled.";
-		}
-		configure.setEnabled(true);
-		return "Report generation completed.";
+		return "\nNo of classes processed: " + iCtr + "\n";
 	}
 	
+	ActionListener clearListener = new ActionListener() {
 
-	ActionListener startListener = new ActionListener() {
-		public void actionPerformed(ActionEvent event) {
-			startButton.setEnabled(false);
-			interruptButton.setEnabled(true);
-
-			reportTextArea.setText("Report generation in progress ...");
-
-			worker = new SwingWorker() {
-				public Object construct() {
-
-					reportTextArea
-							.append("Calculating tree size. Please wait ...\n");
-
-					alreadySeen = new HashMap<OWLClass, OWLClass>();
-
-					if (maxlevel == -1) {
-						maxlevel = getMaxLevel((OWLClass) root);
-					}
-					// reinit alreadySeen for reuse
-					alreadySeen.clear();;
-
-					max = getTreeSize(root, 0, maxlevel);
-					// reinit already seen as it's used to compute max
-					alreadySeen.clear();
-
-					reportTextArea.append("Tree size: " + max + "\n");
-
-					progress.setMaximum(max);
-					// rwp.showProgressBar(true);
-
-					iCtr = 0;
-
-					return generateReport();
-				}
-
-				public void finished() {
-					// startButton.setEnabled(true);
-					interruptButton.setEnabled(false);
-					reportTextArea.append(get().toString());
-					interrupted = false;
-				}
-
-				
-			};
-			worker.start();
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			reportTextArea.setText("");
+			
 		}
-	};
-
-	ActionListener interruptListener = new ActionListener() {
-		public void actionPerformed(ActionEvent event) {
-			// rwp.initializeProgressBar();
-			interruptButton.setEnabled(false);
-			worker.interrupt();
-			startButton.setEnabled(false);
-			interrupted = true;
-
-			try {
-				if (pw != null) {
-					pw.flush();
-					pw.close();
-				}
-				pw = null;
-			} catch (Exception ex) {
-
-			}
-		}
-	};
-
-	private int getMaxLevel(OWLClass cls) {
 		
-		alreadySeen.put(cls, cls);
-		if (interrupted)
-			return 0;
-		try {
-			List<OWLClass> subclasses = tab.getDirectSubClasses(cls);
-			if (subclasses.isEmpty()) {
-				return 1;
-			}
-			
-			int max = 0;
-			for (OWLClass sub : subclasses) {
-				if (alreadySeen.get(sub) != null) {
-					return max;
-				} else {
-					int m = getMaxLevel(sub);
-					if (m > max) {
-						max = m;
-					}
-				}
-			}
-			return max + 1;
-			
-			
-		} catch (Exception e) {
-			updateStatus(0);
-			return 0;
-		}
-	}
-
-	private int getTreeSize(OWLClass cls, int level, int maxlevel) {
-
-		alreadySeen.put(cls, cls);
-		
-
-		if (interrupted)
-			return 0;
-		try {
-			
-			int num_subs = 0;
-			if (level < maxlevel) {
-				level++;
-				List<OWLClass> subclasses = tab.getDirectSubClasses(cls);
-
-				for (OWLClass sub : subclasses) {
-					if (alreadySeen.get(sub) == null) {
-						num_subs = num_subs
-								+ getTreeSize(sub, level, maxlevel);
-					}
-
-				}
-
-
-			}
-			return num_subs + 1;
-		} catch (Exception e) {
-			updateStatus(0);
-			return 0;
-		}
-	}
-
+	};
 	class ReportWriterConfigPanel extends JPanel {
 		private static final long serialVersionUID = 5569432370041174566L;
 
@@ -892,12 +679,6 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 	}
 
 	public void dispose() {
-		// TODO Auto-generated method stub
 		
 	}
-	
-	 
-
-	
-
 }
