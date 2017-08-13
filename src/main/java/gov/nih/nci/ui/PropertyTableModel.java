@@ -204,7 +204,7 @@ public class PropertyTableModel extends AbstractTableModel {
 						propShortForm.equals("Definition_Reviewer_Name")) {
 					OWLAnnotationProperty p = annot.getProperty();
 					propertyValues.put(propShortForm,
-							NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(p)));
+							NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(p), ""));
 				} else {
 
 					propertyValues.put(propShortForm, literalExtractor.getLiteral(annot.getValue()));
@@ -223,7 +223,7 @@ public class PropertyTableModel extends AbstractTableModel {
 		for (OWLAnnotationProperty aprop : requiredAnnotationsList) {
 			String propShortForm = aprop.getIRI().getShortForm();
 			propertyValues.put(propShortForm,
-					NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(aprop)));
+					NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(aprop), NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY));
 		}
 		return propertyValues;
 	}
