@@ -55,6 +55,8 @@ import org.semanticweb.owlapi.vocab.Namespaces;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import gov.nih.nci.ui.NCIEditTab;
+import gov.nih.nci.ui.NCIEditTabConstants;
+
 import static gov.nih.nci.ui.NCIEditTabConstants.*;
 
 public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
@@ -321,7 +323,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		
 		for (OWLAnnotationProperty prop : req_props) {
 			
-			String val = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(prop));
+			String val = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(prop), NCIEditTabConstants.DEFAULT_SOURCE_NEW_CLASS);
 			if (val == null) {
 				val = "No_Default";
 

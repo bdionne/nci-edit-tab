@@ -51,6 +51,12 @@ public class NCIEditTabConstants {
 	public static OWLClass RETIRE_ROOT;
 	public static OWLClass RETIRE_CONCEPTS_ROOT;
 	
+	public static final String DEFAULT_SOURCE_NEW_CLASS = "NEWCLASS";
+	public static final String DEFAULT_SOURCE_NEW_PROPERTY = "NEWPROPERTY";
+	public static final String DEFAULT = "default";
+	public static final String DEFAULT_ON_CREATE_CLASS = "default_on_create_class";
+	public static final String DEFAULT_ON_EDIT_CLASS = "default_on_edit_class";
+	
 	// from metaproject, needed to check if user can retire
     public static final Operation RETIRE = factory.getSystemOperation(
             factory.getOperationId("retire"), factory.getName("Retire"),

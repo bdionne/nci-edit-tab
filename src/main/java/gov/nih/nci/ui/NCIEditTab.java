@@ -1462,16 +1462,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return false;
 	}
 	
-	public String getDefault(OWLDatatype prop) {
+	public String getDefault(OWLDatatype prop, String source) {
 		if (prop == null) {return null;}
-		OWLAnnotationProperty p = this.lookUpShort("default");
+		OWLAnnotationProperty p = this.lookUpShort(NCIEditTabConstants.DEFAULT);
+		if (source != null) {
+			if (source.equals(NCIEditTabConstants.DEFAULT_SOURCE_NEW_CLASS)) {
+				p = this.lookUpShort(NCIEditTabConstants.DEFAULT_ON_CREATE_CLASS);
+			} else if (source.equals(NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY)) {
+				p = this.lookUpShort(NCIEditTabConstants.DEFAULT_ON_EDIT_CLASS);
+			}
+		}
 		Optional<String> val = getPropertyValue(prop, p);
 		if (val.isPresent()) {
 			return val.get();
 		}
 		return null;
 	}
-	
 	
 	OWLClass findOWLClass(String opt, ProjectOptions opts) {
 		OWLClass cls = null;
@@ -1815,7 +1821,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 						df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL));
 				anns.add(new_ann);
 			} else if (is_required(prop)) {
-				String def_val = getDefaultValue(getDataType(prop));
+				String def_val = getDefaultValue(getDataType(prop), "");
 				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
 						df.getOWLLiteral(def_val, OWL2Datatype.RDF_PLAIN_LITERAL));
 				anns.add(new_ann);				
@@ -2146,14 +2152,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return null;
 	}
 	
-	public String getDefaultValue(IRI iri) {
+	public String getDefaultValue(IRI iri, String source) {
 		String type = iri.getShortForm();
 		if (type.equalsIgnoreCase("date-time-system")) {
 			return LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 		} else if (type.equalsIgnoreCase("user-system")) {
 			return clientSession.getActiveClient().getUserInfo().getName().toString();
 		} else if (type.endsWith("enum")) {
-			return getDefault(lookUpDataType(type));
+			return getDefault(lookUpDataType(type), source);
 		}
 		return "";
 	}
