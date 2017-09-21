@@ -42,7 +42,6 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 	@Override
 	public void disposeView() {
 		editPanel.disposeView();
-		super.disposeView();		
 	}
 
 	

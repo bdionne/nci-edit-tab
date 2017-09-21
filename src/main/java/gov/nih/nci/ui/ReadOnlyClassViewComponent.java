@@ -42,7 +42,6 @@ public class ReadOnlyClassViewComponent extends OWLClassAnnotationsViewComponent
 	@Override
 	public void disposeView() {
 		editPanel.disposeView();
-		super.disposeView();		
 	}
 
 	
