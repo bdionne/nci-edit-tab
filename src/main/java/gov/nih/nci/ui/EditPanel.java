@@ -246,10 +246,11 @@ public class EditPanel extends JPanel {
 
     		Optional<String> ps = NCIEditTab.currentTab().getRDFSLabel(cls);
 
-    		if (ps.isPresent()) {
+    		if (ps.isPresent()) { 
+    			
     			origPref = ps.get();
     			newPref = "";
-    			prefNameText.setText(ps.get());    	     
+    			prefNameText.setText(ps.get());
     		} else {
     			prefNameText.setText("Missing");
     		}
