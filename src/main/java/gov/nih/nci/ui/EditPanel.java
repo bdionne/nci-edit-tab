@@ -183,19 +183,18 @@ public class EditPanel extends JPanel {
         topHeader.add(classCode);
         topHeader.add(codeText);
       
-        gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit, 
-        		new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties), read_only) {
-        	
-        	public void handleDelete() {
-        		super.handleDelete();
-        		//NCIEditTab.currentTab().classModified();        		
-        	}
-        	
-        	public void handleEdit() {
-        		super.handleEdit();
-        	    //NCIEditTab.currentTab().classModified();
-        	}        	
-        };
+		gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit,
+				new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties), read_only) {
+			private static final long serialVersionUID = 1L;
+
+			public void handleDelete() {
+				super.handleDelete();
+			}
+
+			public void handleEdit() {
+				super.handleEdit();
+			}
+		};
           
         JScrollPane generalSP = new JScrollPane(gen_props);//will add tree or list to it
         generalSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -211,19 +210,17 @@ public class EditPanel extends JPanel {
         
         
         list = new OWLFrameList<OWLClass>(owlEditorKit, new NCIOWLClassDescriptionFrame(owlEditorKit)) {
-        //list = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit)) {
+			private static final long serialVersionUID = 1L;
         	public void handleDelete() {
         		super.handleDelete();
-        	    //NCIEditTab.currentTab().classModified();
         	}
         	
         	public void handleEdit() {
         		super.handleEdit();
-        	    //NCIEditTab.currentTab().classModified();
         	}        	
         };
         
-        descrPane = new JScrollPane(list);// will add description list to it
+        descrPane = new JScrollPane(list); // will add description list to it
         descrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
                 
         tabbedPane.addTab("Description", descrPane);
@@ -360,7 +357,6 @@ public class EditPanel extends JPanel {
             				NCIEditTab.currentTab().refreshNavTree();
             			}
             		}
-            		//disableButtons();
             	} else {
                 	saveButton.setEnabled(false);
                 }
@@ -377,7 +373,6 @@ public class EditPanel extends JPanel {
             {
             	NCIEditTab.currentTab().undoChanges();            	
             	NCIEditTab.currentTab().setEditInProgress(false);
-            	//NCIEditTab.currentTab().selectClass(NCIEditTab.currentTab().getCurrentlySelected());
             	NCIEditTab.currentTab().refreshNavTree();
             	disableButtons();
             	
