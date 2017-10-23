@@ -2268,7 +2268,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
     		if (complex_prop.equals(getFullSyn()) &&
     				!NCIEditTab.currentTab().validPrefName(ann_vals.get("Value"))) {
-    			JOptionPane.showMessageDialog(this, "Preferred name cannot contain ! or ?", "Warning", JOptionPane.WARNING_MESSAGE);
+    			JOptionPane.showMessageDialog(this, "Preferred name cannot contain special characters, ! or ?", "Warning", JOptionPane.WARNING_MESSAGE);
     			return false; 
     		}
     	}
@@ -2673,7 +2673,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     public boolean validPrefName(String name) {
     	if (name.contains("?") ||
-    			name.contains("!")) {
+    			name.contains("!") ||
+    			name.contains("\t") ||
+    			name.contains("\n")
+    			) {
     		return false;
     	} else {
     		return true;

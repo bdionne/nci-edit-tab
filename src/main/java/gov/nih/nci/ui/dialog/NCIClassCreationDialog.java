@@ -261,7 +261,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	}
     	
     	if (!NCIEditTab.currentTab().validPrefName(preferredName)){
-    		JOptionPane.showMessageDialog(this, "Preferred name cannot contain ! or ?", "Warning", JOptionPane.WARNING_MESSAGE);
+    		JOptionPane.showMessageDialog(this, "Preferred name cannot contain special characters, ! or ?", "Warning", JOptionPane.WARNING_MESSAGE);
     		return false;    		
     	}
     	
