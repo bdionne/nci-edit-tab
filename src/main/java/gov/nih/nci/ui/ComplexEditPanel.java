@@ -7,10 +7,7 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -22,18 +19,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.frame.OWLAnnotationsFrame;
-import org.protege.editor.owl.ui.frame.OWLFrameObject;
-import org.protege.editor.owl.ui.frame.OWLFrameSection;
-import org.protege.editor.owl.ui.frame.OWLFrameSectionRow;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
-
-
-
-import org.protege.editor.owl.server.http.messages.History;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.ComplexEditTransferHandler;
@@ -49,11 +38,11 @@ public class ComplexEditPanel extends JPanel {
 
 	private OWLEditorKit owlEditorKit;
     
-    private OWLFrameList<OWLAnnotationSubject> upperPanelAnn;
-    private OWLFrameList<OWLClass> upperPanelClass;
+    private NCIOWLFrameList<OWLAnnotationSubject> upperPanelAnn;
+    private NCIOWLFrameList<OWLClass> upperPanelClass;
     
-    private OWLFrameList<OWLAnnotationSubject> lowerPanelAnn;
-    private OWLFrameList<OWLClass> lowerPanelClass;
+    private NCIOWLFrameList<OWLAnnotationSubject> lowerPanelAnn;
+    private NCIOWLFrameList<OWLClass> lowerPanelClass;
     
     private JSplitPane upperSplitPane;
     private JSplitPane lowerSplitPane;
@@ -92,15 +81,15 @@ public class ComplexEditPanel extends JPanel {
     
     public ComplexEditPanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
-        this.upperPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit,
+        this.upperPanelAnn = new NCIOWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
         				NCIEditTab.currentTab().getImmutableProperties()));
            
-        this.lowerPanelAnn = new OWLFrameList<OWLAnnotationSubject>(editorKit,
+        this.lowerPanelAnn = new NCIOWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
         				NCIEditTab.currentTab().getImmutableProperties()));
-        this.lowerPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
-        this.upperPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
+        this.lowerPanelClass = new NCIOWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
+        this.upperPanelClass = new NCIOWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
         
         createUI();
     }
