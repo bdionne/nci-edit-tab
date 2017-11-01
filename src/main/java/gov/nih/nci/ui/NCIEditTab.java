@@ -2545,7 +2545,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     private void syncPrefNameLabelFullSyn(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
-       	if (!getRDFSLabel(cls).equals(preferred_name)) {
+       	if (getRDFSLabel(cls).isPresent() &&
+       			!getRDFSLabel(cls).get().equals(preferred_name)) {
     		OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name, OWL2Datatype.RDF_PLAIN_LITERAL);
     		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
     			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
@@ -2586,7 +2587,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     private void syncPrefNameLabel(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
-    	if (!getRDFSLabel(cls).equals(preferred_name)) {
+    	if (getRDFSLabel(cls).isPresent() &&
+    			!getRDFSLabel(cls).get().equals(preferred_name)) {
     		OWLLiteral pref_name_val = 
     				ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name, OWL2Datatype.RDF_PLAIN_LITERAL);
     		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
