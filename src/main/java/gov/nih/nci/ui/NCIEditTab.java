@@ -174,6 +174,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		history.startTalking();
 	}
 	
+	public void enableHistoryRecording() {
+		history.startRecording();		
+	}
+	
+	public void disableHistoryRecording() {
+		history.stopRecording();		
+	}
+	
 	public boolean isEditing() {
 		return editInProgress;
 	}
