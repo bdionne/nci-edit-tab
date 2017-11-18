@@ -150,6 +150,15 @@
         <path value="[NCIAssertedClassHierarchy]/SlotAA-E"/>
         <editorKitId value="OWLEditorKit"/>
     </extension>
+    
+     <extension id="menu.ExecuteClassificationSuggestionAxioms"
+               point="org.protege.editor.core.application.EditorKitMenuAction">
+        <name value="Execute classification suggestions..."/>
+        <class value="gov.nih.nci.ui.action.ExecuteClassificationSuggestionAxiomsAction"/>
+        <toolTip value="Executes all the edits suggested by classification"/>
+        <path value="org.protege.editor.core.application.menu.EditMenu/SlotN-C"/>
+        <editorKitId value="OWLEditorKit"/>
+    </extension>
 	
 
     

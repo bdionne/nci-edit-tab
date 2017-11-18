@@ -1,11 +1,8 @@
 package gov.nih.nci.utils.batch;
 
-import java.util.List;
 import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import gov.nih.nci.ui.NCIEditTab;
 

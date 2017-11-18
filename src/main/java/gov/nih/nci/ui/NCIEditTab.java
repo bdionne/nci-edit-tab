@@ -54,6 +54,7 @@ import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.protege.editor.search.lucene.SearchContext;
 import org.protege.owlapi.inference.cls.ChildClassExtractor;
 import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -171,6 +172,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public void disableBatchMode() { 
 		inBatchMode = false;
 		history.startTalking();
+	}
+	
+	public void enableHistoryRecording() {
+		history.startRecording();		
+	}
+	
+	public void disableHistoryRecording() {
+		history.stopRecording();		
 	}
 	
 	public boolean isEditing() {
@@ -2189,7 +2198,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		for (OWLAxiom ax : ont.getAxioms(selectedClass)) {
 			if (ax.isLogicalAxiom() && !(ax instanceof OWLDisjointClassesAxiom)) {
 				OWLAxiom duplicatedAxiom = dup.duplicateObject(ax);
-				changes.add(new AddAxiom(ont, duplicatedAxiom));
+				if (duplicatedAxiom instanceof OWLSubClassOfAxiom) {
+					OWLSubClassOfAxiom osa = (OWLSubClassOfAxiom) duplicatedAxiom;
+					if (osa.getSubClass().equals(osa.getSuperClass())) {
+						// don't add class as a parent of self
+					} else {
+						changes.add(new AddAxiom(ont, duplicatedAxiom));
+					}
+				} else {
+					changes.add(new AddAxiom(ont, duplicatedAxiom));
+				}
 			}
 		}
 
@@ -2535,7 +2553,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     private void syncPrefNameLabelFullSyn(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
-       	if (!getRDFSLabel(cls).equals(preferred_name)) {
+       	if (getRDFSLabel(cls).isPresent() &&
+       			!getRDFSLabel(cls).get().equals(preferred_name)) {
     		OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name, OWL2Datatype.RDF_PLAIN_LITERAL);
     		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
     			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
@@ -2576,7 +2595,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     
     private void syncPrefNameLabel(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
-    	if (!getRDFSLabel(cls).equals(preferred_name)) {
+    	if (getRDFSLabel(cls).isPresent() &&
+    			!getRDFSLabel(cls).get().equals(preferred_name)) {
     		OWLLiteral pref_name_val = 
     				ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name, OWL2Datatype.RDF_PLAIN_LITERAL);
     		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {

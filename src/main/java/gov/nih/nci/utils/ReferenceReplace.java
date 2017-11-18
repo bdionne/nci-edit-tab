@@ -103,8 +103,10 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 				}
 				if (newPar != null) {
 					changes.add(new RemoveAxiom(ont, ax));
-					OWLSubClassOfAxiom newAx = dataFact.getOWLSubClassOfAxiom(child, newPar);
-					changes.add(new AddAxiom(ont, newAx));
+					if (!child.equals(newPar)) {
+						OWLSubClassOfAxiom newAx = dataFact.getOWLSubClassOfAxiom(child, newPar);
+						changes.add(new AddAxiom(ont, newAx));
+					}
 				}
 				
 			}
