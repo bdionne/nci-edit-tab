@@ -11,6 +11,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.frame.OWLFrame;
 import org.protege.editor.owl.ui.frame.OWLFrameSectionRow;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -96,7 +97,8 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		
 		HashMap<String, String> data = 	add.showDialog(this.editorKit, "Adding Properties");
 		
-		OWLClass cls = editorKit.getOWLWorkspace().getOWLSelectionModel().getLastSelectedClass();
+		String codeStr = ((IRI)axiom.getSubject()).getShortForm();
+		OWLClass cls = NCIEditTab.currentTab().getClass(codeStr);
 		if (data != null) {
 			if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, cls,
 					axiom.getProperty(), axiom, data)) {
@@ -115,7 +117,9 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 				PropertyUtil.getDefaultSelectedPropertyLabel(annotationProps));
 		
 		HashMap<String, String> data = 	edit.showDialog(this.editorKit, "Editing Properties");
-		OWLClass cls = editorKit.getOWLWorkspace().getOWLSelectionModel().getLastSelectedClass();
+		
+		String codeStr = ((IRI)axiom.getSubject()).getShortForm();
+		OWLClass cls = NCIEditTab.currentTab().getClass(codeStr);
 		if (data != null) {
 			if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, cls,
 					axiom.getProperty(), axiom, data)) {
@@ -128,7 +132,6 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		final Object val = getSelectedValue();
 		if (val instanceof NCIOWLAnnotationsFrameSectionRow) {
 			axiom = ((NCIOWLAnnotationsFrameSectionRow)val).getAxiom();
-			OWLAnnotationProperty prop = axiom.getProperty();
 			annotations = new ArrayList<OWLAnnotation>(axiom.getAnnotations());
 			annotationProps = new ArrayList<OWLAnnotationProperty>();
 			for(OWLAnnotation annotation : annotations) {

@@ -54,7 +54,6 @@ import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.protege.editor.search.lucene.SearchContext;
 import org.protege.owlapi.inference.cls.ChildClassExtractor;
 import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -98,7 +97,6 @@ import edu.stanford.protege.search.lucene.tab.engine.IndexDirMapper;
 import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabResultHandler;
-import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
 import gov.nih.nci.ui.action.ComplexOperation;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
@@ -2311,21 +2309,23 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     		Set<OWLAnnotationProperty> req_props = this.getConfiguredAnnotationsForAnnotation(complex_prop);
 
-    		for (OWLAnnotationProperty prop : req_props) {
-    			String new_val = ann_vals.get(prop.getIRI().getShortForm());
-
-    			if (new_val != null && !new_val.isEmpty()) {
-    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
-    						df.getOWLLiteral(new_val,OWL2Datatype.RDF_PLAIN_LITERAL));
-    				new_anns.add(new_ann);
-
-    			} else {
-    				if (is_required(prop)) {
-    					JOptionPane.showMessageDialog(this, "Complex property missing required qualifier " +
-    							prop.getIRI().getShortForm(), "Warning", JOptionPane.WARNING_MESSAGE);
-    					return false; 
-    				}
-    			}
+    		if(req_props != null) {
+	    		for (OWLAnnotationProperty prop : req_props) {
+	    			String new_val = ann_vals.get(prop.getIRI().getShortForm());
+	
+	    			if (new_val != null && !new_val.isEmpty()) {
+	    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
+	    						df.getOWLLiteral(new_val,OWL2Datatype.RDF_PLAIN_LITERAL));
+	    				new_anns.add(new_ann);
+	
+	    			} else {
+	    				if (is_required(prop)) {
+	    					JOptionPane.showMessageDialog(this, "Complex property missing required qualifier " +
+	    							prop.getIRI().getShortForm(), "Warning", JOptionPane.WARNING_MESSAGE);
+	    					return false; 
+	    				}
+	    			}
+	    		}
     		}
 
     		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(old_axiom.getProperty(), cls.getIRI(),
