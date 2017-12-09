@@ -123,6 +123,9 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		if (data != null) {
 			if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, cls,
 					axiom.getProperty(), axiom, data)) {
+				if (axiom.getProperty().equals(NCIEditTab.currentTab().getPreferredName())) {
+					NCIEditTab.currentTab().syncPrefName(data.get("Value"));
+				}
 			}				
 
 		} 

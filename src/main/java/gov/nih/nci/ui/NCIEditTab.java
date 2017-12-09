@@ -2691,6 +2691,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
+    public OWLAnnotationProperty getPreferredName() {
+    	
+		return PREF_NAME;
+    	
+    }
+    
     public boolean validPrefName(String name) {
     	if (name.contains("?") ||
     			name.contains("!") ||
