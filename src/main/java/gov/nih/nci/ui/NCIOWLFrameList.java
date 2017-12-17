@@ -110,6 +110,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	
 	public void handleEdit() {
 		loadAnnotationsAndProperties();
+		if(annotationProps == null) return;
 		PropertyEditingDialog edit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, 
 				PropertyUtil.getSelectedPropertyType(annotationProps), 
 				PropertyUtil.getSelectedPropertyValues(annotations), 

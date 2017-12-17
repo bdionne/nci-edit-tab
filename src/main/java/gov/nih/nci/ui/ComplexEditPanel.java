@@ -39,10 +39,10 @@ public class ComplexEditPanel extends JPanel {
 	private OWLEditorKit owlEditorKit;
     
     private NCIOWLFrameList<OWLAnnotationSubject> upperPanelAnn;
-    private NCIOWLFrameList<OWLClass> upperPanelClass;
+    private OWLFrameList<OWLClass> upperPanelClass;
     
     private NCIOWLFrameList<OWLAnnotationSubject> lowerPanelAnn;
-    private NCIOWLFrameList<OWLClass> lowerPanelClass;
+    private OWLFrameList<OWLClass> lowerPanelClass;
     
     private JSplitPane upperSplitPane;
     private JSplitPane lowerSplitPane;
@@ -88,8 +88,8 @@ public class ComplexEditPanel extends JPanel {
         this.lowerPanelAnn = new NCIOWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
         				NCIEditTab.currentTab().getImmutableProperties()));
-        this.lowerPanelClass = new NCIOWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
-        this.upperPanelClass = new NCIOWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
+        this.lowerPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
+        this.upperPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
         
         createUI();
     }
