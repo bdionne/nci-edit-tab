@@ -318,6 +318,7 @@ public class EditPanel extends JPanel {
     			}
     		}
     		setSelectedClass(NCIEditTab.currentTab().getCurrentlyEditing());
+    		this.repaint();
     	}
     }
     
