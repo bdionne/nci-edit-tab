@@ -2,6 +2,7 @@ package gov.nih.nci.ui.dialog;
 
 
 
+import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.utils.batch.BatchTask;
 
 import java.awt.BorderLayout;
@@ -42,10 +43,12 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
     boolean canCancel;
 
     private int num_completed = 0;
+    
+    private NCIEditTab tab = null;
 
    // OWLModel owlModel;
 
-    public TaskProgressDialog(JFrame owner, String title, BatchTask task) {
+    public TaskProgressDialog(JFrame owner, String title, BatchTask task, NCIEditTab t) {
    		super(owner, title, true);
 
    		this.task = task;
@@ -54,6 +57,8 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
         createUI(owner);
 
         cancelled = false;
+        
+        tab = t;
 
       //  owlModel = NCIEditTab.getActiveOWLModel();
     }
@@ -240,6 +245,9 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 			if (!cancelled) {
 			//task.complete();
 			}
+			
+			tab.applyChanges();
+			tab.commitChanges();
 			long total = System.currentTimeMillis() - beg;
 			task.print("Total run time was: " + total + " ms");
 			

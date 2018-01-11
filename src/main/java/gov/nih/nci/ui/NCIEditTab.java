@@ -103,6 +103,7 @@ import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
+import gov.nih.nci.utils.CharMapper;
 import gov.nih.nci.utils.NCIClassSearcher;
 import gov.nih.nci.utils.ParentRemover;
 import gov.nih.nci.utils.ReferenceReplace;
@@ -401,7 +402,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Set<OWLAnnotationProperty> getOptionalAnnotationsForAnnotation(OWLAnnotationProperty annp) {
 		return optional_annotation_dependencies.get(annp);		
-	}	
+	}
+	
+	private CharMapper mapper = new CharMapper();
 	
     @Override
 	public void initialise() {    	
@@ -2061,6 +2064,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void addAnnotationToClass(OWLClass ocl, OWLAnnotationProperty prop, String value) {
 		
+		value = mapper.fix(value);
+		
 		OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		
@@ -2301,13 +2306,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			if (new_val != null && !new_val.isEmpty()) {
 
     				OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), 
-    						df.getOWLLiteral(new_val, OWL2Datatype.RDF_PLAIN_LITERAL));
+    						df.getOWLLiteral(mapper.fix(new_val), OWL2Datatype.RDF_PLAIN_LITERAL));
     				new_anns.add(new_ann); 
     			} 
     		}
 
 
     		Set<OWLAnnotationProperty> req_props = this.getConfiguredAnnotationsForAnnotation(complex_prop);
+
 
     		if(req_props != null) {
 	    		for (OWLAnnotationProperty prop : req_props) {
@@ -2326,6 +2332,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	    				}
 	    			}
 	    		}
+
+
     		}
 
     		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(old_axiom.getProperty(), cls.getIRI(),

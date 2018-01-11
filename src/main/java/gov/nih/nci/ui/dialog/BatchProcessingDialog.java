@@ -355,13 +355,13 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 					task = new BatchLoadTask(be, tab, infile, outfile, fileDelim.getText());
 					
 					tpd = new TaskProgressDialog(new JFrame(), 
-							"Batch Load Progress Status", task);
+							"Batch Load Progress Status", task, tab);
 				} else {
 					//task = new BatchEditTask(be, tab, infile, outfile);
 					task = new BatchEditTask(be, tab, infile, outfile, fileDelim.getText(), edit_type);
 					
 					tpd = new TaskProgressDialog(new JFrame(),
-							"Batch Edit Progress Status", task);
+							"Batch Edit Progress Status", task, tab);
 				}
 
 				task.openPrintWriter(outfile);
@@ -379,8 +379,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 
 				try {
 			        
-					tab.applyChanges();
-					tab.commitChanges();
+					
 					task.complete();
 					task.closePrintWriter();
 				} catch (Exception e) {
