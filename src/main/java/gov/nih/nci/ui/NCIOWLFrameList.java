@@ -5,14 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionListener;
 
 import org.protege.editor.core.ui.list.MListButton;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.util.OWLAxiomInstance;
-import org.protege.editor.owl.ui.UIHelper;
-import org.protege.editor.owl.ui.axiom.AxiomAnnotationPanel;
 import org.protege.editor.owl.ui.frame.OWLFrame;
 import org.protege.editor.owl.ui.frame.OWLFrameSectionRow;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
@@ -20,9 +16,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +44,8 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
     
     private MListIconButton deleteButton;
     
+    private List<MListButton> buttons = new ArrayList<MListButton>();
+    
     private ListSelectionListener selListener = event -> handleSelectionEvent(event);
     
 	public NCIOWLFrameList(OWLEditorKit editorKit, OWLFrame<R> frame, boolean read_only) {
@@ -66,15 +62,16 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	}
 	
 	protected List<MListButton> getButtons(Object value) {
-		List<MListButton> buttons = new ArrayList<MListButton>();
 		if (read_only) {
 
     	} else {
-    		buttons = new ArrayList<>();
+    		buttons = new ArrayList<>(super.getButtons(value));
     		if (value instanceof OWLFrameSectionRow) {
     			if (((OWLFrameSectionRow) value).isEditable()) {
-    				
     				buttons = createButtons();
+    				if (value != null && !isComplexProperty(value) && buttons.size() == 3) {
+    					buttons.remove(2);
+    				}
     				
     			}
     		}
@@ -95,7 +92,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
     }
 	
 	public void handleAdd() {
-		if(isComplexProperty()) {
+		if(isComplexProperty(getSelectedValue())) {
 			loadAnnotationsAndProperties();
 			PropertyEditingDialog add = new	PropertyEditingDialog(NCIEditTabConstants.ADD, 
 					PropertyUtil.getSelectedPropertyType(annotationProps), 
@@ -114,7 +111,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	
 			} 
 		} else {
-			Object obj = getSelectedValue();
+			/*Object obj = getSelectedValue();
 	        if (!(obj instanceof OWLFrameSectionRow)) {
 	            return;
 	        }
@@ -135,13 +132,14 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	        }
 	        axiomAnnotationPanel.setAxiomInstance(axiomInstance);
 	        new UIHelper(editorKit).showDialog("Annotations for " + ax.getAxiomType().toString(), axiomAnnotationPanel, JOptionPane.CLOSED_OPTION);
-	        axiomAnnotationPanel.dispose();
+	        axiomAnnotationPanel.dispose();*/
+			super.handleEdit();
 		}
 		
 	}
 	
 	public void handleEdit() {
-		if(isComplexProperty()) {
+		if(isComplexProperty(getSelectedValue())) {
 			loadAnnotationsAndProperties();
 			if(annotationProps == null) return;
 			PropertyEditingDialog edit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, 
@@ -168,8 +166,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		}
 	}
 	
-	private boolean isComplexProperty() {
-		final Object val = getSelectedValue();
+	private boolean isComplexProperty(Object val) {
 		if (val instanceof NCIOWLAnnotationsFrameSectionRow) {
 			axiom = ((NCIOWLAnnotationsFrameSectionRow)val).getAxiom();
 			OWLAnnotationProperty annoProp = axiom.getProperty();
