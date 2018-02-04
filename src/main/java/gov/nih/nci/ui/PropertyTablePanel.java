@@ -37,6 +37,7 @@ import javax.swing.table.TableColumnModel;
 
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.core.prefs.Preferences;
+import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -80,7 +81,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     
     private JButton deleteButton;
 
-    //private Preferences prefs;
+    private Preferences prefs;
     
     public PropertyTablePanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
@@ -93,6 +94,9 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         this.complexProp = complexProperty;
         this.tableName = tableName;
         
+        //String prefsID = getClass().toString() + NCIEditTab.currentTab().getRDFSLabel(complexProp).get();
+		//prefs = PreferencesManager.getInstance().getApplicationPreferences(prefsID);
+		
         initialiseOWLView();
         createPopupMenu();
     }
@@ -112,7 +116,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         tableModel = new PropertyTableModel(owlEditorKit, complexProp);
         createButtons(this);
         createUI();
-        //prefs = tableModel.getPrefs();
+        prefs = tableModel.getPrefs();
     }
 
     public static void updateRowHeights(int column, int width, JTable table){
@@ -225,7 +229,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         }
         
         String propName = NCIEditTab.currentTab().getRDFSLabel(tableModel.getComplexProp()).get();  
-        //prefs.putStringList(propName, colNames1);
+        prefs.putStringList(propName, colNames1);
     }
     
     private void createUI() {

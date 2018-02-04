@@ -191,6 +191,8 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	}
 	
 	public void dispose() {
+		
 		removeListSelectionListener(selListener);
+		super.dispose();
 	}
 }

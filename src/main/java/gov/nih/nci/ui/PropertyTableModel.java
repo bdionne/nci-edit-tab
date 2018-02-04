@@ -40,6 +40,8 @@ public class PropertyTableModel extends AbstractTableModel {
 	
 	private JTable propertyTable;
 	
+	private Preferences prefs;
+	
 	public JTable getPropertyTable() {
 		return propertyTable;
 	}
@@ -65,6 +67,10 @@ public class PropertyTableModel extends AbstractTableModel {
 	public PropertyTableModel(OWLEditorKit k, OWLAnnotationProperty complexProperty) {
 		ont = k.getOWLModelManager().getActiveOntology();
 		complexProp = complexProperty;
+		
+		String prefsID = getClass().toString() + NCIEditTab.currentTab().getRDFSLabel(complexProp).get();
+		prefs = PreferencesManager.getInstance().getApplicationPreferences(prefsID);
+		
 		configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(complexProp);
 		requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(configuredAnnotations);
 	}
@@ -298,10 +304,20 @@ public class PropertyTableModel extends AbstractTableModel {
 	}
 
 	public String getColumnName(int column) {
-		if (column == 0) {
+		/*if (column == 0) {
 			return NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
 		}
-		return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
+		return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();*/
+		String complexPropName = NCIEditTab.currentTab().getRDFSLabel(getComplexProp()).get();
+		List<String> column_names = prefs.getStringList(complexPropName, new ArrayList<String>());
+		if (column_names != null && (!column_names.isEmpty()) && (column < column_names.size())) {
+			return column_names.get(column);
+		} else {
+			if (column == 0) {
+				return NCIEditTabConstants.PROPTABLE_VALUE_COLUMN;
+		  	}
+		  	return NCIEditTab.currentTab().getRDFSLabel(requiredAnnotationsList.get(column-1)).get();
+		}
 		
 	}
 	
@@ -376,4 +392,7 @@ public class PropertyTableModel extends AbstractTableModel {
 		return !annotations.isEmpty();
 	}
 	
+	public Preferences getPrefs() {
+  		return prefs;
+  	}
 }
