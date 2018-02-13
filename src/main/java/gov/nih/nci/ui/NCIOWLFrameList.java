@@ -2,7 +2,9 @@ package gov.nih.nci.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.event.ListSelectionListener;
@@ -21,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.nih.nci.ui.dialog.PropertyEditingDialog;
+import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplNoCompression;
 
 public class NCIOWLFrameList<R> extends OWLFrameList {
 
@@ -133,6 +136,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	        axiomAnnotationPanel.setAxiomInstance(axiomInstance);
 	        new UIHelper(editorKit).showDialog("Annotations for " + ax.getAxiomType().toString(), axiomAnnotationPanel, JOptionPane.CLOSED_OPTION);
 	        axiomAnnotationPanel.dispose();*/
+	       
 			super.handleEdit();
 		}
 		
@@ -142,9 +146,14 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		if(isComplexProperty(getSelectedValue())) {
 			loadAnnotationsAndProperties();
 			if(annotationProps == null) return;
+			Map<String, String> propertyValues = PropertyUtil.getSelectedPropertyValues(annotations);
+			OWLAnnotationAssertionAxiom axiom = ((NCIOWLAnnotationsFrameSectionRow)getSelectedValue()).getAxiom();
+			propertyValues.put("Value", ((OWLLiteralImplNoCompression)axiom.getValue()).getLiteral());
+			
 			PropertyEditingDialog edit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, 
 					PropertyUtil.getSelectedPropertyType(annotationProps), 
-					PropertyUtil.getSelectedPropertyValues(annotations), 
+					//PropertyUtil.getSelectedPropertyValues(annotations),
+					propertyValues,
 					PropertyUtil.getSelectedPropertyOptions(annotationProps), 
 					PropertyUtil.getDefaultSelectedPropertyLabel(annotationProps));
 			
@@ -155,7 +164,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 			if (data != null) {
 				if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, cls,
 						axiom.getProperty(), axiom, data)) {
-					if (axiom.getProperty().equals(NCIEditTab.currentTab().getPreferredName())) {
+					if (axiom.getProperty().equals(NCIEditTab.currentTab().getFullSyn())) {
 						NCIEditTab.currentTab().syncPrefName(data.get("Value"));
 					}
 				}				
