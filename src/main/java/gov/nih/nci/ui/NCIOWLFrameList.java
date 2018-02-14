@@ -105,12 +105,18 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 			
 			HashMap<String, String> data = 	add.showDialog(this.editorKit, "Adding Properties");
 			
+			OWLAnnotationAssertionAxiom axiom = ((NCIOWLAnnotationsFrameSectionRow)getSelectedValue()).getAxiom();
+					
+			
 			String codeStr = ((IRI)axiom.getSubject()).getShortForm();
 			OWLClass cls = NCIEditTab.currentTab().getClass(codeStr);
 			if (data != null) {
 				if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, cls,
 						axiom.getProperty(), axiom, data)) {
-				}				
+					if (axiom.getProperty().equals(NCIEditTab.currentTab().getFullSyn())) {
+						NCIEditTab.currentTab().syncPrefName(data.get("Value"));
+					}
+				}			
 	
 			} 
 		} else {
