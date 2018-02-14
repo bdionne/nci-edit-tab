@@ -8,6 +8,7 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -21,6 +22,7 @@ import javax.swing.JSplitPane;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
 
@@ -81,13 +83,17 @@ public class ComplexEditPanel extends JPanel {
     
     public ComplexEditPanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
+        //new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties), read_only)
+        Set<OWLAnnotationProperty> imm_props = NCIEditTab.currentTab().getImmutableProperties();
+        imm_props.add(NCIEditTabConstants.PREF_NAME);
+        
         this.upperPanelAnn = new NCIOWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
-        				NCIEditTab.currentTab().getImmutableProperties()));
+        				imm_props));
            
         this.lowerPanelAnn = new NCIOWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
-        				NCIEditTab.currentTab().getImmutableProperties()));
+        				imm_props));
         this.lowerPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
         this.upperPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
         
@@ -172,20 +178,14 @@ public class ComplexEditPanel extends JPanel {
             		               "nci-edit-tab.ComplexEditView");
             		}
             	} else {
-            		if (NCIEditTab.currentTab().commitChanges()) {
-            			NCIEditTab.currentTab().completeOp();
+            		if ((NCIEditTab.currentTab().syncFullSyn(lowerPanelClass.getRootObject())) &&
+            				(NCIEditTab.currentTab().syncFullSyn(upperPanelClass.getRootObject()))) {
 
-            			setEnableUnselectedRadioButtons(true);
-            			upperPanelAnn.setRootObject(null);
-            			lowerPanelAnn.setRootObject(null);
-            			upperPanelClass.setRootObject(null);
-            			lowerPanelClass.setRootObject(null);
-            			radioButtonGroup.clearSelection();
+            			if (NCIEditTab.currentTab().commitChanges()) {
+            				NCIEditTab.currentTab().completeOp();
 
-            			upperLabel.setText("Source");
-            			lowerLabel.setText("Target");
-
-            			disableButtons();
+            				reset();
+            			}
             		}
             	}
             	

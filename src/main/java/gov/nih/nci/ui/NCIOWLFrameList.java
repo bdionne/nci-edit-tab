@@ -103,46 +103,26 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 					PropertyUtil.getSelectedPropertyOptions(annotationProps), 
 					PropertyUtil.getDefaultSelectedPropertyLabel(annotationProps));
 			
-			HashMap<String, String> data = 	add.showDialog(this.editorKit, "Adding Properties");
-			
-			OWLAnnotationAssertionAxiom axiom = ((NCIOWLAnnotationsFrameSectionRow)getSelectedValue()).getAxiom();
-					
-			
-			String codeStr = ((IRI)axiom.getSubject()).getShortForm();
-			OWLClass cls = NCIEditTab.currentTab().getClass(codeStr);
-			if (data != null) {
-				if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, cls,
-						axiom.getProperty(), axiom, data)) {
-					if (axiom.getProperty().equals(NCIEditTab.currentTab().getFullSyn())) {
-						NCIEditTab.currentTab().syncPrefName(data.get("Value"));
-					}
-				}			
-	
-			} 
+			boolean done = false;
+			while (!done) {
+
+				HashMap<String, String> data = 	add.showDialog(this.editorKit, "Adding Properties");
+
+				OWLAnnotationAssertionAxiom axiom = ((NCIOWLAnnotationsFrameSectionRow)getSelectedValue()).getAxiom();
+
+
+				String codeStr = ((IRI)axiom.getSubject()).getShortForm();
+				OWLClass cls = NCIEditTab.currentTab().getClass(codeStr);
+
+				if (data != null) {
+					if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, cls,
+							axiom.getProperty(), axiom, data)) {
+						done = true;					
+					}			
+
+				}
+			}
 		} else {
-			/*Object obj = getSelectedValue();
-	        if (!(obj instanceof OWLFrameSectionRow)) {
-	            return;
-	        }
-	        OWLFrameSectionRow<?,?,?> row = (OWLFrameSectionRow<?,?,?>) obj;
-	        OWLAxiom ax = row.getAxiom();
-
-	        AxiomAnnotationPanel axiomAnnotationPanel;
-	            axiomAnnotationPanel = new AxiomAnnotationPanel(editorKit);
-
-	        OWLOntology ontology = row.getOntology();
-	        final OWLAxiomInstance axiomInstance;
-	        if(ontology != null) {
-	            axiomInstance = new OWLAxiomInstance(ax, ontology);
-	        }
-	        else {
-	            OWLOntology activeOntology = editorKit.getOWLModelManager().getActiveOntology();
-	            axiomInstance = new OWLAxiomInstance(ax, activeOntology);
-	        }
-	        axiomAnnotationPanel.setAxiomInstance(axiomInstance);
-	        new UIHelper(editorKit).showDialog("Annotations for " + ax.getAxiomType().toString(), axiomAnnotationPanel, JOptionPane.CLOSED_OPTION);
-	        axiomAnnotationPanel.dispose();*/
-	       
 			super.handleEdit();
 		}
 		
@@ -158,24 +138,22 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 			
 			PropertyEditingDialog edit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, 
 					PropertyUtil.getSelectedPropertyType(annotationProps), 
-					//PropertyUtil.getSelectedPropertyValues(annotations),
 					propertyValues,
 					PropertyUtil.getSelectedPropertyOptions(annotationProps), 
 					PropertyUtil.getDefaultSelectedPropertyLabel(annotationProps));
-			
-			HashMap<String, String> data = 	edit.showDialog(this.editorKit, "Editing Properties");
-			
-			String codeStr = ((IRI)axiom.getSubject()).getShortForm();
-			OWLClass cls = NCIEditTab.currentTab().getClass(codeStr);
-			if (data != null) {
-				if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, cls,
-						axiom.getProperty(), axiom, data)) {
-					if (axiom.getProperty().equals(NCIEditTab.currentTab().getFullSyn())) {
-						NCIEditTab.currentTab().syncPrefName(data.get("Value"));
+			boolean done = false;
+			while (!done) {
+				HashMap<String, String> data = edit.showDialog(this.editorKit, "Editing Properties");
+
+				String codeStr = ((IRI) axiom.getSubject()).getShortForm();
+				OWLClass cls = NCIEditTab.currentTab().getClass(codeStr);
+				if (data != null) {
+					if (NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.EDIT, cls, axiom.getProperty(), axiom,
+							data)) {
+						done = true;
 					}
-				}				
-	
-			} 
+				}
+			}
 		} else {
 			super.handleEdit();
 		}
