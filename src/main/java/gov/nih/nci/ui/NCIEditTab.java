@@ -1158,6 +1158,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
 
     	if (proceed) {
+    		setOp(ComplexEditType.CREATE);
     		OWLClass newClass = dlg.getNewClass();
     		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     		if (dontApply) {
