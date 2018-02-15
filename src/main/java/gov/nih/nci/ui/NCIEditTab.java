@@ -709,9 +709,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 
         	if (found) {
+        		
+        		OWLAnnotationValue av = ax1.getValue();
+        		String ann_val = "";
+        		if (av.asIRI().isPresent()) {
+        			ann_val = av.asIRI().get().getShortForm();        			
+        		} else {
+        			ann_val = av.toString();
+        		}
 
         		String val = ax1.getProperty().getIRI().getShortForm() + "|"
-        				+ ax1.getValue().asIRI().get().getShortForm();
+        				+ ann_val;
         		OWLLiteral lit = df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL);
         		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(DEP_ASSOC, class_to_retire.getIRI(), lit);
         		changes.add(new AddAxiom(ontology, ax));
