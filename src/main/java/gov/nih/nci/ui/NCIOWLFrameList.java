@@ -120,6 +120,8 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 						done = true;					
 					}			
 
+				} else {
+					done = true;
 				}
 			}
 		} else {
@@ -152,6 +154,8 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 							data)) {
 						done = true;
 					}
+				} else {
+					done = true;
 				}
 			}
 		} else {
