@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import edu.stanford.protege.metaproject.api.*;
 import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
@@ -1223,7 +1224,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		if (event.hasCategory(EventCategory.OPEN_PROJECT)) {
 			ontology = getOWLModelManager().getActiveOntology();
 			initProperties();
-			fireUpViews();
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireUpViews();					
+				}
+			});
+			
 		}
 	}
 	
