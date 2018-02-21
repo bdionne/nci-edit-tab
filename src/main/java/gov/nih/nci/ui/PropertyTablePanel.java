@@ -250,6 +250,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
             @Override
             public void columnMoved(int oldLocation, int newLocation) {
+            	saveColumnNameOrder();
             	
             }
 
