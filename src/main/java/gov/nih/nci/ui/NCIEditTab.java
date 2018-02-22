@@ -2391,20 +2391,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     	getOWLModelManager().applyChanges(changes);
     	
-    	/**
-    	if (checkForDups(cls, complex_prop)) {
-    		// ok no dups
-    		changes = new ArrayList<OWLOntologyChange>();
-    		if (syncFullSyn(cls, complex_prop, changes)) {
-    			getOWLModelManager().applyChanges(changes); 
-    			return true;
-    		} else {
-    			backOutChange();
-    			return false;
-    		}
-    		
-    	}
-    	**/
     	
     	return true;
     	
