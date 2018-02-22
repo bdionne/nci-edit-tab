@@ -353,7 +353,7 @@ public class EditPanel extends JPanel {
             				NCIEditTab.currentTab().syncPrefName(newPref);                		
             			}
 
-            			if (NCIEditTab.currentTab().commitChanges()) {
+            			if (NCIEditTab.currentTab().commitChanges(true)) {
             				origPref = prefNameText.getText();
             				NCIEditTab.currentTab().refreshNavTree();
             			}

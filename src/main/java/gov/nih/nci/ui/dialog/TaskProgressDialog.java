@@ -219,13 +219,8 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 				task.print("WARNING: cancelled before while loop.");
 			}
 
-		//	boolean eventsEnabled = owlModel.setGenerateEventsEnabled(false);
-			
-			//BatchLoadByNameTask.create_time = 0;
-			//BatchLoadByNameTask.evs_time = 0;
 			long beg = System.currentTimeMillis();
-			//task.print("Processing:");
-			//task.begin();
+			
 			while (!cancelled && i < tpd.getTask().getProgressMax())
 			{
                 if (task.processTask(i)) {
@@ -243,17 +238,16 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 
 			}
 			if (!cancelled) {
-			//task.complete();
+				tpd.setTitle("Committing Changes");
+				tpd.setSubTaskMessage("Pushing changes to server...");
+			    task.complete();
+				long total = System.currentTimeMillis() - beg;
+				task.print("Total run time was: " + total + " ms");
+				
+	            
+				task.print("Total successful completion: " + num_completed + " out of: " + i);
+				task.closePrintWriter();
 			}
-			
-			tab.applyChanges();
-			tab.commitChanges();
-			long total = System.currentTimeMillis() - beg;
-			task.print("Total run time was: " + total + " ms");
-			
-            
-			task.print("Total successful completion: " + num_completed + " out of: " + i);
-
 			if (cancelled)
 			{
 				task.print("Process interrupted by the user.");

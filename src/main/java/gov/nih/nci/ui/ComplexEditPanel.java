@@ -181,7 +181,7 @@ public class ComplexEditPanel extends JPanel {
             		if ((NCIEditTab.currentTab().syncFullSyn(lowerPanelClass.getRootObject())) &&
             				(NCIEditTab.currentTab().syncFullSyn(upperPanelClass.getRootObject()))) {
 
-            			if (NCIEditTab.currentTab().commitChanges()) {
+            			if (NCIEditTab.currentTab().commitChanges(true)) {
             				NCIEditTab.currentTab().completeOp();
 
             				reset();

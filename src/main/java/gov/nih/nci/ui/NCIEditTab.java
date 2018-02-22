@@ -981,7 +981,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     }
     
-    public boolean commitChanges() {
+    public boolean commitChanges(boolean notify) {
     	
     	ComplexEditType type = getCurrentOp().getType();
     	if (type == null) {
@@ -993,7 +993,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	if (changes.size() > 0) {    		
     		try {
     			
-    			doCommit(changes, type);
+    			doCommit(changes, type, notify);
     			
     			getOWLEditorKit().getSearchManager().updateIndex(changes);
     			
@@ -1007,7 +1007,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
                     Optional<AuthToken> authToken = UserLoginPanel.showDialog(getOWLEditorKit(), getOWLEditorKit().getWorkspace());
                     if (authToken.isPresent() && authToken.get().isAuthorized()) {
                     	try {
-							doCommit(changes, type);
+							doCommit(changes, type, notify);
 							
 							return true;
 						} catch (Exception e1) {
@@ -1031,7 +1031,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return false;        
     }
     
-    private void doCommit(List<OWLOntologyChange> changes, ComplexEditType type) throws ClientRequestException, 
+    private void doCommit(List<OWLOntologyChange> changes, ComplexEditType type,
+    		 boolean notify) throws ClientRequestException, 
     AuthorizationException, ClientRequestException {
     	String comment = "";
     	comment = type.name();
@@ -1086,7 +1087,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
                 hist.getHeadRevision(),
                 hist.getMetadataForRevision(hist.getHeadRevision()),
                 hist.getChangesForRevision(hist.getHeadRevision())));
-		JOptionPane.showMessageDialog(this, "Class saved successfully", "Class Save", JOptionPane.INFORMATION_MESSAGE);
+		if (notify) {
+			JOptionPane.showMessageDialog(this, "Class saved successfully", "Class Save", JOptionPane.INFORMATION_MESSAGE);
+		}
+		
 		
 		
     }
@@ -2319,6 +2323,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			String cv = annax.getProperty().getIRI().getShortForm();
     			String new_val = ann_vals.get(cv);
     			if (new_val != null && !new_val.isEmpty()) {
+    				
+    				if (containsAsciiLessThan25(new_val)) {
+    					JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
+    					return false; 
+    				}
 
     				OWLAnnotation new_ann = df.getOWLAnnotation(annax.getProperty(), 
     						df.getOWLLiteral(mapper.fix(new_val), OWL2Datatype.RDF_PLAIN_LITERAL));
@@ -2335,8 +2344,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	    			String new_val = ann_vals.get(prop.getIRI().getShortForm());
 	
 	    			if (new_val != null && !new_val.isEmpty()) {
+	    				if (containsAsciiLessThan25(new_val)) {
+	    					JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
+	    					return false; 
+	    				}
 	    				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
-	    						df.getOWLLiteral(new_val,OWL2Datatype.RDF_PLAIN_LITERAL));
+	    						df.getOWLLiteral(mapper.fix(new_val),OWL2Datatype.RDF_PLAIN_LITERAL));
 	    				new_anns.add(new_ann);
 	
 	    			} else {
@@ -2350,9 +2363,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 
     		}
+    		
+    		if (containsAsciiLessThan25(ann_vals.get("Value"))) {
+				JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
+				return false; 
+			}
 
     		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(old_axiom.getProperty(), cls.getIRI(),
-    				df.getOWLLiteral(ann_vals.get("Value"), OWL2Datatype.RDF_PLAIN_LITERAL), new_anns);
+    				df.getOWLLiteral(mapper.fix(ann_vals.get("Value")), OWL2Datatype.RDF_PLAIN_LITERAL), new_anns);
 
 
     		changes.add(new RemoveAxiom(ontology, old_axiom));
@@ -2361,8 +2379,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		changes.add(new RemoveAxiom(ontology, old_axiom));
 
     	} else if (operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
+    		if (containsAsciiLessThan25(ann_vals.get("Value"))) {
+				JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
+				return false; 
+			}
     		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), 
-    				df.getOWLLiteral(ann_vals.get("Value"), OWL2Datatype.RDF_PLAIN_LITERAL));
+    				df.getOWLLiteral(mapper.fix(ann_vals.get("Value")), OWL2Datatype.RDF_PLAIN_LITERAL));
 
     		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
     		Set<OWLAnnotationProperty> req_props = getConfiguredAnnotationsForAnnotation(complex_prop);
@@ -2370,8 +2392,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		for (OWLAnnotationProperty prop : req_props) {
     			String val = ann_vals.get(prop.getIRI().getShortForm());
     			if (val != null && !val.isEmpty()) {
+    				if (containsAsciiLessThan25(val)) {
+    					JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
+    					return false; 
+    				}
     				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
-    						df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL));
+    						df.getOWLLiteral(mapper.fix(val), OWL2Datatype.RDF_PLAIN_LITERAL));
     				anns.add(new_ann);
 
     			}  else {
@@ -2706,12 +2732,23 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
+    public boolean containsAsciiLessThan25(String name) {
+    	for (int index = 0; index < name.length(); index++)
+		{
+			int ch = (int) name.charAt(index);
+			
+			if (ch < 25) {
+				return true;
+			}			
+		}
+    	return false;    
+    }
+    
     public boolean validPrefName(String name) {
-    	if (name.contains("?") ||
-    			name.contains("!") ||
-    			name.contains("\t") ||
-    			name.contains("\n")
-    			) {
+    	if (containsAsciiLessThan25(name)) {
+    		return false;
+    	}
+    	if (name.contains("?") || name.contains("!")) {
     		return false;
     	} else {
     		return true;
