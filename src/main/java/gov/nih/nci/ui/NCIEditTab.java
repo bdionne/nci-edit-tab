@@ -2324,7 +2324,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			String new_val = ann_vals.get(cv);
     			if (new_val != null && !new_val.isEmpty()) {
     				
-    				if (containsAsciiLessThan25(new_val)) {
+    				if (containsAsciiLessThan32(new_val)) {
     					JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
     					return false; 
     				}
@@ -2344,7 +2344,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	    			String new_val = ann_vals.get(prop.getIRI().getShortForm());
 	
 	    			if (new_val != null && !new_val.isEmpty()) {
-	    				if (containsAsciiLessThan25(new_val)) {
+	    				if (containsAsciiLessThan32(new_val)) {
 	    					JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
 	    					return false; 
 	    				}
@@ -2364,7 +2364,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     		}
     		
-    		if (containsAsciiLessThan25(ann_vals.get("Value"))) {
+    		if (containsAsciiLessThan32(ann_vals.get("Value"))) {
 				JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
 				return false; 
 			}
@@ -2379,7 +2379,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		changes.add(new RemoveAxiom(ontology, old_axiom));
 
     	} else if (operation.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
-    		if (containsAsciiLessThan25(ann_vals.get("Value"))) {
+    		if (containsAsciiLessThan32(ann_vals.get("Value"))) {
 				JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
 				return false; 
 			}
@@ -2392,7 +2392,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		for (OWLAnnotationProperty prop : req_props) {
     			String val = ann_vals.get(prop.getIRI().getShortForm());
     			if (val != null && !val.isEmpty()) {
-    				if (containsAsciiLessThan25(val)) {
+    				if (containsAsciiLessThan32(val)) {
     					JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
     					return false; 
     				}
@@ -2732,12 +2732,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
-    public boolean containsAsciiLessThan25(String name) {
+    public boolean containsAsciiLessThan32(String name) {
     	for (int index = 0; index < name.length(); index++)
 		{
 			int ch = (int) name.charAt(index);
 			
-			if (ch < 25) {
+			if (ch < 32) {
 				return true;
 			}			
 		}
@@ -2745,7 +2745,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public boolean validPrefName(String name) {
-    	if (containsAsciiLessThan25(name)) {
+    	if (containsAsciiLessThan32(name)) {
     		return false;
     	}
     	if (name.contains("?") || name.contains("!")) {
