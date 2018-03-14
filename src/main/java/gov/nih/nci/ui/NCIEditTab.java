@@ -44,6 +44,8 @@ import org.protege.editor.owl.model.find.OWLEntityFinder;
 import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.UndoManagerListener;
 import org.protege.editor.owl.server.api.CommitBundle;
+import org.protege.editor.owl.server.http.messages.History;
+import org.protege.editor.owl.server.http.messages.History.HistoryType;
 import org.protege.editor.owl.server.policy.CommitBundleImpl;
 import org.protege.editor.owl.server.versioning.Commit;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
@@ -1110,6 +1112,28 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    	
+    	/** some test code for evs
+    	List<History> evs_hist = getEvsHistory();
+    	for (History hist : evs_hist) {
+    		System.out.println(hist.toRecord(HistoryType.EVS) + "\n");
+    	}
+    	**/
+    	
+    }
+    
+    public List<History> getEvsHistory() {
+    	try {
+			return ((LocalHttpClient) clientSession.getActiveClient()).getEVSHistory(clientSession.getActiveProject());
+		} catch (ClientRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AuthorizationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+    	
     	
     }
     
