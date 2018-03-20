@@ -35,7 +35,7 @@ public class BatchEditIRIsTableModel extends AbstractTableModel {
 	private static final int SECOND_COLUMN = 1;
 	private static final int THIRD_COLUMN = 2;
 	private static final String FIRST_COLUMN_NAME = "RDFS Label";
-	private static final String SECOND_COLUMN_NAME = "IRI Fregment";
+	private static final String SECOND_COLUMN_NAME = "IRI Fragment";
 	private static final String THIRD_COLUMN_NAME = "IRI";
 	private static final String EMPTY_STRING = "";
 	private Set<OWLAnnotationProperty> annProps;
