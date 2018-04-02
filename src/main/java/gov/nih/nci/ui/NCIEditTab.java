@@ -354,6 +354,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private Set<OWLAnnotationProperty> associations = new HashSet<OWLAnnotationProperty>();
 	
+	private Map<OWLAnnotationProperty, OWLAnnotationProperty> restrictedBy = 
+			new HashMap<OWLAnnotationProperty, OWLAnnotationProperty>();
+	
 	public boolean isAssociation(OWLAnnotationProperty p) {
 		return associations.contains(p);
 	}				
@@ -1113,12 +1116,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			e.printStackTrace();
 		}
     	
-    	/** some test code for evs
+    	/**
     	List<History> evs_hist = getEvsHistory();
     	for (History hist : evs_hist) {
     		System.out.println(hist.toRecord(HistoryType.EVS) + "\n");
     	}
     	**/
+    	
     	
     }
     
@@ -1353,6 +1357,30 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		history.reset();		
 	}
 	
+	private boolean isRestricted(OWLClass cls, OWLAnnotationProperty prop) {
+		if (restrictedBy.containsKey(prop)) {
+			OWLAnnotationProperty resProp = restrictedBy.get(prop);
+			if (getPropertyValue(cls, resProp).isPresent()) {
+				String val = getPropertyValue(cls, resProp).get();
+				IRI valIri = IRI.create(CODE_PROP.getIRI().getNamespace() + val);
+				List<String> enums = getEnumValues(valIri);
+				
+				if (enums.contains(clientSession.getActiveClient().getUserInfo().getName().toString())) {
+					return false;
+				}
+	
+				return true;
+				
+			} else {
+				return false;
+			}			
+		} else {
+			return false;
+		}
+		
+	}
+	
+	
 	private void initProperties() {
 		
 		getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
@@ -1370,6 +1398,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				// get all annotations from ontology to use for lookup
 				annProps = ontology.getAnnotationPropertiesInSignature();
 				
+				OWLAnnotationProperty restricted_by = lookUpShort("restricted_by");
+				
 				// populate associations
 				for (OWLAnnotationProperty p : annProps) {
 					Set<OWLAnnotationPropertyRangeAxiom> ranges = ontology.getAnnotationPropertyRangeAxioms(p);
@@ -1379,6 +1409,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	        				associations.add(p);
 	        			}
 	        		}
+	        		
+	        		Set<OWLAnnotationAssertionAxiom> panns =
+	        				ontology.getAnnotationAssertionAxioms(p.getIRI());
+	        		
+	        		for (OWLAnnotationAssertionAxiom ax : panns) {
+	        			if (ax.getProperty().equals(restricted_by)) {
+	        				com.google.common.base.Optional<IRI> iri = ax.getValue().asIRI();
+	        				OWLAnnotationProperty res_prop = lookUpIri(iri.get());
+	        				restrictedBy.put(p, res_prop);
+	        				
+	        			}
+	        			
+	        		}
+	        		
+	        		
+	   
 					
 				}
 				
@@ -1556,6 +1602,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	OWLAnnotationProperty lookUp(String iri) {
 		IRI cpIRI = IRI.create(iri);
+		return lookUpIri(cpIRI);
+	}
+	
+	OWLAnnotationProperty lookUpIri(IRI cpIRI) {
+		
 		for (OWLAnnotationProperty ap : annProps) {
 			if (ap.getIRI().equals(cpIRI)) {
 				IRI dt = getDataType(ap);
@@ -2333,6 +2384,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		if (complex_prop.equals(getFullSyn()) &&
     				!NCIEditTab.currentTab().validPrefName(ann_vals.get("Value"))) {
     			JOptionPane.showMessageDialog(this, "Preferred name cannot contain special characters, ! or ?", "Warning", JOptionPane.WARNING_MESSAGE);
+    			return false; 
+    		}
+    		if (isRestricted(cls, complex_prop)) {
+    			JOptionPane.showMessageDialog(this, "Property is restricted to certain editors", "Warning", JOptionPane.WARNING_MESSAGE);
     			return false; 
     		}
     	}
