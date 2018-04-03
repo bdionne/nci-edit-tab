@@ -488,6 +488,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			// retarget inbound roles and children
 			// reuse retire logic for this
 			changes.addAll(finalizeMerge());
+			
 			changes.add(new AddAxiom(ontology, df.getDeprecatedOWLAnnotationAssertionAxiom(source.getIRI())));
     		
     	} else {
@@ -610,6 +611,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         		changes.add(new RemoveAxiom(ontology, ax1));
         	}
         }
+        if (DEPR_CONCEPT_STATUS_PROP != null) {
+    		changes.add(new AddAxiom(ontology,
+    				df.getOWLAnnotationAssertionAxiom(DEPR_CONCEPT_STATUS_PROP, source.getIRI(),
+    						df.getOWLLiteral(DEPR_CONCEPT_STATUS_VALUE, OWL2Datatype.RDF_PLAIN_LITERAL))));
+    		
+    	}
     	return changes;    	
     }
     
