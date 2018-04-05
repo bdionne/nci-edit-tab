@@ -1193,9 +1193,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     public OWLClass createNewChild(OWLClass selectedClass, Optional<String> prefName, Optional<String> code, boolean dontApply) {
-
+    	Optional<String> modPrefName = prefName;
+    	if (prefName.isPresent()) {
+    		modPrefName = Optional.of(mapper.fix(prefName.get()));    		
+    	}
     	NCIClassCreationDialog<OWLClass> dlg = new NCIClassCreationDialog<OWLClass>(getOWLEditorKit(),
-    			"Please enter a class name", OWLClass.class, prefName, code, dontApply);
+    			"Please enter a class name", OWLClass.class, modPrefName, code, dontApply);
 
     	boolean proceed = false;
 
