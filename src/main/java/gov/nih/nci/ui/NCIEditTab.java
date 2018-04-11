@@ -1375,7 +1375,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				IRI valIri = IRI.create(CODE_PROP.getIRI().getNamespace() + val);
 				List<String> enums = getEnumValues(valIri);
 				
-				if (enums.contains(clientSession.getActiveClient().getUserInfo().getName().toString())) {
+				if (enums.contains(clientSession.getActiveClient().getUserInfo().getId().toString())) {
 					return false;
 				}
 	
