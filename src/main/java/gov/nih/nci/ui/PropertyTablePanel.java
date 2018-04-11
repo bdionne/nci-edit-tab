@@ -312,8 +312,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     		tableModel.fireTableDataChanged();  
     		
     		TableColumn c = getValueColumn();
-    		c.setCellRenderer(new RowHeightCellRenderer());
-    		updateRowHeights(c.getModelIndex(), c.getWidth(), propertyTable);
+    		if(c != null) {
+    			c.setCellRenderer(new RowHeightCellRenderer());
+    			updateRowHeights(c.getModelIndex(), c.getWidth(), propertyTable);
+    		}
     		 
     	} else {
     		tableHeaderPanel.setVisible(false);

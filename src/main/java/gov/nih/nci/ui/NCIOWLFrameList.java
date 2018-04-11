@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.nih.nci.ui.dialog.PropertyEditingDialog;
 import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplNoCompression;
+import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplString;
 
 public class NCIOWLFrameList<R> extends OWLFrameList {
 
@@ -97,11 +98,13 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	public void handleAdd() {
 		if(isComplexProperty(getSelectedValue())) {
 			loadAnnotationsAndProperties();
+			Set<OWLAnnotationProperty> configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(axiom.getProperty());
+			List<OWLAnnotationProperty> requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(configuredAnnotations);
 			PropertyEditingDialog add = new	PropertyEditingDialog(NCIEditTabConstants.ADD, 
-					PropertyUtil.getSelectedPropertyType(annotationProps), 
-					PropertyUtil.getDefaultPropertyValues(annotationProps), 
+					PropertyUtil.getSelectedPropertyType(requiredAnnotationsList), 
+					PropertyUtil.getDefaultPropertyValues(requiredAnnotationsList), 
 					PropertyUtil.getSelectedPropertyOptions(annotationProps), 
-					PropertyUtil.getDefaultSelectedPropertyLabel(annotationProps));
+					PropertyUtil.getDefaultSelectedPropertyLabel(requiredAnnotationsList));
 			
 			boolean done = false;
 			while (!done) {
@@ -134,15 +137,16 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		if(isComplexProperty(getSelectedValue())) {
 			loadAnnotationsAndProperties();
 			if(annotationProps == null) return;
-			Map<String, String> propertyValues = PropertyUtil.getSelectedPropertyValues(annotations);
+			
 			OWLAnnotationAssertionAxiom axiom = ((NCIOWLAnnotationsFrameSectionRow)getSelectedValue()).getAxiom();
-			propertyValues.put("Value", ((OWLLiteralImplNoCompression)axiom.getValue()).getLiteral());
+			Set<OWLAnnotationProperty> configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(axiom.getProperty());
+			List<OWLAnnotationProperty> requiredAnnotationsList = new ArrayList<OWLAnnotationProperty>(configuredAnnotations);
 			
 			PropertyEditingDialog edit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, 
-					PropertyUtil.getSelectedPropertyType(annotationProps), 
-					propertyValues,
+					PropertyUtil.getSelectedPropertyType(requiredAnnotationsList),
+					getPropertyValues(configuredAnnotations),
 					PropertyUtil.getSelectedPropertyOptions(annotationProps), 
-					PropertyUtil.getDefaultSelectedPropertyLabel(annotationProps));
+					PropertyUtil.getDefaultSelectedPropertyLabel(requiredAnnotationsList));
 			boolean done = false;
 			while (!done) {
 				HashMap<String, String> data = edit.showDialog(this.editorKit, "Editing Properties");
@@ -161,6 +165,23 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		} else {
 			super.handleEdit();
 		}
+	}
+
+	private Map<String, String> getPropertyValues(Set<OWLAnnotationProperty> configuredAnnotations) {
+		Map<String, String> propertyValues = PropertyUtil.getSelectedPropertyValues(annotations);
+		//Check if configured annotation is not in propertyValues, add it into propertyValues with null value
+		for (OWLAnnotationProperty annotProp : configuredAnnotations) {
+			if (!propertyValues.containsKey(annotProp.getIRI().getShortForm())) {
+				propertyValues.put(annotProp.getIRI().getShortForm(), null);	
+			}
+		}
+		
+		if (axiom.getValue() instanceof OWLLiteralImplString) {
+			propertyValues.put("Value", ((OWLLiteralImplString)axiom.getValue()).getLiteral());
+		} else if (axiom.getValue() instanceof OWLLiteralImplNoCompression) {
+			propertyValues.put("Value", ((OWLLiteralImplNoCompression)axiom.getValue()).getLiteral());
+		}
+		return propertyValues;
 	}
 	
 	private boolean isComplexProperty(Object val) {
