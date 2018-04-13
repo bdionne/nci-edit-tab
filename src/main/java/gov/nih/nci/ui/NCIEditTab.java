@@ -2387,6 +2387,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
     public boolean complexPropOp(String operation, OWLClass cls, OWLAnnotationProperty complex_prop, 
     		OWLAnnotationAssertionAxiom old_axiom, HashMap<String, String> ann_vals) {
+    	
+    	if (isRestricted(cls, complex_prop)) {
+			JOptionPane.showMessageDialog(this, "Property " + complex_prop.getIRI().getShortForm() +
+					 " is restricted to certain editors", "Warning", JOptionPane.WARNING_MESSAGE);
+			return false; 
+		}
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLDataFactory df = getOWLModelManager().getOWLDataFactory();
     	if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT) ||
@@ -2396,10 +2402,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			JOptionPane.showMessageDialog(this, "Preferred name cannot contain special characters, ! or ?", "Warning", JOptionPane.WARNING_MESSAGE);
     			return false; 
     		}
-    		if (isRestricted(cls, complex_prop)) {
-    			JOptionPane.showMessageDialog(this, "Property is restricted to certain editors", "Warning", JOptionPane.WARNING_MESSAGE);
-    			return false; 
-    		}
+    		
     	}
 
     	if (operation.equalsIgnoreCase(NCIEditTabConstants.EDIT)) {
