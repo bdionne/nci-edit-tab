@@ -15,6 +15,7 @@ import javax.swing.tree.TreePath;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
 import org.protege.editor.core.ui.view.DisposableAction;
+import org.protege.editor.core.ui.workspace.TabbedWorkspace;
 import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.ui.OWLIcons;
@@ -275,10 +276,19 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		}		
 	}
 	
-	
+	@Override
+	public boolean canDelete() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	} else {
+    		return super.canDelete();
+    	}
+	}
 
 	@Override
 	public boolean canCreateNewChild() {
+		
 		if (NCIEditTab.currentTab().isEditing()) {
 			return false;
 		}
