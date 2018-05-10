@@ -24,9 +24,6 @@ public class BatchLoadTask extends BatchTask {
 		this.infile = infile;
 		this.outfile = outfile;
 		this.fieldDelim = fileDelim;
-		
-		data_vec = getData(infile);
-		setMax(data_vec.size());
 		setMessage("Batch Load processing in progress, please wait ...");
 	}
 

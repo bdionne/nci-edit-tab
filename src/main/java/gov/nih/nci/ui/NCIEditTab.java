@@ -1367,7 +1367,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		history.reset();		
 	}
 	
-	private boolean isRestricted(OWLClass cls, OWLAnnotationProperty prop) {
+	public boolean isRestricted(OWLClass cls, OWLAnnotationProperty prop) {
 		if (restrictedBy.containsKey(prop)) {
 			OWLAnnotationProperty resProp = restrictedBy.get(prop);
 			if (getPropertyValue(cls, resProp).isPresent()) {

@@ -365,6 +365,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 				}
 
 				task.openPrintWriter(outfile);
+				task.initData();
 
 				
 				if (!task.canProceed()) {

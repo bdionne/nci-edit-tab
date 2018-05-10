@@ -33,8 +33,17 @@ public class ComplexPropProcessor extends EditProcessor {
 				
 				// in all cases we need the prop id
 				prop_iri = (String) v.elementAt(2);
+				
 				prop_value = null;
 				new_prop_value = null;
+				
+				if (tab.isRestricted(classToEdit, tab.lookUpShort(prop_iri))) {
+					String error_msg = " -- property " + prop_iri
+							+ " is restricted.";
+					w.add(error_msg);
+					return w;
+					
+				}
 				
 				if (!tab.supportsProperty(prop_iri)) {
 					String error_msg = " -- property " + prop_iri

@@ -41,8 +41,8 @@ public class BatchEditTask extends BatchTask {
 		
 		initProcessor(batchtype);	
 
-		data_vec = getData(infile);
-		setMax(data_vec.size());
+		
+		
 		setMessage("Batch Edit processing in progress, please wait ...");
 	}
 	

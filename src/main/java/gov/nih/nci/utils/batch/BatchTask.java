@@ -2,13 +2,20 @@ package gov.nih.nci.utils.batch;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
 import org.apache.log4j.Logger;
+
+import com.google.common.base.Charsets;
 
 import gov.nih.nci.ui.BatchProcessOutputPanel;
 import gov.nih.nci.ui.NCIEditTab;
@@ -79,6 +86,11 @@ public abstract class BatchTask {
 		String title = "Batch Processing";
 		setTitle(title);
 		setMessage("Batch processing in progress, please wait ...");
+	}
+	
+	public void initData() {
+		data_vec = getData(infile);
+		setMax(data_vec.size());
 	}
 
 	
@@ -216,16 +228,24 @@ public abstract class BatchTask {
 		String s;
 		BufferedReader inFile = null;
 		try {
-			inFile = new BufferedReader(new FileReader(filename));
+			CharsetDecoder cs = Charsets.UTF_8.newDecoder();
+			cs.onMalformedInput(CodingErrorAction.REPLACE);
+			String repl = cs.replacement();
+			
+			inFile = new BufferedReader(new InputStreamReader(new FileInputStream(filename), cs));
+			int cnt = 1;
 			while ((s = inFile.readLine()) != null) {
 				s = s.trim();
-				if (s.length() > 0) {
+				if (s.contains(repl)) {
+					print("skipping, non-utf8 chars in line: " + cnt + "\n" + s);
+				} else if (s.length() > 0) {
 					if (s.startsWith("#")) {
 						// ignore comment lines
 					} else {
 						v.add(s);
 					}
 				}
+				cnt++;
 			}
 			inFile.close();
 		} catch (Exception e) {
