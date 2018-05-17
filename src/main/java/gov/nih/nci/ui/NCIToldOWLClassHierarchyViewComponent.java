@@ -264,6 +264,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	}
 	
 	private boolean isRestricted(OWLClass cls) {
+		
 		if (cls.equals(NCIEditTabConstants.RETIRE_ROOT) ||
 				cls.equals(NCIEditTabConstants.PRE_MERGE_ROOT) ||
 				cls.equals(NCIEditTabConstants.PRE_RETIRE_ROOT) ||
