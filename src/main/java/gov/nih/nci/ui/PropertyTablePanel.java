@@ -439,7 +439,12 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 
 		boolean done = false;
 		while(!done) {
-			HashMap<String, String> data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
+			HashMap<String, String> data = null;
+			if (type.equalsIgnoreCase(NCIEditTabConstants.ADD)) {
+				data = 	addedit.showDialog(owlEditorKit, "Adding Properties");
+			} else {
+				data = 	addedit.showDialog(owlEditorKit, "Editing Properties");
+			}
 			if (data != null) {
 				if (NCIEditTab.currentTab().complexPropOp(type, tableModel.getSelection(),
 						tableModel.getComplexProp(), axiom, data)) {
