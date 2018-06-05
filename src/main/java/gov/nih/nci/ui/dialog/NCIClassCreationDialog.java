@@ -6,19 +6,26 @@ import static gov.nih.nci.ui.NCIEditTabConstants.PREF_NAME;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -69,6 +76,20 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     private final AugmentedJTextField entityIRIField = new AugmentedJTextField(FIELD_WIDTH, "IRI (auto-generated)");
 
     private final JTextArea messageArea = new JTextArea(1, FIELD_WIDTH);
+    
+    private JPanel definitionPanel;
+    
+    private static final String DEFINITION_VIEWER_NAME = "Definition_Reviewer_Name";
+    
+    private static final String DEFINITION_VIEW_DATE = "Definition_Review_Date";
+    
+    private static final String DEF_SOURCE = "def-source";
+    
+    private static final String DEFINITION_VIEWER_NAME_LABEL = "Definition Reviewer Name";
+    
+    private static final String DEFINITION_VIEW_DATE_LABEL = "Definition Review Date";
+    
+    private static final String DEF_SOURCE_LABEL = "def source";
 
     public NCIClassCreationDialog(OWLEditorKit owlEditorKit, String message, Class<T> type, Optional<String> prefName,
     		Optional<String> code) {
@@ -100,7 +121,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 
         int rowIndex = 0;
 
-        holder.add(new JLabel("Name:"), new GridBagConstraints(0, rowIndex, 1, 1, 0.0, 0.0, GridBagConstraints.BASELINE_TRAILING, GridBagConstraints.NONE, insets, 0, 0));
+        //holder.add(new JLabel("Name:"), new GridBagConstraints(0, rowIndex, 1, 1, 0.0, 0.0, GridBagConstraints.BASELINE_TRAILING, GridBagConstraints.NONE, insets, 0, 0));
 
         preferredNameField = new AugmentedJTextField(30, "Preferred Name");
         
@@ -123,6 +144,11 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
         rowIndex++;
         holder.add(new JSeparator(), new GridBagConstraints(0, rowIndex, 2, 1, 100.0, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(10, 2, 5, 2), 0, 0));
         rowIndex++;
+        createDefinitionPanel();
+        holder.add(definitionPanel, new GridBagConstraints(0, rowIndex, 2, 1, 100.0, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        rowIndex++;
+        holder.add(new JSeparator(), new GridBagConstraints(0, rowIndex, 2, 1, 100.0, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(10, 2, 5, 2), 0, 0));
+        rowIndex++;
 
         messageArea.setBackground(null);
         messageArea.setBorder(null);
@@ -138,6 +164,87 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
         update();
     }
 
+    private void createDefinitionPanel() {
+    	definitionPanel = new JPanel();
+    	definitionPanel.setLayout(new BoxLayout(definitionPanel, BoxLayout.Y_AXIS));
+    	
+    	//create Value text area
+    	JTextArea area = new JTextArea();
+    	area.setLineWrap(true);
+    	area.setWrapStyleWord(true);
+    	
+    	JPanel areaPanel = new JPanel(new BorderLayout());
+    	areaPanel.add(new JLabel("Value"), BorderLayout.NORTH);
+    	areaPanel.add(new JScrollPane(area), BorderLayout.CENTER);
+    	areaPanel.setPreferredSize(new Dimension(450, 100));
+    	
+    	definitionPanel.add(areaPanel);
+    	
+    	//create Definition Reviewer Name  and Definition Reviewer Date text fields
+    	OWLAnnotationProperty defComplexProp = NCIEditTab.currentTab().lookUpShort("DEFINITION");
+    	Set<OWLAnnotationProperty> configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
+    	Map<String, String> defaultPropValues = new HashMap<String, String>();
+    	
+    	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
+    		String propShortForm = annotProp.getIRI().getShortForm();
+    		String propDefaultVal = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(annotProp), NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY);
+    		if (propShortForm.equals(DEFINITION_VIEWER_NAME)) {
+    			defaultPropValues.put(DEFINITION_VIEWER_NAME_LABEL, propDefaultVal);
+    		} else if (propShortForm.equals(DEFINITION_VIEW_DATE)) {
+    			defaultPropValues.put(DEFINITION_VIEW_DATE_LABEL, propDefaultVal);
+    		}
+    	}
+    	
+    	for (String labelStr : defaultPropValues.keySet()) {
+    		JPanel tfPanel = createTextFieldPanel(labelStr, defaultPropValues.get(labelStr));
+    		definitionPanel.add(tfPanel);
+    	}
+    	
+    	//create def source combo box
+    	//String[] options = NCIEditTab.currentTab().getEnumValues("def source");
+    	ArrayList<String> optionList = new ArrayList<String>();
+    	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
+			String propShortForm = annotProp.getIRI().getShortForm();
+			if (propShortForm.equals(DEF_SOURCE)) {
+				optionList.addAll(NCIEditTab.currentTab().getEnumValues(NCIEditTab.currentTab().getDataType(annotProp)));
+			}
+		}
+    	//String[] options = {"ACC test", "BCC test"};
+    	String[] options = optionList.toArray(new String[optionList.size()]);
+    	JPanel cbPanel = new JPanel(new BorderLayout());
+    	
+    	JComboBox<String> combobox = new JComboBox<String>(options);   	
+    	combobox.setPreferredSize(new Dimension(230, 20));
+    	
+    	JLabel label = new JLabel("def source");  	   	
+    	label.setPreferredSize(new Dimension(220, 20));
+    	
+    	cbPanel.add(label, BorderLayout.WEST);
+    	cbPanel.add(combobox, BorderLayout.EAST);
+    	cbPanel.setPreferredSize(new Dimension(450, 25));
+    	
+    	definitionPanel.add(cbPanel);
+    	definitionPanel.setBorder(BorderFactory.createTitledBorder("Definition"));
+    }
+    
+    private JPanel createTextFieldPanel(String labelStr, String defaultValue){
+    	
+    	JPanel panel = new JPanel(new BorderLayout());
+    	
+    	JTextField textfield = new JTextField(defaultValue);
+    	textfield.setEditable(false);
+    	textfield.setPreferredSize(new Dimension(230, 20));
+    	
+    	JLabel label = new JLabel(labelStr);
+    	label.setPreferredSize(new Dimension(220, 20));
+    	
+    	panel.add(label, BorderLayout.WEST);
+    	panel.add(textfield, BorderLayout.EAST);
+    	panel.setPreferredSize(new Dimension(450, 25));
+    	
+    	return panel;
+    }
+    
     public String getEntityName() {
         return preferredNameField.getText().trim();
     }
