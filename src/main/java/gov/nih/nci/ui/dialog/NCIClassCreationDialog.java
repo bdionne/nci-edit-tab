@@ -13,6 +13,7 @@ import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +43,7 @@ import org.protege.editor.owl.ui.UIHelper;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -53,6 +55,7 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.NCIEditTabConstants;
+import gov.nih.nci.utils.CharMapper;
 
 public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 	
@@ -90,6 +93,10 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     private static final String DEFINITION_VIEW_DATE_LABEL = "Definition Review Date";
     
     private static final String DEF_SOURCE_LABEL = "def source";
+    
+    private Map<String, Object> propcomponentmap;
+    
+    private OWLAnnotationProperty defComplexProp;
 
     public NCIClassCreationDialog(OWLEditorKit owlEditorKit, String message, Class<T> type, Optional<String> prefName,
     		Optional<String> code) {
@@ -165,6 +172,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     }
 
     private void createDefinitionPanel() {
+    	propcomponentmap = new HashMap<String, Object>();
     	definitionPanel = new JPanel();
     	definitionPanel.setLayout(new BoxLayout(definitionPanel, BoxLayout.Y_AXIS));
     	
@@ -178,25 +186,34 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	areaPanel.add(new JScrollPane(area), BorderLayout.CENTER);
     	areaPanel.setPreferredSize(new Dimension(450, 100));
     	
+    	propcomponentmap.put("Value", area);
+    	
     	definitionPanel.add(areaPanel);
     	
     	//create Definition Reviewer Name  and Definition Reviewer Date text fields
-    	OWLAnnotationProperty defComplexProp = NCIEditTab.currentTab().lookUpShort("DEFINITION");
+    	defComplexProp = NCIEditTab.currentTab().lookUpShort("DEFINITION");
     	Set<OWLAnnotationProperty> configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
-    	Map<String, String> defaultPropValues = new HashMap<String, String>();
+    	Map<String, List<String>> defaultPropValues = new HashMap<String, List<String>>();
     	
     	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
     		String propShortForm = annotProp.getIRI().getShortForm();
     		String propDefaultVal = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(annotProp), NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY);
+    		List<String> propList = new ArrayList<String>();
     		if (propShortForm.equals(DEFINITION_VIEWER_NAME)) {
-    			defaultPropValues.put(DEFINITION_VIEWER_NAME_LABEL, propDefaultVal);
+    			propList.add(DEFINITION_VIEWER_NAME_LABEL);
+    			propList.add(propDefaultVal);
+    			defaultPropValues.put(DEFINITION_VIEWER_NAME, propList);
+    			
     		} else if (propShortForm.equals(DEFINITION_VIEW_DATE)) {
-    			defaultPropValues.put(DEFINITION_VIEW_DATE_LABEL, propDefaultVal);
+    			propList.add(DEFINITION_VIEW_DATE_LABEL);
+    			propList.add(propDefaultVal);
+    			defaultPropValues.put(DEFINITION_VIEW_DATE, propList);
     		}
+    		
     	}
     	
-    	for (String labelStr : defaultPropValues.keySet()) {
-    		JPanel tfPanel = createTextFieldPanel(labelStr, defaultPropValues.get(labelStr));
+    	for (String prop : defaultPropValues.keySet()) {
+    		JPanel tfPanel = createTextFieldPanel(prop, defaultPropValues.get(prop));
     		definitionPanel.add(tfPanel);
     	}
     	
@@ -216,18 +233,22 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	JComboBox<String> combobox = new JComboBox<String>(options);   	
     	combobox.setPreferredSize(new Dimension(230, 20));
     	
-    	JLabel label = new JLabel("def source");  	   	
+    	JLabel label = new JLabel(DEF_SOURCE_LABEL);  	   	
     	label.setPreferredSize(new Dimension(220, 20));
     	
     	cbPanel.add(label, BorderLayout.WEST);
     	cbPanel.add(combobox, BorderLayout.EAST);
     	cbPanel.setPreferredSize(new Dimension(450, 25));
     	
+    	propcomponentmap.put(DEF_SOURCE, combobox);
+    	
     	definitionPanel.add(cbPanel);
     	definitionPanel.setBorder(BorderFactory.createTitledBorder("Definition"));
     }
     
-    private JPanel createTextFieldPanel(String labelStr, String defaultValue){
+    private JPanel createTextFieldPanel(String prop, List<String> propList){
+    	String labelStr = propList.get(0);
+    	String defaultValue = propList.get(1);
     	
     	JPanel panel = new JPanel(new BorderLayout());
     	
@@ -242,6 +263,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	panel.add(textfield, BorderLayout.EAST);
     	panel.setPreferredSize(new Dimension(450, 25));
     	
+    	propcomponentmap.put(prop, textfield);
     	return panel;
     }
     
@@ -409,6 +431,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax2));
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax3));
 		
+		//Add FULL SYN
 		OWLAnnotationProperty full_syn = NCIEditTab.currentTab().getFullSyn();
 		
 		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(full_syn, newClass.getIRI(), pref_name_val);
@@ -433,7 +456,49 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 				
 		changes.add(new AddAxiom(mngr.getActiveOntology(), new_new_axiom));
 		
-				
+		//Add DEFINITION
+		HashMap<String, String> propValueMap = getPropertyValueMap();
+		
+		if (NCIEditTab.currentTab().isRestricted(newClass, defComplexProp)) {
+			JOptionPane.showMessageDialog(this, "Property " + defComplexProp.getIRI().getShortForm() +
+					 " is restricted to certain editors", "Warning", JOptionPane.WARNING_MESSAGE);
+			return false; 
+		}
+
+		if (NCIEditTab.currentTab().containsAsciiLessThan32(propValueMap.get("Value"))) {
+			JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
+			return false; 
+		}
+		CharMapper mapper = new CharMapper();
+		new_axiom = df.getOWLAnnotationAssertionAxiom(defComplexProp, newClass.getIRI(), 
+				df.getOWLLiteral(mapper.fix(propValueMap.get("Value")), OWL2Datatype.RDF_PLAIN_LITERAL));
+
+		anns = new HashSet<OWLAnnotation>();
+		req_props = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
+
+		for (OWLAnnotationProperty prop : req_props) {
+			String val = propValueMap.get(prop.getIRI().getShortForm());
+			if (val != null && !val.isEmpty()) {
+				if (NCIEditTab.currentTab().containsAsciiLessThan32(val)) {
+					JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
+					return false; 
+				}
+				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
+						df.getOWLLiteral(mapper.fix(val), OWL2Datatype.RDF_PLAIN_LITERAL));
+				anns.add(new_ann);
+
+			} /* else {
+				if (NCIEditTab.currentTab().is_required(prop)) {
+					JOptionPane.showMessageDialog(this, "Complex property missing required qualifier " +
+							prop.getIRI().getShortForm(), "Warning", JOptionPane.WARNING_MESSAGE);
+					return false; 
+				}
+			}*/
+		}
+
+		new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
+		changes.add(new AddAxiom(mngr.getActiveOntology(), new_new_axiom));
+		
 		this.ont_changes = changes;
 		this.newClass = newClass;
 		
@@ -444,5 +509,36 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		return true;
     }
     
+    /*public boolean createNewDefinition() {
+    	boolean done = false;
+    	HashMap<String, String> propValueMap = getPropertyValueMap();
+    	if (propValueMap != null) {
+			done = NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, this.newClass, defComplexProp, null, propValueMap);
+			
+		}
+    	return done;
+    }*/
     
+    private HashMap<String, String> getPropertyValueMap(){
+    	
+    	HashMap<String, String> data = new HashMap<String, String>();
+    	
+        Iterator<String> itor = propcomponentmap.keySet().iterator();
+    	
+    	while(itor.hasNext()){
+    		String key = itor.next();
+    		Object obj = propcomponentmap.get(key);
+    		if(obj instanceof JTextField){
+    			data.put(key, ((JTextField)obj).getText().trim());
+    		}
+    		else if(obj instanceof JTextArea){
+    			data.put(key, ((JTextArea)obj).getText().trim());
+    		}
+    		else if(obj instanceof JComboBox){
+    			data.put(key,  (String)((JComboBox<?>)obj).getSelectedItem());
+    		}
+    	}
+    	
+    	return data;
+    }
 }
