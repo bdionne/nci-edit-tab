@@ -194,6 +194,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	defComplexProp = NCIEditTab.currentTab().lookUpShort("DEFINITION");
     	Set<OWLAnnotationProperty> configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
     	Map<String, List<String>> defaultPropValues = new HashMap<String, List<String>>();
+    	String defaultOption = null;
     	
     	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
     		String propShortForm = annotProp.getIRI().getShortForm();
@@ -208,6 +209,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     			propList.add(DEFINITION_VIEW_DATE_LABEL);
     			propList.add(propDefaultVal);
     			defaultPropValues.put(DEFINITION_VIEW_DATE, propList);
+    		} else if (propShortForm.equals(DEF_SOURCE)) {
+    			defaultOption = propDefaultVal;
     		}
     		
     	}
@@ -226,12 +229,14 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 				optionList.addAll(NCIEditTab.currentTab().getEnumValues(NCIEditTab.currentTab().getDataType(annotProp)));
 			}
 		}
+    	
     	//String[] options = {"ACC test", "BCC test"};
     	String[] options = optionList.toArray(new String[optionList.size()]);
     	JPanel cbPanel = new JPanel(new BorderLayout());
     	
     	JComboBox<String> combobox = new JComboBox<String>(options);   	
     	combobox.setPreferredSize(new Dimension(230, 20));
+    	combobox.setSelectedItem(defaultOption);
     	
     	JLabel label = new JLabel(DEF_SOURCE_LABEL);  	   	
     	label.setPreferredSize(new Dimension(220, 20));
@@ -304,11 +309,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     				if (c_exists) {
     					int allow = JOptionPane.showConfirmDialog(this, "Preferred name already exists", "warning",
     							JOptionPane.OK_CANCEL_OPTION);
-    					if (allow == JOptionPane.OK_OPTION) {
-    						if (buildNewClass(getEntityName(), Optional.empty())) {
-    							return true;
-    						}
-
+    					if (allow == JOptionPane.CANCEL_OPTION) {
+    						return false;
     					} 
     				} else {
     					if (buildNewClass(getEntityName(), Optional.empty())) {
