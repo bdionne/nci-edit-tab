@@ -472,34 +472,31 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 			return false; 
 		}
 		CharMapper mapper = new CharMapper();
-		new_axiom = df.getOWLAnnotationAssertionAxiom(defComplexProp, newClass.getIRI(), 
-				df.getOWLLiteral(mapper.fix(propValueMap.get("Value")), OWL2Datatype.RDF_PLAIN_LITERAL));
-
-		anns = new HashSet<OWLAnnotation>();
-		req_props = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
-
-		for (OWLAnnotationProperty prop : req_props) {
-			String val = propValueMap.get(prop.getIRI().getShortForm());
-			if (val != null && !val.isEmpty()) {
-				if (NCIEditTab.currentTab().containsAsciiLessThan32(val)) {
-					JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
-					return false; 
+		String value = propValueMap.get("Value");
+		if (value != null && !value.isEmpty()) {
+			new_axiom = df.getOWLAnnotationAssertionAxiom(defComplexProp, newClass.getIRI(), 
+					df.getOWLLiteral(mapper.fix(value), OWL2Datatype.RDF_PLAIN_LITERAL));
+	
+			anns = new HashSet<OWLAnnotation>();
+			req_props = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
+	
+			for (OWLAnnotationProperty prop : req_props) {
+				String val = propValueMap.get(prop.getIRI().getShortForm());
+				if (val != null && !val.isEmpty()) {
+					if (NCIEditTab.currentTab().containsAsciiLessThan32(val)) {
+						JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
+						return false; 
+					}
+					OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
+							df.getOWLLiteral(mapper.fix(val), OWL2Datatype.RDF_PLAIN_LITERAL));
+					anns.add(new_ann);
+	
 				}
-				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
-						df.getOWLLiteral(mapper.fix(val), OWL2Datatype.RDF_PLAIN_LITERAL));
-				anns.add(new_ann);
-
-			} /* else {
-				if (NCIEditTab.currentTab().is_required(prop)) {
-					JOptionPane.showMessageDialog(this, "Complex property missing required qualifier " +
-							prop.getIRI().getShortForm(), "Warning", JOptionPane.WARNING_MESSAGE);
-					return false; 
-				}
-			}*/
+			}
+	
+			new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
+			changes.add(new AddAxiom(mngr.getActiveOntology(), new_new_axiom));
 		}
-
-		new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
-		changes.add(new AddAxiom(mngr.getActiveOntology(), new_new_axiom));
 		
 		this.ont_changes = changes;
 		this.newClass = newClass;
