@@ -33,7 +33,8 @@ public abstract class EditProcessor {
 						+ " does not exist.";
 				errors.add(error_msg);
 
-			} else if (tab.isRetired(classToEdit)) {
+			} else if (tab.isRetired(classToEdit) &&
+					!tab.isWorkFlowManager()) {
 				errors.add(" -- concept " + cls_iri + " is retired, cannot edit");
 			}
 			
