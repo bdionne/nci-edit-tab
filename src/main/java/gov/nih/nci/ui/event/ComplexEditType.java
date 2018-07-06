@@ -6,6 +6,7 @@ public enum ComplexEditType {
 	EDIT,
 	DUAL,
 	MODIFY,
+	DELETE,
 	SPLIT,
 	MERGE,
 	CLONE,

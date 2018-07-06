@@ -132,6 +132,71 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 	}
 	
+	private boolean inPowerMode = false;
+	public void setPowerMode(Boolean b) {inPowerMode = b;}
+	
+	private String classDeletedName = "";
+	private String classDeletedCode = "";
+	private String classDeletedLabel = "";
+
+	public void setClassDeleted(OWLClass c) {
+		classDeletedName = c.getIRI().getShortForm();
+		classDeletedCode = getCodeOrIRI(c);
+		classDeletedLabel = getRDFSLabel(c).get();
+	}
+	
+	public boolean wasCreatedInCurrentCycle(OWLClass c) {
+		String code = this.getCodeOrIRI(c);
+		try {
+			return ((LocalHttpClient) clientSession.getActiveClient()).checkEvsHistoryCreate(code,
+					this.clientSession.getActiveProject());
+		} catch (LoginTimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AuthorizationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClientRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public void commitPowerDelete() {
+		
+		List<OWLOntologyChange> changes = history.getUncommittedChanges();
+		
+		if (!changes.isEmpty()) {
+
+			String comment = "(" +  classDeletedName + ") - DELETED";
+
+			Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
+			DocumentRevision base = clientSession.getActiveVersionOntology().getHeadRevision();
+			CommitBundle commitBundle = new CommitBundleImpl(base, commit);
+			ChangeHistory hist;
+			try {
+				hist = clientSession.getActiveClient().commit(clientSession.getActiveProject(), commitBundle);
+
+				clientSession.getActiveVersionOntology().update(hist);
+				// submit history after the commit but before you broadcast the news
+				if (!inBatchMode) 
+					submitDeleteHistory();
+				clientSession.fireCommitPerformedEvent(new CommitOperationEvent(
+						hist.getHeadRevision(),
+						hist.getMetadataForRevision(hist.getHeadRevision()),
+						hist.getChangesForRevision(hist.getHeadRevision())));
+				JOptionPane.showMessageDialog(this, "Class successfully deleted", "Class Delete", JOptionPane.INFORMATION_MESSAGE);
+
+			} catch (AuthorizationException | ClientRequestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
+	}
+	
 	private Set<OWLAnnotationProperty> annProps = null;
 	
 	private boolean editInProgress = false;
@@ -934,7 +999,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		OWLAnnotationProperty deprecated = this.lookUpShort("deprecated");
     		Optional<String> bool = getPropertyValue(cls, deprecated);
     		if (bool.isPresent()) {
-    			return bool.get().equals("true");
+    			return (bool.get().equals("true"));
     		}
     	}
     	return false;
@@ -1123,12 +1188,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			e.printStackTrace();
 		}
     	
-    	/**
-    	List<History> evs_hist = getEvsHistory();
-    	for (History hist : evs_hist) {
-    		System.out.println(hist.toRecord(HistoryType.EVS) + "\n");
-    	}
-    	**/
     	
     	
     }
@@ -1282,6 +1341,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     @Override
     public void stateChanged(HistoryManager source) {
+    	if (this.inPowerMode) {
+    		return;
+    	}
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
     	List<OWLClass>  subjects = findUniqueSubjects(changes);
     	if (!subjects.isEmpty()) {
@@ -3004,6 +3066,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	String ref = "";
     	putHistory(c, n, op, ref);
     	setNew(false);
+    }
+    
+    public void submitDeleteHistory() {
+    	
+    	String c = classDeletedCode;
+    	
+    	String n = classDeletedLabel;
+    	String op = ComplexEditType.DELETE.toString();
+    	
+    	String ref = "";
+    	putHistory(c, n, op, ref);
     }
     
     private String getCodeOrIRI(OWLClass cls) {

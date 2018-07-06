@@ -3,6 +3,7 @@ package gov.nih.nci.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.HashSet;
 import java.util.Optional;
 
 import javax.swing.FocusManager;
@@ -20,6 +21,7 @@ import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.ui.OWLIcons;
 import org.protege.editor.owl.ui.action.AbstractOWLTreeAction;
+import org.protege.editor.owl.ui.action.DeleteClassAction;
 import org.protege.editor.owl.ui.tree.OWLTreeDragAndDropHandler;
 import org.protege.editor.owl.ui.tree.UserRendering;
 import org.protege.editor.owl.ui.view.CreateNewChildTarget;
@@ -72,6 +74,49 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 			}
 		}, "A", "A");
 		
+		DeleteClassAction deleteClassAction =
+                new DeleteClassAction(getOWLEditorKit(),
+                                      () -> new HashSet<>(getTree().getSelectedOWLObjects())) {
+                    @Override
+                    public void updateState() {
+                        super.updateState();
+                        if (isEnabled()) {
+                        	NCIEditTab tab = NCIEditTab.currentTab();
+                            setEnabled(isInAssertedMode() &&
+                            		tab.isRetired(getSelectedEntity()) &&
+                            		!(tab.isRetireRoot(getSelectedEntity()) ||
+                            				tab.isRetireConceptsRoot(getSelectedEntity())) &&
+                            		NCIEditTab.currentTab().isWorkFlowManager());
+                        }
+                    }
+                    
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                    	NCIEditTab tab = NCIEditTab.currentTab();
+                    	if (tab.isEditing()) {
+                    		JOptionPane.showMessageDialog(null,"Other Edits in Progress", "Class Delete", JOptionPane.INFORMATION_MESSAGE);
+                    		return;
+                    	}
+                    	if (tab.wasCreatedInCurrentCycle(getSelectedEntity())) {
+
+
+                    		NCIEditTab.currentTab().setPowerMode(true);
+                    		tab.setClassDeleted(getSelectedEntity());
+                    		super.actionPerformed(e);                        
+                    		NCIEditTab.currentTab().commitPowerDelete();
+                    		NCIEditTab.currentTab().setPowerMode(false);
+                    	} else {
+                    		JOptionPane.showMessageDialog(null,"Class was not created in current cycle, can't delete", "Class Delete", JOptionPane.INFORMATION_MESSAGE);
+                    		return;
+
+                    	}
+                        
+                        
+                    }
+                };
+
+        addAction(deleteClassAction, "B", "B");
+		
 		addAction(new DisposableAction("Batch Load/Edit", batchbutton.getIcon()) {
 			/**
 			 * 
@@ -95,7 +140,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 			}
 			
 			
-		}, "B", "B");
+		}, "C", "C");
 		
 		addAction(new DisposableAction("Search", searchbutton.getIcon()) {
 			/**
