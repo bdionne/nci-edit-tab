@@ -191,7 +191,14 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	definitionPanel.add(areaPanel);
     	
     	//create Definition Reviewer Name  and Definition Reviewer Date text fields
+    	// NOTE: currently we have no way to distinguish byCode versus byName Kbs.
     	defComplexProp = NCIEditTab.currentTab().lookUpShort("DEFINITION");
+    	if (defComplexProp != null) {
+    		// found it by name
+    	} else {
+    		defComplexProp = NCIEditTab.currentTab().lookUpShort("P97");    		
+    	}
+    	
     	Set<OWLAnnotationProperty> configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
     	Map<String, List<String>> defaultPropValues = new HashMap<String, List<String>>();
     	String defaultOption = null;
