@@ -88,11 +88,11 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     
     private static final String DEF_SOURCE = "def-source";
     
-    private static final String DEFINITION_VIEWER_NAME_LABEL = "Definition Reviewer Name";
+    private static final String DEFINITION_VIEWER_NAME_LABEL = "Definition_Reviewer_Name";
     
-    private static final String DEFINITION_VIEW_DATE_LABEL = "Definition Review Date";
+    private static final String DEFINITION_VIEW_DATE_LABEL = "Definition_Review_Date";
     
-    private static final String DEF_SOURCE_LABEL = "def source";
+    private static final String DEF_SOURCE_LABEL = "Definition Source";
     
     private Map<String, Object> propcomponentmap;
     
@@ -205,6 +205,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	
     	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
     		String propShortForm = annotProp.getIRI().getShortForm();
+    		
+    		String lab = NCIEditTab.currentTab().getRDFSLabel(annotProp).get();
     		String propDefaultVal = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(annotProp), NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY);
     		List<String> propList = new ArrayList<String>();
     		if (propShortForm.equals(DEFINITION_VIEWER_NAME)) {
@@ -216,8 +218,13 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     			propList.add(DEFINITION_VIEW_DATE_LABEL);
     			propList.add(propDefaultVal);
     			defaultPropValues.put(DEFINITION_VIEW_DATE, propList);
-    		} else if (propShortForm.equals(DEF_SOURCE)) {
+    		} else if ((propShortForm.equals(DEF_SOURCE)) ||
+    				(propShortForm.equals("P378"))) {
     			defaultOption = propDefaultVal;
+    		} else {
+    			propList.add(lab);
+    			propList.add(propDefaultVal);
+    			defaultPropValues.put(lab, propList);
     		}
     		
     	}
@@ -232,7 +239,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	ArrayList<String> optionList = new ArrayList<String>();
     	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
 			String propShortForm = annotProp.getIRI().getShortForm();
-			if (propShortForm.equals(DEF_SOURCE)) {
+			if (propShortForm.equals(DEF_SOURCE) ||
+					propShortForm.equals("P378")) {
 				optionList.addAll(NCIEditTab.currentTab().getEnumValues(NCIEditTab.currentTab().getDataType(annotProp)));
 			}
 		}
