@@ -237,11 +237,15 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	//create def source combo box
     	//String[] options = NCIEditTab.currentTab().getEnumValues("def source");
     	ArrayList<String> optionList = new ArrayList<String>();
+    	boolean byName = false;
     	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
 			String propShortForm = annotProp.getIRI().getShortForm();
 			if (propShortForm.equals(DEF_SOURCE) ||
 					propShortForm.equals("P378")) {
 				optionList.addAll(NCIEditTab.currentTab().getEnumValues(NCIEditTab.currentTab().getDataType(annotProp)));
+				if (propShortForm.equals(DEF_SOURCE)) {
+					byName = true;
+				}
 			}
 		}
     	
@@ -260,7 +264,11 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	cbPanel.add(combobox, BorderLayout.EAST);
     	cbPanel.setPreferredSize(new Dimension(450, 25));
     	
-    	propcomponentmap.put(DEF_SOURCE, combobox);
+    	if (byName) {
+    		propcomponentmap.put(DEF_SOURCE, combobox);
+    	} else {
+    		propcomponentmap.put("P378", combobox);
+    	}
     	
     	definitionPanel.add(cbPanel);
     	definitionPanel.setBorder(BorderFactory.createTitledBorder("Definition"));
