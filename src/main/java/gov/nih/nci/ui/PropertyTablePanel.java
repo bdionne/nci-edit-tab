@@ -93,10 +93,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         this.owlEditorKit = editorKit;
         this.complexProp = complexProperty;
         this.tableName = tableName;
-        
-        //String prefsID = getClass().toString() + NCIEditTab.currentTab().getRDFSLabel(complexProp).get();
-		//prefs = PreferencesManager.getInstance().getApplicationPreferences(prefsID);
-		
+        		
         initialiseOWLView();
         createPopupMenu();
     }
@@ -192,7 +189,8 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         }
 
         @Override
-        public void columnRemoved(TableColumnModelEvent e) {        
+        public void columnRemoved(TableColumnModelEvent e) { 
+        	
         }
 
         @Override
@@ -203,7 +201,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
                 oldIndex = e.getFromIndex();
             }
 
-            newIndex = e.getToIndex();  
+            newIndex = e.getToIndex(); 
                  
         }
 
@@ -275,7 +273,10 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         
         ProtegeManager.getInstance().getFrame(this.owlEditorKit.getOWLWorkspace()).addWindowListener(new WindowAdapter(){
         	public void windowClosing(WindowEvent e) {
-        		saveColumnNameOrder();
+        		
+        		
+        		ProtegeManager.getInstance().getEditorKitManager().getWorkspaceManager().doClose(owlEditorKit.getOWLWorkspace());
+        		//saveColumnNameOrder();
         	}
         });
         
@@ -393,7 +394,6 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 				int viewRow = propertyTable.getSelectedRow();
 				if (viewRow != -1) {
 					int modelRow = propertyTable.convertRowIndexToModel(viewRow);
-					Map selectedPropertyMap = new HashMap();
 					
 					PropertyEditingDialog addedit = new	PropertyEditingDialog(NCIEditTabConstants.EDIT, tableModel.getSelectedPropertyType(), tableModel.getSelectedPropertyValues(modelRow), 
 							tableModel.getSelectedPropertyOptions(), tableModel.getDefaultSelectedPropertyLabel());

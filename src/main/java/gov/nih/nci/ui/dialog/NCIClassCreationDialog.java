@@ -82,15 +82,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     
     private JPanel definitionPanel;
     
-    private static final String DEFINITION_VIEWER_NAME = "Definition_Reviewer_Name";
-    
-    private static final String DEFINITION_VIEW_DATE = "Definition_Review_Date";
-    
     private static final String DEF_SOURCE = "def-source";
-    
-    private static final String DEFINITION_VIEWER_NAME_LABEL = "Definition_Reviewer_Name";
-    
-    private static final String DEFINITION_VIEW_DATE_LABEL = "Definition_Review_Date";
     
     private static final String DEF_SOURCE_LABEL = "Definition Source";
     
@@ -127,9 +119,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
         Insets insets = new Insets(0, 0, 2, 2);
 
         int rowIndex = 0;
-
-        //holder.add(new JLabel("Name:"), new GridBagConstraints(0, rowIndex, 1, 1, 0.0, 0.0, GridBagConstraints.BASELINE_TRAILING, GridBagConstraints.NONE, insets, 0, 0));
-
+        
         preferredNameField = new AugmentedJTextField(30, "Preferred Name");
         
         preferredNameField.getDocument().addDocumentListener(new DocumentListener() {
@@ -170,7 +160,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
         
         update();
     }
-
+    
     private void createDefinitionPanel() {
     	propcomponentmap = new HashMap<String, Object>();
     	definitionPanel = new JPanel();
@@ -192,12 +182,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	
     	//create Definition Reviewer Name  and Definition Reviewer Date text fields
     	// NOTE: currently we have no way to distinguish byCode versus byName Kbs.
-    	defComplexProp = NCIEditTab.currentTab().lookUpShort("DEFINITION");
-    	if (defComplexProp != null) {
-    		// found it by name
-    	} else {
-    		defComplexProp = NCIEditTab.currentTab().lookUpShort("P97");    		
-    	}
+    	defComplexProp = NCIEditTabConstants.DEFINITION;
     	
     	Set<OWLAnnotationProperty> configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
     	Map<String, List<String>> defaultPropValues = new HashMap<String, List<String>>();
@@ -209,16 +194,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     		String lab = NCIEditTab.currentTab().getRDFSLabel(annotProp).get();
     		String propDefaultVal = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(annotProp), NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY);
     		List<String> propList = new ArrayList<String>();
-    		if (propShortForm.equals(DEFINITION_VIEWER_NAME)) {
-    			propList.add(DEFINITION_VIEWER_NAME_LABEL);
-    			propList.add(propDefaultVal);
-    			defaultPropValues.put(DEFINITION_VIEWER_NAME, propList);
-    			
-    		} else if (propShortForm.equals(DEFINITION_VIEW_DATE)) {
-    			propList.add(DEFINITION_VIEW_DATE_LABEL);
-    			propList.add(propDefaultVal);
-    			defaultPropValues.put(DEFINITION_VIEW_DATE, propList);
-    		} else if ((propShortForm.equals(DEF_SOURCE)) ||
+    		if ((propShortForm.equals(DEF_SOURCE)) ||
     				(propShortForm.equals("P378"))) {
     			defaultOption = propDefaultVal;
     		} else {
@@ -234,22 +210,19 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     		definitionPanel.add(tfPanel);
     	}
     	
-    	//create def source combo box
-    	//String[] options = NCIEditTab.currentTab().getEnumValues("def source");
+    	
     	ArrayList<String> optionList = new ArrayList<String>();
-    	boolean byName = false;
+    	String def_source_label = "";
     	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
 			String propShortForm = annotProp.getIRI().getShortForm();
 			if (propShortForm.equals(DEF_SOURCE) ||
 					propShortForm.equals("P378")) {
 				optionList.addAll(NCIEditTab.currentTab().getEnumValues(NCIEditTab.currentTab().getDataType(annotProp)));
-				if (propShortForm.equals(DEF_SOURCE)) {
-					byName = true;
-				}
+				def_source_label = NCIEditTab.currentTab().getRDFSLabel(annotProp).get();
+				
 			}
 		}
     	
-    	//String[] options = {"ACC test", "BCC test"};
     	String[] options = optionList.toArray(new String[optionList.size()]);
     	JPanel cbPanel = new JPanel(new BorderLayout());
     	
@@ -263,12 +236,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	cbPanel.add(label, BorderLayout.WEST);
     	cbPanel.add(combobox, BorderLayout.EAST);
     	cbPanel.setPreferredSize(new Dimension(450, 25));
-    	
-    	if (byName) {
-    		propcomponentmap.put(DEF_SOURCE, combobox);
-    	} else {
-    		propcomponentmap.put("P378", combobox);
-    	}
+    	propcomponentmap.put(def_source_label, combobox);
+    
     	
     	definitionPanel.add(cbPanel);
     	definitionPanel.setBorder(BorderFactory.createTitledBorder("Definition"));
@@ -281,7 +250,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	JPanel panel = new JPanel(new BorderLayout());
     	
     	JTextField textfield = new JTextField(defaultValue);
-    	textfield.setEditable(false);
+    	textfield.setEditable(true);
     	textfield.setPreferredSize(new Dimension(230, 20));
     	
     	JLabel label = new JLabel(labelStr);
@@ -376,19 +345,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
             entityIRIField.setText(iriString);
         }
         catch (RuntimeException | OWLEntityCreationException e) {
-        	// safely ignore these, as the name is checked later
-            Throwable cause = e.getCause();
-            if (cause != null) {
-                if(cause instanceof OWLEntityCreationException) {
-                    //messageArea.setText("Entity already exists");
-                }
-                else {
-                    //messageArea.setText(cause.getMessage());
-                }
-            }
-            else {
-                //messageArea.setText(e.getMessage());
-            }
+        	// safely ignore these, as the name is checked later           
         }
 
     }    
@@ -510,7 +467,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 			req_props = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
 	
 			for (OWLAnnotationProperty prop : req_props) {
-				String val = propValueMap.get(prop.getIRI().getShortForm());
+				String val = propValueMap.get(NCIEditTab.currentTab().getRDFSLabel(prop).get());
+			
 				if (val != null && !val.isEmpty()) {
 					if (NCIEditTab.currentTab().containsAsciiLessThan32(val)) {
 						JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -537,15 +495,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		return true;
     }
     
-    /*public boolean createNewDefinition() {
-    	boolean done = false;
-    	HashMap<String, String> propValueMap = getPropertyValueMap();
-    	if (propValueMap != null) {
-			done = NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.ADD, this.newClass, defComplexProp, null, propValueMap);
-			
-		}
-    	return done;
-    }*/
+  
     
     private HashMap<String, String> getPropertyValueMap(){
     	

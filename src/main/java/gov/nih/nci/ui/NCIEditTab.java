@@ -1591,6 +1591,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					FULL_SYN = getSingleProperty("fully_qualified_syn", opts);
 					immutable_properties.add(LABEL_PROP);
 					PREF_NAME = getSingleProperty("pref_name", opts);
+					DEFINITION = getSingleProperty("definition", opts);
 					
 					SEMANTIC_TYPE = getSingleProperty("semantic_type", opts); 
 					
