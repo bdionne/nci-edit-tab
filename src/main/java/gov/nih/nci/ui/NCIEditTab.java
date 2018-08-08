@@ -1310,6 +1310,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	@Override
 	public void dispose() {
 		clientSession.removeListener(this);
+		clientSession.removeCommitOperationListener(this);
 		super.dispose();
 		log.info("Disposed of NCI Edit Tab");
 	}
