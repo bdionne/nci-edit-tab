@@ -438,7 +438,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		try {
 			codes = cl.getCodes(no, clientSession.getActiveProject());
 		} catch (Exception e) {
-			codes.add(UUID.randomUUID().toString());
+			// will detect empty array as issue with server
 		}
 		return codes;
 	}
@@ -500,7 +500,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					}
 					
 				});
-		
 	}
     
    
@@ -1457,6 +1456,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private void initProperties() {
 		
 		getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
+		
 		
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {

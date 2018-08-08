@@ -425,7 +425,13 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     		gen_code = code.get();
     	} else {
     		List<String> codes = NCIEditTab.currentTab().generateCodes(1);
-    		gen_code = codes.get(0);
+    		if (codes.isEmpty()) {
+    			JOptionPane.showMessageDialog(this, "Code can't be generated for this class, see sysadmin", "Warning", JOptionPane.WARNING_MESSAGE);
+        		return false;
+
+    		} else {
+    			gen_code = codes.get(0);
+    		}
     	}
 
 		OWLEntityCreationSet<OWLClass> newSet = null;
