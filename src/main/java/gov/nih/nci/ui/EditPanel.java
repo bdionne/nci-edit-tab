@@ -347,7 +347,8 @@ public class EditPanel extends JPanel {
             {
             	// Do the save
             	if (shouldSave()) {
-            		if (NCIEditTab.currentTab().syncFullSyn(NCIEditTab.currentTab().getCurrentlyEditing())) {
+            		if (NCIEditTab.currentTab().syncFullSyn(NCIEditTab.currentTab().getCurrentlyEditing())
+            				&& NCIEditTab.currentTab().syncDefinition(NCIEditTab.currentTab().getCurrentlyEditing())) {
 
             			if (!newPref.equals("")) {
             				NCIEditTab.currentTab().syncPrefName(newPref);                		

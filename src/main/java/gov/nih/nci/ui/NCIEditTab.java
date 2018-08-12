@@ -2815,6 +2815,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
+    private boolean isDefNCI(OWLAnnotationAssertionAxiom ax) {
+    	return (getAnnotationValue(ax, "def-source").equals("NCI"));
+    }
+    
     public boolean syncFullSyn(OWLClass cls) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLAnnotationProperty full_syn = getFullSyn();
@@ -2832,10 +2836,35 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	//checkPtNciFullSyn(changes, assertions);
     	
     	if ((assertions.size() != 1)) {
-    		JOptionPane.showMessageDialog(this, "One and only one PT with source NCI is allowed.", "Warning", JOptionPane.WARNING_MESSAGE);
+    		JOptionPane.showMessageDialog(this, "One and only one PT with source NCI is allowed in Full Syn.", "Warning", JOptionPane.WARNING_MESSAGE);
     		return false;
     	} else {
     		syncPrefNameLabel(cls, assertions.get(0).getValue().asLiteral().get().getLiteral(), changes);
+    		getOWLModelManager().applyChanges(changes);
+    		//selectClass(cls);
+    		return true;
+    	}
+    }
+    
+    public boolean syncDefinition(OWLClass cls) {
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	OWLAnnotationProperty definition = getDefinition();
+    	
+    	List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
+
+    	for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
+    		if (ax.getProperty().equals(definition)) {
+    			if (isDefNCI(ax)) {
+    				assertions.add(ax);
+    			} 
+    		}
+    	}
+    	
+    	if ((assertions.size() > 1)) {
+    		JOptionPane.showMessageDialog(this, "Only one def source NCI is allowed in Definition.", "Warning", JOptionPane.WARNING_MESSAGE);
+    		return false;
+    	} else {
+    		//syncPrefNameLabel(cls, assertions.get(0).getValue().asLiteral().get().getLiteral(), changes);
     		getOWLModelManager().applyChanges(changes);
     		//selectClass(cls);
     		return true;
@@ -2882,6 +2911,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
+    public OWLAnnotationProperty getDefinition() {
+    	
+		return DEFINITION;
+    	
+    }
+
     public OWLAnnotationProperty getPreferredName() {
     	
 		return PREF_NAME;

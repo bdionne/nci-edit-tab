@@ -179,7 +179,9 @@ public class ComplexEditPanel extends JPanel {
             		}
             	} else {
             		if ((NCIEditTab.currentTab().syncFullSyn(lowerPanelClass.getRootObject())) &&
-            				(NCIEditTab.currentTab().syncFullSyn(upperPanelClass.getRootObject()))) {
+            				(NCIEditTab.currentTab().syncFullSyn(upperPanelClass.getRootObject())) &&
+            				(NCIEditTab.currentTab().syncDefinition(lowerPanelClass.getRootObject())) &&
+            				(NCIEditTab.currentTab().syncDefinition(upperPanelClass.getRootObject()))) {
 
             			if (NCIEditTab.currentTab().commitChanges(true)) {
             				NCIEditTab.currentTab().completeOp();
