@@ -2095,7 +2095,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			return Optional.of(oobj.getIRI().getShortForm());			
 		}
 		if (ontology != null) {
-			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
+			Set<OWLAnnotationAssertionAxiom> axioms = ontology.getAnnotationAssertionAxioms(oobj.getIRI());
+			if (axioms.isEmpty()) {
+				return Optional.of("");
+			}
+			for (OWLAnnotation annotation : annotationObjects(axioms, ontology.getOWLOntologyManager().getOWLDataFactory()
 					.getRDFSLabel())) {
 				OWLAnnotationValue av = annotation.getValue();
 				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
@@ -2119,6 +2123,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public Optional<String> getCode(OWLNamedObject oobj) {
 		// TODO: fall back to IRI if no label
 		if (oobj != null) {
+			Set<OWLAnnotationAssertionAxiom> axioms = ontology.getAnnotationAssertionAxioms(oobj.getIRI());
+			if (axioms.isEmpty()) {
+				return Optional.of("");
+			}
 			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP)) {
 				OWLAnnotationValue av = annotation.getValue();
 				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
