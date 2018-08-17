@@ -27,7 +27,7 @@ import org.semanticweb.owlapi.util.CollectionFactory;
 
 public class NCIInheritedAnonymousClassesFrameSectionRow extends AbstractOWLFrameSectionRow<OWLClass, OWLClassAxiom, OWLClassExpression> {
 	
-	private String dispAnon = PreferencesManager.getInstance().getApplicationPreferences(ProtegeApplication.ID)
+	private String dispAnonPref = PreferencesManager.getInstance().getApplicationPreferences(ProtegeApplication.ID)
 			.getString(GeneralPreferencesPanel.ANON_ANCESTORS_DISPLAY, 
 					GeneralPreferencesPanel.AnonDispNone);
 	
@@ -90,6 +90,9 @@ public class NCIInheritedAnonymousClassesFrameSectionRow extends AbstractOWLFram
 	}
 	
 	public String getRendering() {
+		boolean dispAnon = dispAnonPref.equalsIgnoreCase(GeneralPreferencesPanel.AnonDispAll) ||
+				dispAnonPref.equalsIgnoreCase(GeneralPreferencesPanel.AnonDispOne);
+		
         StringBuilder sb = new StringBuilder();
         sb.append(getPrefix());
         for (Iterator<? extends OWLObject> it = getManipulatableObjects().iterator(); it.hasNext();) {
@@ -99,8 +102,22 @@ public class NCIInheritedAnonymousClassesFrameSectionRow extends AbstractOWLFram
                 sb.append(getDelimeter());
             }
         }
-        if (dispAnon == GeneralPreferencesPanel.AnonDispAll) {
+        if (dispAnon) {
         	sb.append(" (" + getObjectRendering(getRootObject()) + ")");
+        }
+        sb.append(getSuffix());
+        return sb.toString();
+    }
+	
+	public String getDefaultRendering() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getPrefix());
+        for (Iterator<? extends OWLObject> it = getManipulatableObjects().iterator(); it.hasNext();) {
+            OWLObject obj = it.next();
+            sb.append(getObjectRendering(obj));
+            if (it.hasNext()) {
+                sb.append(getDelimeter());
+            }
         }
         sb.append(getSuffix());
         return sb.toString();

@@ -2,15 +2,23 @@ package gov.nih.nci.ui;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
+
+
+import org.protege.editor.core.ProtegeApplication;
+import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.model.event.EventType;
+import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ReasonerPreferences.OptionalInferenceTask;
 import org.protege.editor.owl.ui.editor.OWLObjectEditor;
 import org.protege.editor.owl.ui.frame.AbstractOWLFrameSection;
 import org.protege.editor.owl.ui.frame.OWLFrame;
 import org.protege.editor.owl.ui.frame.OWLFrameSectionRow;
 import org.protege.editor.owl.ui.frame.cls.InheritedAnonymousClassesFrameSectionRow;
+import org.protege.editor.owl.ui.preferences.GeneralPreferencesPanel;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -24,10 +32,22 @@ public class NCIInheritedAnonymousClassesFrameSection extends AbstractOWLFrameSe
 	private static final String LABEL = "SubClass Of (Anonymous Ancestor)";
 
     private Set<OWLClass> processedClasses = new HashSet<>();
+    
+    OWLModelManagerListener listener;
+    
+    
+    
+    Set<String> dupSubClassAxioms = new HashSet<String>();
 
 
     public NCIInheritedAnonymousClassesFrameSection(OWLEditorKit editorKit, OWLFrame<? extends OWLClass> frame) {
         super(editorKit, LABEL, "Anonymous Ancestor Class", frame);
+        listener = event -> {
+            if (event.isType(EventType.ENTITY_RENDERER_CHANGED)) {
+                super.reset();
+            }
+        };
+        getOWLModelManager().addListener(listener);
     }
 
 
@@ -39,15 +59,34 @@ public class NCIInheritedAnonymousClassesFrameSection extends AbstractOWLFrameSe
     public OWLObjectEditor<OWLClassExpression> getObjectEditor() {
         return null; // canAdd() = false
     }
-
-
+    
     protected void refill(OWLOntology ontology) {
+    	boolean dispOneAnon = PreferencesManager.getInstance().getApplicationPreferences(ProtegeApplication.ID)
+    			.getString(GeneralPreferencesPanel.ANON_ANCESTORS_DISPLAY, 
+    					GeneralPreferencesPanel.AnonDispNone).equalsIgnoreCase(GeneralPreferencesPanel.AnonDispOne);
+    	
+    	if (dispOneAnon) {
+    		dupSubClassAxioms = new HashSet<String>();
+    	}
         Set<OWLClass> clses = getOWLModelManager().getOWLHierarchyManager().getOWLClassHierarchyProvider().getAncestors(getRootObject());
         clses.remove(getRootObject());
         for (OWLClass cls : clses) {
             for (OWLSubClassOfAxiom ax : ontology.getSubClassAxiomsForSubClass(cls)) {
+            	
                 if (ax.getSuperClass().isAnonymous()) {
-                    addRow(new NCIInheritedAnonymousClassesFrameSectionRow(getOWLEditorKit(), this, ontology, cls, ax, false));
+                	NCIInheritedAnonymousClassesFrameSectionRow row = 
+                			new NCIInheritedAnonymousClassesFrameSectionRow(getOWLEditorKit(),
+                					this, ontology, cls, ax, false);
+                	
+                	if (dispOneAnon && dupSubClassAxioms.contains(row.getDefaultRendering())) {
+
+                	} else {
+                		
+                		addRow(row);
+                		if (dispOneAnon) {
+                			dupSubClassAxioms.add(row.getDefaultRendering());
+                		}
+                	}
                 }
             }
             for (OWLEquivalentClassesAxiom ax : ontology.getEquivalentClassesAxioms(cls)) {
