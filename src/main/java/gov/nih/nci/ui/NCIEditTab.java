@@ -2824,7 +2824,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     private boolean isDefNCI(OWLAnnotationAssertionAxiom ax) {
-    	return (getAnnotationValue(ax, "def-source").equals("NCI"));
+    	String ann_val = getAnnotationValue(ax, "def-source");
+    	if (ann_val.equalsIgnoreCase("none")) {
+    		ann_val = getAnnotationValue(ax, "P378");
+    		
+    	}
+    	return ann_val.equalsIgnoreCase("NCI");
     }
     
     public boolean syncFullSyn(OWLClass cls) {
