@@ -557,7 +557,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		
     	} else {
     		if (switchMergeSourceTarget()) {
-    			int result = JOptionPane.showOptionDialog(null, "Retiring Concept is created after the Surviving Concept. Do you want to switch them?", 
+    			int result = JOptionPane.showOptionDialog(null, "Retiring Concept was created before the Surviving Concept. Do you want to switch them?", 
 						"Switch Retiring and Surviving Concept", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 				if (result == JOptionPane.OK_OPTION) {
 					OWLClass temp = target;
