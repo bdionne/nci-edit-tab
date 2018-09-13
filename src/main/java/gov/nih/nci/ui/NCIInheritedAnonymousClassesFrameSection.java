@@ -2,10 +2,7 @@ package gov.nih.nci.ui;
 
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-
-
 
 import org.protege.editor.core.ProtegeApplication;
 import org.protege.editor.core.prefs.PreferencesManager;
@@ -17,7 +14,6 @@ import org.protege.editor.owl.ui.editor.OWLObjectEditor;
 import org.protege.editor.owl.ui.frame.AbstractOWLFrameSection;
 import org.protege.editor.owl.ui.frame.OWLFrame;
 import org.protege.editor.owl.ui.frame.OWLFrameSectionRow;
-import org.protege.editor.owl.ui.frame.cls.InheritedAnonymousClassesFrameSectionRow;
 import org.protege.editor.owl.ui.preferences.GeneralPreferencesPanel;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAxiom;
@@ -48,6 +44,10 @@ public class NCIInheritedAnonymousClassesFrameSection extends AbstractOWLFrameSe
             }
         };
         getOWLModelManager().addListener(listener);
+    }
+    
+    public void disposeOfSection() {
+    	getOWLModelManager().removeListener(listener);
     }
 
 
