@@ -1347,6 +1347,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
     	List<OWLClass>  subjects = findUniqueSubjects(changes);
     	if (!subjects.isEmpty()) {
+    		if (current_op.isMissingOneside()) {
+    			JOptionPane.showMessageDialog(null, "You need two concepts to edit in Dual Edit panel");
+    			//backOutChange(); 
+				//refreshNavTree();
+    			return;
+    		}
     		if (current_op.isChangedEditFocus(subjects)) {
     			int result = JOptionPane.showOptionDialog(null, "Class already being edited. Do you want to proceed with this edit?", 
     					"Proceed or stay with existing edit?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);

@@ -105,6 +105,16 @@ public class ComplexOperation {
 		return type != ComplexEditType.EDIT;
 	}
 	
+	public boolean isMissingOneside() {
+		boolean result = false;
+		if (type == MERGE || type == DUAL) {
+			if ((source == null) || (target == null)) {
+				result = true;
+			}
+		}
+		return result;
+	}
+	
 	public boolean isChangedEditFocus(List<OWLClass> subjects) {
 		if ((type == EDIT) && (subjects.size() > 1)) {
 			// can only edit one at a time
@@ -140,9 +150,9 @@ public class ComplexOperation {
 		} 
 		
 		if (type == MERGE || type == DUAL) {
-			if ((source == null) || (target == null)) {
+			/*if ((source == null) || (target == null)) {
 				return true;
-			}
+			}*/
 			// check intitial state
 			if (currently_editing == null) {
 				currently_editing = subjects.get(0);
