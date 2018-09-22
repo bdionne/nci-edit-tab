@@ -1687,6 +1687,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	OWLAnnotationProperty lookUpIri(IRI cpIRI) {
 		
+		if (annProps == null) {
+			ontology = getOWLModelManager().getActiveOntology();
+			initProperties();
+		}
 		for (OWLAnnotationProperty ap : annProps) {
 			if (ap.getIRI().equals(cpIRI)) {
 				IRI dt = getDataType(ap);
@@ -1717,6 +1721,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public OWLAnnotationProperty lookUpShort(String shortName) {
 		
+		if (annProps == null) {
+			ontology = getOWLModelManager().getActiveOntology();
+			initProperties();
+		}
 		for (OWLAnnotationProperty ap : annProps) {
 			if (ap.getIRI().getShortForm().equals(shortName)) {				
 				return ap;	
