@@ -3109,11 +3109,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	String n = getRDFSLabel(cls).get();
     	String op = getCurrentOp().toString();
     	
-    	if (getRetiredParents(cls) != null) {
+    	if (!getRetiredParents(cls).isEmpty()) {
     		for (String s : getRetiredParents(cls)) {
     			String ref = getCodeOrIRI(getClass(s));
     			putHistory(c, n, op, ref);
     		}
+    	} else {
+    		putHistory(c, n, op, "ROOT");
     	}
     }
     
