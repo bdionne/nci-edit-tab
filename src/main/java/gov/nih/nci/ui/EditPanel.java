@@ -2,6 +2,7 @@ package gov.nih.nci.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import javax.swing.event.DocumentListener;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
+import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -60,10 +62,13 @@ public class EditPanel extends JPanel {
     
     JScrollPane descrPane;
     
+    private JLabel prefNamLabel;
     private JTextField prefNameText;
     private String origPref = "";
     private String newPref = "";
+    private JLabel iriLabel;
     private JTextField iri;
+    private JLabel classCode;
     private JTextField codeText;
 	
 	private JPanel buttonPanel;
@@ -112,7 +117,7 @@ public class EditPanel extends JPanel {
         genPropPanel = new JPanel();
         genPropPanel.setLayout(new BorderLayout());
         
-        JLabel prefNamLabel = new JLabel("Preferred Name");        
+        prefNamLabel = new JLabel("Preferred Name");        
         prefNameText = new JTextField("preferred name");
         prefNameText.setVisible(true);
         
@@ -167,7 +172,7 @@ public class EditPanel extends JPanel {
         topHeader.add(prefNamLabel);
         topHeader.add(prefNameText);
         
-        JLabel iriLabel = new JLabel("IRI fragment:");
+        iriLabel = new JLabel("IRI fragment:");
         iri = new JTextField("iri-short-form");
         iri.setVisible(true);
         iri.setEditable(false);
@@ -175,7 +180,7 @@ public class EditPanel extends JPanel {
         topHeader.add(iriLabel);
         topHeader.add(iri);
         
-        JLabel classCode = new JLabel("Code");
+        classCode = new JLabel("Code");
         codeText = new JTextField("code");
         codeText.setVisible(true);
         codeText.setEditable(false);
@@ -236,7 +241,14 @@ public class EditPanel extends JPanel {
     
     public void setSelectedClass(OWLClass cls) {
     	
-    	prefNameText.getDocument().removeDocumentListener(doc_listen);    	
+    	prefNameText.getDocument().removeDocumentListener(doc_listen);   
+    	Font font = OWLRendererPreferences.getInstance().getFont();
+    	prefNamLabel.setFont(font);
+    	prefNameText.setFont(font);
+    	iriLabel.setFont(font);
+    	iri.setFont(font);
+    	classCode.setFont(font);
+    	codeText.setFont(font);
     	if (cls != null && !NCIEditTab.currentTab().isUneditableRoot(cls)) {   		
 
     		currentClass = cls;

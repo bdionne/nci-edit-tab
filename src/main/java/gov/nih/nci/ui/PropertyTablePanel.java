@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -13,7 +14,6 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -37,8 +37,8 @@ import javax.swing.table.TableColumnModel;
 
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.core.prefs.Preferences;
-import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -306,11 +306,16 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
     }
     public void setSelectedCls(OWLClass cls) {
     	tableModel.setSelection(cls);
-
+    	
     	if (tableModel.hasAnnotation()) {
     		tableHeaderPanel.setVisible(true);
     		sp.setVisible(true);
-    		tableModel.fireTableDataChanged();  
+    		tableModel.fireTableDataChanged(); 
+    		
+    		Font font = OWLRendererPreferences.getInstance().getFont();
+    		propertyTable.setFont(font);
+    		propertyTable.getTableHeader().setFont(font);
+    		tableNameLabel.setFont(font);
     		
     		TableColumn c = getValueColumn();
     		if(c != null) {
