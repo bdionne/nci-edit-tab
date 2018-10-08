@@ -1349,8 +1349,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	if (!subjects.isEmpty()) {
     		if (current_op.isMissingOneside()) {
     			JOptionPane.showMessageDialog(null, "You need two concepts to edit in Dual Edit panel");
-    			//backOutChange(); 
-				//refreshNavTree();
+    			undoChanges();
     			return;
     		}
     		if (current_op.isChangedEditFocus(subjects)) {
@@ -1372,11 +1371,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			classModified();
     			
     		}
-    	} else {            	
-        	setEditInProgress(false);
-        	selectClass(getCurrentlyEditing());
-        	refreshNavTree();
-        	resetState();
+    	} else {  
+    		if (!current_op.isMissingOneside()) {
+	        	setEditInProgress(false);
+	        	selectClass(getCurrentlyEditing());
+	        	refreshNavTree();
+	        	resetState();
+    		}
     	}
     	
     	
