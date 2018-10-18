@@ -98,7 +98,7 @@ public class ExecuteClassificationSuggestionAxiomsAction extends ProtegeOWLActio
             OWLOntologyManager man = OWLManager.createOWLOntologyManager();
             OWLOntology inferredOnt = man.createOntology(IRI.create("http://another.com/ontology" + System.currentTimeMillis()));
             InferredOntologyGenerator ontGen = new InferredOntologyGenerator(getOWLModelManager().getReasoner(), new ArrayList<>());
-            ontGen.addGenerator(new InferredSubClassAxiomGenerator<OWLAxiom>());
+            ontGen.addGenerator(new InferredSubClassAxiomGenerator());
            
             ontGen.fillOntology(man.getOWLDataFactory(), inferredOnt);
             

@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.swing.FocusManager;
 import javax.swing.Icon;
@@ -12,7 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.TreePath;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
 import org.protege.editor.core.ui.view.DisposableAction;
@@ -28,6 +29,7 @@ import org.protege.editor.owl.ui.view.CreateNewChildTarget;
 import org.protege.editor.owl.ui.view.cls.AbstractOWLClassHierarchyViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.util.OWLEntitySetProvider;
 
 import gov.nih.nci.ui.action.AddComplexTarget;
 import gov.nih.nci.ui.action.CloneClassTarget;
@@ -50,7 +52,19 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;	
+	private static final long serialVersionUID = 1L;
+	
+	private class InternalOWLEntitySetProvider implements OWLEntitySetProvider<OWLClass> {
+
+        public Set<OWLClass> getEntities() {
+            return new HashSet<>(getTree().getSelectedOWLObjects());
+        }
+
+		@Override
+		public Stream<OWLClass> entities() {
+			return getEntities().stream();
+		}
+    }
 
 	public NCIToldOWLClassHierarchyViewComponent() {}	
 
@@ -76,7 +90,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		
 		DeleteClassAction deleteClassAction =
                 new DeleteClassAction(getOWLEditorKit(),
-                                      () -> new HashSet<>(getTree().getSelectedOWLObjects())) {
+                                      new InternalOWLEntitySetProvider()) {
                     @Override
                     public void updateState() {
                         super.updateState();

@@ -4,6 +4,7 @@ package gov.nih.nci.utils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.protege.editor.owl.model.OWLModelManager;
@@ -113,7 +114,7 @@ public class ReferenceReplace implements OWLClassExpressionVisitor {
 		}
 		
 		for (OWLAnnotationAssertionAxiom ax : ont.getAxioms(AxiomType.ANNOTATION_ASSERTION)) {
-            com.google.common.base.Optional<IRI> valueIRI = ax.getValue().asIRI();
+            Optional<IRI> valueIRI = ax.getValue().asIRI();
             if (valueIRI.isPresent()) {
                 if (valueIRI.get().equals(from.getIRI())) {
                 	changes.add(new RemoveAxiom(ont, ax));
