@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
@@ -119,10 +120,11 @@ public class BatchEditIRIsTableModel extends AbstractTableModel {
 			return Optional.of(oobj.getIRI().getShortForm());			
 		}
 		if (ontology != null) {
-			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
-					.getRDFSLabel())) {
+			for (OWLAnnotation annotation : annotationObjects(ontology.annotationAssertionAxioms(oobj.getIRI()), ontology.getOWLOntologyManager().getOWLDataFactory()
+					.getRDFSLabel()).
+					collect(Collectors.toSet())) {
 				OWLAnnotationValue av = annotation.getValue();
-				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				Optional<OWLLiteral> ol = av.asLiteral();
 				if (ol.isPresent()) {
 					return Optional.of(ol.get().getLiteral());
 				}

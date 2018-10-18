@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -339,7 +340,8 @@ public class PropertyTableModel extends AbstractTableModel {
 			annotations.clear();
 			assertions.clear();
 			String key;
-			for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selection, ont)) {
+			for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selection, ont).
+					collect(Collectors.toSet())) {
 				OWLAnnotation annot = ax.getAnnotation();
 				
 				if (annot.getProperty().equals(this.complexProp)) {

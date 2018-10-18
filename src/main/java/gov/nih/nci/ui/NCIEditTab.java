@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -691,10 +693,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 
-    	Map<IRI, IRI> replacementIRIMap = new HashMap<>();
-    	replacementIRIMap.put(source.getIRI(), target.getIRI());
+    	Map<OWLEntity, IRI> replacementIRIMap = new HashMap<>();
+    	replacementIRIMap.put(source, target.getIRI());
 
-    	OWLObjectDuplicator dup = new OWLObjectDuplicator(getOWLModelManager().getOWLDataFactory(), replacementIRIMap);            
+    	OWLObjectDuplicator dup = new OWLObjectDuplicator(replacementIRIMap, getOWLModelManager().getOWLOntologyManager());            
 
     	changes.addAll(duplicateClassAxioms(source, dup));            
     	changes.addAll(duplicateAnnotations(source, dup));
@@ -1229,10 +1231,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		changes.add(new AddAxiom(ontology, ax));
     	}
     	
-    	Map<IRI, IRI> replacementIRIMap = new HashMap<>();
-    	replacementIRIMap.put(selectedClass.getIRI(), newClass.getIRI());
+    	Map<OWLEntity, IRI> replacementIRIMap = new HashMap<>();
+    	replacementIRIMap.put(selectedClass, newClass.getIRI());
 
-    	OWLObjectDuplicator dup = new OWLObjectDuplicator(mngr.getOWLDataFactory(), replacementIRIMap);            
+    	OWLObjectDuplicator dup = new OWLObjectDuplicator(replacementIRIMap, mngr.getOWLOntologyManager());            
 
     	changes.addAll(duplicateClassAxioms(selectedClass, dup));            
     	changes.addAll(duplicateAnnotations(selectedClass, dup));    	           
@@ -1495,7 +1497,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	        		
 	        		for (OWLAnnotationAssertionAxiom ax : panns) {
 	        			if (ax.getProperty().equals(restricted_by)) {
-	        				com.google.common.base.Optional<IRI> iri = ax.getValue().asIRI();
+	        				Optional<IRI> iri = ax.getValue().asIRI();
 	        				OWLAnnotationProperty res_prop = lookUpIri(iri.get());
 	        				restrictedBy.put(p, res_prop);
 	        				
@@ -2065,7 +2067,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			OWLAnnotation ann = ann_ax.getAnnotation();
 			if (ann.getProperty().equals(prop)) {
 				OWLAnnotationValue av = ann.getValue();
-				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				Optional<OWLLiteral> ol = av.asLiteral();
 				if (ol.isPresent()) {
 					if (ol.get().getLiteral().equals(value)) {
 						// we have a possible
@@ -2110,14 +2112,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			return Optional.of(oobj.getIRI().getShortForm());			
 		}
 		if (ontology != null) {
-			Set<OWLAnnotationAssertionAxiom> axioms = ontology.getAnnotationAssertionAxioms(oobj.getIRI());
-			if (axioms.isEmpty()) {
+			Set<OWLAnnotation> axiomanns = annotationObjects(ontology.annotationAssertionAxioms(oobj.getIRI()),
+					ontology.getOWLOntologyManager().getOWLDataFactory()
+					.getRDFSLabel()).
+					collect(Collectors.toSet());
+			if (axiomanns.isEmpty()) {
 				return Optional.of("");
 			}
-			for (OWLAnnotation annotation : annotationObjects(axioms, ontology.getOWLOntologyManager().getOWLDataFactory()
-					.getRDFSLabel())) {
+			for (OWLAnnotation annotation : axiomanns) {
 				OWLAnnotationValue av = annotation.getValue();
-				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				Optional<OWLLiteral> ol = av.asLiteral();
 				if (ol.isPresent()) {
 					return Optional.of(ol.get().getLiteral());
 				}
@@ -2138,13 +2142,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public Optional<String> getCode(OWLNamedObject oobj) {
 		// TODO: fall back to IRI if no label
 		if (oobj != null) {
-			Set<OWLAnnotationAssertionAxiom> axioms = ontology.getAnnotationAssertionAxioms(oobj.getIRI());
+			Set<OWLAnnotationAssertionAxiom> axioms = ontology.annotationAssertionAxioms(oobj.getIRI()).
+					collect(Collectors.toSet());
 			if (axioms.isEmpty()) {
 				return Optional.of("");
 			}
-			for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP)) {
+			for (OWLAnnotation annotation : annotationObjects(ontology.annotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP).
+					collect(Collectors.toSet())) {
 				OWLAnnotationValue av = annotation.getValue();
-				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				Optional<OWLLiteral> ol = av.asLiteral();
 				if (ol.isPresent()) {
 					return Optional.of(ol.get().getLiteral());
 				}
@@ -2163,7 +2169,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Optional<OWLAnnotationValue> getSemanticType(OWLClass cls) {
 		
-		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(cls.getIRI()), SEMANTIC_TYPE)) {
+		for (OWLAnnotation annotation : annotationObjects(ontology.annotationAssertionAxioms(cls.getIRI()), SEMANTIC_TYPE).
+				collect(Collectors.toSet())) {
 			OWLAnnotationValue av = annotation.getValue();
 			return Optional.of(av);
 			
@@ -2182,7 +2189,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public Set<OWLAnnotation> getAnnotations(OWLClass cls) {
 		Set<OWLAnnotation> res = new HashSet<OWLAnnotation>();
 
-		for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(cls, ontology)) {
+		Set<OWLAnnotationAssertionAxiom> strs = EntitySearcher.getAnnotationAssertionAxioms(cls, ontology).
+				collect(Collectors.toSet());
+		
+		for (OWLAnnotationAssertionAxiom ax : strs) {
 			res.add(ax.getAnnotation());
 		}
 		
@@ -2191,7 +2201,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Set<OWLAnnotation> getDependentAnnotations(OWLClass cls, OWLAnnotationProperty prop) {
 		
-		for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(cls, ontology)) {
+		Set<OWLAnnotationAssertionAxiom> strs = EntitySearcher.getAnnotationAssertionAxioms(cls, ontology).
+				collect(Collectors.toSet());
+		
+		for (OWLAnnotationAssertionAxiom ax : strs) {
 			OWLAnnotation annot = ax.getAnnotation();
 			if (annot.getProperty().equals(prop)) {
 				return ax.getAnnotations();				
@@ -2205,13 +2218,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public List<String> getPropertyValues(OWLNamedObject oobj, OWLAnnotationProperty prop) {
 		
 		List<String> values = new ArrayList<String>();
+		
+		Set<OWLAnnotation> sowl = annotationObjects(ontology.annotationAssertionAxioms(oobj.getIRI()), prop).
+				collect(Collectors.toSet());
 		  
-		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), prop)) {
+		for (OWLAnnotation annotation : sowl) {
 			OWLAnnotationValue av = annotation.getValue();
 			if (av instanceof IRI) {
 				values.add(av.toString());
 			} else {
-				com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+				Optional<OWLLiteral> ol = av.asLiteral();
 				if (ol.isPresent()) {
 					values.add(ol.get().getLiteral());
 				} 
@@ -2226,7 +2242,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		 
 		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(oobj.getIRI())) {
 			if (ax.getProperty().equals(prop)) {
-				com.google.common.base.Optional<OWLLiteral> ol = ax.getAnnotation().getValue().asLiteral();
+				Optional<OWLLiteral> ol = ax.getAnnotation().getValue().asLiteral();
 				if (ol.isPresent()) {
 					if (ol.get().getLiteral().equals(value)) {
 						return ol.get();
@@ -2240,9 +2256,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public Optional<String> getPropertyValue(OWLNamedObject oobj, OWLAnnotationProperty prop) {
 		  
-		for (OWLAnnotation annotation : annotationObjects(ontology.getAnnotationAssertionAxioms(oobj.getIRI()), prop)) {
+		for (OWLAnnotation annotation : annotationObjects(ontology.annotationAssertionAxioms(oobj.getIRI()), prop).
+				collect(Collectors.toSet())) {
 			OWLAnnotationValue av = annotation.getValue();
-		    com.google.common.base.Optional<OWLLiteral> ol = av.asLiteral();
+		    Optional<OWLLiteral> ol = av.asLiteral();
 		    if (ol.isPresent()) {
 		     return Optional.of(ol.get().getLiteral());
 		     
@@ -2422,7 +2439,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
         OWLOntology ont = getOWLModelManager().getActiveOntology();
         
-        for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selectedClass, ont)) {
+        for (OWLAnnotationAssertionAxiom ax : EntitySearcher.getAnnotationAssertionAxioms(selectedClass, ont).
+        		collect(Collectors.toSet())) {
         	final OWLAnnotation annot = ax.getAnnotation();
         	if (annotIRIs == null || !annotIRIs.contains(annot.getProperty().getIRI())) {
         		if (okToCopy(annot.getProperty())) {

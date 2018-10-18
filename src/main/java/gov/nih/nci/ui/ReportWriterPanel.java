@@ -514,7 +514,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 					slotname = ann.getProperty().getIRI().getShortForm();				
 				}
 
-				com.google.common.base.Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
+				Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
 				if (strentry.isPresent()) {
 					entry = strentry.get().getLiteral();
 				}
@@ -538,7 +538,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 					}					
 				}
 				String entry = "";
-				com.google.common.base.Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
+				Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
 				if (strentry.isPresent()) {
 					entry = strentry.get().getLiteral();
 				}
@@ -554,7 +554,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 			String slotname = ap.getIRI().getShortForm();
 			String entry = "";
 			if (this.complexProps.contains(slotname)) {
-				com.google.common.base.Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
+				Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
 				if (strentry.isPresent()) {
 					entry = strentry.get().getLiteral();
 				}
@@ -565,7 +565,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 					OWLAnnotationProperty qap = qualAnn.getProperty();
 					String qslotname = qap.getIRI().getShortForm();
 					String qentry = "";
-					com.google.common.base.Optional<OWLLiteral> qstrentry = qualAnn.getValue().asLiteral();
+					Optional<OWLLiteral> qstrentry = qualAnn.getValue().asLiteral();
 					if (qstrentry.isPresent()) {
 						qentry = qstrentry.get().getLiteral();
 					}
