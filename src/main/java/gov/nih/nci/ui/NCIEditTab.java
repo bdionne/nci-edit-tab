@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,7 +26,7 @@ import javax.swing.SwingUtilities;
 
 import edu.stanford.protege.metaproject.api.*;
 import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.client.ClientSession;
@@ -115,7 +117,7 @@ import gov.nih.nci.utils.ReferenceReplace;
 import gov.nih.nci.utils.RoleReplacer;
 
 public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionListener, UndoManagerListener, CommitOperationListener {
-	private static final Logger log = Logger.getLogger(NCIEditTab.class);
+	private static final Logger log = LoggerFactory.getLogger(NCIEditTab.class);
 	private static final long serialVersionUID = -4896884982262745722L;
 	
 	private static NCIEditTab tab;	

@@ -14,16 +14,14 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 
-import gov.nih.nci.ui.dialog.BatchProcessingDialog;
-
 public class BatchProcessOutputPanel extends JPanel implements ActionListener{
 	
-	private static final Logger log = Logger.getLogger(BatchProcessOutputPanel.class);
+	private static final Logger log = LoggerFactory.getLogger(BatchProcessOutputPanel.class);
 
 	private static final long serialVersionUID = 1L;
 	private JTextArea textarea;
