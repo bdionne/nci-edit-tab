@@ -13,10 +13,10 @@ import java.nio.charset.CodingErrorAction;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.google.common.base.Charsets;
-
 import gov.nih.nci.ui.BatchProcessOutputPanel;
 import gov.nih.nci.ui.NCIEditTab;
 
@@ -25,7 +25,7 @@ import gov.nih.nci.ui.NCIEditTab;
  */
 public abstract class BatchTask {
 	
-	private static final Logger log = Logger.getLogger(BatchTask.class);
+	private static final Logger log = Logger.getLogger(BatchTask.class.getName());
 
 	public static enum TaskType {
 		LOAD, EDIT_SIMPLE_PROPS, EDIT_COMPLEX_PROPS, EDIT_PARENTS, EDIT_ROLES
@@ -154,7 +154,7 @@ public abstract class BatchTask {
 			pw.close();
 			pw = null;
 		} catch (Exception e) {
-			log.warn("Exception caught", e);
+			log.log(Level.WARNING, "Exception caught", e);
 		}
 	}
 

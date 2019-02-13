@@ -19,6 +19,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -30,7 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
+
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 
@@ -47,7 +49,7 @@ import gov.nih.nci.utils.batch.BatchTask.TaskType;
 
 public class BatchProcessingDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = -3817605737614597419L;
-	private static final Logger log = Logger.getLogger(BatchProcessingDialog.class);
+	private static final Logger log = Logger.getLogger(BatchProcessingDialog.class.getName());
 
 	JButton fStartButton, fCancelButton, fInputButton, fOutputButton;
 
@@ -255,7 +257,7 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			this.setVisible(true);
 
 		} catch (Exception ex) {
-			log.warn("Exception caught", ex);
+			log.log(Level.WARNING, "Exception caught", ex);
 		}
 	}
 	
@@ -317,11 +319,11 @@ public class BatchProcessingDialog extends JDialog implements ActionListener {
 			}
 			writer.close();
 		} catch (Exception e) {
-			log.warn("Exception caught", e);
+			log.log(Level.WARNING, "Exception caught", e);
 			try {
 				writer.close();
 			} catch (Exception ex) {
-				log.warn("Exception caught", ex);
+				log.log(Level.WARNING, "Exception caught", ex);
 			}
 		}
 	}
