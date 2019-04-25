@@ -1346,6 +1346,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     @Override
     public void stateChanged(HistoryManager source) {
+    	if (this.getOWLEditorKit().getModelManager().getExplanationManager().getIsRunning()) {
+    		return;
+    	}
     	if (this.inPowerMode) {
     		return;
     	}
