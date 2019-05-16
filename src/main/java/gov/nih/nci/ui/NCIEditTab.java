@@ -2015,6 +2015,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
 		Set<OWLAnnotationProperty> req_props = getConfiguredAnnotationsForAnnotation(complex_prop);
 
+		Set<OWLAnnotationProperty> opt_props = new HashSet<OWLAnnotationProperty>();
+		
+		for (String as : annotations.keySet()) {
+			OWLAnnotationProperty ap = this.lookUpShort(as);
+			if (!req_props.contains(ap)) {
+				opt_props.add(ap);
+			}
+			
+		}
 		for (OWLAnnotationProperty prop : req_props) {
 			String val = annotations.get(prop.getIRI().getShortForm());
 			if (val != null) {
@@ -2026,6 +2035,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
 						df.getOWLLiteral(def_val, OWL2Datatype.RDF_PLAIN_LITERAL));
 				anns.add(new_ann);				
+			}
+		}
+		
+		for (OWLAnnotationProperty prop : opt_props) {
+			String val = annotations.get(prop.getIRI().getShortForm());
+			if (val != null) {
+				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
+						df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL));
+				anns.add(new_ann);
 			}
 		}
 

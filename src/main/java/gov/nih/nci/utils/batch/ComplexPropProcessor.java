@@ -178,6 +178,12 @@ public class ComplexPropProcessor extends EditProcessor {
 	
 	private String checkQualifierTypes(String prop_iri, Map<String, String> qualifiers) {
 		String errors = "";
+		// check qualifiers are valid properties
+		for (String qs : qualifiers.keySet()) {
+			if (tab.lookUpShort(qs) == null) {
+				errors += "qualifier " + qs + " does not exist. \n";
+			}
+		}
 		if (tab.isNCIPtFullSyn(prop_iri, qualifiers)) {
 			errors += "only one NCI/PT FULL_SYN allowed. \n";
 			
