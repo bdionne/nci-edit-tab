@@ -84,7 +84,9 @@ public class ComplexEditPanel extends JPanel {
     public ComplexEditPanel(OWLEditorKit editorKit) {
         this.owlEditorKit = editorKit;
         //new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties), read_only)
-        Set<OWLAnnotationProperty> imm_props = NCIEditTab.currentTab().getImmutableProperties();
+        
+        Set<OWLAnnotationProperty> imm_props = new HashSet<OWLAnnotationProperty>();
+        imm_props.addAll(NCIEditTab.currentTab().getImmutableProperties());
         imm_props.add(NCIEditTabConstants.PREF_NAME);
         
         this.upperPanelAnn = new NCIOWLFrameList<OWLAnnotationSubject>(editorKit,
