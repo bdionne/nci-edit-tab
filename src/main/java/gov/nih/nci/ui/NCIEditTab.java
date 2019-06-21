@@ -1756,9 +1756,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public boolean checkType(String propName, String value) {
 		OWLAnnotationProperty prop = lookUpShort(propName);
 		IRI type = getDataType(prop);
-		if (type.toString().endsWith("-enum")) {
-			List<String> vals = getEnumValues(type);
-			return vals.contains(value);			
+		if (type != null) {
+			if (type.toString().endsWith("-enum")) {
+				List<String> vals = getEnumValues(type);
+				return vals.contains(value);			
+			}
 		}
 		// TODO: flesh out with more types as requirements come in
 		

@@ -96,6 +96,7 @@ public class SimplePropProcessor extends EditProcessor {
 					break;
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				w.add("Exception caught" + e.toString());
 			}
 		}
