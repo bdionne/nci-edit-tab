@@ -2,17 +2,18 @@ package gov.nih.nci.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionListener;
 
 import org.protege.editor.core.ui.list.MListButton;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.frame.OWLFrame;
 import org.protege.editor.owl.ui.frame.OWLFrameSectionRow;
+import org.protege.editor.owl.ui.frame.cls.OWLSubClassAxiomFrameSectionRow;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -68,7 +69,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	protected List<MListButton> getButtons(Object value) {
 		if (read_only) {
 
-    	} else {
+    	} else if (isComplexProperty(value)) {
     		buttons = new ArrayList<>(super.getButtons(value));
     		if (value instanceof OWLFrameSectionRow) {
     			if (((OWLFrameSectionRow) value).isEditable()) {
@@ -79,6 +80,8 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
     				
     			}
     		}
+    	} else {
+    		buttons = super.getButtons(value);
     	}
 		return buttons;
 	}
@@ -166,6 +169,21 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 			super.handleEdit();
 		}
 	}
+	
+	public void handleDelete() {
+		if (isClassDescription(getSelectedValue())) {
+			OWLClass cls = NCIEditTab.currentTab().getCurrentlySelected();
+			Set<OWLClass> parents = editorKit.getOWLModelManager().getOWLHierarchyManager().getOWLClassHierarchyProvider().getParents(cls);
+			if (parents == null || parents.isEmpty() || parents.size() == 1) {
+				JOptionPane.showMessageDialog(null,"Can not delete the last super class", "Class Delete", JOptionPane.INFORMATION_MESSAGE);
+        		//NCIEditTab.currentTab().undoChanges();
+			} else {
+				super.handleDelete();
+			}
+		} else {
+			super.handleDelete();
+		}
+	}
 
 	private Map<String, String> getPropertyValues(Set<OWLAnnotationProperty> configuredAnnotations) {
 		Map<String, String> propertyValues = PropertyUtil.getSelectedPropertyValues(annotations);
@@ -192,6 +210,13 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 			if(complexProps.contains(annoProp)) {
 				return true;
 			}
+		}
+		return false;
+	}
+	
+	private boolean isClassDescription(Object val) {
+		if (val instanceof OWLSubClassAxiomFrameSectionRow) {
+			return true;
 		}
 		return false;
 	}

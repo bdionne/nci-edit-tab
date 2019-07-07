@@ -48,7 +48,7 @@ public class EditPanel extends JPanel {
 	
 	private Set<OWLAnnotationProperty> readOnlyProperties;
 	
-	private OWLFrameList<OWLClass> list;
+	private NCIOWLFrameList<OWLClass> list;
 	
 	private OWLFrameList<OWLAnnotationSubject> gen_props;
 	
@@ -214,7 +214,7 @@ public class EditPanel extends JPanel {
         }        
         
         
-        list = new OWLFrameList<OWLClass>(owlEditorKit, new NCIOWLClassDescriptionFrame(owlEditorKit)) {
+        list = new NCIOWLFrameList<OWLClass>(owlEditorKit, new NCIOWLClassDescriptionFrame(owlEditorKit)) {
 			private static final long serialVersionUID = 1L;
         	public void handleDelete() {
         		super.handleDelete();
