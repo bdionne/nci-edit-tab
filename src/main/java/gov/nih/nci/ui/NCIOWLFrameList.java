@@ -2,6 +2,7 @@ package gov.nih.nci.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -174,9 +175,17 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		if (isClassDescription(getSelectedValue())) {
 			OWLClass cls = NCIEditTab.currentTab().getCurrentlySelected();
 			Set<OWLClass> parents = editorKit.getOWLModelManager().getOWLHierarchyManager().getOWLClassHierarchyProvider().getParents(cls);
-			if (parents == null || parents.isEmpty() || parents.size() == 1) {
-				JOptionPane.showMessageDialog(null,"Can not delete the last super class", "Class Delete", JOptionPane.INFORMATION_MESSAGE);
-        		//NCIEditTab.currentTab().undoChanges();
+			if (parents == null || parents.isEmpty() ) {
+				//JOptionPane.showMessageDialog(null,"Can not delete the last super class", "Class Delete", JOptionPane.INFORMATION_MESSAGE);
+        		logger.warn(cls.toString() + "doesn't have super class defined.");
+			} else if (parents.size() == 1) {
+				Iterator itr = parents.iterator();
+				OWLClass parent = (OWLClass)itr.next();
+				if (parent.getIRI().getShortForm().equals(getSelectedValue().toString())) {
+					JOptionPane.showMessageDialog(null,"Can not delete the last super class", "Class Delete", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					super.handleDelete();
+				}
 			} else {
 				super.handleDelete();
 			}
