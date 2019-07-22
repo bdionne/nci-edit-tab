@@ -149,9 +149,10 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 
 	public void run()
 	{
-		proc.start();
+		proc.start();		
 		pack();
 		this.setVisible(true);
+		
 
 	}
 
@@ -254,7 +255,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 				task.cancelTask();
 			}
 
-			dispose();
+			tpd.dispose();
 
 		}
 	}
