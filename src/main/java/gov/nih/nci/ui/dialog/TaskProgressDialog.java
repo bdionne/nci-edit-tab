@@ -6,6 +6,7 @@ import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.utils.batch.BatchTask;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Rectangle;
@@ -50,6 +51,8 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 
     public TaskProgressDialog(JFrame owner, String title, BatchTask task, NCIEditTab t) {
    		super(owner, title, true);
+   		
+   		this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 
    		this.task = task;
 
@@ -59,8 +62,8 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
         cancelled = false;
         
         tab = t;
-
-      //  owlModel = NCIEditTab.getActiveOWLModel();
+        
+        proc = new BatchProc(this);
     }
 
     public BatchTask getTask()
@@ -138,7 +141,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 
         this.setLocation(locRec.getLocation().x + locRec.width / 3 - getSize().width / 3,
                 locRec.getLocation().y + locRec.height / 3 - getSize().height / 3);
-		proc = new BatchProc(this);
+		
 
 	}
 
@@ -149,7 +152,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 
 	public void run()
 	{
-		proc.start();		
+		proc.start();
 		pack();
 		this.setVisible(true);
 		
