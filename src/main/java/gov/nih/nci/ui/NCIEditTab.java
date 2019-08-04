@@ -504,6 +504,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					}
 					
 				});
+		
+		if (clientSession.getActiveClient() != null) {
+			clientSession.fireChangeEvent(EventCategory.OPEN_PROJECT);
+		}
 	}
     
    
