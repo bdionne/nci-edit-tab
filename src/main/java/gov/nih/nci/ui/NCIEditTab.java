@@ -1330,7 +1330,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void handleChange(ClientSessionChangeEvent event) {
 		
-		if (event.hasCategory(EventCategory.OPEN_PROJECT)) {
+		if (event.hasCategory(EventCategory.OPEN_PROJECT) || event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
 			ontology = getOWLModelManager().getActiveOntology();
 			initProperties();
 			SwingUtilities.invokeLater(new Runnable() {
@@ -1481,7 +1481,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		if (lhc != null) {
 			Project project = null;
 			try {
-				project = lhc.getCurrentConfig().getProject(clientSession.getActiveProject());
+				ProjectId pid = clientSession.getActiveProject();
+				if (pid == null) return;
+				project = lhc.getCurrentConfig().getProject(pid);
 			} catch (UnknownProjectIdException e) {
 				e.printStackTrace();
 			}
