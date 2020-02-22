@@ -1331,15 +1331,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	public void handleChange(ClientSessionChangeEvent event) {
 		
 		if (event.hasCategory(EventCategory.OPEN_PROJECT) || event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
-			ontology = getOWLModelManager().getActiveOntology();
-			initProperties();
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					log.info("Voila");				
-					fireUpViews();					
+			if (event.getSource().hasActiveClient()) {
+				ontology = getOWLModelManager().getActiveOntology();
+				initProperties();
+				if (event.hasCategory(EventCategory.OPEN_PROJECT)) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							log.info("Voila");				
+							fireUpViews();					
+						}
+					});
 				}
-			});
-			
+			}
 		}
 	}
 	
