@@ -117,6 +117,15 @@ public class EditPanel extends JPanel {
         genPropPanel = new JPanel();
         genPropPanel.setLayout(new BorderLayout());
         
+        JPanel topHeader = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        classCode = new JLabel("Code");
+        codeText = new JTextField("code");
+        codeText.setVisible(true);
+        codeText.setEditable(false);
+        topHeader.add(classCode);
+        topHeader.add(codeText);
+        
         prefNamLabel = new JLabel("Preferred Name");        
         prefNameText = new JTextField("preferred name");
         prefNameText.setVisible(true);
@@ -167,8 +176,6 @@ public class EditPanel extends JPanel {
         
         prefNameText.getDocument().addDocumentListener(doc_listen);
         
-        JPanel topHeader = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        
         topHeader.add(prefNamLabel);
         topHeader.add(prefNameText);
         
@@ -179,15 +186,7 @@ public class EditPanel extends JPanel {
        
         topHeader.add(iriLabel);
         topHeader.add(iri);
-        
-        classCode = new JLabel("Code");
-        codeText = new JTextField("code");
-        codeText.setVisible(true);
-        codeText.setEditable(false);
                
-        topHeader.add(classCode);
-        topHeader.add(codeText);
-      
 		gen_props = new OWLFrameList<OWLAnnotationSubject>(owlEditorKit,
 				new FilteredAnnotationsFrame(owlEditorKit, propsToExclude, readOnlyProperties), read_only) {
 			private static final long serialVersionUID = 1L;
