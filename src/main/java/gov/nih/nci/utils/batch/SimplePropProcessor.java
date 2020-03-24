@@ -43,53 +43,68 @@ public class SimplePropProcessor extends EditProcessor {
 
 				switch (operation) {
 				case DELETE:
-					prop_value = (String) v.elementAt(3);				
-
-					if (!tab.hasPropertyValue(classToEdit, prop_iri,
-							prop_value)) {
-						String error_msg = " -- property " + "("
-								+ prop_iri + ", "
-								+ prop_value
-								+ ") does not exist.";
+					if (v.size() == 4) {
+						prop_value = (String) v.elementAt(3);				
+	
+						if (!tab.hasPropertyValue(classToEdit, prop_iri,
+								prop_value)) {
+							String error_msg = " -- property " + "("
+									+ prop_iri + ", "
+									+ prop_value
+									+ ") does not exist.";
+							w.add(error_msg);
+						}
+					} else {
+						String error_msg = " -- input file should have 4 fields for deleting Simple Property.";
 						w.add(error_msg);
 					}
 					break;
 				case MODIFY:
-					prop_value = (String) v.elementAt(3);
-					
-					if (!tab.hasPropertyValue(classToEdit, prop_iri,
-							prop_value)) {
-						String error_msg = " -- property " + "("
-								+ prop_iri + ", "
-								+ prop_value
-								+ ") does not exist.";
+					if (v.size() == 5) {
+						prop_value = (String) v.elementAt(3);
+						
+						if (!tab.hasPropertyValue(classToEdit, prop_iri,
+								prop_value)) {
+							String error_msg = " -- property " + "("
+									+ prop_iri + ", "
+									+ prop_value
+									+ ") does not exist.";
+							w.add(error_msg);
+						}
+						
+						new_prop_value = (String) v.elementAt(4);
+						
+						if (tab.hasPropertyValue(classToEdit, prop_iri,
+								new_prop_value)) {
+							String error_msg = " -- property already exists.";
+							w.add(error_msg);
+						}
+						if (!checkBatchProperty(prop_iri, new_prop_value)) {
+							String error_msg = " -- property value has invalid type.";
+							w.add(error_msg);						
+						}
+					} else {
+						String error_msg = " -- input file should have 5 fields for modifying Simple Property.";
 						w.add(error_msg);
-					}
-					
-					new_prop_value = (String) v.elementAt(4);
-					
-					if (tab.hasPropertyValue(classToEdit, prop_iri,
-							new_prop_value)) {
-						String error_msg = " -- property already exists.";
-						w.add(error_msg);
-					}
-					if (!checkBatchProperty(prop_iri, new_prop_value)) {
-						String error_msg = " -- property value has invalid type.";
-						w.add(error_msg);						
 					}
 					break;
 				case NEW:
-					prop_value = (String) v.elementAt(3);
-					if (tab.hasPropertyValue(classToEdit, prop_iri,
-							prop_value)) {
-						String error_msg = " -- property already exists.";
+					if ( v.size() == 4 ) {
+						prop_value = (String) v.elementAt(3);
+						if (tab.hasPropertyValue(classToEdit, prop_iri,
+								prop_value)) {
+							String error_msg = " -- property already exists.";
+							w.add(error_msg);
+						}
+						if (!checkBatchProperty(
+								prop_iri, prop_value)) {
+							String error_msg = " -- property value has invalid type.";
+							w.add(error_msg);
+							
+						}
+					} else {
+						String error_msg = " -- input file should have 4 fields for adding Simple Property.";
 						w.add(error_msg);
-					}
-					if (!checkBatchProperty(
-							prop_iri, prop_value)) {
-						String error_msg = " -- property value has invalid type.";
-						w.add(error_msg);
-						
 					}
 					break;
 				default:
