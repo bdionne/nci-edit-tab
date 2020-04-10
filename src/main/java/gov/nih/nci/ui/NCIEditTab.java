@@ -14,19 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import edu.stanford.protege.metaproject.api.*;
-import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
-//import org.apache.log4j.Logger;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.client.ClientSession;
@@ -49,7 +46,6 @@ import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.UndoManagerListener;
 import org.protege.editor.owl.server.api.CommitBundle;
 import org.protege.editor.owl.server.http.messages.History;
-import org.protege.editor.owl.server.http.messages.History.HistoryType;
 import org.protege.editor.owl.server.policy.CommitBundleImpl;
 import org.protege.editor.owl.server.versioning.Commit;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
@@ -1483,13 +1479,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {
 			Project project = null;
-			try {
-				ProjectId pid = clientSession.getActiveProject();
-				if (pid == null) return;
-				project = lhc.getCurrentConfig().getProject(pid);
-			} catch (UnknownProjectIdException e) {
-				e.printStackTrace();
+			
+			ProjectId pid = clientSession.getActiveProject();
+			if (pid == null) {
+				pid = lhc.findProjectId(ontology.getOntologyID().getOntologyIRI().get());
 			}
+			if (pid == null) return;
+			project = lhc.findProject(pid);
 
 			if (project != null) {
 				// get all annotations from ontology to use for lookup
@@ -1519,13 +1515,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	        			}
 	        			
 	        		}
-	        		
-	        		
-	   
-					
+			
 				}
-				
-				
 
 				com.google.common.base.Optional<ProjectOptions> options = project.getOptions();
 				
