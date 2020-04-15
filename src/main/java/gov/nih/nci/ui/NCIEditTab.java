@@ -128,7 +128,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void refreshNavTree() {
 		//navTree.refreshTree();
+		if (navTree != null) {
 		navTree.setSelectedEntity(current_op.getCurrentlyEditing());
+		}
 		
 	}
 	
