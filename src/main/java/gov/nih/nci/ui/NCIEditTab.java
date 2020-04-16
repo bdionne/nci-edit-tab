@@ -1484,7 +1484,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			
 			ProjectId pid = clientSession.getActiveProject();
 			if (pid == null) {
-				pid = lhc.findProjectId(ontology.getOntologyID().getOntologyIRI().get());
+				Optional<ProjectId> projid = lhc.findProjectId(ontology.getOntologyID().getOntologyIRI().get());
+				if (projid.isPresent()) {
+					pid = projid.get();
+				}
 			}
 			if (pid == null) return;
 			project = lhc.findProject(pid);
