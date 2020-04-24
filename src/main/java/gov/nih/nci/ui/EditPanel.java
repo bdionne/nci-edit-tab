@@ -29,6 +29,7 @@ import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import gov.nih.nci.ui.dialog.ComplexPropChooser;
@@ -264,6 +265,15 @@ public class EditPanel extends JPanel {
     		}
 
     		Optional<String> cps = NCIEditTab.currentTab().getCode(cls);
+    		if (!cps.isPresent()) {
+    			for (OWLOntology ont : getEditorKit().getOWLModelManager().getActiveOntologies()) {
+    				Optional<String> temp_cps = NCIEditTab.currentTab().getCode(cls, ont);
+    				if (temp_cps.isPresent()) {
+    					cps = temp_cps;
+    				}
+    			}
+
+    		}
 
     		if (cps.isPresent()) {
     			codeText.setText(cps.get());
@@ -284,8 +294,12 @@ public class EditPanel extends JPanel {
     		}
     		complexPropertyPanel.repaint();
     		
+    		list.setReadOnly(NCIEditTab.currentTab().isImported(cls));
+    		
     		list.setRootObject(cls);
+    		
     		if (cls != null) {
+    			gen_props.setReadOnly(NCIEditTab.currentTab().isImported(cls));
     			gen_props.setRootObject(cls.getIRI());
     		}
 

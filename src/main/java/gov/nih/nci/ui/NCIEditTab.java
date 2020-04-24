@@ -388,6 +388,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private OWLOntology ontology;
 	
+	public boolean isCurrentOntology(OWLOntology ont) {
+		return ont.getOntologyID() == ontology.getOntologyID();
+	}
+	
+	public boolean isImported(OWLClass c) {
+		return !(c.getIRI().getNamespace().equalsIgnoreCase(
+				ontology.getOntologyID().getOntologyIRI().get().getIRIString() + "#"));
+	}
+	
 	private static ArrayList<EditTabChangeListener> event_listeners = new ArrayList<EditTabChangeListener>();
 		
 	public static void addListener(EditTabChangeListener l) {
@@ -2179,6 +2188,34 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				return Optional.of("");
 			}
 			for (OWLAnnotation annotation : annotationObjects(ontology.annotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP).
+					collect(Collectors.toSet())) {
+				OWLAnnotationValue av = annotation.getValue();
+				Optional<OWLLiteral> ol = av.asLiteral();
+				if (ol.isPresent()) {
+					return Optional.of(ol.get().getLiteral());
+				}
+			}
+
+			if (!topOrBot(oobj)) {
+
+				JOptionPane.showMessageDialog(this, oobj.getIRI().getShortForm() + " should have a code property, using IRI short form instead",
+						"Warning", JOptionPane.WARNING_MESSAGE);
+			}
+			return Optional.of(oobj.getIRI().getShortForm());
+		} else {
+			return Optional.empty();
+		}
+	}
+	
+	public Optional<String> getCode(OWLNamedObject oobj, OWLOntology ont) {
+		// TODO: fall back to IRI if no label
+		if (oobj != null) {
+			Set<OWLAnnotationAssertionAxiom> axioms = ont.annotationAssertionAxioms(oobj.getIRI()).
+					collect(Collectors.toSet());
+			if (axioms.isEmpty()) {
+				return Optional.of("");
+			}
+			for (OWLAnnotation annotation : annotationObjects(ont.annotationAssertionAxioms(oobj.getIRI()), NCIEditTabConstants.CODE_PROP).
 					collect(Collectors.toSet())) {
 				OWLAnnotationValue av = annotation.getValue();
 				Optional<OWLLiteral> ol = av.asLiteral();

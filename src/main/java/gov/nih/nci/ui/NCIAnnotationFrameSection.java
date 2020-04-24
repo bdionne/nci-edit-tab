@@ -49,27 +49,51 @@ public class NCIAnnotationFrameSection extends AbstractOWLFrameSection<OWLAnnota
 
 
     protected void refill(OWLOntology ontology) {
-        boolean hidden = false;
-        final OWLAnnotationSubject annotationSubject = getRootObject();
-        for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(annotationSubject)) {
-        	if (!getOWLEditorKit().getWorkspace().isHiddenAnnotationURI(ax.getAnnotation().getProperty().getIRI().toURI()) &&
-        			!propsToExclude.contains(ax.getProperty())) {
-        		if (!readOnlyProps.contains(ax.getProperty())) {
-        			addRow(new NCIOWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, propsToExclude, ax));
-        		} else {
-        			addRow(new NCIOWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology, annotationSubject, propsToExclude, ax, false));
+    	
+		boolean hidden = false;
+		final OWLAnnotationSubject annotationSubject = getRootObject();
 
-        		}
-        	} else {
-        		hidden = true;
-        	}
-        }
-        if (hidden) {
-            setLabel(LABEL + " (some annotations are hidden)");
-        } else {
-            setLabel(LABEL);
-        }
-        
+		if (NCIEditTab.currentTab().isCurrentOntology(ontology)) {
+			if (ontology.containsClassInSignature(annotationSubject.asIRI().get())) {
+				for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(annotationSubject)) {
+					if (!getOWLEditorKit().getWorkspace()
+							.isHiddenAnnotationURI(ax.getAnnotation().getProperty().getIRI().toURI())
+							&& !propsToExclude.contains(ax.getProperty())) {
+						if (!readOnlyProps.contains(ax.getProperty())) {
+							addRow(new NCIOWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology,
+									annotationSubject, propsToExclude, ax));
+						} else {
+							addRow(new NCIOWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology,
+									annotationSubject, propsToExclude, ax, false));
+
+						}
+					} else {
+						hidden = true;
+					}
+				}
+			}
+		} else {
+			if (ontology.containsClassInSignature(annotationSubject.asIRI().get())) {
+
+				for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(annotationSubject)) {
+					if (!getOWLEditorKit().getWorkspace()
+							.isHiddenAnnotationURI(ax.getAnnotation().getProperty().getIRI().toURI())) {
+						addRow(new NCIOWLAnnotationsFrameSectionRow(getOWLEditorKit(), this, ontology,
+								annotationSubject, new HashSet<OWLAnnotationProperty>(), ax, false));
+
+					} else {
+						hidden = true;
+					}
+				}
+			}
+
+		}
+		if (hidden) {
+			setLabel(LABEL + " (some annotations are hidden)");
+		} else {
+			setLabel(LABEL);
+		}
+
     }
 
 

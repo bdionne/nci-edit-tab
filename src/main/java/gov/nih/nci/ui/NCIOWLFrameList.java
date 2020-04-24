@@ -36,6 +36,11 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	
 	private boolean read_only = false;
 	
+	public void setReadOnly(boolean b) {
+		//super.setReadOnly(b);
+		read_only = b;
+	}
+	
 	private OWLEditorKit editorKit;
 	
 	private List<OWLAnnotationProperty> annotationProps;
@@ -68,6 +73,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	}
 	
 	protected List<MListButton> getButtons(Object value) {
+		List<MListButton> buttons = new ArrayList<MListButton>();
 		if (read_only) {
 
     	} else if (isComplexProperty(value)) {
