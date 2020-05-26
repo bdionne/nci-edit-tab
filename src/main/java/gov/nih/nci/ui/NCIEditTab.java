@@ -1337,18 +1337,25 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void handleChange(ClientSessionChangeEvent event) {
 		
-		if (event.hasCategory(EventCategory.OPEN_PROJECT) || event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
-			if (event.getSource().hasActiveClient()) {
+		if (event.hasCategory(EventCategory.OPEN_PROJECT)) {
+			if (event.getSource().hasActiveClient() || 
+					!getOWLModelManager().getActiveOntology().getOntologyID().getOntologyIRI().get().toString().contains("untitled-ontology")) {
+				
 				ontology = getOWLModelManager().getActiveOntology();
 				initProperties();
-				if (event.hasCategory(EventCategory.OPEN_PROJECT)) {
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							log.info("Voila");				
-							fireUpViews();					
-						}
-					});
-				}
+				
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						log.info("Voila");				
+						fireUpViews();					
+					}
+				});
+				
+			}
+		} else if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
+			if (event.getSource().hasActiveClient()) {
+				ontology = getOWLModelManager().getActiveOntology();		
+				initProperties();
 			}
 		}
 	}
@@ -1486,6 +1493,35 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 		getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
 		
+		// get all annotations from ontology to use for lookup
+		annProps = ontology.getAnnotationPropertiesInSignature();
+		
+		OWLAnnotationProperty restricted_by = lookUpShort("restricted_by");
+		
+		// populate associations
+		for (OWLAnnotationProperty p : annProps) {
+			Set<OWLAnnotationPropertyRangeAxiom> ranges = ontology.getAnnotationPropertyRangeAxioms(p);
+    		for (OWLAnnotationPropertyRangeAxiom rax : ranges) {
+    			//System.out.println("The range: " + rax.toString());
+    			if (rax.getRange().getShortForm().equals("anyURI")) {
+    				associations.add(p);
+    			}
+    		}
+    		
+    		Set<OWLAnnotationAssertionAxiom> panns =
+    				ontology.getAnnotationAssertionAxioms(p.getIRI());
+    		
+    		for (OWLAnnotationAssertionAxiom ax : panns) {
+    			if (ax.getProperty().equals(restricted_by)) {
+    				Optional<IRI> iri = ax.getValue().asIRI();
+    				OWLAnnotationProperty res_prop = lookUpIri(iri.get());
+    				restrictedBy.put(p, res_prop);
+    				
+    			}
+    			
+    		}
+	
+		}
 		
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
 		if (lhc != null) {
@@ -1501,36 +1537,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			if (pid == null) return;
 			project = lhc.findProject(pid);
 
-			if (project != null) {
-				// get all annotations from ontology to use for lookup
-				annProps = ontology.getAnnotationPropertiesInSignature();
-				
-				OWLAnnotationProperty restricted_by = lookUpShort("restricted_by");
-				
-				// populate associations
-				for (OWLAnnotationProperty p : annProps) {
-					Set<OWLAnnotationPropertyRangeAxiom> ranges = ontology.getAnnotationPropertyRangeAxioms(p);
-	        		for (OWLAnnotationPropertyRangeAxiom rax : ranges) {
-	        			//System.out.println("The range: " + rax.toString());
-	        			if (rax.getRange().getShortForm().equals("anyURI")) {
-	        				associations.add(p);
-	        			}
-	        		}
-	        		
-	        		Set<OWLAnnotationAssertionAxiom> panns =
-	        				ontology.getAnnotationAssertionAxioms(p.getIRI());
-	        		
-	        		for (OWLAnnotationAssertionAxiom ax : panns) {
-	        			if (ax.getProperty().equals(restricted_by)) {
-	        				Optional<IRI> iri = ax.getValue().asIRI();
-	        				OWLAnnotationProperty res_prop = lookUpIri(iri.get());
-	        				restrictedBy.put(p, res_prop);
-	        				
-	        			}
-	        			
-	        		}
 			
-				}
+			if (project != null) {
+				
+				
 
 				com.google.common.base.Optional<ProjectOptions> options = project.getOptions();
 				
