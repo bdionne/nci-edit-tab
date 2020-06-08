@@ -4,6 +4,7 @@ import static gov.nih.nci.ui.NCIEditTabConstants.*;
 import static gov.nih.nci.ui.event.ComplexEditType.*;
 import static org.semanticweb.owlapi.search.Searcher.annotationObjects;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -100,6 +101,7 @@ import edu.stanford.protege.search.lucene.tab.engine.IndexDirMapper;
 import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabResultHandler;
+import gov.nih.nci.api.RuleService;
 import gov.nih.nci.ui.action.ComplexOperation;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
@@ -515,6 +517,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		if (clientSession.getActiveClient() != null) {
 			clientSession.fireChangeEvent(EventCategory.OPEN_PROJECT);
 		}
+		
+		RuleServiceLoader.init();
 	}
     
    
@@ -2927,20 +2931,57 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     private boolean isQualsPTNCI(OWLAnnotationAssertionAxiom ax) {
-    	return ((getAnnotationValue(ax, "term-group").equals("PT") ||
-				getAnnotationValue(ax, "term-group").equals("AQ") ||
-				getAnnotationValue(ax, "term-group").equals("HD")) &&
-				getAnnotationValue(ax, "term-source").equals("NCI"));
-    	
+		try {
+			RuleService rs = RuleServiceLoader.instanceOf(RuleService.class);
+			return rs.isQualsPTNCI(ax);
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+    	return false;
     }
     
     private boolean isDefNCI(OWLAnnotationAssertionAxiom ax) {
-    	String ann_val = getAnnotationValue(ax, "def-source");
-    	if (ann_val.equalsIgnoreCase("none")) {
-    		ann_val = getAnnotationValue(ax, "P378");
-    		
-    	}
-    	return ann_val.equalsIgnoreCase("NCI");
+    	try {
+    		RuleService rs = RuleServiceLoader.instanceOf(RuleService.class);
+			return rs.isDefNCI(ax);
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+    	return false;
     }
     
     public boolean syncFullSyn(OWLClass cls) {
