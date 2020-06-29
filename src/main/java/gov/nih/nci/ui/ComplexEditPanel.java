@@ -203,9 +203,6 @@ public class ComplexEditPanel extends JPanel {
 			 
             public void actionPerformed(ActionEvent e)
             {
-            	NCIEditTab.currentTab().undoChanges();            	
-            	NCIEditTab.currentTab().setEditInProgress(false);
-            	NCIEditTab.currentTab().refreshNavTree();
             	NCIEditTab.currentTab().cancelOp();
             	reset();
             	
