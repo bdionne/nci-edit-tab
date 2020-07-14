@@ -16,7 +16,7 @@
             <HSNode splits="0.625 0.375">
                 <CNode>
                     <Component label="Inferences">
-                       <Property id="pluginId" value="org.protege.editor.owl.InferredAxioms"/>
+                       <Property id="pluginId" value="nci-edit-tab.NCIInferredAxioms"/>
                     </Component>                
                 </CNode>
                 <!-- VSNode splits="0.5 0.5" -->

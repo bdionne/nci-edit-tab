@@ -25,6 +25,15 @@
 
 	<!-- View -->
 	
+	<extension id="NCIInferredAxioms"
+               point="org.protege.editor.core.application.ViewComponent">
+        <label value="Curator Classification results"/>
+        <class value="gov.nih.nci.ui.InferredAxiomsViewComponent"/>
+        <headerColor value="@org.protege.ontologycolor"/>
+        <category value="@org.protege.ontologycategory"/>
+        <category value="NCI Edit Tab"/>
+    </extension>
+	
 	
 	<extension id="NCITOWLAssertedClassHierarchy"
                point="org.protege.editor.core.application.ViewComponent">

@@ -107,6 +107,7 @@ import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
 import gov.nih.nci.utils.CharMapper;
+import gov.nih.nci.utils.CuratorChecks;
 import gov.nih.nci.utils.NCIClassSearcher;
 import gov.nih.nci.utils.ParentRemover;
 import gov.nih.nci.utils.ReferenceReplace;
@@ -1367,6 +1368,18 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		return;
     	}
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
+    	
+    	if (!changes.isEmpty()) {
+    		boolean ok_curator = (new CuratorChecks(ontology)).checkOk(changes);
+    		if (!ok_curator) {
+    			undoChanges();
+    			resetState();
+    			return;
+    		}
+    	}
+    	
+    	
+    	
     	List<OWLClass>  subjects = findUniqueSubjects(changes);
     	if (!subjects.isEmpty()) {
     		if (current_op.isMissingOneside()) {
