@@ -143,7 +143,6 @@ public class EditPanel extends JPanel {
 
 				} else {
 					if (!NCIEditTab.currentTab().isEditing()) {
-						NCIEditTab.currentTab().setEditInProgress(true);
 						NCIEditTab.currentTab().setCurrentlyEditing(currentClass, false);						
 						enableButtons();
 					}
@@ -161,7 +160,6 @@ public class EditPanel extends JPanel {
 
 				} else {
 					if (!NCIEditTab.currentTab().isEditing()) {
-						NCIEditTab.currentTab().setEditInProgress(true);
 						NCIEditTab.currentTab().setCurrentlyEditing(currentClass, false);
 						enableButtons();
 					}
