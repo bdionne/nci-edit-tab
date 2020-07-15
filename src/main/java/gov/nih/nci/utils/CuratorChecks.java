@@ -14,6 +14,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
 import gov.nih.nci.curator.CuratorReasonerPreferences;
+import gov.nih.nci.curator.utils.RolesVisitor;
 import gov.nih.nci.curator.utils.StatedParentVisitor;
 
 public class CuratorChecks {
@@ -22,19 +23,28 @@ public class CuratorChecks {
 	
 	private StatedParentVisitor spar_visitor;
 	
+	private RolesVisitor roles_visitor;
+	
 	private boolean checkRedundantParents = false;
 	
 	private boolean checkDisjointParents = false;
 	
+	private boolean checkUnsupportedConstructs = false;
+	
 	public CuratorChecks(OWLOntology o) {
 		ont = o;
 		spar_visitor = new StatedParentVisitor(null, ont);
+		roles_visitor = new RolesVisitor(null, ont);
+		
 		checkRedundantParents =
 				CuratorReasonerPreferences.getInstance().
 				isEnabled(CuratorReasonerPreferences.OptionalEditChecksTask.CHECK_REDUNDANT_PARENT);
 		checkDisjointParents =
 				CuratorReasonerPreferences.getInstance().
 				isEnabled(CuratorReasonerPreferences.OptionalEditChecksTask.CHECK_DISJOINT_CLASSES);
+		checkUnsupportedConstructs =
+				CuratorReasonerPreferences.getInstance().
+				isEnabled(CuratorReasonerPreferences.OptionalEditChecksTask.CHECK_UNSUPPORTED_CONSTRUCTS);
 	}
 	
 	public Set<OWLClass> getStatedParents(OWLClass c) {
@@ -66,32 +76,60 @@ public class CuratorChecks {
 	}
 	
 	private boolean checkOkAxiom(OWLAxiom ax, OWLOntology ont) {
-    	if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
-    		OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
-    		OWLClass cls = subax.getSubClass().asOWLClass();    		
-    		if (!subax.getSuperClass().isAnonymous()) {
-    			OWLClass newParent = subax.getSuperClass().asOWLClass();
-    			
-    			boolean redundantParentsOk = true;
-    			boolean disjointRootsOk = true;
-    			
-    			if (checkRedundantParents) {
-    				redundantParentsOk = checkRedundantParents(cls, newParent);
-    				
-    			}
-    			
-    			if (this.checkDisjointParents) {
-    				disjointRootsOk = checkDisjointRoots(cls);
-    				
-    			}
-    			
-    			return redundantParentsOk &&
-    					disjointRootsOk;
-    			
-    		}
-    	}
-    	return true;
+		if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
+			OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
+			OWLClass cls = subax.getSubClass().asOWLClass(); 
+			boolean unsupportedConstructsOk = true;
+			boolean redundantParentsOk = true;
+			boolean disjointRootsOk = true;
+
+			if (checkUnsupportedConstructs) {
+				unsupportedConstructsOk = checkUnsupportedConstructs(cls);
+
+			}
+			if (!subax.getSuperClass().isAnonymous()) {
+				OWLClass newParent = subax.getSuperClass().asOWLClass();
+
+
+
+				if (checkRedundantParents) {
+					redundantParentsOk = checkRedundantParents(cls, newParent);
+
+				}
+
+				if (this.checkDisjointParents) {
+					disjointRootsOk = checkDisjointRoots(cls);
+
+				}
+
+
+
+			}
+			return redundantParentsOk &&
+					unsupportedConstructsOk &&
+					disjointRootsOk;
+		}
+		return true;
     }
+	
+	private boolean checkUnsupportedConstructs(OWLClass cls) {
+		roles_visitor.setEntity(cls, false);
+		cls.accept(roles_visitor);
+		if (!roles_visitor.bad_constructs.isEmpty()) {
+			if (JOptionPane.showConfirmDialog(null,
+					"NCI Curator does not support these language constructs!",
+					"Ontology Project Changed",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.WARNING_MESSAGE) ==
+					JOptionPane.OK_OPTION) {
+				return true;
+			} else {
+				return false;
+			}
+			
+		}
+		return true;
+	}
 	
 	private boolean checkRedundantParents(OWLClass cls, OWLClass newParent) {
 		boolean found = false;
