@@ -397,9 +397,9 @@ public class EditPanel extends JPanel {
             public void actionPerformed(ActionEvent e)
             {
             	NCIEditTab.currentTab().undoChanges();            	
-            	NCIEditTab.currentTab().setEditInProgress(false);
-            	NCIEditTab.currentTab().refreshNavTree();
-            	disableButtons();
+            	//NCIEditTab.currentTab().setEditInProgress(false);
+            	//NCIEditTab.currentTab().refreshNavTree();
+            	//disableButtons();
             	
             }
         });     
@@ -416,11 +416,7 @@ public class EditPanel extends JPanel {
     	} else {
     		return true;
     	}
-    }
-    
-    
-    
-    
+    }    
     
     public void disposeView() {
     	list.dispose();
