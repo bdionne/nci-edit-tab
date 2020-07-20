@@ -63,7 +63,7 @@ public class UnsupportedConstructsFrameSection extends AbstractOWLFrameSection<O
     	        	for (OWLAxiom ax : bad_cons.get(cls)) {
     	        		UnsupportedConstructsFrameSectionRow newRow = 
     	    					new UnsupportedConstructsFrameSectionRow(getOWLEditorKit(), this, null, getRootObject(), ax);
-    	        		this.addInferredRowIfNontrivial(newRow);
+    	        		addInferredRowIfNontrivial(newRow);
     	        		
     	        	}
     	        }
