@@ -14,6 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.logging.Logger;
+
+import javax.swing.SwingUtilities;
+
 import java.util.logging.Level;
 
 import com.google.common.base.Charsets;
@@ -42,7 +45,10 @@ public abstract class BatchTask {
 	
 	public boolean complete() {
 		tab.applyChanges();
-		tab.commitChanges(false);
+		SwingUtilities.invokeLater(() -> {
+			tab.commitChanges(false);
+			
+		});
 		tab.disableBatchMode();
 		return true;
 	}
