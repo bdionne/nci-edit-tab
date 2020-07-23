@@ -103,6 +103,8 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
                 	
                 }
             }
+            
+            
     	}
         catch (Exception e) {
             e.printStackTrace();
