@@ -9,6 +9,7 @@ import javax.swing.JOptionPane;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
@@ -57,17 +58,15 @@ public class CuratorChecks {
 	public boolean checkOk(List<OWLOntologyChange> changes) {
 		
 		boolean ok = true;
+		
+		ok = checkUnsupportedConstructs(changes);
 
 		for (OWLOntologyChange change : changes) {
 			if (change.isAddAxiom()) {
-				if (change.isAxiomChange()) {
+				
 					OWLAxiom ax = change.getAxiom();
-					if (checkOkAxiom(ax, ont)) {
-						continue;
-					} else {
-						return false;
-					}
-				}
+					ok = checkOkAxiom(ax, ont);
+				
 			}
 		}
 
@@ -78,57 +77,73 @@ public class CuratorChecks {
 	private boolean checkOkAxiom(OWLAxiom ax, OWLOntology ont) {
 		if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
 			OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
-			OWLClass cls = subax.getSubClass().asOWLClass(); 
-			boolean unsupportedConstructsOk = true;
-			boolean redundantParentsOk = true;
-			boolean disjointRootsOk = true;
+			if (subax.getSuperClass().isOWLClass()) {
+				OWLClass cls = subax.getSuperClass().asOWLClass(); 
+				boolean redundantParentsOk = true;
+				boolean disjointRootsOk = true;
 
-			if (checkUnsupportedConstructs) {
-				unsupportedConstructsOk = checkUnsupportedConstructs(cls);
-
-			}
-			if (!subax.getSuperClass().isAnonymous()) {
-				OWLClass newParent = subax.getSuperClass().asOWLClass();
+				if (!subax.getSuperClass().isAnonymous()) {
+					OWLClass newParent = subax.getSuperClass().asOWLClass();
 
 
 
-				if (checkRedundantParents) {
-					redundantParentsOk = checkRedundantParents(cls, newParent);
+					if (checkRedundantParents) {
+						redundantParentsOk = checkRedundantParents(cls, newParent);
 
-				}
+					}
 
-				if (this.checkDisjointParents) {
-					disjointRootsOk = checkDisjointRoots(cls);
+					if (this.checkDisjointParents) {
+						disjointRootsOk = checkDisjointRoots(cls);
+
+					}
 
 				}
 
-
-
+				return redundantParentsOk &&
+						disjointRootsOk;
 			}
-			return redundantParentsOk &&
-					unsupportedConstructsOk &&
-					disjointRootsOk;
 		}
 		return true;
     }
 	
-	private boolean checkUnsupportedConstructs(OWLClass cls) {
-		roles_visitor.setEntity(cls, false);
-		cls.accept(roles_visitor);
-		if (!roles_visitor.bad_constructs.isEmpty()) {
-			if (JOptionPane.showConfirmDialog(null,
-					"NCI Curator does not support these language constructs!",
-					"Ontology Project Changed",
-					JOptionPane.YES_NO_OPTION,
-					JOptionPane.WARNING_MESSAGE) ==
-					JOptionPane.OK_OPTION) {
-				return true;
-			} else {
-				return false;
+	private boolean checkUnsupportedConstructs(List<OWLOntologyChange> changes) {
+		Set<OWLClass> classes = getUniqueClasses(changes);
+		for (OWLClass cls : classes) { 
+			roles_visitor.setEntity(cls, false);
+			cls.accept(roles_visitor);
+			if (!roles_visitor.bad_constructs.isEmpty()) {
+				if (JOptionPane.showConfirmDialog(null,
+						"NCI Curator does not support these language constructs!",
+						"Ontology Project Changed",
+						JOptionPane.YES_NO_OPTION,
+						JOptionPane.WARNING_MESSAGE) ==
+						JOptionPane.OK_OPTION) {
+					return true;
+				} else {
+					return false;
+				}
+
 			}
-			
 		}
 		return true;
+	}
+
+	private Set<OWLClass> getUniqueClasses(List<OWLOntologyChange> changes) {
+		Set<OWLClass> result = new HashSet<OWLClass>();
+		for (OWLOntologyChange change : changes) {
+			if (change.isAddAxiom()) {
+				OWLAxiom ax = change.getAxiom();
+				if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
+					OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
+					result.add(subax.getSubClass().asOWLClass()); 
+				} else if (ax.isOfType(AxiomType.EQUIVALENT_CLASSES)) {
+					OWLEquivalentClassesAxiom eax = (OWLEquivalentClassesAxiom) ax;
+					result.add(eax.getClassExpressionsAsList().get(0).asOWLClass());
+				}
+			}
+		}
+		return result;
+
 	}
 	
 	private boolean checkRedundantParents(OWLClass cls, OWLClass newParent) {
