@@ -65,7 +65,7 @@ public class CuratorChecks {
 			if (change.isAddAxiom()) {
 				
 					OWLAxiom ax = change.getAxiom();
-					ok = checkOkAxiom(ax, ont);
+					ok = ok && checkOkAxiom(ax, ont);
 				
 			}
 		}
@@ -78,7 +78,7 @@ public class CuratorChecks {
 		if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
 			OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
 			if (subax.getSuperClass().isOWLClass()) {
-				OWLClass cls = subax.getSuperClass().asOWLClass(); 
+				OWLClass cls = subax.getSubClass().asOWLClass(); 
 				boolean redundantParentsOk = true;
 				boolean disjointRootsOk = true;
 
@@ -115,7 +115,7 @@ public class CuratorChecks {
 				if (JOptionPane.showConfirmDialog(null,
 						"NCI Curator does not support these language constructs!",
 						"Ontology Project Changed",
-						JOptionPane.YES_NO_OPTION,
+						JOptionPane.OK_CANCEL_OPTION,
 						JOptionPane.WARNING_MESSAGE) ==
 						JOptionPane.OK_OPTION) {
 					return true;
@@ -158,7 +158,7 @@ public class CuratorChecks {
 			if (JOptionPane.showConfirmDialog(null,
 					"Asserted parent is already parent of existing parent!",
 					"Ontology Project changed",
-					JOptionPane.YES_NO_OPTION,
+					JOptionPane.OK_CANCEL_OPTION,
 					JOptionPane.WARNING_MESSAGE) ==
 					JOptionPane.OK_OPTION) {
 				return true;
@@ -177,7 +177,7 @@ public class CuratorChecks {
 			if (JOptionPane.showConfirmDialog(null,
 					"Adding this parent creates multiple disjoint roots!",
 					"Ontology Project changed",
-					JOptionPane.YES_NO_OPTION,
+					JOptionPane.OK_CANCEL_OPTION,
 					JOptionPane.WARNING_MESSAGE) ==
 					JOptionPane.OK_OPTION) {
 				return true;
