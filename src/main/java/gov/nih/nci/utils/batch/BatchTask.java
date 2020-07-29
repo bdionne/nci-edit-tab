@@ -47,9 +47,10 @@ public abstract class BatchTask {
 		tab.applyChanges();
 		SwingUtilities.invokeLater(() -> {
 			tab.commitChanges(false);
+			tab.disableBatchMode();
 			
 		});
-		tab.disableBatchMode();
+		
 		return true;
 	}
 	
