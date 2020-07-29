@@ -55,6 +55,27 @@ public class CuratorChecks {
 		
 	}
 	
+	public boolean checkOkChange(OWLOntologyChange change) {
+
+		boolean ok = true;
+
+		
+
+		if (change.isAddAxiom()) {
+			
+			if (checkUnsupportedConstructs) {
+				ok = ok && checkUnsupportedConstruct(change);
+			}
+
+			OWLAxiom ax = change.getAxiom();
+			ok = ok && checkOkAxiom(ax, ont);
+
+		}
+
+		return ok;
+
+	}
+	
 	public boolean checkOk(List<OWLOntologyChange> changes) {
 		
 		boolean ok = true;
@@ -124,6 +145,43 @@ public class CuratorChecks {
 				}
 
 			}
+		}
+		return true;
+	}
+	
+	private boolean checkUnsupportedConstruct(OWLOntologyChange change) {
+		OWLClass cls = null;
+
+		if (change.isAddAxiom()) {
+			OWLAxiom ax = change.getAxiom();
+			if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
+				OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
+				if (!subax.getSuperClass().isAnonymous()) {
+					return true;
+				}
+				cls = subax.getSubClass().asOWLClass(); 
+			} else if (ax.isOfType(AxiomType.EQUIVALENT_CLASSES)) {
+				OWLEquivalentClassesAxiom eax = (OWLEquivalentClassesAxiom) ax;
+				cls = eax.getClassExpressionsAsList().get(0).asOWLClass();
+			}
+		}
+		
+		
+
+		roles_visitor.setEntity(cls, false);
+		cls.accept(roles_visitor);
+		if (!roles_visitor.bad_constructs.isEmpty()) {
+			if (JOptionPane.showConfirmDialog(null,
+					"NCI Curator does not support these language constructs!",
+					"Ontology Project Changed",
+					JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.WARNING_MESSAGE) ==
+					JOptionPane.OK_OPTION) {
+				return true;
+			} else {
+				return false;
+			}
+
 		}
 		return true;
 	}

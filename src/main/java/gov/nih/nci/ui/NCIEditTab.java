@@ -1059,11 +1059,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     }
     
     
+    private boolean clearing = false;
     
     public void undoChanges() {
+    	clearing = true;
     	while (history.canUndo()) {
     		history.undo();
     	}
+    	clearing = false;
     	
     }
     
@@ -1368,13 +1371,28 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		return;
     	}
     	List<OWLOntologyChange> changes = history.getUncommittedChanges();
-    	
-    	if (!changes.isEmpty()) {
-    		boolean ok_curator = (new CuratorChecks(ontology)).checkOk(changes);
-    		if (!ok_curator) {
-    			undoChanges();
-    			resetState();
-    			return;
+
+    	if (!changes.isEmpty() && !clearing) {
+    		List<? extends OWLOntologyChange> latest_changes = history.getLatestChanges();
+
+    		OWLOntologyChange latest_change = null;
+
+    		if ((latest_changes.size() == 1) && (latest_changes.get(0).isAddAxiom())) {
+    			latest_change = latest_changes.get(0);
+    		} else if ((latest_changes.size() == 2) && (latest_changes.get(0).isRemoveAxiom() &&
+    				latest_changes.get(1).isAddAxiom())) {
+    			latest_change = latest_changes.get(1);
+    		}
+
+    		if (latest_change != null) {
+
+    			boolean ok_curator = (new CuratorChecks(ontology)).checkOkChange(latest_change);
+    			if (!ok_curator) {
+    				history.stopTalking();
+    				backOutChange();
+    				history.startTalking();
+    				return;
+    			}
     		}
     	}
     	
