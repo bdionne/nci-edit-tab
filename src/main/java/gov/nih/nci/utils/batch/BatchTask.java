@@ -43,9 +43,9 @@ public abstract class BatchTask {
 		return canProceed;
 	}
 	
-	public boolean complete() {
-		tab.applyChanges();
+	public boolean complete() {		
 		SwingUtilities.invokeLater(() -> {
+			tab.applyChanges();
 			tab.commitChanges(false);
 			tab.disableBatchMode();
 			
