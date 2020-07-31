@@ -34,6 +34,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import gov.nih.nci.ui.dialog.ComplexPropChooser;
 import gov.nih.nci.ui.event.ComplexEditType;
+import gov.nih.nci.utils.PropertyCheckUtil;
 
 public class EditPanel extends JPanel {
 	/**
@@ -372,11 +373,12 @@ public class EditPanel extends JPanel {
             {
             	// Do the save
             	if (shouldSave()) {
-            		if (NCIEditTab.currentTab().syncFullSyn(NCIEditTab.currentTab().getCurrentlyEditing())
-            				&& NCIEditTab.currentTab().syncDefinition(NCIEditTab.currentTab().getCurrentlyEditing())) {
+            		PropertyCheckUtil propCheckUtil = new PropertyCheckUtil();
+            		if (propCheckUtil.syncFullSyn(NCIEditTab.currentTab().getCurrentlyEditing())
+            				&& propCheckUtil.syncDefinition(NCIEditTab.currentTab().getCurrentlyEditing())) {
 
             			if (!newPref.equals("")) {
-            				NCIEditTab.currentTab().syncPrefName(newPref);                		
+            				propCheckUtil.syncPrefName(newPref);                		
             			}
 
             			if (NCIEditTab.currentTab().commitChanges(true)) {

@@ -111,6 +111,7 @@ import gov.nih.nci.ui.event.EditTabChangeListener;
 import gov.nih.nci.utils.CharMapper;
 import gov.nih.nci.utils.NCIClassSearcher;
 import gov.nih.nci.utils.ParentRemover;
+import gov.nih.nci.utils.PropertyCheckUtil;
 import gov.nih.nci.utils.ReferenceReplace;
 import gov.nih.nci.utils.RoleReplacer;
 
@@ -532,14 +533,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return current_op.readyToMerge();
     }
     
-    public boolean canMerge(OWLClass cls) {
+    /*public boolean canMerge(OWLClass cls) {
     	if (!isWorkFlowManager()) {
     		if (isSubClass(cls, PRE_MERGE_ROOT)) {
     			return false;
     		}
     	}
     	return true;
-    }    
+    } */   
     
     public boolean merge() {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
@@ -930,22 +931,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		return false;    				
     	}
 
-			ProjectId projectId = clientSession.getActiveProject();
-			if (projectId == null) {
-				return false;
-			}
+		ProjectId projectId = clientSession.getActiveProject();
+		if (projectId == null) {
+			return false;
+		}
 
     	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(
-    		NCIEditTabConstants.RETIRE.getId(), projectId);
-			if (!can) {
-				return false;
-			}
+		NCIEditTabConstants.RETIRE.getId(), projectId);
+		if (!can) {
+			return false;
+		}
 
-			if (isPreRetired(cls)) {
-				return isWorkFlowManager();
-			} else {
-				return !isRetired(cls);
-			}
+		if (isPreRetired(cls)) {
+			return isWorkFlowManager();
+		} else {
+			return !isRetired(cls);
+		}
     }
     
     public void retire(OWLClass selectedClass) {
@@ -2370,7 +2371,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		changes.add(new AddAxiom(ontology, ax));
 		
 		if (prop.equals(NCIEditTabConstants.PREF_NAME)) {
-			syncPrefNameLabelFullSyn(ocl, value, changes);
+			PropertyCheckUtil propCheckUtil = new PropertyCheckUtil();
+			propCheckUtil.syncPrefNameLabelFullSyn(ocl, value, changes);
 		}
 		
 		if (inBatchMode) {
@@ -2847,7 +2849,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     // make sure there is a FULL_SYN property with group PT and an rdfs:label
     // that has the same value as the preferred_name property
     // TODO: Add FULL_SYN without creating cycle
-    public void syncPrefName(String preferred_name) {
+    /*public void syncPrefName(String preferred_name) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	if (current_op.getCurrentlyEditing() != null) {
     		syncPrefNameLabelFullSyn(current_op.getCurrentlyEditing(), preferred_name, changes);
@@ -2897,7 +2899,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	
     }
     
-    private void syncPrefNameLabel(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
+    public void syncPrefNameLabel(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
     	if (getRDFSLabel(cls).isPresent() &&
     			!getRDFSLabel(cls).get().equals(preferred_name)) {
@@ -2972,9 +2974,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			e.printStackTrace();
 		} 
     	return false;
-    }
+    }*/
     
-    public boolean syncFullSyn(OWLClass cls) {
+    /*public boolean syncFullSyn(OWLClass cls) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLAnnotationProperty full_syn = getFullSyn();
     	
@@ -3001,6 +3003,60 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     }
     
+    public boolean syncFullSyn(OWLClass cls) {
+    	List<String> message = new ArrayList<String>();
+    	boolean isSavable = false;
+    	try {
+			RuleService rs = RuleServiceLoader.instanceOf(RuleService.class);
+			isSavable = rs.isFullSynSavable(cls, ontology, getFullSyn(), message);
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+    	
+    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	
+    	if (!isSavable) {
+    		JOptionPane.showMessageDialog(this, message.get(1), message.get(0), getMessageType(message.get(0)));
+    		return false;
+    	} else {
+    		syncPrefNameLabel(cls, message.get(0), changes);
+    		getOWLModelManager().applyChanges(changes);
+    		//selectClass(cls);
+    		return true;
+    	}
+    }
+    
+    private int getMessageType(String title) {
+    	if (title.equalsIgnoreCase("Warning")) {
+    		return JOptionPane.WARNING_MESSAGE;
+    	} else if (title.equalsIgnoreCase("Error")) {
+    		return JOptionPane.ERROR_MESSAGE;
+    	} else if (title.equalsIgnoreCase("Information")) {
+    		return JOptionPane.INFORMATION_MESSAGE;
+    	} else if (title.equalsIgnoreCase("Question")) {
+    		return JOptionPane.QUESTION_MESSAGE;
+    	} else {
+    		return JOptionPane.PLAIN_MESSAGE;
+    	}
+    }
+    
     public boolean syncDefinition(OWLClass cls) {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	OWLAnnotationProperty definition = getDefinition();
@@ -3024,7 +3080,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		//selectClass(cls);
     		return true;
     	}
-    }
+    }*/
     
     public boolean isNCIPtFullSyn(String prop_iri, Map<String, String> qualifiers) {
     	OWLAnnotationProperty p = lookUpShort(prop_iri);
@@ -3283,11 +3339,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     	return c;
     }
-    
 
-	
+	public OWLOntology getOntology() {
+		return ontology;
+	}
 
-    
-    
-    
+	public ClientSession getClientSession() {
+		return clientSession;
+	}
 }

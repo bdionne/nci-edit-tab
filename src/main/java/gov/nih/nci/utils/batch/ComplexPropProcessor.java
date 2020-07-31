@@ -8,7 +8,10 @@ import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 
+import gov.nih.nci.api.RuleService;
 import gov.nih.nci.ui.NCIEditTab;
+import gov.nih.nci.ui.RuleServiceLoader;
+import gov.nih.nci.utils.PropertyCheckUtil;
 
 public class ComplexPropProcessor extends EditProcessor {
 	
@@ -25,7 +28,7 @@ public class ComplexPropProcessor extends EditProcessor {
 	}
 	
 	public Vector<String> validateData(Vector<String> v) {
-		
+		PropertyCheckUtil pcUtil = new PropertyCheckUtil();
 		Vector<String> w = super.validateData(v);
 		
 		if (classToEdit != null) {
@@ -96,6 +99,7 @@ public class ComplexPropProcessor extends EditProcessor {
 					}	
 
 				}
+				
 				switch (operation) {
 				case DELETE:
 				case MODIFY:								
@@ -120,7 +124,7 @@ public class ComplexPropProcessor extends EditProcessor {
 						return w;
 					}
 					
-					String new_qual_errors = checkQualifierTypes(prop_iri, new_qualifiers);
+					String new_qual_errors = pcUtil.checkQualifierTypes(prop_iri, new_qualifiers);
 					if (new_qual_errors != null) {
 						w.add(new_qual_errors);
 						return w;
@@ -136,7 +140,7 @@ public class ComplexPropProcessor extends EditProcessor {
 						w.add(error_msg);
 						return w;
 					}
-					String qual_errors = checkQualifierTypes(prop_iri, qualifiers);
+					String qual_errors = pcUtil.checkQualifierTypes(prop_iri, qualifiers);
 					if (qual_errors != null) {
 						w.add(qual_errors);
 						return w;
@@ -173,48 +177,4 @@ public class ComplexPropProcessor extends EditProcessor {
 		
 		return true;
 	}
-	
-	
-	
-	private String checkQualifierTypes(String prop_iri, Map<String, String> qualifiers) {
-		String errors = "";
-		// check qualifiers are valid properties
-		for (String qs : qualifiers.keySet()) {
-			if (tab.lookUpShort(qs) == null) {
-				errors += "qualifier " + qs + " does not exist. \n";
-			}
-		}
-		if (tab.isNCIPtFullSyn(prop_iri, qualifiers)) {
-			errors += "only one NCI/PT FULL_SYN allowed. \n";
-			
-		}
-		List<String> req_quals = tab.getRequiredQualifiers(prop_iri);
-		for (String rs : req_quals) {
-			String q_val = qualifiers.get(rs);
-			if (q_val != null) {
-				if (tab.isReadOnlyProperty(rs)) {
-					errors += "required qualifier: " + rs + " is immutable. \n";	
-					
-				}
-				if (tab.checkType(rs, q_val)) {
-					
-				} else {
-					errors += "value " + q_val + " of required qualifier: " + rs + " has invalid type. \n";					
-				}
-				
-			} else {
-				//errors += "required qualifier missing: " + rs + "\n";
-				// not necessarily an error, we'll add the default
-			}
-		}
-		if (errors.equals("")) {
-			return null;
-		} else {
-			return errors;
-		}		
-	}
-
-	
-	
-	
 }

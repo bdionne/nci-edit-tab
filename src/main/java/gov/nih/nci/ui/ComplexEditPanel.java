@@ -7,7 +7,9 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.ButtonGroup;
@@ -28,6 +30,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.ComplexEditTransferHandler;
+import gov.nih.nci.utils.PropertyCheckUtil;
 
 
 
@@ -180,10 +183,15 @@ public class ComplexEditPanel extends JPanel {
             		               "nci-edit-tab.ComplexEditView");
             		}
             	} else {
-            		if ((NCIEditTab.currentTab().syncFullSyn(lowerPanelClass.getRootObject())) &&
-            				(NCIEditTab.currentTab().syncFullSyn(upperPanelClass.getRootObject())) &&
-            				(NCIEditTab.currentTab().syncDefinition(lowerPanelClass.getRootObject())) &&
-            				(NCIEditTab.currentTab().syncDefinition(upperPanelClass.getRootObject()))) {
+            		//List<String> messageList = new ArrayList<String>();
+            		//NCIEditTab tab = NCIEditTab.currentTab();
+            		PropertyCheckUtil propCheckUtil = new PropertyCheckUtil();
+            		if ((propCheckUtil.syncFullSyn(lowerPanelClass.getRootObject())) &&
+            				(propCheckUtil.syncFullSyn(upperPanelClass.getRootObject())) &&
+            				//(NCIEditTab.currentTab().syncDefinition(lowerPanelClass.getRootObject())) &&
+            				propCheckUtil.syncDefinition(lowerPanelClass.getRootObject()) &&
+            				//(NCIEditTab.currentTab().syncDefinition(upperPanelClass.getRootObject()))) {
+            				propCheckUtil.syncDefinition(upperPanelClass.getRootObject())) {
 
             			if (NCIEditTab.currentTab().commitChanges(true)) {
             				NCIEditTab.currentTab().completeOp();

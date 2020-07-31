@@ -1,12 +1,51 @@
 package gov.nih.nci.api;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.swing.JOptionPane;
 
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+
+import gov.nih.nci.ui.NCIEditTab;
+
 
 public class NCIPropertyCheck implements RuleService {
 
+	@Override
+	public boolean isFullSynSavable(OWLClass cls, OWLOntology ontology, OWLAnnotationProperty full_syn, List message) {
+		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+    	List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
+
+    	for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
+    		if (ax.getProperty().equals(full_syn)) {
+    			if (isQualsPTNCI(ax)) {
+    				assertions.add(ax);
+    			} 
+    		}
+    	}
+    	if ((assertions.size() != 1)) {
+    		//JOptionPane.showMessageDialog(NCIEditTab.currentTab(), "One and only one PT with source NCI is allowed in Full Syn.", "Warning", JOptionPane.WARNING_MESSAGE);
+    		message.add("Warning");
+    		message.add("One and only one PT with source NCI is allowed in Full Syn.");
+    		return false;
+    	} /*else {
+    		NCIEditTab.currentTab().syncPrefNameLabel(cls, assertions.get(0).getValue().asLiteral().get().getLiteral(), changes);
+    		NCIEditTab.currentTab().getOWLModelManager().applyChanges(changes);
+    		//selectClass(cls);
+    		return true;
+    	}*/
+    	message.add(assertions.get(0).getValue().asLiteral().get().getLiteral());
+    	return true;
+	}
+	
 	@Override
 	public boolean isQualsPTNCI(OWLAnnotationAssertionAxiom ax) {
 		return ((getAnnotationValue(ax, "term-group").equals("PT") ||
@@ -35,5 +74,25 @@ public class NCIPropertyCheck implements RuleService {
     	return "None";   	
     	
     }
+
+	@Override
+	public boolean isNCIPtFullSyn(String prop_iri, Map<String, String> qualifiers) {
+		//OWLAnnotationProperty p = tab.lookUpShort(prop_iri);
+    	boolean isIt = false;
+    	//if (prop.equals(fullSyn)) {
+		String tg = qualifiers.get("term-group");
+		String ts = qualifiers.get("term-source");
+		if (tg != null &&
+				ts != null &&
+				(tg.equals("PT") ||
+						tg.equals("AQ") ||
+						tg.equals("HD"))
+						&&
+				ts.equals("NCI")) {
+			isIt = true;
+		}
+    	//}
+    	return isIt;
+	}
 
 }
