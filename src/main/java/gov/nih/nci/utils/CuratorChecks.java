@@ -167,21 +167,22 @@ public class CuratorChecks {
 		}
 		
 		
+		if (cls != null) {
+			roles_visitor.setEntity(cls, false);
+			cls.accept(roles_visitor);
+			if (!roles_visitor.bad_constructs.isEmpty()) {
+				if (JOptionPane.showConfirmDialog(null,
+						"NCI Curator does not support these language constructs!",
+						"Ontology Project Changed",
+						JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.WARNING_MESSAGE) ==
+						JOptionPane.OK_OPTION) {
+					return true;
+				} else {
+					return false;
+				}
 
-		roles_visitor.setEntity(cls, false);
-		cls.accept(roles_visitor);
-		if (!roles_visitor.bad_constructs.isEmpty()) {
-			if (JOptionPane.showConfirmDialog(null,
-					"NCI Curator does not support these language constructs!",
-					"Ontology Project Changed",
-					JOptionPane.OK_CANCEL_OPTION,
-					JOptionPane.WARNING_MESSAGE) ==
-					JOptionPane.OK_OPTION) {
-				return true;
-			} else {
-				return false;
 			}
-
 		}
 		return true;
 	}
