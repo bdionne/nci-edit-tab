@@ -1,0 +1,3 @@
+# providers of SearchService
+# (comment lines begin with pound)
+gov.nih.nci.api.NCIPropertyCheck

@@ -263,8 +263,7 @@ public class PropertyCheckUtil {
     	}
     }
     
-    public
-    void syncPrefNameLabelFullSyn(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
+    public void syncPrefNameLabelFullSyn(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
     	//retrieve rdfs:label and adjust if needed
        	if (tab.getRDFSLabel(cls).isPresent() &&
        			!tab.getRDFSLabel(cls).get().equals(preferred_name)) {

@@ -65,7 +65,6 @@
 	</dependencies>
 	
 	<build>
-	    
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -76,7 +75,31 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
+			
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+				  <execution>
+					<id>copy-resources</id>
+					
+					<phase>validate</phase>
+					<goals>
+					  <goal>copy-resources</goal>
+					</goals>
+					<configuration>
+					  <outputDirectory>${basedir}/target/classes/META-INF/services</outputDirectory>
+					  <resources>          
+						<resource>
+						  <directory>src/main/resources/services</directory>
+						  <filtering>false</filtering>
+						</resource>
+					  </resources>              
+					</configuration>            
+				  </execution>
+				</executions>
+			 </plugin>
+			 
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -95,9 +118,11 @@
                             *
                         </Import-Package>
                         <Update-Url>https://raw.githubusercontent.com/bdionne/nci-edit-tab/master/src/main/resources/update.properties</Update-Url>
-                        <Include-Resource>{maven-resources}</Include-Resource>
+                        <Include-Resource>{maven-resources},META-INF/services/gov.nih.nci.api.RuleService=${project.build.directory}/classes/META-INF/services/gov.nih.nci.api.RuleService
+						</Include-Resource>
                     </instructions>
                 </configuration>
+			
                 <!-- executions>
                     <execution>
                         <id>bundle-manifest</id>
@@ -108,6 +133,7 @@
                     </execution>
                 </executions -->
             </plugin>
+			
         </plugins>
     </build>
 </project>
