@@ -110,6 +110,7 @@ import gov.nih.nci.utils.CharMapper;
 import gov.nih.nci.utils.CuratorChecks;
 import gov.nih.nci.utils.NCIClassSearcher;
 import gov.nih.nci.utils.ParentRemover;
+import gov.nih.nci.utils.PropertyCheckUtil;
 import gov.nih.nci.utils.ReferenceReplace;
 import gov.nih.nci.utils.RoleReplacer;
 
@@ -516,6 +517,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		if (clientSession.getActiveClient() != null) {
 			clientSession.fireChangeEvent(EventCategory.OPEN_PROJECT);
 		}
+		RuleServiceLoader.init();
 	}
     
    
@@ -528,15 +530,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public boolean readyMerge() {
     	return current_op.readyToMerge();
     }
-    
-    public boolean canMerge(OWLClass cls) {
-    	if (!isWorkFlowManager()) {
-    		if (isSubClass(cls, PRE_MERGE_ROOT)) {
-    			return false;
-    		}
-    	}
-    	return true;
-    }    
     
     public boolean merge() {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
@@ -2397,7 +2390,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		changes.add(new AddAxiom(ontology, ax));
 		
 		if (prop.equals(NCIEditTabConstants.PREF_NAME)) {
-			syncPrefNameLabelFullSyn(ocl, value, changes);
+			PropertyCheckUtil propCheckUtil = new PropertyCheckUtil();
+			propCheckUtil.syncPrefNameLabelFullSyn(ocl, value, changes);
 		}
 		
 		if (inBatchMode) {
@@ -2871,172 +2865,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     }
     
-    // make sure there is a FULL_SYN property with group PT and an rdfs:label
-    // that has the same value as the preferred_name property
-    // TODO: Add FULL_SYN without creating cycle
-    public void syncPrefName(String preferred_name) {
-    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	if (current_op.getCurrentlyEditing() != null) {
-    		syncPrefNameLabelFullSyn(current_op.getCurrentlyEditing(), preferred_name, changes);
-    		ontology.getOWLOntologyManager().applyChanges(changes);
-    	}
-    }
-    
-    private void syncPrefNameLabelFullSyn(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
-    	//retrieve rdfs:label and adjust if needed
-       	if (getRDFSLabel(cls).isPresent() &&
-       			!getRDFSLabel(cls).get().equals(preferred_name)) {
-    		OWLLiteral pref_name_val = ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name, OWL2Datatype.RDF_PLAIN_LITERAL);
-    		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
-    			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
-    				changes.add(new RemoveAxiom(ontology, ax));
-    				
-    				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
-    						.getOWLAnnotationAssertionAxiom(LABEL_PROP, cls.getIRI(), pref_name_val);
-    				changes.add(new AddAxiom(ontology, ax2));
-    			} else if (ax.getProperty().equals(NCIEditTabConstants.PREF_NAME)) {
-    				changes.add(new RemoveAxiom(ontology, ax));
-    				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
-    						.getOWLAnnotationAssertionAxiom(PREF_NAME, cls.getIRI(), pref_name_val);
-    				changes.add(new AddAxiom(ontology, ax2));
-    				
-    			} else if (ax.getProperty().equals(NCIEditTabConstants.FULL_SYN)) {
-    				if (isQualsPTNCI(ax)) {
-    					changes.add(new RemoveAxiom(ontology, ax));
-    					
-    					OWLDataFactory df = ontology.getOWLOntologyManager().getOWLDataFactory();
-    					
-    					OWLAxiom new_axiom = 
-    							df.getOWLAnnotationAssertionAxiom(NCIEditTabConstants.FULL_SYN, cls.getIRI(), pref_name_val);
-    					
-    					Set<OWLAnnotation> anns = ax.getAnnotations();    					
-    					  					
-    					OWLAxiom new_new_axiom = new_axiom.getAxiomWithoutAnnotations().getAnnotatedAxiom(anns);
-    							
-    					changes.add(new AddAxiom(ontology, new_new_axiom));
-    					
-    					
-    				}
-    			}
-    			
-    		}   		
-    	}
-    	
-    }
-    
-    private void syncPrefNameLabel(OWLClass cls, String preferred_name, List<OWLOntologyChange> changes) {
-    	//retrieve rdfs:label and adjust if needed
-    	if (getRDFSLabel(cls).isPresent() &&
-    			!getRDFSLabel(cls).get().equals(preferred_name)) {
-    		OWLLiteral pref_name_val = 
-    				ontology.getOWLOntologyManager().getOWLDataFactory().getOWLLiteral(preferred_name, OWL2Datatype.RDF_PLAIN_LITERAL);
-    		for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
-    			if (ax.getProperty().equals(NCIEditTabConstants.LABEL_PROP)) {
-    				changes.add(new RemoveAxiom(ontology, ax));
-    				
-    				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
-    						.getOWLAnnotationAssertionAxiom(LABEL_PROP, cls.getIRI(), pref_name_val);
-    				changes.add(new AddAxiom(ontology, ax2));
-    			} else if (ax.getProperty().equals(NCIEditTabConstants.PREF_NAME)) {
-    				changes.add(new RemoveAxiom(ontology, ax));
-    				OWLAxiom ax2 = ontology.getOWLOntologyManager().getOWLDataFactory()
-    						.getOWLAnnotationAssertionAxiom(PREF_NAME, cls.getIRI(), pref_name_val);
-    				changes.add(new AddAxiom(ontology, ax2));    				
-    			}    			
-    		}   		
-    	}    	
-    }
-    
-    private boolean isQualsPTNCI(OWLAnnotationAssertionAxiom ax) {
-    	return ((getAnnotationValue(ax, "term-group").equals("PT") ||
-				getAnnotationValue(ax, "term-group").equals("AQ") ||
-				getAnnotationValue(ax, "term-group").equals("HD")) &&
-				getAnnotationValue(ax, "term-source").equals("NCI"));
-    	
-    }
-    
-    private boolean isDefNCI(OWLAnnotationAssertionAxiom ax) {
-    	String ann_val = getAnnotationValue(ax, "def-source");
-    	if (ann_val.equalsIgnoreCase("none")) {
-    		ann_val = getAnnotationValue(ax, "P378");
-    		
-    	}
-    	return ann_val.equalsIgnoreCase("NCI");
-    }
-    
-    public boolean syncFullSyn(OWLClass cls) {
-    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	OWLAnnotationProperty full_syn = getFullSyn();
-    	
-    	List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
-
-    	for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
-    		if (ax.getProperty().equals(full_syn)) {
-    			if (isQualsPTNCI(ax)) {
-    				assertions.add(ax);
-    			} 
-    		}
-    	}
-    	// check the new change
-    	//checkPtNciFullSyn(changes, assertions);
-    	
-    	if ((assertions.size() != 1)) {
-    		JOptionPane.showMessageDialog(this, "One and only one PT with source NCI is allowed in Full Syn.", "Warning", JOptionPane.WARNING_MESSAGE);
-    		return false;
-    	} else {
-    		syncPrefNameLabel(cls, assertions.get(0).getValue().asLiteral().get().getLiteral(), changes);
-    		getOWLModelManager().applyChanges(changes);
-    		//selectClass(cls);
-    		return true;
-    	}
-    }
-    
-    public boolean syncDefinition(OWLClass cls) {
-    	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-    	OWLAnnotationProperty definition = getDefinition();
-    	
-    	List<OWLAnnotationAssertionAxiom> assertions = new ArrayList<OWLAnnotationAssertionAxiom>();
-
-    	for (OWLAnnotationAssertionAxiom ax : ontology.getAnnotationAssertionAxioms(cls.getIRI())) {
-    		if (ax.getProperty().equals(definition)) {
-    			if (isDefNCI(ax)) {
-    				assertions.add(ax);
-    			} 
-    		}
-    	}
-    	
-    	if ((assertions.size() > 1)) {
-    		JOptionPane.showMessageDialog(this, "Only one def source NCI is allowed in Definition.", "Warning", JOptionPane.WARNING_MESSAGE);
-    		return false;
-    	} else {
-    		//syncPrefNameLabel(cls, assertions.get(0).getValue().asLiteral().get().getLiteral(), changes);
-    		getOWLModelManager().applyChanges(changes);
-    		//selectClass(cls);
-    		return true;
-    	}
-    }
-    
-    public boolean isNCIPtFullSyn(String prop_iri, Map<String, String> qualifiers) {
-    	OWLAnnotationProperty p = lookUpShort(prop_iri);
-    	boolean isIt = false;
-    	if (p.equals(getFullSyn())) {
-    		String tg = qualifiers.get("term-group");
-    		String ts = qualifiers.get("term-source");
-    		if (tg != null &&
-    				ts != null &&
-    				(tg.equals("PT") ||
-    						tg.equals("AQ") ||
-    						tg.equals("HD"))
-    						&&
-    				ts.equals("NCI")) {
-    			isIt = true;
-    		}
-    	}
-    	return isIt;
-    }
-    
- 
-    
     String getAnnotationValue(OWLAnnotationAssertionAxiom axiom, String annProp) {
     	Set<OWLAnnotation> anns = axiom.getAnnotations();
     	for (OWLAnnotation ann : anns) {
@@ -3274,10 +3102,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	return c;
     }
     
+    public OWLOntology getOntology() {
+		return ontology;
+	}
 
+	public ClientSession getClientSession() {
+		return clientSession;
+	}
 	
-
-    
-    
-    
 }

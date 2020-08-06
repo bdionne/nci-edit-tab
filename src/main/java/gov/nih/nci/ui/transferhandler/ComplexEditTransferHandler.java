@@ -15,6 +15,7 @@ import gov.nih.nci.ui.ComplexEditPanel;
 import gov.nih.nci.ui.NCIEditTab;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
+import gov.nih.nci.utils.PropertyCheckUtil;
 
 public class ComplexEditTransferHandler extends TransferHandler {
 	
@@ -82,7 +83,8 @@ public class ComplexEditTransferHandler extends TransferHandler {
 				return false;
 			}
 		} else if (complexEditPanel.isMergeBtnSelected() || complexEditPanel.isDualBtnSelected()) {	
-			if (complexEditPanel.isMergeBtnSelected() && !NCIEditTab.currentTab().canMerge(data.get(0))) {
+			PropertyCheckUtil propCheckUtil = new PropertyCheckUtil();
+			if (complexEditPanel.isMergeBtnSelected() && !propCheckUtil.canMerge(data.get(0))) {
 				JOptionPane.showMessageDialog(complexEditPanel, 
 						"Can't merge, only a manager can do this.", "Warning", JOptionPane.WARNING_MESSAGE);
 				return false;

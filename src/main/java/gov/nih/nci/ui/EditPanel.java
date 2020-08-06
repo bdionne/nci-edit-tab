@@ -23,17 +23,15 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
 import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import gov.nih.nci.ui.dialog.ComplexPropChooser;
-import gov.nih.nci.ui.event.ComplexEditType;
+import gov.nih.nci.utils.PropertyCheckUtil;
 
 public class EditPanel extends JPanel {
 	/**
@@ -370,11 +368,12 @@ public class EditPanel extends JPanel {
             {
             	// Do the save
             	if (shouldSave()) {
-            		if (NCIEditTab.currentTab().syncFullSyn(NCIEditTab.currentTab().getCurrentlyEditing())
-            				&& NCIEditTab.currentTab().syncDefinition(NCIEditTab.currentTab().getCurrentlyEditing())) {
+            		PropertyCheckUtil propCheckUtil = new PropertyCheckUtil();
+            		if (propCheckUtil.syncFullSyn(NCIEditTab.currentTab().getCurrentlyEditing())
+            				&& propCheckUtil.syncDefinition(NCIEditTab.currentTab().getCurrentlyEditing())) {
 
             			if (!newPref.equals("")) {
-            				NCIEditTab.currentTab().syncPrefName(newPref);                		
+            				propCheckUtil.syncPrefName(newPref);                		
             			}
 
             			if (NCIEditTab.currentTab().commitChanges(true)) {

@@ -28,6 +28,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.transferhandler.ComplexEditTransferHandler;
+import gov.nih.nci.utils.PropertyCheckUtil;
 
 
 
@@ -180,10 +181,11 @@ public class ComplexEditPanel extends JPanel {
             		               "nci-edit-tab.ComplexEditView");
             		}
             	} else {
-            		if ((NCIEditTab.currentTab().syncFullSyn(lowerPanelClass.getRootObject())) &&
-            				(NCIEditTab.currentTab().syncFullSyn(upperPanelClass.getRootObject())) &&
-            				(NCIEditTab.currentTab().syncDefinition(lowerPanelClass.getRootObject())) &&
-            				(NCIEditTab.currentTab().syncDefinition(upperPanelClass.getRootObject()))) {
+            		PropertyCheckUtil propCheckUtil = new PropertyCheckUtil();
+            		if ((propCheckUtil.syncFullSyn(lowerPanelClass.getRootObject())) &&
+            				(propCheckUtil.syncFullSyn(upperPanelClass.getRootObject())) &&
+            				propCheckUtil.syncDefinition(lowerPanelClass.getRootObject()) &&
+            				propCheckUtil.syncDefinition(upperPanelClass.getRootObject())) {
 
             			if (NCIEditTab.currentTab().commitChanges(true)) {
             				NCIEditTab.currentTab().completeOp();
