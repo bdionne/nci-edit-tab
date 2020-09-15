@@ -1,5 +1,7 @@
 package gov.nih.nci.api;
 
+import static gov.nih.nci.ui.NCIEditTabConstants.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,26 +40,22 @@ public class NCIPropertyCheck implements RuleService {
 	
 	@Override
 	public boolean isQualsPTNCI(OWLAnnotationAssertionAxiom ax) {
-		return ((getAnnotationValue(ax, "term-group").equals("PT") ||
-				getAnnotationValue(ax, "term-group").equals("AQ") ||
-				getAnnotationValue(ax, "term-group").equals("HD")) &&
-				getAnnotationValue(ax, "term-source").equals("NCI"));
+		return ((getAnnotationValue(ax, SYN_TYPE).equals("PT") ||
+				getAnnotationValue(ax, SYN_TYPE).equals("AQ") ||
+				getAnnotationValue(ax, SYN_TYPE).equals("HD")) &&
+				getAnnotationValue(ax, SYN_SOURCE).equals("NCI"));
 	}
 
 	@Override
 	public boolean isDefNCI(OWLAnnotationAssertionAxiom ax) {
-		String ann_val = getAnnotationValue(ax, "def-source");
-    	if (ann_val.equalsIgnoreCase("none")) {
-    		ann_val = getAnnotationValue(ax, "P378");
-    		
-    	}
+		String ann_val = getAnnotationValue(ax, DEF_SOURCE);    	
     	return ann_val.equalsIgnoreCase("NCI");
 	}
 	
-	private String getAnnotationValue(OWLAnnotationAssertionAxiom axiom, String annProp) {
+	private String getAnnotationValue(OWLAnnotationAssertionAxiom axiom, OWLAnnotationProperty annProp) {
     	Set<OWLAnnotation> anns = axiom.getAnnotations();
     	for (OWLAnnotation ann : anns) {
-    		if (ann.getProperty().getIRI().getShortForm().equalsIgnoreCase(annProp)) {
+    		if (ann.getProperty().equals(annProp)) {
     			return ann.getValue().asLiteral().get().getLiteral();
     		}
     	}
@@ -70,8 +68,8 @@ public class NCIPropertyCheck implements RuleService {
 		//OWLAnnotationProperty p = tab.lookUpShort(prop_iri);
     	boolean isIt = false;
     	//if (prop.equals(fullSyn)) {
-		String tg = qualifiers.get("term-group");
-		String ts = qualifiers.get("term-source");
+		String tg = qualifiers.get(SYN_TYPE.getIRI().getShortForm());
+		String ts = qualifiers.get(SYN_SOURCE.getIRI().getShortForm());
 		if (tg != null &&
 				ts != null &&
 				(tg.equals("PT") ||

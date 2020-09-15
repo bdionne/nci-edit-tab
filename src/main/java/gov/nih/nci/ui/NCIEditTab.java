@@ -1640,6 +1640,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					DESIGN_NOTE = getSingleProperty("design_note", opts);
 					EDITOR_NOTE = getSingleProperty("editor_note", opts);	
 					
+					SYN_TYPE = getSingleProperty("syn_type", opts);
+					SYN_SOURCE = getSingleProperty("syn_source", opts);
+					
+					DEF_SOURCE = getSingleProperty("def_source", opts);
+					
+					REVIEWER_NAME = getSingleProperty("reviewer_name", opts);
+					REVIEW_DATE = getSingleProperty("review_date", opts);
+					
 					CODE_PROP = getSingleProperty("code_prop", opts);
 					LABEL_PROP = getSingleProperty("label_prop", opts);
 					FULL_SYN = getSingleProperty("fully_qualified_syn", opts);

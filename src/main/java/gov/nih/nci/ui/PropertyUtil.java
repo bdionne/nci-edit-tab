@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -15,7 +14,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationValueVisitor;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
-import gov.nih.nci.ui.PropertyTableModel.LiteralExtractor;
+import static gov.nih.nci.ui.NCIEditTabConstants.*;
 
 public final class PropertyUtil {
 	//private static PropertyUtil util;	
@@ -116,12 +115,8 @@ public final class PropertyUtil {
 			
 			if (annotation != null) {
 				propShortForm = annotation.getProperty().getIRI().getShortForm();
-			
-				// TODO: temporarily hardcode this, certain annotations always use system defaults
-				// even when diting an existing row. We need to add this as a property of the annotation
-				// or otherwise distinguish in ghte config file
-				if (propShortForm.equals("Definition_Review_Date") ||
-						propShortForm.equals("Definition_Reviewer_Name")) {
+				if (propShortForm.equals(REVIEW_DATE.getIRI().getShortForm()) ||
+						propShortForm.equals(REVIEWER_NAME.getIRI().getShortForm())) {
 					OWLAnnotationProperty p = annotation.getProperty();
 					propertyValues.put(propShortForm,
 							NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(p), ""));
