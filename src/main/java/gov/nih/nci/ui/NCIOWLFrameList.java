@@ -178,7 +178,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 	}
 	
 	public void handleDelete() {
-		if (isClassDescription(getSelectedValue())) {
+		if (isOWLClass(getSelectedValue())) {
 			OWLClass cls = NCIEditTab.currentTab().getCurrentlySelected();
 			Set<OWLClass> parents = editorKit.getOWLModelManager().getOWLHierarchyManager().getOWLClassHierarchyProvider().getParents(cls);
 			if (parents == null || parents.isEmpty() ) {
@@ -187,7 +187,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 			} else if (parents.size() == 1) {
 				Iterator itr = parents.iterator();
 				OWLClass parent = (OWLClass)itr.next();
-				if (parent.getIRI().getShortForm().equals(getSelectedValue().toString())) {
+				if (parent.getIRI().equals(getSuperClass(getSelectedValue()).getIRI())) {
 					JOptionPane.showMessageDialog(null,"Can not delete the last super class", "Class Delete", JOptionPane.INFORMATION_MESSAGE);
 				} else {
 					super.handleDelete();
@@ -229,11 +229,19 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		return false;
 	}
 	
-	private boolean isClassDescription(Object val) {
+	private boolean isOWLClass(Object val) {
 		if (val instanceof OWLSubClassAxiomFrameSectionRow) {
-			return true;
+			return ((OWLSubClassAxiomFrameSectionRow) val).getAxiom().getSuperClass().isOWLClass();
 		}
 		return false;
+	}
+	
+	private OWLClass getSuperClass(Object val) {
+		if (val instanceof OWLSubClassAxiomFrameSectionRow) {
+			return (OWLClass) ((OWLSubClassAxiomFrameSectionRow) val).getAxiom().getSuperClass();
+		}
+		return null;
+		
 	}
 	
 	private void loadAnnotationsAndProperties() {

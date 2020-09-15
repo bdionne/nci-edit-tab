@@ -45,6 +45,12 @@ public class ParentsProcessor extends EditProcessor {
 						w.add(error_msg);
 						return w;
 					}
+					if (tab.isLastParent(classToEdit, par_class)) {
+						String error_msg = " -- parent concept " + parent_id
+								+ " is the last one and can't be deleted.";
+						w.add(error_msg);
+						return w;
+					}
 					break;
 				case MODIFY:
 					if (!tab.hasParent(classToEdit, par_class)) {

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1805,7 +1806,22 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return true;		
 	}
 	
+	public boolean isLastParent(OWLClass cls, OWLClass par) {
+		Set<OWLClass> parents = getOWLEditorKit().getOWLModelManager().getOWLHierarchyManager().getOWLClassHierarchyProvider().getParents(cls);
+		if (parents.size() == 1) {
+			Iterator<OWLClass> itr = parents.iterator();
+			OWLClass parent = (OWLClass)itr.next();
+			if (parent.getIRI().equals(par.getIRI())) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
 	public boolean hasParent(OWLClass cls, OWLClass par_cls) {
+		
 
 		Set<OWLSubClassOfAxiom> sub_axioms = ontology.getSubClassAxiomsForSubClass(cls);
 
