@@ -465,7 +465,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
 	}
 	
 	public void dispose() {
-		saveColumnNameOrder();
+		//saveColumnNameOrder();
 	}
  
 }

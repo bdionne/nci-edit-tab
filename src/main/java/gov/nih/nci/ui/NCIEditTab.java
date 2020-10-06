@@ -143,6 +143,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	private String classDeletedName = "";
 	private String classDeletedCode = "";
 	private String classDeletedLabel = "";
+	
+	private boolean initEagerViews = false;
 
 	public void setClassDeleted(OWLClass c) {
 		classDeletedName = c.getIRI().getShortForm();
@@ -515,9 +517,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					
 				});
 		
-		if (clientSession.getActiveClient() != null) {
-			clientSession.fireChangeEvent(EventCategory.OPEN_PROJECT);
-		}
 		RuleServiceLoader.init();
 	}
     
@@ -1340,12 +1339,17 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				ontology = getOWLModelManager().getActiveOntology();
 				initProperties();
 				if (event.hasCategory(EventCategory.OPEN_PROJECT)) {
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							log.info("Voila");				
-							fireUpViews();					
-						}
-					});
+					if (initEagerViews) {
+
+					} else {
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								log.info("Voila");				
+								fireUpViews();					
+							}
+						});
+						initEagerViews = true;
+					}
 				}
 			}
 		}
