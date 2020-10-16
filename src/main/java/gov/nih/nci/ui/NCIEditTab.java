@@ -300,7 +300,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	public void cancelOp() {
 		ComplexEditType t = current_op.getType();
-		if (t == SPLIT || t == CLONE) {
+		if (t == SPLIT || t == CLONE || t == DUAL) {
 			cancelSplit();
 		}
 		if (t == ComplexEditType.MERGE) {

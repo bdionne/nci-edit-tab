@@ -15,7 +15,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import gov.nih.nci.curator.IncrementalReasoner;
-import gov.nih.nci.curator.owlapiv3.NCICurator;
+import gov.nih.nci.curator.owlapi.NCICurator;
 
 
 /**

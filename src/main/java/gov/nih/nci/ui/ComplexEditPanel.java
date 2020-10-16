@@ -272,6 +272,8 @@ public class ComplexEditPanel extends JPanel {
 						//setOp(ComplexEditType.CLONE);
 
 					} else if (sb.equals(dualButton)) {
+						upperLabel.setText("Source");
+				    	lowerLabel.setText("Target");
 						//setOp(ComplexEditType.DUAL);
 						
 					}
