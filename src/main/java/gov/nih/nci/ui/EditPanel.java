@@ -370,7 +370,8 @@ public class EditPanel extends JPanel {
             	if (shouldSave()) {
             		PropertyCheckUtil propCheckUtil = new PropertyCheckUtil();
             		if (propCheckUtil.syncFullSyn(NCIEditTab.currentTab().getCurrentlyEditing())
-            				&& propCheckUtil.syncDefinition(NCIEditTab.currentTab().getCurrentlyEditing())) {
+            				&& propCheckUtil.syncDefinition(NCIEditTab.currentTab().getCurrentlyEditing())
+            				&& NCIEditTab.currentTab().isLogicallyCorrect()) {
 
             			if (!newPref.equals("")) {
             				propCheckUtil.syncPrefName(newPref);                		

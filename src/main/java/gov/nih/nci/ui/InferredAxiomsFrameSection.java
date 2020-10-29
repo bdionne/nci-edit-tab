@@ -76,7 +76,7 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
     			return;
     		}
     		
-    		cur_checks = new CuratorChecks(this.getOWLModelManager().getActiveOntology());
+    		cur_checks = new CuratorChecks(this.getOWLModelManager().getActiveOntology(), getOWLEditorKit());
     		
     		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
             OWLOntologyManagerImpl imp = (OWLOntologyManagerImpl) man;

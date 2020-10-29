@@ -91,6 +91,7 @@ import org.semanticweb.owlapi.model.OWLQuantifiedObjectRestriction;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.search.EntitySearcher;
+import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLObjectDuplicator;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
@@ -624,6 +625,55 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		
     	} 
     	getOWLModelManager().applyChanges(changes);
+    	changes.clear();
+    	
+    	// check if conversion needed
+    	if (!ontology.getEquivalentClassesAxioms(target).isEmpty()) {
+    		//we have a defined class, first make primitive
+    		
+    		for (OWLEquivalentClassesAxiom ax : ontology.getEquivalentClassesAxioms(target)) {
+                changes.add(new RemoveAxiom(ontology, ax));
+                for (OWLClassExpression desc : ax.getClassExpressions()) {
+                    if (!desc.equals(target)) {
+                        if (desc instanceof OWLObjectIntersectionOf) {
+                            for (OWLClassExpression op : ((OWLObjectIntersectionOf) desc).getOperands()) {
+                                changes.add(new AddAxiom(ontology, df.getOWLSubClassOfAxiom(target, op)));
+                            }
+                        }
+                        else {
+                            changes.add(new AddAxiom(ontology, df.getOWLSubClassOfAxiom(target, desc)));
+                        }
+                    }
+                }
+            }
+    		
+    		getOWLModelManager().applyChanges(changes);
+    		changes.clear();
+    		// now convert back to completed
+    		Set<OWLClassExpression> operands = new HashSet<>();
+
+    		for (OWLSubClassOfAxiom ax : ontology.getSubClassAxiomsForSubClass(target)) {
+    			changes.add(new RemoveAxiom(ontology, ax));
+    			operands.add(ax.getSuperClass());
+    		}
+
+            if (operands.isEmpty()) {
+                return true;
+            }
+            
+            OWLClassExpression equCls;
+            if (operands.size() == 1) {
+                equCls = operands.iterator().next();
+            }
+            else {
+                equCls = df.getOWLObjectIntersectionOf(operands);
+            }
+            OWLAxiom ax = df.getOWLEquivalentClassesAxiom(CollectionFactory.createSet(target, equCls));
+            changes.add(new AddAxiom(getOWLModelManager().getActiveOntology(), ax));
+            getOWLModelManager().applyChanges(changes);
+    		
+    		
+    	}
     	
     	return true;
     	
@@ -1372,30 +1422,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     	if (!changes.isEmpty() && !clearing) {
     		List<? extends OWLOntologyChange> latest_changes = history.getLatestChanges();
-
-    		OWLOntologyChange latest_change = null;
-
-    		if ((latest_changes.size() == 1) && (latest_changes.get(0).isAddAxiom())) {
-    			latest_change = latest_changes.get(0);
-    		} else if ((latest_changes.size() == 2) && (latest_changes.get(0).isRemoveAxiom() &&
-    				latest_changes.get(1).isAddAxiom())) {
-    			latest_change = latest_changes.get(1);
-    		}
-
-    		if (latest_change != null) {
-
-    			boolean ok_curator = (new CuratorChecks(ontology)).checkOkChange(latest_change);
-    			if (!ok_curator) {
-    				history.stopTalking();
-    				backOutChange();
-    				history.startTalking();
-    				return;
-    			}
-    		}
+    		
+    		boolean ok_curator = (new CuratorChecks(ontology, getOWLEditorKit())).checkOkChanges(latest_changes);
+			if (!ok_curator) {
+				history.stopTalking();
+				backOutChange();
+				history.startTalking();
+				return;
+			}
+    		
     	}
-    	
-    	
-    	
     	List<OWLClass>  subjects = findUniqueSubjects(changes);
     	if (!subjects.isEmpty()) {
     		if (current_op.isMissingOneside()) {
@@ -3136,6 +3172,49 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
 	public ClientSession getClientSession() {
 		return clientSession;
+	}
+	
+	public boolean isLogicallyCorrect() {
+		if (ontology.getEquivalentClassesAxioms(currentlySelected).isEmpty()) {
+			return true;
+		} else {
+			if (!ontology.getSubClassAxiomsForSubClass(currentlySelected).isEmpty()) {
+				JOptionPane.showMessageDialog(tab, 
+						"A Defined class cannot have subclass axioms.", 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+				return false;
+				
+			} else {
+				Set<OWLEquivalentClassesAxiom> eqs = ontology.getEquivalentClassesAxioms(currentlySelected);
+				
+				if (eqs.size() > 1) {
+					return true;
+				} else {
+					
+					Set<OWLClassExpression> exs = eqs.iterator().next().getClassExpressions();
+					
+					for (OWLClassExpression exp : exs) {
+						if (exp.isOWLClass() && exp.equals(currentlySelected)) {
+							
+						} else {
+							if (exp instanceof OWLObjectIntersectionOf) {
+								return true;
+							}
+						}
+					}
+					
+					JOptionPane.showMessageDialog(tab, 
+							"A Defined class needs to have two or more conditions.", 
+							"Warning", JOptionPane.WARNING_MESSAGE);
+					return false;
+					
+					
+				}
+				
+				
+			}
+			
+		}
 	}
 	
 }

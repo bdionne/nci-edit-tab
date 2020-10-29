@@ -35,19 +35,21 @@ public class UsagePanel extends JPanel {
     public UsagePanel(OWLEditorKit owlEditorKit) {
         setLayout(new BorderLayout());
 
-        tree = new UsageTree(owlEditorKit);
-        UsagePreferences.getInstance().setFilterActive(UsageFilter.filterSelf, true);
-        UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDisjoints, true);
-        UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDifferent, true);
-        UsagePreferences.getInstance().setFilterActive(UsageFilter.filterNamedSubsSupers, false);
-        UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDifferent, true);       
+        tree = new UsageTree(owlEditorKit);      
 
         add(new JScrollPane(tree), BorderLayout.CENTER);
    }
 
 
     public void setOWLEntity(OWLEntity entity) {
-           tree.setOWLEntity(entity);        
+    	// set preferences here in case user changes them in entities tab
+    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterSelf, true);
+    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDisjoints, true);
+    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDifferent, true);
+    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterNamedSubsSupers, false);
+    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDifferent, true);  
+
+    	tree.setOWLEntity(entity);        
     }
     
     public int getCount() {
