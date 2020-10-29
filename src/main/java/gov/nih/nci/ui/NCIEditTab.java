@@ -102,6 +102,7 @@ import edu.stanford.protege.search.lucene.tab.engine.IndexDirMapper;
 import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabManager;
 import edu.stanford.protege.search.lucene.tab.engine.SearchTabResultHandler;
+import gov.nih.nci.curator.CuratorReasonerPreferences;
 import gov.nih.nci.ui.action.ComplexOperation;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.dialog.NoteDialog;
@@ -3179,10 +3180,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			return true;
 		} else {
 			if (!ontology.getSubClassAxiomsForSubClass(currentlySelected).isEmpty()) {
-				JOptionPane.showMessageDialog(tab, 
-						"A Defined class cannot have subclass axioms.", 
-						"Warning", JOptionPane.WARNING_MESSAGE);
-				return false;
+				if (CuratorReasonerPreferences.getInstance().
+						isEnabled(CuratorReasonerPreferences.OptionalEditChecksTask
+								.CHECK_SUBCLASS_FULL_DEFINED)) {
+					JOptionPane.showMessageDialog(tab, 
+							"A Defined class cannot have subclass axioms.", 
+							"Warning", JOptionPane.WARNING_MESSAGE);
+					return false;
+				}
 				
 			} else {
 				Set<OWLEquivalentClassesAxiom> eqs = ontology.getEquivalentClassesAxioms(currentlySelected);
@@ -3215,6 +3220,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			}
 			
 		}
+		return true;
 	}
 	
 }
