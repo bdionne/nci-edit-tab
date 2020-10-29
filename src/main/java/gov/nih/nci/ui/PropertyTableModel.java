@@ -207,8 +207,8 @@ public class PropertyTableModel extends AbstractTableModel {
 				// TODO: temporarily hardcode this, certain annotations always use system defaults
 				// even when diting an existing row. We need to add this as a property of the annotation
 				// or otherwise distinguish in ghte config file
-				if (propShortForm.equals("Definition_Review_Date") ||
-						propShortForm.equals("Definition_Reviewer_Name")) {
+				if (annot.getProperty().equals(NCIEditTabConstants.REVIEW_DATE) ||
+						annot.getProperty().equals(NCIEditTabConstants.REVIEWER_NAME)) {
 					OWLAnnotationProperty p = annot.getProperty();
 					propertyValues.put(propShortForm,
 							NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(p), ""));
