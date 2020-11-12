@@ -1214,6 +1214,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     		}
     	}
     	
+    	// first do last update to sync
+    	clientSession.fireChangeEvent(EventCategory.UPDATE_ONTOLOGY);
+    	
 		Commit commit = ClientUtils.createCommit(clientSession.getActiveClient(), comment, changes);
 		DocumentRevision base = clientSession.getActiveVersionOntology().getHeadRevision();
 		CommitBundle commitBundle = new CommitBundleImpl(base, commit);
