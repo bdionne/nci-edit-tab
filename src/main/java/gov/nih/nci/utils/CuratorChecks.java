@@ -113,8 +113,6 @@ public class CuratorChecks {
 	
 	private boolean checkUnsupportedConstructs = false;
 	
-	private boolean checkFullDefinedSubclass = false;
-	
 	private boolean checkBadRetree = false;
 	
 	private boolean is_retree = false;
@@ -131,8 +129,6 @@ public class CuratorChecks {
 	
 	private Set<OWLAxiom> additionalAxioms = new HashSet<>();
 
-	private int usageCount;
-	
 	private OWLEntity entity;
 	
 	private Set<UsageFilter> filters = new HashSet<>();
@@ -155,9 +151,8 @@ public class CuratorChecks {
 		checkUnsupportedConstructs =
 				CuratorReasonerPreferences.getInstance().
 				isEnabled(CuratorReasonerPreferences.OptionalEditChecksTask.CHECK_UNSUPPORTED_CONSTRUCTS);
-		checkFullDefinedSubclass =
-				CuratorReasonerPreferences.getInstance().
-				isEnabled(CuratorReasonerPreferences.OptionalEditChecksTask.CHECK_SUBCLASS_FULL_DEFINED);
+		CuratorReasonerPreferences.getInstance().
+		isEnabled(CuratorReasonerPreferences.OptionalEditChecksTask.CHECK_SUBCLASS_FULL_DEFINED);
 		checkBadRetree =
 				CuratorReasonerPreferences.getInstance().
 				isEnabled(CuratorReasonerPreferences.OptionalEditChecksTask.CHECK_BAD_RETREE);
@@ -176,19 +171,41 @@ public class CuratorChecks {
 	
 	private boolean checkRetreeOk(List<? extends OWLOntologyChange> latest_changes) {
 		
+		OWLClass f_cls = 
+	    		((OWLSubClassOfAxiom) latest_changes.get(0).getAxiom()).getSuperClass().asOWLClass();
+		
 	    OWLClass cls = 
 	    		((OWLSubClassOfAxiom) latest_changes.get(1).getAxiom()).getSubClass().asOWLClass();
 	    
-	    usage_panel.setOWLEntity(cls);
 	    
-	    entity = cls;
 	    
-	    if (usage_panel.getCount() > 1) {		
-	    	displayUsages(cls);
-	    	return false;
-	    } else {
-	    	return true;
+	    Set<OWLClass> rts = findRoots(cls, new HashSet<OWLClass>());
+	    Set<OWLClass> o_rts = findRoots(f_cls, new HashSet<OWLClass>());
+	    
+	    if ((rts.size() == 1) && (o_rts.size() == 1)) {
+	    	if (rts.iterator().next().equals(o_rts.iterator().next())) {
+	    		
+	    	} else {
+	    		if (checkClassNotModeled(cls)) {
+	    			
+	    			usage_panel.setOWLEntity(cls);	    	    
+	    			entity = cls;
+	    			
+	    			if (usage_panel.getCount() > 1) {		
+	    				displayUsages(cls);
+	    				return false;
+	    			} else {
+	    				return true;
+	    			}
+	    		} else {
+	    			// class is modeled but parent is disjoint
+	    			return false;
+	    		}
+	    	}
 	    }
+	    return true;
+	    
+	    
 	}
 	
 	private boolean allSubClassAxioms(List<? extends OWLOntologyChange> latest_changes) {
@@ -394,6 +411,24 @@ public class CuratorChecks {
 		}
 		return !found;
 	}
+	
+	private boolean checkClassNotModeled(OWLClass cls) {
+		boolean not_modeled = true;
+		for (OWLSubClassOfAxiom subax : ont.getSubClassAxiomsForSubClass(cls)) {
+			if (subax.getSuperClass().isOWLClass()) {
+				
+			} else {
+				JOptionPane.showMessageDialog(null,
+						"Changing parent to disjoint parent creates issues with role domains",
+						"Class Parent Changed",
+						JOptionPane.WARNING_MESSAGE);
+				return false;
+			}
+			
+		};
+		
+		return not_modeled;
+	}
     
     private Set<OWLClass> findRoots(OWLClass cls, Set<OWLClass> res) {
     	
@@ -453,7 +488,7 @@ public class CuratorChecks {
     	WorkspaceFrame frame = ProtegeManager.getInstance().getFrame(owlEditorKit.getOWLWorkspace());
     	
     	    	
-        Dimension size = frame.getSize();
+        frame.getSize();
         Point loc = frame.getLocation();
         SwingUtilities.convertPointToScreen(loc, frame);
         
@@ -490,8 +525,6 @@ public class CuratorChecks {
 
 
 				  //String filename = file.getName();
-				  
-				  usageCount = 0;
 				  
 				  UsagePreferences p = UsagePreferences.getInstance();
 				  
@@ -556,7 +589,6 @@ public class CuratorChecks {
             if (isFilterSet(UsageFilter.filterSelf) && entity.equals(ent)) {
                 return;
             }
-            usageCount++;
             Set<OWLAxiom> axioms = axiomsByEntityMap.get(ent);
             if (axioms == null) {
                 axioms = new HashSet<>();
@@ -703,7 +735,6 @@ public class CuratorChecks {
             }
             if (!hasBeenIndexed) {
                 additionalAxioms.add(axiom);
-                usageCount++;
             }
         }
 
@@ -743,7 +774,6 @@ public class CuratorChecks {
             }
             if (!hasBeenIndexed) {
                 additionalAxioms.add(axiom);
-                usageCount++;
             }
         }
 
@@ -863,7 +893,6 @@ public class CuratorChecks {
             }
             else {
                 additionalAxioms.add(axiom);
-                usageCount++;
             }
         }
 

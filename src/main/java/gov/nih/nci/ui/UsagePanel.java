@@ -46,7 +46,7 @@ public class UsagePanel extends JPanel {
     	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterSelf, true);
     	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDisjoints, true);
     	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDifferent, true);
-    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterNamedSubsSupers, false);
+    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterNamedSubsSupers, true);
     	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDifferent, true);  
 
     	tree.setOWLEntity(entity);        
