@@ -379,11 +379,9 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		}
 		NCIEditTab.currentTab().enableBatchMode();
 		OWLClass newCls = NCIEditTab.currentTab().createNewChild(selectedClass, Optional.empty(), Optional.empty(), false);
+		NCIEditTab.currentTab().disableBatchMode();
 		if (newCls != null) {
 			getTree().setSelectedOWLObject(newCls);
-
-			NCIEditTab.currentTab().disableBatchMode();
-
 			NCIEditTab.currentTab().setCurrentlyEditing(newCls, true);
 			NCIEditTab.currentTab().setNew(true);
 			this.getTree().refreshComponent();

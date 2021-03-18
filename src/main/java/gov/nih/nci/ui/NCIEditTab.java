@@ -1398,7 +1398,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					} else {
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								log.info("Voila");				
+								//log.info("Voila");				
 								fireUpViews();					
 							}
 						});
