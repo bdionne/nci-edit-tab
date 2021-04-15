@@ -40,11 +40,7 @@ public class PropertyEditingDialog extends JPanel {
 	private Map<String, String> proplabelmap;
 	
 	private String type;
-	//private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	private static final String DEFINITION_REVIEWER_NAME = "Definition Reviewer Name";
-	private static final String DEFINITION_REVIEW_DATE = "Definition Review Date";
-	
-    public PropertyEditingDialog(String type, Map<String, String> proptype, Map<String, String> propvalue, Map<String, ArrayList<String>> propoptions, Map<String, String> proplabel){
+	public PropertyEditingDialog(String type, Map<String, String> proptype, Map<String, String> propvalue, Map<String, ArrayList<String>> propoptions, Map<String, String> proplabel){
     	
       this.proptypemap = proptype;
       this.propvaluemap = propvalue;
@@ -152,21 +148,6 @@ public class PropertyEditingDialog extends JPanel {
     	return panel;
     }
     
-    /*public class DateInputVerifier extends InputVerifier {
-        @Override
-        public boolean verify(JComponent input) {
-            String text = ((JTextField) input).getText();
-            try {
-            	Date formattedDate = sdf.parse(text);
-            	return true;
-            } catch (ParseException ex) {
-            
-            	JOptionPane.showMessageDialog(input, "Please enter Date using yyyy-MM-dd format.");
-            	return false;
-            }
-            
-        }
-    }*/
     
     private JPanel createComboBoxPanel(String prop, String[] options){
     	JPanel panel = new JPanel(new BorderLayout());

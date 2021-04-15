@@ -166,81 +166,87 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     	propcomponentmap = new HashMap<String, Object>();
     	definitionPanel = new JPanel();
     	definitionPanel.setLayout(new BoxLayout(definitionPanel, BoxLayout.Y_AXIS));
-    	
+
     	//create Value text area
     	JTextArea area = new JTextArea();
     	area.setLineWrap(true);
     	area.setWrapStyleWord(true);
-    	
+
     	JPanel areaPanel = new JPanel(new BorderLayout());
     	areaPanel.add(new JLabel("Value"), BorderLayout.NORTH);
     	areaPanel.add(new JScrollPane(area), BorderLayout.CENTER);
     	areaPanel.setPreferredSize(new Dimension(450, 100));
-    	
+
     	propcomponentmap.put("Value", area);
-    	
+
     	definitionPanel.add(areaPanel);
-    	
+
     	//create Definition Reviewer Name  and Definition Reviewer Date text fields
     	// NOTE: currently we have no way to distinguish byCode versus byName Kbs.
     	defComplexProp = NCIEditTabConstants.DEFINITION;
-    	
+
     	Set<OWLAnnotationProperty> configuredAnnotations = NCIEditTab.currentTab().getConfiguredAnnotationsForAnnotation(defComplexProp);
     	Map<String, List<String>> defaultPropValues = new HashMap<String, List<String>>();
-    	String defaultOption = null;
-    	
+
     	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
-    		String propShortForm = annotProp.getIRI().getShortForm();
-    		
-    		String lab = NCIEditTab.currentTab().getRDFSLabel(annotProp).get();
-    		String propDefaultVal = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(annotProp), NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY);
-    		List<String> propList = new ArrayList<String>();
-    		if ((propShortForm.equals(DEF_SOURCE)) ||
-    				(propShortForm.equals("P378"))) {
-    			defaultOption = propDefaultVal;
-    		} else {
+    		IRI datTyp = NCIEditTab.currentTab().getDataType(annotProp);
+    		if (this.isDataTypeTextField(datTyp)) {
+
+    			String lab = NCIEditTab.currentTab().getRDFSLabel(annotProp).get();
+    			String propDefaultVal = NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(annotProp), NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY);
+    			List<String> propList = new ArrayList<String>();
+
+
     			propList.add(lab);
     			propList.add(propDefaultVal);
     			defaultPropValues.put(lab, propList);
+
     		}
-    		
+
+
     	}
-    	
+
     	for (String prop : defaultPropValues.keySet()) {
     		JPanel tfPanel = createTextFieldPanel(prop, defaultPropValues.get(prop));
     		definitionPanel.add(tfPanel);
-    	}
-    	
-    	
-    	ArrayList<String> optionList = new ArrayList<String>();
-    	String def_source_label = "";
+    	}    	
+
+
     	for (OWLAnnotationProperty annotProp : configuredAnnotations) {
-			String propShortForm = annotProp.getIRI().getShortForm();
-			if (propShortForm.equals(DEF_SOURCE) ||
-					propShortForm.equals("P378")) {
-				optionList.addAll(NCIEditTab.currentTab().getEnumValues(NCIEditTab.currentTab().getDataType(annotProp)));
-				def_source_label = NCIEditTab.currentTab().getRDFSLabel(annotProp).get();
-				
-			}
-		}
-    	
-    	String[] options = optionList.toArray(new String[optionList.size()]);
-    	JPanel cbPanel = new JPanel(new BorderLayout());
-    	
-    	JComboBox<String> combobox = new JComboBox<String>(options);   	
-    	combobox.setPreferredSize(new Dimension(230, 20));
-    	combobox.setSelectedItem(defaultOption);
-    	
-    	JLabel label = new JLabel(DEF_SOURCE_LABEL);  	   	
-    	label.setPreferredSize(new Dimension(220, 20));
-    	
-    	cbPanel.add(label, BorderLayout.WEST);
-    	cbPanel.add(combobox, BorderLayout.EAST);
-    	cbPanel.setPreferredSize(new Dimension(450, 25));
-    	propcomponentmap.put(def_source_label, combobox);
-    
-    	
-    	definitionPanel.add(cbPanel);
+    		IRI datTyp = NCIEditTab.currentTab().getDataType(annotProp);
+    		if (this.isDataTypeCombobox(datTyp)) {
+    			ArrayList<String> optionList = new ArrayList<String>();
+    			optionList.addAll(NCIEditTab.currentTab().getEnumValues(datTyp));
+    			String cbx_label = NCIEditTab.currentTab().getRDFSLabel(annotProp).get();
+
+
+    			String[] options = optionList.toArray(new String[optionList.size()]);
+    			JPanel cbPanel = new JPanel(new BorderLayout());
+
+    			String defaultOption = 
+    					NCIEditTab.currentTab().getDefaultValue(NCIEditTab.currentTab().getDataType(annotProp), 
+    							NCIEditTabConstants.DEFAULT_SOURCE_NEW_PROPERTY);
+
+    			JComboBox<String> combobox = new JComboBox<String>(options);   	
+    			combobox.setPreferredSize(new Dimension(230, 20));
+    			combobox.setSelectedItem(defaultOption);
+
+    			JLabel label = new JLabel(DEF_SOURCE_LABEL);  	   	
+    			label.setPreferredSize(new Dimension(220, 20));
+
+    			cbPanel.add(label, BorderLayout.WEST);
+    			cbPanel.add(combobox, BorderLayout.EAST);
+    			cbPanel.setPreferredSize(new Dimension(450, 25));
+    			propcomponentmap.put(cbx_label, combobox);
+
+
+    			definitionPanel.add(cbPanel);
+    		}
+    	}
+
+
+
+
     	definitionPanel.setBorder(BorderFactory.createTitledBorder("Definition"));
     }
     
@@ -280,6 +286,28 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     		return s;
     	}
     }
+    
+    private boolean isDataTypeTextField( IRI dataType ) {
+		boolean result = false;
+		if (dataType.toString().contains("string")) {
+			result = true;
+		}
+		if (dataType.toString().endsWith("system")) {
+			return true;
+		}
+	
+		return result;
+	}
+
+	private boolean isDataTypeCombobox( IRI dataType ) {
+		boolean result = false;
+		if (dataType != null) {
+			if (dataType.toString().endsWith("enum")) {
+				result = true;
+			}
+		}
+		return result;
+	}
 
 
 
