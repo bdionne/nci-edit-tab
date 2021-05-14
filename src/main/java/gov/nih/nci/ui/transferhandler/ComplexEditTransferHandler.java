@@ -75,8 +75,11 @@ public class ComplexEditTransferHandler extends TransferHandler {
 					NCIEditTab.currentTab().splitClass(dlg.getNewClass(), data.get(0), clone_p);
 					complexEditPanel.setEnableUnselectedRadioButtons(false);
 					return true;
+				} else {
+					NCIEditTab.currentTab().cancelOp();					
+					return false;					
 				}
-				return false;
+				
 			} else {
 				JOptionPane.showMessageDialog(complexEditPanel, 
 						"Can't split or clone a retired class.", "Warning", JOptionPane.WARNING_MESSAGE);
