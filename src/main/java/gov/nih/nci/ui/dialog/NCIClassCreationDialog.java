@@ -231,7 +231,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     			combobox.setPreferredSize(new Dimension(230, 20));
     			combobox.setSelectedItem(defaultOption);
 
-    			JLabel label = new JLabel(DEF_SOURCE_LABEL);  	   	
+    			JLabel label = new JLabel(cbx_label);  	   	
     			label.setPreferredSize(new Dimension(220, 20));
 
     			cbPanel.add(label, BorderLayout.WEST);
