@@ -82,10 +82,6 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     
     private JPanel definitionPanel;
     
-    private static final String DEF_SOURCE = "def-source";
-    
-    private static final String DEF_SOURCE_LABEL = "Definition Source";
-    
     private Map<String, Object> propcomponentmap;
     
     private OWLAnnotationProperty defComplexProp;
