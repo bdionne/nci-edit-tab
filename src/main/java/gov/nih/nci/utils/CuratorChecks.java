@@ -188,7 +188,7 @@ public class CuratorChecks {
 	    	} else {
 	    		if (checkClassNotModeled(cls)) {
 	    			
-	    			usage_panel.setOWLEntity(cls);	    	    
+	    			usage_panel.setOWLEntity(cls, true);	    	    
 	    			entity = cls;
 	    			
 	    			if (usage_panel.getCount() > 1) {		

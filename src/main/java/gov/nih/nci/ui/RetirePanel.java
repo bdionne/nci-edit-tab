@@ -116,7 +116,7 @@ public class RetirePanel extends JPanel {
     public void setOWLClass(OWLClass inst) {
     	
     	// always update the usages panel
-    	usage_panel.setOWLEntity(inst);
+    	usage_panel.setOWLEntity(inst, false);
     	if (inst == null) {
     		return;
     	}
@@ -155,7 +155,7 @@ public class RetirePanel extends JPanel {
     	
     				if (NCIEditTab.currentTab().commitChanges(true)) {
     					upperPanelList.setRootObject(null);
-    					usage_panel.setOWLEntity(null);
+    					usage_panel.setOWLEntity(null, false);
     					disableButtons();
     					NCIEditTab.currentTab().selectClass(classToRetire);
     					NCIEditTab.currentTab().refreshNavTree();
@@ -184,7 +184,7 @@ public class RetirePanel extends JPanel {
     		public void actionPerformed(ActionEvent e)
     		{
     			upperPanelList.setRootObject(null);
-    			usage_panel.setOWLEntity(null);
+    			usage_panel.setOWLEntity(null, false);
     		    classToRetire = null;
     			NCIEditTab.currentTab().undoChanges();
     			NCIEditTab.currentTab().cancelRetire();

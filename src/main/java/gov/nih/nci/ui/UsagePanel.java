@@ -41,12 +41,12 @@ public class UsagePanel extends JPanel {
    }
 
 
-    public void setOWLEntity(OWLEntity entity) {
+    public void setOWLEntity(OWLEntity entity, boolean filter_subs_sups) {
     	// set preferences here in case user changes them in entities tab
     	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterSelf, true);
     	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDisjoints, true);
     	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDifferent, true);
-    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterNamedSubsSupers, true);
+    	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterNamedSubsSupers, filter_subs_sups);
     	UsagePreferences.getInstance().setFilterActive(UsageFilter.filterDifferent, true);  
 
     	tree.setOWLEntity(entity);        
