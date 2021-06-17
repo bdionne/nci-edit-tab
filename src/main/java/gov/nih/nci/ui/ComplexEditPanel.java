@@ -22,6 +22,7 @@ import javax.swing.JSplitPane;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
 import org.protege.editor.owl.ui.framelist.OWLFrameList;
+import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -217,7 +218,7 @@ public class ComplexEditPanel extends JPanel {
 	}
     
     public void reset() {
-
+         
     	setEnableUnselectedRadioButtons(true);
     	//Execute when button is pressed
     	upperPanelAnn.setRootObject(null);
@@ -231,6 +232,7 @@ public class ComplexEditPanel extends JPanel {
     	
     	saveButton.setText("Save");    	
     	disableButtons();
+    	OWLRendererPreferences.getInstance().setRenderHyperlinks(true);
     }
     private JPanel createRadioButtonPanel() {
     	
@@ -347,11 +349,13 @@ public class ComplexEditPanel extends JPanel {
     		NCIEditTab.currentTab().setSource(cls);
     		
     	} else if (c.equals(this.upperSplitPane)) {
+    		OWLRendererPreferences.getInstance().setRenderHyperlinks(false);
     		this.upperPanelAnn.setRootObject(cls.getIRI());
     		this.upperPanelClass.setRootObject(cls);
     		NCIEditTab.currentTab().setSource(cls);
     		
     	} else {
+    		OWLRendererPreferences.getInstance().setRenderHyperlinks(false);
     		this.lowerPanelAnn.setRootObject(cls.getIRI());
     		this.lowerPanelClass.setRootObject(cls);
     		NCIEditTab.currentTab().setTarget(cls);
@@ -383,6 +387,7 @@ public class ComplexEditPanel extends JPanel {
     }
     
 	public void setRootObjects(OWLClass top, OWLClass bot) {
+		OWLRendererPreferences.getInstance().setRenderHyperlinks(false);
 		this.upperPanelAnn.setRootObject(top.getIRI());
 		this.upperPanelClass.setRootObject(top);
 		this.lowerPanelAnn.setRootObject(bot.getIRI());
