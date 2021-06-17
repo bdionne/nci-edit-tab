@@ -59,14 +59,26 @@ public class UnsupportedConstructsFrameSection extends AbstractOWLFrameSection<O
     			
     			Map<OWLClass, Set<OWLAxiom>> bad_cons = curator.getBadConstructs();
     			
-    	        for (OWLClass cls : bad_cons.keySet()) {
-    	        	for (OWLAxiom ax : bad_cons.get(cls)) {
-    	        		UnsupportedConstructsFrameSectionRow newRow = 
-    	    					new UnsupportedConstructsFrameSectionRow(getOWLEditorKit(), this, null, getRootObject(), ax);
-    	        		addInferredRowIfNontrivial(newRow);
-    	        		
-    	        	}
-    	        }
+    			for (OWLClass cls : bad_cons.keySet()) {
+    				for (OWLAxiom ax : bad_cons.get(cls)) {
+    					UnsupportedConstructsFrameSectionRow newRow = 
+    							new UnsupportedConstructsFrameSectionRow(getOWLEditorKit(), this, null, getRootObject(), ax);
+    					addInferredRowIfNontrivial(newRow);
+
+    				}
+    			}
+
+    			Map<OWLClass, Set<OWLAxiom>> bad_roles = curator.getBadRoles();
+
+    			for (OWLClass cls : bad_roles.keySet()) {
+    				for (OWLAxiom ax : bad_roles.get(cls)) {
+    					UnsupportedConstructsFrameSectionRow newRow = 
+    							new UnsupportedConstructsFrameSectionRow(getOWLEditorKit(), this, null, getRootObject(), ax);
+    					newRow.setEditingHint(" - Domain/Range issue");
+    					addInferredRowIfNontrivial(newRow);
+
+    				}
+    			}
     			
     		}
     		

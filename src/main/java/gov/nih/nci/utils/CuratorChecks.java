@@ -140,7 +140,7 @@ public class CuratorChecks {
 		axiomSorter = new AxiomSorter();
 		axiomsByEntityMap = new TreeMap<>(owlModelManager.getOWLObjectComparator());
 		spar_visitor = new StatedParentVisitor(null, ont);
-		roles_visitor = new RolesVisitor(null, ont);
+		roles_visitor = new RolesVisitor(null, ont, null);
 		
 		checkRedundantParents =
 				CuratorReasonerPreferences.getInstance().
@@ -332,7 +332,7 @@ public class CuratorChecks {
 		
 		
 		if (cls != null) {
-			roles_visitor.setEntity(cls, true);
+			roles_visitor.setEntity(cls, true, null);
 			cls.accept(roles_visitor);
 			if (!roles_visitor.bad_constructs.isEmpty()) {
 				if (JOptionPane.showConfirmDialog(null,
