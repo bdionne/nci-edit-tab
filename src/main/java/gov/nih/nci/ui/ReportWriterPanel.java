@@ -563,7 +563,13 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 				Set<OWLAnnotation> quals = tab.getDependentAnnotations(cls,ap);
 				for (OWLAnnotation qualAnn : quals) {
 					OWLAnnotationProperty qap = qualAnn.getProperty();
-					String qslotname = qap.getIRI().getShortForm();
+					String qslotname = null;
+					Optional<String> qapLabel = tab.getRDFSLabel(qap);
+					if (qapLabel.isPresent()) {
+						qslotname = qapLabel.get();
+					} else {
+						qslotname = qap.getIRI().getShortForm();
+					}
 					String qentry = "";
 					Optional<OWLLiteral> qstrentry = qualAnn.getValue().asLiteral();
 					if (qstrentry.isPresent()) {
