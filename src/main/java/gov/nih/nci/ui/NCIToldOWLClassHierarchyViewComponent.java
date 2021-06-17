@@ -384,7 +384,6 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 			getTree().setSelectedOWLObject(newCls);
 			NCIEditTab.currentTab().setCurrentlyEditing(newCls, true);
 			NCIEditTab.currentTab().setNew(true);
-			this.getTree().refreshComponent();
 			NCIEditTab.currentTab().classModified();
 		}
 
