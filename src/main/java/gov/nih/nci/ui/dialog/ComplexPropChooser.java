@@ -26,19 +26,19 @@ public class ComplexPropChooser extends JPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private Set<OWLAnnotationProperty> complex_props;
+	private List<OWLAnnotationProperty> complex_props;
 	private String[] prop_strings;
 	
 	private JComboBox<String> combobox;
 	
 	
-	public ComplexPropChooser(Set<OWLAnnotationProperty> props) {
+	public ComplexPropChooser(List<OWLAnnotationProperty> props) {
 		complex_props = props;
 		prop_strings = populateStrings(complex_props);
 		createUI();
 	}
 	
-	private String[] populateStrings(Set<OWLAnnotationProperty> props) {
+	private String[] populateStrings(List<OWLAnnotationProperty> props) {
 		List<String> strs = new ArrayList<String>();
 		for (OWLAnnotationProperty p : props) {
 			Optional<String> optl = NCIEditTab.currentTab().getRDFSLabel(p);

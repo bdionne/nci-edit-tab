@@ -221,7 +221,7 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 		if (val instanceof NCIOWLAnnotationsFrameSectionRow) {
 			axiom = ((NCIOWLAnnotationsFrameSectionRow)val).getAxiom();
 			OWLAnnotationProperty annoProp = axiom.getProperty();
-			Set<OWLAnnotationProperty> complexProps = NCIEditTab.currentTab().getComplexProperties();
+			List<OWLAnnotationProperty> complexProps = NCIEditTab.currentTab().getComplexProperties();
 			if(complexProps.contains(annoProp)) {
 				return true;
 			}

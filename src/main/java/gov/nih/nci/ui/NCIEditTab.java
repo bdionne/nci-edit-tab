@@ -420,7 +420,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		}		
 	}	
 	
-	private Set<OWLAnnotationProperty> complex_properties = new HashSet<OWLAnnotationProperty>();
+	private List<OWLAnnotationProperty> complex_properties = new ArrayList<OWLAnnotationProperty>();
 	
 	private Set<OWLAnnotationProperty> not_equal_props = new HashSet<OWLAnnotationProperty>();
 	
@@ -461,7 +461,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return codes;
 	}
 	
-	public Set<OWLAnnotationProperty> getComplexProperties() {
+	public List<OWLAnnotationProperty> getComplexProperties() {
 		return complex_properties;
 	}
 	
@@ -1346,12 +1346,14 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			OWLSubClassOfAxiom ax = df.getOWLSubClassOfAxiom(newClass, selectedClass);
     			changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
     			
-    			Optional<OWLAnnotationValue> sem_typ = this.getSemanticType(selectedClass);
-    			if (sem_typ.isPresent()) {
-    				OWLAnnotationValue sem_typ_val = sem_typ.get();
-    				OWLAxiom sem_typ_ax = 
-    						df.getOWLAnnotationAssertionAxiom(SEMANTIC_TYPE, newClass.getIRI(), sem_typ_val);
-    				changes.add(new AddAxiom(mngr.getActiveOntology(), sem_typ_ax));
+    			if (SEMANTIC_TYPE != null) {
+    				Optional<OWLAnnotationValue> sem_typ = this.getSemanticType(selectedClass);
+    				if (sem_typ.isPresent()) {
+    					OWLAnnotationValue sem_typ_val = sem_typ.get();
+    					OWLAxiom sem_typ_ax = 
+    							df.getOWLAnnotationAssertionAxiom(SEMANTIC_TYPE, newClass.getIRI(), sem_typ_val);
+    					changes.add(new AddAxiom(mngr.getActiveOntology(), sem_typ_ax));
+    				}
     			}
     		}
     		if (dontApply) {
@@ -1608,6 +1610,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 				if (options.isPresent()) {
 					ProjectOptions opts = options.get();
 					Set<String> complex_props = opts.getValues(COMPLEX_PROPS);
+					complex_properties = new ArrayList<OWLAnnotationProperty>();
 					if (complex_props != null) {						
 						for (String cp : complex_props) {
 							OWLAnnotationProperty p = lookUp(cp);
@@ -1774,7 +1777,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	OWLAnnotationProperty getSingleProperty(String ps, ProjectOptions opts) {
 		OWLAnnotationProperty prop = null;
 		Set<String> ss = opts.getValues(ps);
-		if (ss != null) {
+		if (!ss.isEmpty()) {
 			prop = lookUp((String) ss.toArray()[0]);
 		}
 		return prop;

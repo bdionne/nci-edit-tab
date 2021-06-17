@@ -41,7 +41,7 @@ public class EditPanel extends JPanel {
 
 	private OWLEditorKit owlEditorKit;
 	
-	private Set<OWLAnnotationProperty> complexProps;
+	private List<OWLAnnotationProperty> complexProps;
 	
 	private Set<OWLAnnotationProperty> propsToExclude;
 	

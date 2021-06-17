@@ -337,7 +337,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 	private void init() {
 
 		complexProps = new HashSet<String>();
-		Set<OWLAnnotationProperty> cprops = tab.getComplexProperties();
+		List<OWLAnnotationProperty> cprops = tab.getComplexProperties();
 		for (OWLAnnotationProperty p : cprops) {
 			complexProps.add(p.getIRI().getShortForm());
 		}
