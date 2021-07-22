@@ -685,7 +685,8 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	Optional<String> mergeTargetCode = getCode(current_op.getTarget());
     	if (mergeSourceCode.isPresent() &&
     			mergeTargetCode.isPresent()) {
-    		return ((LocalHttpClient) clientSession.getActiveClient()).codeIsLessThan(mergeSourceCode.get(), mergeTargetCode.get());
+    		return ((LocalHttpClient) clientSession.getActiveClient()).codeIsLessThan(mergeSourceCode.get(), mergeTargetCode.get(),
+    				clientSession.getActiveProject());
     	} else {
     		return false;
     	}
