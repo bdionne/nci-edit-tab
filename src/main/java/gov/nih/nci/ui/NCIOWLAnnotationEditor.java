@@ -48,6 +48,10 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
     protected final OWLEditorKit owlEditorKit;
 
     private JTabbedPane tabbedPane;
+    
+    private int curr_jtab = 0;
+    
+    private boolean isIRI = false;
 
     private JPanel mainPanel;
 
@@ -131,6 +135,28 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
             tabCount++;
         }
         tabbedPane.setSelectedIndex(selIndex);
+        tabbedPane.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JTabbedPane sourceTabbedPane = (JTabbedPane) e.getSource();
+		        int index = sourceTabbedPane.getSelectedIndex();
+		        if (index != curr_jtab) {
+		        	if (isIRI) {
+		        		OWLObjectEditor<?> editor = editors.get(index);
+						if ((editor instanceof IRIFromEntityEditor) ||
+								(editor instanceof IRITextEditor)) {
+							curr_jtab = index;
+						}
+		        		
+		        	}
+		        			        	
+		        }
+		        tabbedPane.setSelectedIndex(curr_jtab);
+			}
+        	
+        });
+        
     }
 
 
@@ -150,6 +176,7 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
 			public void stateChanged(ChangeEvent e) {				
 				OWLAnnotationProperty prop = annotationPropertySelector.getSelectedObject();				
 				if (prop != null) {
+					isIRI = false;
 					IRI range = getDataTypeIRI(prop);
 					if (range != null) {
 						if (enumEditor.isDataTypeCombobox(range)) {
@@ -157,14 +184,19 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
 							for (int i = 0; i < editors.size(); i++) {
 								OWLObjectEditor<?> editor = editors.get(i);
 								if (editor instanceof EnumEditor) {
+									curr_jtab = i;
 									tabbedPane.setSelectedIndex(i);
+									
 								}
 							}
 						} else if (range.getShortForm().equals("anyURI")) {
+							isIRI = true;
 							for (int i = 0; i < editors.size(); i++) {
 								OWLObjectEditor<?> editor = editors.get(i);
 								if (editor instanceof IRIFromEntityEditor) {
+									curr_jtab = i;
 									tabbedPane.setSelectedIndex(i);
+									
 								}
 							}
 							
@@ -174,7 +206,9 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
 								OWLObjectEditor<?> editor = editors.get(i);
 								if (editor instanceof OWLConstantEditor) {
 									((OWLConstantEditor) editor).setDataType(getOWLDatatype(prop));
+									curr_jtab = i;
 									tabbedPane.setSelectedIndex(i);
+									
 								}
 							}
 							
@@ -185,10 +219,14 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
 							OWLObjectEditor<?> editor = editors.get(i);
 							if (editor instanceof OWLConstantEditor) {
 								((OWLConstantEditor) editor).setDataType(getOWLDatatype(prop));
+								curr_jtab = i;
 								tabbedPane.setSelectedIndex(i);
+								
 							}
 						}
 					}
+					
+					
 				}
 			}
 			
@@ -250,11 +288,14 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
             		editor.setEditedObject(annotation.getValue());
             		if (tabIndex == -1) {
             			tabIndex = i;
+            			
             		}
+            		curr_jtab = tabIndex;
             	}
             	else {
             		editor.clear();
             		editor.setEditedObject(null);
+            		
             	}
             }
         }
@@ -266,6 +307,7 @@ public class NCIOWLAnnotationEditor extends AbstractOWLObjectEditor<OWLAnnotatio
                 editor.clear();
                 if(lastEditorName.equals(editor.getEditorTypeName())) {
                     tabIndex = i;
+                    curr_jtab = i;
                 }
             }
         }
