@@ -29,6 +29,9 @@ import gov.nih.nci.ui.NCIEditTab;
 public abstract class BatchTask {
 	
 	private static final Logger log = Logger.getLogger(BatchTask.class.getName());
+	
+	// Windows tools add a BOM at the beginning of the file, which messes with Java, so we strip it
+	public static final String UTF8_BOM = "\uFEFF";
 
 	public static enum TaskType {
 		LOAD, EDIT_SIMPLE_PROPS, EDIT_COMPLEX_PROPS, EDIT_PARENTS, EDIT_ROLES
@@ -241,7 +244,14 @@ public abstract class BatchTask {
 			
 			inFile = new BufferedReader(new InputStreamReader(new FileInputStream(filename), cs));
 			int cnt = 1;
+			boolean firstLine = true;
 			while ((s = inFile.readLine()) != null) {
+				if (firstLine) {
+					if (s.startsWith(UTF8_BOM)) {
+			            s = s.substring(1);
+			        }
+					firstLine = false;					
+				}
 				s = s.trim();
 				if (s.contains(repl)) {
 					print("skipping, non-utf8 chars in line: " + cnt + "\n" + s);

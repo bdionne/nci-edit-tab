@@ -22,6 +22,14 @@ public class SimplePropProcessor extends EditProcessor {
 		
 
 		Vector<String> w = super.validateData(v);
+		
+		if (!(v.size() >= 4)) {
+
+			String error_msg = " -- input file should have 4 fields for editing Simple Property.";
+			w.add(error_msg);
+			return w;
+
+		}
 
 		if (classToEdit != null) {
 			try {
@@ -91,6 +99,11 @@ public class SimplePropProcessor extends EditProcessor {
 				case NEW:
 					if ( v.size() == 4 ) {
 						prop_value = (String) v.elementAt(3);
+						if (!checkCorrectlyQuoted(prop_value)) {
+							String error_msg = " -- property value not correctly quoted.";
+							w.add(error_msg);
+							
+						}
 						if (tab.hasPropertyValue(classToEdit, prop_iri,
 								prop_value)) {
 							String error_msg = " -- property already exists.";
@@ -111,7 +124,6 @@ public class SimplePropProcessor extends EditProcessor {
 					break;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				w.add("Exception caught" + e.toString());
 			}
 		}
@@ -151,6 +163,13 @@ public class SimplePropProcessor extends EditProcessor {
 	
 	private boolean checkBatchProperty(String propName, String value) {
 		return tab.checkType(propName, value);
+	}
+	
+	private boolean checkCorrectlyQuoted(String s) {
+		if (s.startsWith("\"")) {
+			return s.endsWith("\"");
+		}
+		return true;
 	}
 	
 	
