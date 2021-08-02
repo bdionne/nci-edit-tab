@@ -1554,7 +1554,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	
-	private void initProperties() {
+	private synchronized void initProperties() {
 		
 		getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
 		
