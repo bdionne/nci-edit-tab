@@ -30,7 +30,7 @@ public class ComplexOperation {
 	public void setCurrentlyEditing(OWLClass c) { currently_editing = c; }
 	public OWLClass getCurrentlyEditing() { return currently_editing; }
 	
-	private List<OWLClass> already_seen = null;
+	private List<OWLClass> already_seen = new ArrayList<OWLClass>();
 	
 	private OWLClass class_to_retire = null;
 	public OWLClass getRetireClass() { return class_to_retire; }
