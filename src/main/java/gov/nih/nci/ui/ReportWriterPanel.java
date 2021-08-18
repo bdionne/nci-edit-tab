@@ -50,6 +50,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedObject;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 import edu.stanford.protege.csv.export.ui.ExportDialogPanel;
@@ -422,13 +423,8 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 				classList.add("");
 			}
 
-			String pt = null;
-			Optional<String> supLabel = tab.getRDFSLabel(superCls);
-			if (supLabel.isPresent()) {
-				pt = supLabel.get();
-			} else {
-				pt = superCls.getIRI().getShortForm();
-			}
+			String pt = getLabel(superCls);
+			
 			
 
 			if (withoutAttrsWithId) {
@@ -551,7 +547,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 		for (OWLAnnotation ann : annotations) {
 			OWLAnnotationProperty ap = ann.getProperty();
-			String slotname = ap.getIRI().getShortForm();
+			String slotname = getLabel(ap);
 			String entry = "";
 			if (this.complexProps.contains(slotname)) {
 				Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
@@ -563,13 +559,8 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 				Set<OWLAnnotation> quals = tab.getDependentAnnotations(cls,ap);
 				for (OWLAnnotation qualAnn : quals) {
 					OWLAnnotationProperty qap = qualAnn.getProperty();
-					String qslotname = null;
-					Optional<String> qapLabel = tab.getRDFSLabel(qap);
-					if (qapLabel.isPresent()) {
-						qslotname = qapLabel.get();
-					} else {
-						qslotname = qap.getIRI().getShortForm();
-					}
+					String qslotname = getLabel(qap);
+					
 					String qentry = "";
 					Optional<OWLLiteral> qstrentry = qualAnn.getValue().asLiteral();
 					if (qstrentry.isPresent()) {
@@ -681,6 +672,15 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 				return ExportType.FILEINPUT;
 			}
 			return ExportType.CLASSIC;
+		}
+	}
+	
+	public String getLabel(OWLNamedObject obj) {
+		Optional<String> nam = tab.getRDFSLabel(obj);
+		if (nam.isPresent()) {
+			return nam.get();
+		} else {
+			return obj.getIRI().getShortForm();
 		}
 	}
 
