@@ -60,12 +60,12 @@
         <dependency>
         	<groupId>edu.stanford.protege</groupId>
     	    <artifactId>lucene-search-tab</artifactId>
-            <version>1.2.3-SNAPSHOT</version>
+            <version>1.2.5-SNAPSHOT</version>
         </dependency>
         <dependency>
         	<groupId>gov.nih.nci</groupId>
     	    <artifactId>nci-curator</artifactId>
-            <version>0.0.9-SNAPSHOT</version>
+            <version>0.1.2-SNAPSHOT</version>
         </dependency>
 	</dependencies>
 	
