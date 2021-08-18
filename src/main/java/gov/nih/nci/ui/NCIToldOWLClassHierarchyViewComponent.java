@@ -270,7 +270,7 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 	public void retireClass() {
 		OWLClass selectedClass = getSelectedEntity();
 		NCIEditTab.currentTab().retire(selectedClass);
-		refreshTree();
+		NCIEditTab.currentTab().refreshNavTree();
 		
 	}
 	

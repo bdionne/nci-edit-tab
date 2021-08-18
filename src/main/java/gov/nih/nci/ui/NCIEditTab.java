@@ -1089,7 +1089,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     public void updateRetire() {    	
     	editInProgress = false;
     	navTree.setSelectedEntity(current_op.getRetireClass());
-    	navTree.refreshTree();
     	this.fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));    	
     }
     

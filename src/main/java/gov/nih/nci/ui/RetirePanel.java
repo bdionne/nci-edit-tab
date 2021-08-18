@@ -34,6 +34,8 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
+import gov.nih.nci.ui.event.ComplexEditType;
+import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.transferhandler.RetireTransferHandler;
 import gov.nih.nci.utils.ReferenceFinder;
 
@@ -160,6 +162,8 @@ public class RetirePanel extends JPanel {
     					NCIEditTab.currentTab().selectClass(classToRetire);
     					NCIEditTab.currentTab().refreshNavTree();
     					NCIEditTab.currentTab().completeRetire();
+    					NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), 
+    							ComplexEditType.READ));
     				}
     			} else if (retireButton.getText().equals("Approve")) {
     				approveRetire();
@@ -168,6 +172,7 @@ public class RetirePanel extends JPanel {
     			} else {
     				// proceed to retire
     				if (NCIEditTab.currentTab().completeRetire(fixups)) {
+    					NCIEditTab.currentTab().refreshNavTree();
     					retireButton.setText("Save");
     				}			
     			}
