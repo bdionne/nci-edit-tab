@@ -18,7 +18,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -33,13 +32,10 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-//import javax.swing.SwingWorker;
 
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
@@ -51,41 +47,10 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedObject;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 import edu.stanford.protege.csv.export.ui.ExportDialogPanel;
-//import gov.nih.nci.ui.dialog.LQTExportDialog;
 import gov.nih.nci.ui.dialog.RepWriterConfigDialog;
 import gov.nih.nci.utils.QuickSortVecStrings;
-/**
-import edu.stanford.smi.protege.action.ExportToCsvUtil;
-import edu.stanford.smi.protege.model.Cls;
-import edu.stanford.smi.protege.model.Instance;
-import edu.stanford.smi.protege.model.Model;
-import edu.stanford.smi.protege.model.Slot;
-import edu.stanford.smi.protege.model.ValueType;
-import edu.stanford.smi.protege.query.ui.NCIExportToCsvAction;
-import edu.stanford.smi.protege.ui.FrameComparator;
-import edu.stanford.smi.protege.util.FrameWithBrowserText;
-import edu.stanford.smi.protege.util.Log;
-import edu.stanford.smi.protege.util.ModalDialog;
-import edu.stanford.smi.protege.util.ModalDialog.CloseCallback;
-import edu.stanford.smi.protegex.owl.model.OWLModel;
-import edu.stanford.smi.protegex.owl.model.OWLNamedClass;
-import edu.stanford.smi.protegex.owl.model.RDFProperty;
-import edu.stanford.smi.protegex.owl.model.RDFResource;
-import edu.stanford.smi.protegex.owl.model.RDFSClass;
-import edu.stanford.smi.protegex.owl.model.RDFSNames;
-
-import gov.nih.nci.protegex.dialog.RepWriterConfigDialog;
-import gov.nih.nci.protegex.edit.NCIConditionsTableModel;
-import gov.nih.nci.protegex.edit.NCIEditTab;
-import gov.nih.nci.protegex.edit.OWLWrapper;
-import gov.nih.nci.protegex.util.ClsUtil;
-import gov.nih.nci.protegex.util.ComplexPropertyParser;
-import gov.nih.nci.protegex.util.QuickSortVecStrings;
-**/
-import gov.nih.nci.utils.SwingWorker;
 
 /**
  * @author Bob Dionne
@@ -340,7 +305,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		complexProps = new HashSet<String>();
 		List<OWLAnnotationProperty> cprops = tab.getComplexProperties();
 		for (OWLAnnotationProperty p : cprops) {
-			complexProps.add(p.getIRI().getShortForm());
+			complexProps.add(getLabel(p));
 		}
 
 		this.classList = new Vector<String>();
@@ -496,19 +461,13 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 		Set<OWLAnnotation> annotations = tab.getAnnotations(cls);
 		for (OWLAnnotation ann : annotations) {
 			OWLAnnotationProperty ap = ann.getProperty();
-			String slotname = "";
-			String entry = "";
+			
 			if (ap.equals(NCIEditTabConstants.CODE_PROP) ||
 					ap.equals(NCIEditTabConstants.PREF_NAME)) {
+				
+				String slotname = getLabel(ap);
 
-				if (ap.equals(NCIEditTabConstants.CODE_PROP)) {
-					Optional<String> lab = tab.getRDFSLabel(ap);
-					if (lab.isPresent()) {
-						slotname = lab.get();
-					}				
-				} else if (ap.equals(NCIEditTabConstants.PREF_NAME)) {
-					slotname = ann.getProperty().getIRI().getShortForm();				
-				}
+				String entry = "";
 
 				Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
 				if (strentry.isPresent()) {
@@ -523,16 +482,11 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 		for (OWLAnnotation ann : annotations) {
 			OWLAnnotationProperty ap = ann.getProperty();
-			String slotname = ann.getProperty().getIRI().getShortForm();			
+			String slotname = getLabel(ap);			
 			if (this.complexProps.contains(slotname)) {
-				// more to do
+				// more to do later
 			} else {
-				if (ap.equals(NCIEditTabConstants.CODE_PROP)) {
-					Optional<String> lab = tab.getRDFSLabel(ap);
-					if (lab.isPresent()) {
-						slotname = lab.get();
-					}					
-				}
+				
 				String entry = "";
 				Optional<OWLLiteral> strentry = ann.getValue().asLiteral();
 				if (strentry.isPresent()) {
