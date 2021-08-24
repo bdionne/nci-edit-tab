@@ -27,7 +27,7 @@ public class ComplexOperation {
 	public OWLClass getTarget() { return target; }
 	
 	private OWLClass currently_editing = null;
-	public void setCurrentlyEditing(OWLClass c) { currently_editing = c; }
+	public void setCurrentlyEditing(OWLClass c) { currently_editing = c;}
 	public OWLClass getCurrentlyEditing() { return currently_editing; }
 	
 	private List<OWLClass> already_seen = new ArrayList<OWLClass>();
@@ -155,7 +155,7 @@ public class ComplexOperation {
 			}*/
 			// check intitial state
 			if (currently_editing == null) {
-				currently_editing = subjects.get(0);
+				currently_editing = subjects.get(1);
 			}
 			for (OWLClass c : subjects) {
 				if (!(c.equals(source) ||
