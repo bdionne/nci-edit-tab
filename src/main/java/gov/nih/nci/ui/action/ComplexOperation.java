@@ -155,7 +155,11 @@ public class ComplexOperation {
 			}*/
 			// check intitial state
 			if (currently_editing == null) {
-				currently_editing = subjects.get(1);
+				if (type == MERGE && subjects.size() > 1) {
+					currently_editing = subjects.get(1);
+				} else {
+					currently_editing = subjects.get(0);
+				}
 			}
 			for (OWLClass c : subjects) {
 				if (!(c.equals(source) ||
