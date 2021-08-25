@@ -2593,9 +2593,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         List<OWLOntologyChange> changes = new ArrayList<>();
         OWLModelManagerEntityRenderer ren = getOWLModelManager().getOWLEntityRenderer();
         List<IRI> annotIRIs = null;
+        String selectedClassName = null;
         if (ren instanceof OWLEntityAnnotationValueRenderer){
+            selectedClassName = getOWLModelManager().getRendering(selectedClass);
             annotIRIs = OWLRendererPreferences.getInstance().getAnnotationIRIs();
         }
+
+        LiteralExtractor literalExtractor = new LiteralExtractor();
 
         OWLOntology ont = getOWLModelManager().getActiveOntology();
         
@@ -2604,8 +2608,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         	final OWLAnnotation annot = ax.getAnnotation();
         	if (annotIRIs == null || !annotIRIs.contains(annot.getProperty().getIRI())) {
         		if (okToCopy(annot.getProperty())) {
+        			String label = literalExtractor.getLiteral(annot.getValue());
+        			if (label == null || !label.equals(selectedClassName)){
         				OWLAxiom duplicatedAxiom = dup.duplicateObject(ax);
         				changes.add(new AddAxiom(ont, duplicatedAxiom));
+        			}
         		}
         	}
         }
