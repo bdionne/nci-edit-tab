@@ -2612,6 +2612,12 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         			if (label == null || !label.equals(selectedClassName)){
         				OWLAxiom duplicatedAxiom = dup.duplicateObject(ax);
         				changes.add(new AddAxiom(ont, duplicatedAxiom));
+        			} else if (label.equals(selectedClassName) &&
+        					annot.getProperty().equals(this.getFullSyn())) {
+        				
+        			} else {
+        				OWLAxiom duplicatedAxiom = dup.duplicateObject(ax);
+        				changes.add(new AddAxiom(ont, duplicatedAxiom));
         			}
         		}
         	}
