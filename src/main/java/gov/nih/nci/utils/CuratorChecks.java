@@ -372,14 +372,16 @@ public class CuratorChecks {
 	private boolean checkRedundantParents(OWLClass cls, OWLClass newParent) {
 		boolean found = false;
 		try {
-			found = findPath(cls, newParent);
+			found = findPath(cls, newParent, false);
 		} catch (Exception ex) {
 			found = true;    				
 		}
 		if (found) {
 			// ask user if redundant parent ok or NOT
 			if (JOptionPane.showConfirmDialog(null,
-					"Asserted parent is already parent of existing parent!",
+					"Asserted parent: " +
+			         newParent.getIRI().getFragment() +
+			         "\nis already parent of existing parent! ",
 					"Ontology Project changed",
 					JOptionPane.OK_CANCEL_OPTION,
 					JOptionPane.WARNING_MESSAGE) ==
@@ -389,6 +391,34 @@ public class CuratorChecks {
 				return false;
 			}
 		}
+		
+		Set<OWLClass> assertedParents = getStatedParents(cls);
+    	
+		for (OWLClass ap : assertedParents) {
+			if (!ap.equals(newParent)) {
+				try {
+					found = findPath(newParent, ap, true);
+				} catch (Exception ex) {
+					found = true;    				
+				}
+				if (found) {
+					if (JOptionPane.showConfirmDialog(null,
+							"Asserted parent: " + newParent.getIRI().getFragment() +
+							"\nis already a child of existing parent: "
+							+ ap.getIRI().getFragment() +
+							"\nconsider deleting ancestor",
+							"Ontology Project changed",
+							JOptionPane.OK_CANCEL_OPTION,
+							JOptionPane.WARNING_MESSAGE) ==
+							JOptionPane.OK_OPTION) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+		}		
+		
 		// not found then it's ok
 		return !found;
 		
@@ -455,15 +485,24 @@ public class CuratorChecks {
         return res;
     }
     
-    private boolean findPath(OWLClass src, OWLClass target) throws Exception {
+    
+    
+    private boolean findPath(OWLClass src, OWLClass target, boolean checkBase) throws Exception {
     	Set<OWLClass> assertedParents = getStatedParents(src);
     	
+    	if (checkBase && assertedParents.contains(target)) {
+    		throw new Exception();
+    		
+    	}
+    	
+    	
 		for (OWLClass ap : assertedParents) {
+			
 			Set<OWLClass> app = getStatedParents(ap);
 			if (app.contains(target)) {
 				throw new Exception();				
 			} else {
-				findPath(ap, target);
+				findPath(ap, target, checkBase);
 			}
 		}
 		return false;
