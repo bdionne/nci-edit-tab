@@ -1555,7 +1555,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	private synchronized void initProperties() {
 		
-		getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
+		//getOWLEditorKit().getSearchManager().disableIncrementalIndexing();
 		
 		
 		LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
@@ -1611,7 +1611,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					ProjectOptions opts = options.get();
 					Set<String> complex_props = opts.getValues(COMPLEX_PROPS);
 					complex_properties = new ArrayList<OWLAnnotationProperty>();
-					if (complex_props != null) {						
+					if (!complex_props.isEmpty()) {						
 						for (String cp : complex_props) {
 							OWLAnnotationProperty p = lookUp(cp);
 							if (p != null) {
@@ -1628,7 +1628,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 							// oprops are options, they do not have the rquired annotation or they have it set to false
 							Set<OWLAnnotationProperty> oprops = new HashSet<OWLAnnotationProperty>();
 							Set<String> dependents = opts.getValues(cp);
-							if (dependents != null) {
+							if (!dependents.isEmpty()) {
 								for (String dp : dependents) {
 									OWLAnnotationProperty dpProp = lookUp(dp);
 									if (dpProp != null) {
@@ -1657,7 +1657,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 						}
 					}
 					Set<String> imm_props = opts.getValues(IMMUTABLE_PROPS);
-					if (imm_props != null) {
+					if (!imm_props.isEmpty()) {
 						for (String ip : imm_props) {
 							OWLAnnotationProperty p = lookUp(ip);
 							if (p != null) {
@@ -1764,7 +1764,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	OWLClass findOWLClass(String opt, ProjectOptions opts) {
 		OWLClass cls = null;
 		Set<String> ss = opts.getValues(opt);
-		if (ss != null) {
+		if (!ss.isEmpty()) {
 			IRI iri = IRI.create((String) ss.toArray()[0]);
 			Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
 			for (OWLEntity et : classes) {
