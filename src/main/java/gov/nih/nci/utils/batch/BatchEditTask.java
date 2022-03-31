@@ -1,5 +1,6 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import gov.nih.nci.ui.BatchProcessOutputPanel;
@@ -84,7 +85,7 @@ public class BatchEditTask extends BatchTask {
 
 	
 
-	public Vector<String> validateData(Vector<String> v) {
+	public ArrayList<Vector<String>> validateData(Vector<String> v) {
 		
 		return processor.validateData(v);
 

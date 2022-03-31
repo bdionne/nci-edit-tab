@@ -1,5 +1,6 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -21,9 +22,10 @@ public class ComplexPropProcessor extends EditProcessor {
 		super(t);
 	}
 	
-	public Vector<String> validateData(Vector<String> v) {
+	public ArrayList<Vector<String>> validateData(Vector<String> v) {
 		PropertyCheckUtil pcUtil = new PropertyCheckUtil();
-		Vector<String> w = super.validateData(v);
+		ArrayList<Vector<String>> err_warn = super.validateData(v);
+		Vector<String> w = err_warn.get(0);
 		
 		if (classToEdit != null) {
 			try {
@@ -38,7 +40,7 @@ public class ComplexPropProcessor extends EditProcessor {
 					String error_msg = " -- property " + prop_iri
 							+ " is restricted.";
 					w.add(error_msg);
-					return w;
+					return err_warn;
 					
 				}
 				
@@ -46,12 +48,12 @@ public class ComplexPropProcessor extends EditProcessor {
 					String error_msg = " -- property " + prop_iri
 							+ " is not identifiable.";
 					w.add(error_msg);
-					return w;
+					return err_warn;
 				} else if (tab.isReadOnlyProperty(prop_iri)) {
 					String error_msg = " -- property "
 							+ prop_iri + ", it is read-only.";
 					w.add(error_msg);
-					return w;
+					return err_warn;
 				}
 
 
@@ -104,7 +106,7 @@ public class ComplexPropProcessor extends EditProcessor {
 								+ prop_value
 								+ ") does not exist.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 					}
 					
 					if (tab.hasComplexPropertyValue(classToEdit, prop_iri,
@@ -114,13 +116,13 @@ public class ComplexPropProcessor extends EditProcessor {
 								+ prop_value
 								+ ") already exists.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 					}
 					
 					String new_qual_errors = pcUtil.checkQualifierTypes(prop_iri, new_qualifiers);
 					if (new_qual_errors != null) {
 						w.add(new_qual_errors);
-						return w;
+						return err_warn;
 					}
 					break;				
 				case NEW:				
@@ -131,12 +133,12 @@ public class ComplexPropProcessor extends EditProcessor {
 								+ prop_value
 								+ ") already exists.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 					}
 					String qual_errors = pcUtil.checkQualifierTypes(prop_iri, qualifiers);
 					if (qual_errors != null) {
 						w.add(qual_errors);
-						return w;
+						return err_warn;
 					}
 					
 					break;
@@ -149,7 +151,7 @@ public class ComplexPropProcessor extends EditProcessor {
 			}
 		}
 
-		return w;
+		return err_warn;
 	}
 	
 	public boolean processData(Vector<String> w) {

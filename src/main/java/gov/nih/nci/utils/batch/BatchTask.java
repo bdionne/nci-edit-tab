@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -41,6 +42,8 @@ public abstract class BatchTask {
 
 	boolean done = false;
 	private boolean canProceed = true;
+	
+	public int no_warnings = 0;
 
 	public boolean canProceed() {
 		return canProceed;
@@ -92,6 +95,7 @@ public abstract class BatchTask {
 		bp = be;
 		tab = t;
 		setMax(10000);
+		no_warnings = 0;
 		cancelled = false;
 		String title = "Batch Processing";
 		setTitle(title);
@@ -213,7 +217,9 @@ public abstract class BatchTask {
 	}
 
 	public boolean 	checkNoErrors(Vector<String> w, int i) {
-		Vector<String> errors = validateData(w);
+		ArrayList<Vector<String>> err_warn = validateData(w);
+		Vector<String> errors = err_warn.get(0);
+		Vector<String> warnings = err_warn.get(1);
 		if (errors.size() > 0) {
 			for (int j = 0; j < errors.size(); j++) {
 				print("record " + (i+1) + ": " + errors.elementAt(j));
@@ -221,8 +227,17 @@ public abstract class BatchTask {
 			return false;
 
 		}
+		if (warnings.size() > 0) {
+			no_warnings =+ warnings.size();
+			for (int j = 0; j < warnings.size(); j++) {
+				print("record " + (i+1) + ": WARNING:" + warnings.elementAt(j));
+			}
+			
+
+		}
 		return true;
 	}
+	
 
 	public String getToday() {
 		Calendar cal = Calendar.getInstance();
@@ -271,7 +286,7 @@ public abstract class BatchTask {
 		return v;
 	}
 
-	public abstract Vector<String> validateData(Vector<String> v);
+	public abstract ArrayList<Vector<String>> validateData(Vector<String> v);
 
 	public Vector<String> parseTokens(String value) {
 		Vector<String> tokenValues = new Vector<String>();

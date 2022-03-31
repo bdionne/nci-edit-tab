@@ -1861,6 +1861,25 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return true;		
 	}
 	
+	public boolean checkAnyURIValue(String propName, String value) {
+		OWLAnnotationProperty prop = lookUpShort(propName);
+		IRI type = getDataType(prop);
+		if (type != null) {
+			
+			if (type.getShortForm().equals("anyURI")) {
+				IRI val = null;
+				if (value.startsWith("http:")) {
+					val = IRI.create(value);				
+				} else {
+					val = IRI.create(CODE_PROP.getIRI().getNamespace() + value);
+				}
+				return !ontology.getEntitiesInSignature(val).isEmpty();
+							
+			}
+		}
+		return true;		
+	}
+	
 	public boolean isLastParent(OWLClass cls, OWLClass par) {
 		Set<OWLClass> parents = getOWLEditorKit().getOWLModelManager().getOWLHierarchyManager().getOWLClassHierarchyProvider().getParents(cls);
 		if (parents.size() == 1) {
@@ -2443,7 +2462,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		OWLAxiom ax;
 		
 		IRI type = this.getDataType(prop);
-		if (type.getShortForm().equals("anyURI")) {
+		if ((type != null) && type.getShortForm().equals("anyURI")) {
 			IRI val;
 			if (value.startsWith("http:")) {
 				val = IRI.create(value);				

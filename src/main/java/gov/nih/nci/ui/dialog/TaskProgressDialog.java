@@ -247,6 +247,7 @@ public class TaskProgressDialog extends JDialog implements ActionListener {
 			    task.complete();
 				long total = System.currentTimeMillis() - beg;
 				task.print("Total run time was: " + total + " ms");
+				task.print("Total number of warnings: " + task.no_warnings);
 				
 	            
 				task.print("Total successful completion: " + num_completed + " out of: " + i);

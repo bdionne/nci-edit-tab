@@ -1,5 +1,6 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLClass;
@@ -19,9 +20,11 @@ public class ParentsProcessor extends EditProcessor {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public Vector<String> validateData(Vector<String> v) {
+	public ArrayList<Vector<String>> validateData(Vector<String> v) {
 		
-		Vector<String> w = super.validateData(v);
+		ArrayList<Vector<String>> err_warn = super.validateData(v);
+		
+		Vector<String> w = err_warn.get(0);
 
 		if (classToEdit != null) {
 			try {
@@ -34,7 +37,7 @@ public class ParentsProcessor extends EditProcessor {
 					String error_msg = " -- parent concept " + parent_id
 							+ " does not exist.";
 					w.add(error_msg);
-					return w;
+					return err_warn;
 				}
 				
 				switch (operation) {
@@ -43,13 +46,13 @@ public class ParentsProcessor extends EditProcessor {
 						String error_msg = " -- parent concept " + parent_id
 								+ " does not exist on class.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 					}
 					if (tab.isLastParent(classToEdit, par_class)) {
 						String error_msg = " -- parent concept " + parent_id
 								+ " is the last one and can't be deleted.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 					}
 					break;
 				case MODIFY:
@@ -57,7 +60,7 @@ public class ParentsProcessor extends EditProcessor {
 						String error_msg = " -- parent concept " + parent_id
 								+ " does not exist on class.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 					}
 					
 					new_parent_id = (String) v.elementAt(3);		
@@ -67,12 +70,12 @@ public class ParentsProcessor extends EditProcessor {
 						String error_msg = " -- new parent concept " + new_parent_id
 								+ " does not exist.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 					} else if (tab.hasParent(classToEdit, new_par_class)) {
 						String error_msg = " -- new parent concept " + parent_id
 								+ " already exists as parent on class.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 						
 					}
 					break;
@@ -81,7 +84,7 @@ public class ParentsProcessor extends EditProcessor {
 						String error_msg = " -- new parent concept " + parent_id
 								+ " already exists as parent on class.";
 						w.add(error_msg);
-						return w;
+						return err_warn;
 						
 					}
 					break;
@@ -93,7 +96,7 @@ public class ParentsProcessor extends EditProcessor {
 			}
 		}
 
-		return w;
+		return err_warn;
 	}
 	
 	public boolean processData(Vector<String> data) {

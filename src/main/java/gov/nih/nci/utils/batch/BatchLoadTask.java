@@ -62,8 +62,13 @@ public class BatchLoadTask extends BatchTask {
 		
 	}
 
-	public Vector<String> validateData(Vector<String> v) {
+	public ArrayList<Vector<String>> validateData(Vector<String> v) {
 		Vector<String> w = new Vector<String>();
+		Vector<String> warnings = new Vector<String>();
+		ArrayList<Vector<String>> err_warn = new ArrayList<Vector<String>>();
+		err_warn.add(w);
+		err_warn.add(warnings);
+		
 		try {
 			
 				
@@ -95,7 +100,7 @@ public class BatchLoadTask extends BatchTask {
 			return null;
 		}
 
-		return w;
+		return err_warn;
 
 	}
 

@@ -1,5 +1,6 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 
@@ -22,8 +23,10 @@ public class RolesProcessor extends EditProcessor {
 		supportedRoles = tab.getSupportedRoles();
 	}
 
-	public Vector<String> validateData(Vector<String> v) {
-		Vector<String> w = super.validateData(v);
+	public ArrayList<Vector<String>> validateData(Vector<String> v) {
+		ArrayList<Vector<String>> err_warn = super.validateData(v);
+		
+		Vector<String> w = err_warn.get(0);
 
 		if (classToEdit != null) {
 			try {
@@ -38,7 +41,7 @@ public class RolesProcessor extends EditProcessor {
 					String error_msg = " -- role " + role_iri
 							+ " is not identifiable.";
 					w.add(error_msg);
-					return w;
+					return err_warn;
 				}
 				
 				boolean role_exists = hasRole(classToEdit, role_iri, mod, filler);
@@ -77,7 +80,7 @@ public class RolesProcessor extends EditProcessor {
 			}
 		}
 
-		return w;
+		return err_warn;
 	}
 
 	public boolean processData(Vector<String> data) {

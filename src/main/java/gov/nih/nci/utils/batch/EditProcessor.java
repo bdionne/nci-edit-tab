@@ -1,5 +1,6 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLClass;
@@ -18,8 +19,12 @@ public abstract class EditProcessor {
 		
 	public EditProcessor(NCIEditTab t) { tab = t; }
 	
-	public Vector<String> validateData(Vector<String> v) {
+	public ArrayList<Vector<String>> validateData(Vector<String> v) {
 		Vector<String> errors = new Vector<String>();
+		Vector<String> warnings = new Vector<String>();
+		ArrayList<Vector<String>> err_warn = new ArrayList<Vector<String>>();
+		err_warn.add(errors);
+		err_warn.add(warnings);
 		
 		try {
 
@@ -53,7 +58,8 @@ public abstract class EditProcessor {
 			errors.add("Exception caught" + e.toString());
 		}
 		
-		return errors;
+		
+		return err_warn;
 	}
 	
 	public boolean processData(Vector<String> data) {

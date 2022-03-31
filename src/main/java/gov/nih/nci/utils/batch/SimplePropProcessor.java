@@ -1,5 +1,6 @@
 package gov.nih.nci.utils.batch;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -18,16 +19,19 @@ public class SimplePropProcessor extends EditProcessor {
 		
 	}
 	
-	public Vector<String> validateData(Vector<String> v) {
+	public ArrayList<Vector<String>> validateData(Vector<String> v) {
 		
 
-		Vector<String> w = super.validateData(v);
+		ArrayList<Vector<String>> err_warn = super.validateData(v);
+		
+		Vector<String> w = err_warn.get(0);
+		Vector<String> warnings = err_warn.get(1);
 		
 		if (!(v.size() >= 4)) {
 
 			String error_msg = " -- input file should have 4 fields for editing Simple Property.";
 			w.add(error_msg);
-			return w;
+			return err_warn;
 
 		}
 
@@ -41,12 +45,12 @@ public class SimplePropProcessor extends EditProcessor {
 					String error_msg = " -- property " + prop_iri
 							+ " is not identifiable.";
 					w.add(error_msg);
-					return w;
+					return err_warn;
 				} else if (tab.isReadOnlyProperty(prop_iri)) {
 					String error_msg = " -- property "
 							+ prop_iri + ", it is read-only.";
 					w.add(error_msg);
-					return w;
+					return err_warn;
 				}
 
 				switch (operation) {
@@ -87,10 +91,11 @@ public class SimplePropProcessor extends EditProcessor {
 							String error_msg = " -- property already exists.";
 							w.add(error_msg);
 						}
-						if (!checkBatchProperty(prop_iri, new_prop_value)) {
+						if (!checkBatchProperty(prop_iri, new_prop_value, warnings)) {
 							String error_msg = " -- property value has invalid type.";
 							w.add(error_msg);						
 						}
+						
 					} else {
 						String error_msg = " -- input file should have 5 fields for modifying Simple Property.";
 						w.add(error_msg);
@@ -110,11 +115,12 @@ public class SimplePropProcessor extends EditProcessor {
 							w.add(error_msg);
 						}
 						if (!checkBatchProperty(
-								prop_iri, prop_value)) {
+								prop_iri, prop_value, warnings)) {
 							String error_msg = " -- property value has invalid type.";
 							w.add(error_msg);
 							
 						}
+						
 					} else {
 						String error_msg = " -- input file should have 4 fields for adding Simple Property.";
 						w.add(error_msg);
@@ -128,7 +134,7 @@ public class SimplePropProcessor extends EditProcessor {
 			}
 		}
 
-		return w;
+		return err_warn;
 	}
 
 	
@@ -161,9 +167,17 @@ public class SimplePropProcessor extends EditProcessor {
 
 	
 	
-	private boolean checkBatchProperty(String propName, String value) {
+	public boolean checkBatchProperty(String propName, String value, 
+			Vector<String> warn ) {
+		if (!tab.checkAnyURIValue(prop_iri, value)) {
+			String warn_msg = " -- property has anyURI type but value does not exist";
+			warn.add(warn_msg);						
+		}
+		
 		return tab.checkType(propName, value);
 	}
+	
+	
 	
 	private boolean checkCorrectlyQuoted(String s) {
 		if (s.startsWith("\"")) {
