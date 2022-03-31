@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -196,6 +197,8 @@ public class EditPanel extends JPanel {
 				super.handleEdit();
 			}
 		};
+		
+		gen_props.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
           
         JScrollPane generalSP = new JScrollPane(gen_props);//will add tree or list to it
         generalSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
