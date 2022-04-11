@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.ListSelectionModel;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.frame.cls.OWLClassDescriptionFrame;
@@ -94,13 +95,16 @@ public class ComplexEditPanel extends JPanel {
         this.upperPanelAnn = new NCIOWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
         				imm_props));
+        upperPanelAnn.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
            
         this.lowerPanelAnn = new NCIOWLFrameList<OWLAnnotationSubject>(editorKit,
         		new FilteredAnnotationsFrame(owlEditorKit, new HashSet<>(),
         				imm_props));
+        lowerPanelAnn.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         this.lowerPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));
+        lowerPanelClass.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         this.upperPanelClass = new OWLFrameList<OWLClass>(owlEditorKit, new OWLClassDescriptionFrame(owlEditorKit));       
-        
+        upperPanelClass.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         createUI();
     }
 

@@ -223,6 +223,7 @@ public class EditPanel extends JPanel {
         		super.handleEdit();
         	}        	
         };
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         descrPane = new JScrollPane(list); // will add description list to it
         descrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
