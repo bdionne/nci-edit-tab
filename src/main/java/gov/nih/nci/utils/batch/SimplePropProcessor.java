@@ -170,7 +170,7 @@ public class SimplePropProcessor extends EditProcessor {
 	public boolean checkBatchProperty(String propName, String value, 
 			Vector<String> warn ) {
 		if (!tab.checkAnyURIValue(prop_iri, value)) {
-			String warn_msg = " -- property has anyURI type but value does not exist";
+			String warn_msg = " -- the filler value is not an entity in this terminology";
 			warn.add(warn_msg);						
 		}
 		
