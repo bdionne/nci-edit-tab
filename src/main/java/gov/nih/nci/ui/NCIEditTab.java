@@ -1847,6 +1847,11 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return values.contains(value);		
 	}
 	
+	public boolean checkHasType(String propName) {
+		OWLAnnotationProperty prop = lookUpShort(propName);
+		return (getDataType(prop) != null);
+	}
+	
 	public boolean checkType(String propName, String value) {
 		OWLAnnotationProperty prop = lookUpShort(propName);
 		IRI type = getDataType(prop);
