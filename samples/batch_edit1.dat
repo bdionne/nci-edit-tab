@@ -1,5 +1,5 @@
 C1001,new,Concept_In_Subset,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#Foo
-C1001,new,Concept_In_Subset,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#Gene
+C1001,new,Concept_In_Subset,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#GeneOid
 C1001,new,Concept_In_Subset,Gene
 C1001,new,Editor_Note,Food
 C1001,new,default,soda

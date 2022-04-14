@@ -91,10 +91,7 @@ public class SimplePropProcessor extends EditProcessor {
 							String error_msg = " -- property already exists.";
 							w.add(error_msg);
 						}
-						if (!checkBatchProperty(prop_iri, new_prop_value, warnings)) {
-							String error_msg = " -- property value has invalid type.";
-							w.add(error_msg);						
-						}
+						checkBatchProperty(prop_iri, new_prop_value, w, warnings);
 						
 					} else {
 						String error_msg = " -- input file should have 5 fields for modifying Simple Property.";
@@ -114,12 +111,7 @@ public class SimplePropProcessor extends EditProcessor {
 							String error_msg = " -- property already exists.";
 							w.add(error_msg);
 						}
-						if (!checkBatchProperty(
-								prop_iri, prop_value, warnings)) {
-							String error_msg = " -- property value has invalid type.";
-							w.add(error_msg);
-							
-						}
+						checkBatchProperty(prop_iri, prop_value, w, warnings);
 						
 					} else {
 						String error_msg = " -- input file should have 4 fields for adding Simple Property.";
@@ -167,17 +159,21 @@ public class SimplePropProcessor extends EditProcessor {
 
 	
 	
-	public boolean checkBatchProperty(String propName, String value, 
-			Vector<String> warn ) {
+	public void checkBatchProperty(String propName, String value, 
+			Vector<String> err, Vector<String> warn ) {
 		if (!tab.checkHasType(propName)) {
-			return false;			
+			String error_msg = "property declaration does not have a range";
+			err.add(error_msg);			
 		}
 		if (!tab.checkAnyURIValue(prop_iri, value)) {
-			String warn_msg = " -- the filler value is not an entity in this terminology";
+			String warn_msg = "the filler value is not an entity in this terminology";
 			warn.add(warn_msg);						
 		}
 		
-		return tab.checkType(propName, value);
+		if (!tab.checkType(propName, value)) {
+			String error_msg = "property value has invalid type.";
+			err.add(error_msg);
+		}
 	}
 	
 	

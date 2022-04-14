@@ -222,15 +222,15 @@ public abstract class BatchTask {
 		Vector<String> warnings = err_warn.get(1);
 		if (errors.size() > 0) {
 			for (int j = 0; j < errors.size(); j++) {
-				print("record " + (i+1) + ": " + errors.elementAt(j));
+				print("ERROR: record " + (i+1) + " - " + errors.elementAt(j));
 			}
 			return false;
 
 		}
 		if (warnings.size() > 0) {
-			no_warnings =+ warnings.size();
+			no_warnings += warnings.size();
 			for (int j = 0; j < warnings.size(); j++) {
-				print("record " + (i+1) + ": WARNING:" + warnings.elementAt(j));
+				print("WARNING: record " + (i+1) + " - " + warnings.elementAt(j));
 			}
 			
 
