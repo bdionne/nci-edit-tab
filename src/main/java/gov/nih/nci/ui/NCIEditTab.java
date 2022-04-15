@@ -1134,7 +1134,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     			
     			doCommit(changes, type, notify);
     			
-    			getOWLEditorKit().getSearchManager().updateIndex(changes);
+    			//getOWLEditorKit().getSearchManager().updateIndex(changes);
     			
     			fireChange(new EditTabChangeEvent(this, ComplexEditType.COMMIT));
     			
