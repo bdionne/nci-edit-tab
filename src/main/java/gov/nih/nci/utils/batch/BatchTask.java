@@ -51,9 +51,11 @@ public abstract class BatchTask {
 	
 	public boolean complete() {		
 		SwingUtilities.invokeLater(() -> {
+			long beg = System.currentTimeMillis();
 			tab.applyChanges();
 			tab.commitChanges(false);
 			tab.disableBatchMode();
+			log.info("committing and indexing took: " + (System.currentTimeMillis() - beg));
 			
 		});
 		
