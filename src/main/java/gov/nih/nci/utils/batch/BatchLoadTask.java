@@ -1,6 +1,7 @@
 package gov.nih.nci.utils.batch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
@@ -17,6 +18,8 @@ public class BatchLoadTask extends BatchTask {
 	
 	
 	List<String> codes = new ArrayList<String>();
+	
+	HashMap<String, String> names = new HashMap<String, String>();
 
 	public BatchLoadTask(BatchProcessOutputPanel be, NCIEditTab tab, String infile,
 			String outfile, String fileDelim) {
@@ -86,6 +89,14 @@ public class BatchLoadTask extends BatchTask {
 					w.add(error_msg);
 					System.out.println(error_msg);
 					
+				}
+				if (names.get(name) != null) {
+					String error_msg = " -- a class with this preferred name was already used in this load file.";
+					w.add(error_msg);
+					System.out.println(error_msg);
+					
+				} else {
+					names.put(name, name);
 				}
 				String sup = (String) v.elementAt(1);
 				
