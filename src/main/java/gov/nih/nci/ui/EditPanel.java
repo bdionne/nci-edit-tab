@@ -350,6 +350,7 @@ public class EditPanel extends JPanel {
     private void createComplexPropertyTable(OWLAnnotationProperty complexProperty) {
     	Optional<String> tableName = NCIEditTab.currentTab().getRDFSLabel(complexProperty);
     	PropertyTablePanel tablePanel = new PropertyTablePanel(this.owlEditorKit, complexProperty, tableName.get());
+    	
     	tablePanelList.add(tablePanel);
     }
     

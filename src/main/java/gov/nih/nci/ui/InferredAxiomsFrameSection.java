@@ -26,12 +26,13 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.util.BatchInferredSubClassAxiomGenerator;
+import org.semanticweb.owlapi.util.InferredEquivalentClassAxiomGenerator;
 import org.semanticweb.owlapi.util.InferredOntologyGenerator;
 
 import gov.nih.nci.utils.CuratorChecks;
 import uk.ac.manchester.cs.owl.owlapi.OWLOntologyManagerImpl;
 
-import org.semanticweb.owlapi.util.BatchInferredSubClassAxiomGenerator;
 
 
 /**
@@ -83,6 +84,7 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
             OWLOntology inferredOnt = man.createOntology(IRI.create("http://another.com/ontology" + System.currentTimeMillis()));
             InferredOntologyGenerator ontGen = new InferredOntologyGenerator(getOWLModelManager().getReasoner(), new ArrayList<>());
             ontGen.addGenerator(new BatchInferredSubClassAxiomGenerator());
+            ontGen.addGenerator(new InferredEquivalentClassAxiomGenerator());
            
             ontGen.fillOntology(man.getOWLDataFactory(), inferredOnt);
 

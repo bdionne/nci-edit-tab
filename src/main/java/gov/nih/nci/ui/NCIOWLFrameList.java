@@ -195,6 +195,15 @@ public class NCIOWLFrameList<R> extends OWLFrameList {
 			} else {
 				super.handleDelete();
 			}
+		} else if (isComplexProperty(getSelectedValue())) {			
+			
+			OWLAnnotationAssertionAxiom axiom = ((NCIOWLAnnotationsFrameSectionRow)getSelectedValue()).getAxiom();
+						
+			String codeStr = ((IRI) axiom.getSubject()).getShortForm();
+			OWLClass cls = NCIEditTab.currentTab().getClass(codeStr);
+			NCIEditTab.currentTab().complexPropOp(NCIEditTabConstants.DELETE, cls, 
+					axiom.getProperty(), axiom, null);
+			
 		} else {
 			super.handleDelete();
 		}

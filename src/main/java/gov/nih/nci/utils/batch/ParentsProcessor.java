@@ -56,6 +56,7 @@ public class ParentsProcessor extends EditProcessor {
 					}
 					break;
 				case MODIFY:
+					
 					if (!tab.hasParent(classToEdit, par_class)) {
 						String error_msg = " -- parent concept " + parent_id
 								+ " does not exist on class.";
@@ -78,8 +79,20 @@ public class ParentsProcessor extends EditProcessor {
 						return err_warn;
 						
 					}
+					if (new_par_class.getIRI().equals(classToEdit.getIRI())) {
+						String error_msg = "Can't add a class as it's own parent " + parent_id;
+						w.add(error_msg);
+						return err_warn;
+						
+					}
 					break;
 				case NEW:
+					if (par_class.getIRI().equals(classToEdit.getIRI())) {
+						String error_msg = "Can't add a class as it's own parent " + parent_id;
+						w.add(error_msg);
+						return err_warn;
+						
+					}
 					if (tab.hasParent(classToEdit, par_class)) {
 						String error_msg = " -- new parent concept " + parent_id
 								+ " already exists as parent on class.";

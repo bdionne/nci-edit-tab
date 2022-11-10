@@ -52,11 +52,13 @@ import org.protege.editor.owl.server.versioning.Commit;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
+import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.protege.editor.owl.ui.renderer.OWLEntityAnnotationValueRenderer;
 import org.protege.editor.owl.ui.renderer.OWLModelManagerEntityRenderer;
 import org.protege.editor.owl.ui.renderer.OWLRendererPreferences;
 import org.protege.editor.search.lucene.SearchContext;
 import org.protege.owlapi.inference.cls.ChildClassExtractor;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -77,6 +79,7 @@ import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedObject;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
@@ -400,8 +403,15 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	}
 	
 	public boolean isImported(OWLClass c) {
-		return !(c.getIRI().getNamespace().equalsIgnoreCase(
-				ontology.getOntologyID().getOntologyIRI().get().getIRIString() + "#"));
+		
+		String classNS = c.getIRI().getNamespace();
+		if (classNS.endsWith("#") ||
+				classNS.endsWith("/")) {
+			classNS = classNS.substring(0, classNS.length() - 1);
+		}
+			
+		return !(classNS.equalsIgnoreCase(
+				ontology.getOntologyID().getOntologyIRI().get().getIRIString()));
 	}
 	
 	private static ArrayList<EditTabChangeListener> event_listeners = new ArrayList<EditTabChangeListener>();
@@ -2530,6 +2540,39 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		
 	}
 	
+	public OWLClass getIRIClass(String code) {
+
+		if (OWLRendererPreferences.getInstance().useIriInBatchEdits()) {
+			PrefixDocumentFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
+
+			for (Map.Entry<String, String> prefixName2PrefixEntry : prefixManager.getPrefixName2PrefixMap()
+					.entrySet()) {
+
+				String prefix = prefixName2PrefixEntry.getValue();
+
+				IRI check = IRI.create(prefix);
+				System.out.println(check);
+
+			}
+		}
+
+		OWLClass cls = null;
+
+		IRI iri;
+		if (code.startsWith("http:")) {
+			iri = IRI.create(code);
+		} else {
+			iri = IRI.create(CODE_PROP.getIRI().getNamespace() + code);
+		}
+
+		Set<OWLEntity> classes = ontology.getEntitiesInSignature(iri);
+		for (OWLEntity et : classes) {
+			cls = et.asOWLClass();
+		}
+
+		return cls;
+	}
+	
 	public OWLClass getClass(String code) {
 		
 		OWLClass cls = null;
@@ -2616,12 +2659,13 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
         OWLModelManagerEntityRenderer ren = getOWLModelManager().getOWLEntityRenderer();
         List<IRI> annotIRIs = null;
         String selectedClassName = null;
+        LiteralExtractor literalExtractor = new LiteralExtractor();
         if (ren instanceof OWLEntityAnnotationValueRenderer){
             selectedClassName = getOWLModelManager().getRendering(selectedClass);
             annotIRIs = OWLRendererPreferences.getInstance().getAnnotationIRIs();
         }
 
-        LiteralExtractor literalExtractor = new LiteralExtractor();
+        
 
         OWLOntology ont = getOWLModelManager().getActiveOntology();
         
@@ -2814,10 +2858,6 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 	
 	// Methods needed by BatchEditTask
 	
-	public OWLClass getClassByName(String name) {
-		OWLClass cls = null;
-		return cls;
-	}
 	
 	public Set<String> getSupportedRoles() {
 		Set<OWLObjectProperty> o_props = ontology.getObjectPropertiesInSignature();
