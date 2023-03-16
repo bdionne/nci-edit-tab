@@ -294,12 +294,12 @@ public class EditPanel extends JPanel {
     		}
     		complexPropertyPanel.repaint();
     		
-    		list.setReadOnly(NCIEditTab.currentTab().isImported(cls));
+    		list.setReadOnly(isReadOnly(cls));
     		
     		list.setRootObject(cls);
     		
     		if (cls != null) {
-    			gen_props.setReadOnly(NCIEditTab.currentTab().isImported(cls));
+    			gen_props.setReadOnly(isReadOnly(cls));
     			gen_props.setRootObject(cls.getIRI());
     		}
 
@@ -331,6 +331,12 @@ public class EditPanel extends JPanel {
     
     public OWLClass getSelectedClass() {
     	return this.currentClass;
+    }
+    
+    private boolean isReadOnly(OWLClass cls) {
+    	return NCIEditTab.currentTab().isImported(cls) ||
+    			NCIEditTab.currentTab().isGuest();
+    	
     }
     
     public void addNewComplexProp() {

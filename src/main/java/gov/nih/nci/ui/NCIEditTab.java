@@ -396,6 +396,10 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		return clientSession.getActiveClient().getUserInfo().getId();
 	}
 	
+	public boolean isGuest() {
+		return ((LocalHttpClient) clientSession.getActiveClient()).isGuest(clientSession.getActiveProject());
+	}
+	
 	private OWLOntology ontology;
 	
 	public boolean isCurrentOntology(OWLOntology ont) {
