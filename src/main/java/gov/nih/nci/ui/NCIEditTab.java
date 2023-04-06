@@ -1840,10 +1840,16 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			ontology = getOWLModelManager().getActiveOntology();
 			initProperties();
 		}
-		for (OWLAnnotationProperty ap : annProps) {
-			if (ap.getIRI().getShortForm().equals(shortName)) {				
-				return ap;	
+		// check again and log if annProps not initialized
+		if (annProps != null) {
+			for (OWLAnnotationProperty ap : annProps) {
+				if (ap.getIRI().getShortForm().equals(shortName)) {				
+					return ap;	
+				}
 			}
+		} else {
+			log.error("can't look up " + shortName +
+					" because annProps aren't initialized");
 		}
 		return null;
 		
