@@ -25,6 +25,8 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import edu.stanford.protege.metaproject.api.*;
+
+import org.protege.editor.core.ModelManager.ConnectionMode;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.client.ClientSession;
@@ -1430,6 +1432,9 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 
     @Override
     public void stateChanged(HistoryManager source) {
+    	if (!getOWLEditorKit().getModelManager().getConnectionMode().equals(ConnectionMode.CLIENTSERVER)) {
+    		return;    		
+    	}
     	if (this.getOWLEditorKit().getModelManager().getExplanationManager().getIsRunning()) {
     		return;
     	}
