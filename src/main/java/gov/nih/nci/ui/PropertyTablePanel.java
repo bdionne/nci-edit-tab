@@ -271,15 +271,7 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         	propertyTable.getColumnModel().getColumn(i).setCellRenderer(alignRenderer);
         }
         
-        ProtegeManager.getInstance().getFrame(this.owlEditorKit.getOWLWorkspace()).addWindowListener(new WindowAdapter(){
-        	public void windowClosing(WindowEvent e) {
-        		
-        		
-        		ProtegeManager.getInstance().getEditorKitManager().getWorkspaceManager().doClose(owlEditorKit.getOWLWorkspace());
-        		//saveColumnNameOrder();
-        	}
-        });
-        
+                
         sp = new JScrollPane(propertyTable);
         createLabelHeader(tableName, addButton, editButton, deleteButton);
         add(tableHeaderPanel, BorderLayout.NORTH);
