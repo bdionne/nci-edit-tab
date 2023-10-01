@@ -98,7 +98,9 @@ public class NCIEditViewComponent extends OWLClassAnnotationsViewComponent imple
 				event.isType(ComplexEditType.RESET)) { 
 			editPanel.disableButtons();
 			
-		}		
+		} else if (event.isType(ComplexEditType.READ) && !NCIEditTab.currentTab().hasActiveClient()) {
+			editPanel.enableCancelButtonOnly();
+		}
 	}
 
 }
