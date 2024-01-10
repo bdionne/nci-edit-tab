@@ -4,19 +4,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+import javax.swing.JButton;
+import javax.swing.JTextField;
 
 import org.apache.commons.io.FileUtils;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
+import org.protege.editor.core.ui.error.ErrorLogPanel;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLProperty;
+import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import edu.stanford.protege.search.lucene.tab.ui.OwlEntityComboBox;
+import uk.ac.manchester.cs.owl.owlapi.OWLAnnotationPropertyImpl;
 
 public class NCIEditTabPreferences {
 	private static final Logger logger = LoggerFactory.getLogger(NCIEditTabPreferences.class);
@@ -37,6 +50,25 @@ public class NCIEditTabPreferences {
     public static final String FN_MERGE = "FnMerge";
     public static final String FN_DUALEDITS = "FnDualEdits";
     public static final String FN_RETIRE = "FnRetire";
+    
+    public static final String IMMUTABLE_PROPERTYLIST = "ImmutPropList";
+    public static final String COMPLEX_PROPERTYLIST = "ComplexPropList";
+    public static final String RETIRE_CONCEPTROOT = "RetireConceptRoot";
+    public static final String RETIRE_DESIGNNOTE = "RetireDesignNote";
+    public static final String RETIRE_EDITORNOTE = "RetireEditorNote";
+    public static final String RETIRE_CONCEPTSTATUS = "RetireConceptStatus";
+    public static final String RETIRE_PARENT = "RetireParent";
+    public static final String RETIRE_CHILD = "RetireChild";
+    public static final String RETIRE_ROLE = "RetireRole";
+    public static final String RETIRE_INROLE = "RetireInRole";
+    public static final String RETIRE_ASSOC = "RetireAssoc";
+    public static final String RETIRE_INASSOC = "RetireInAssoc";
+	
+    public static final String SPLIT_FROM = "SplitFrom";
+    public static final String MERGE_SOURCE = "MergeSource";
+    public static final String MERGE_TARGET = "MergeTarget";
+    public static final String MERGE_DESIGNNOTE = "MergeDesignNote";
+    public static final String MERGE_EDITORNOTE = "MergeEditorNote";
 
     public static final String PROTEGE_DIR = ".protege";
 
@@ -44,6 +76,8 @@ public class NCIEditTabPreferences {
 
     private static String fileSystemSeparator = System.getProperty("file.separator");
 
+    private static List<OWLEntity> immutablePropList = new ArrayList<OWLEntity>();
+    
     private static Preferences getPreferences() {
         return PreferencesManager.getInstance().getApplicationPreferences(NCIEDITTAB_PREFERENCES_KEY);
     }
@@ -106,6 +140,213 @@ public class NCIEditTabPreferences {
 
     public static void setFnRetire(boolean isSelected) {
         getPreferences().putBoolean(FN_RETIRE, isSelected);
+    }
+    
+    //
+    public static List<String> getImmutPropList() {
+    	return getPreferences().getStringList(IMMUTABLE_PROPERTYLIST, new ArrayList<String>());
+    	//return getPreferences().getString(IMMUTABLE_PROPERTYLIST, "");
+    }
+
+    public static void setImmutPropList(List<String> iplist) {
+    	getPreferences().putStringList(IMMUTABLE_PROPERTYLIST, iplist);
+        //getPreferences().putString(IMMUTABLE_PROPERTYLIST, ipl);
+    }
+    
+    /*public static void setImmutProps(List<OWLEntity> iplist){
+    	immutablePropList = iplist;
+        writeImmutProps();
+    }
+    
+    public static List<OWLEntity> getImmutPropList(){
+        //return new ArrayList<>(immutablePropIRIs);
+    	return immutablePropList;
+    }*/
+    
+    /*private static void loadImmutProps() {
+        final List<String> defaultValues = Collections.emptyList();
+        List<String> values = getPreferences().getStringList(IMMUTABLE_PROPERTYLIST, defaultValues);
+
+        if (values.equals(defaultValues)){
+            
+        }
+        else{
+            for (String value : values){
+                try {
+                    IRI iri = IRI.create(new URI(value.trim()));
+                    immutablePropList.add(new OWLiri);
+                }
+                catch (URISyntaxException e) {
+                    ErrorLogPanel.showErrorDialog(e);
+                }
+            }
+        }
+    }*/
+    
+    /*private static void writeImmutProps() {
+        
+        //for (String str : immutablePropList){
+            //StringBuilder str = new StringBuilder(obj.toString());
+            //str.append(langStringBuilder.toString());
+            //values.add(str);
+        //}
+        //getPreferences().putStringList(IMMUTABLE_PROPERTYLIST, values);
+        
+        List<String> values = new ArrayList<>();
+        StringBuilder langStringBuilder = new StringBuilder();
+        
+        for (IRI iri : immutablePropIRIs){
+            StringBuilder str = new StringBuilder(iri.toString());
+            str.append(langStringBuilder.toString());
+            values.add(str.toString());
+        }
+        getPreferences().putStringList(IMMUTABLE_PROPERTYLIST, values);
+    }*/
+    
+    public static List<String> getComplexPropList() {
+    	return getPreferences().getStringList(COMPLEX_PROPERTYLIST, new ArrayList<String>());
+    	//return getPreferences().getString(COMPLEX_PROPERTYLIST, "");
+    }
+
+    public static void setComplexPropList(List<String> cplist) {
+    	getPreferences().putStringList(COMPLEX_PROPERTYLIST, cplist);
+        //getPreferences().putString(COMPLEX_PROPERTYLIST, cpl);
+    }
+    
+    public static List<String> getComplexPropAnnotationList(String annot) {
+    	StringBuilder strBld = new StringBuilder();
+    	strBld.append(COMPLEX_PROPERTYLIST);
+    	strBld.append("/");
+    	strBld.append(annot);
+    	return getPreferences().getStringList(strBld.toString(), new ArrayList<String>());
+    }
+
+    public static void setComplexPropAnnotationList(String annot, List<String> cplist) {
+    	StringBuilder strBld = new StringBuilder();
+    	strBld.append(COMPLEX_PROPERTYLIST);
+    	strBld.append("/");
+    	strBld.append(annot);
+    	getPreferences().putStringList(strBld.toString(), cplist);
+    }
+    
+    public static String getRetireConceptRoot() {
+    	return getPreferences().getString(RETIRE_CONCEPTROOT, "");
+    }
+
+    public static void setRetireConceptRoot(String rcr) {
+        getPreferences().putString(RETIRE_CONCEPTROOT, rcr);
+    }
+    
+    public static String getRetireDesignNote() {
+    	return getPreferences().getString(RETIRE_DESIGNNOTE, "");
+    }
+    
+    public static void setRetireDesignNote(String rdn) {
+        getPreferences().putString(RETIRE_DESIGNNOTE, rdn);
+    }
+    
+    public static String getRetireEditorNote() {
+    	return getPreferences().getString(RETIRE_EDITORNOTE, "");
+    }
+
+    public static void setRetireEditorNote(String ren) {
+        getPreferences().putString(RETIRE_EDITORNOTE, ren);
+    }
+    
+    public static String getRetireConceptStatus() {
+    	return getPreferences().getString(RETIRE_CONCEPTSTATUS, "");
+    }
+
+    public static void setRetireConceptStatus(String rcs) {
+        getPreferences().putString(RETIRE_CONCEPTSTATUS, rcs);
+    }
+    
+    public static String getRetireParent() {
+    	return getPreferences().getString(RETIRE_PARENT, "");
+    }
+
+    public static void setRetireParent(String rp) {
+        getPreferences().putString(RETIRE_PARENT, rp);
+    }
+    
+    public static String getRetireChild() {
+    	return getPreferences().getString(RETIRE_CHILD, "");
+    }
+
+    public static void setRetireChild(String rc) {
+        getPreferences().putString(RETIRE_CHILD, rc);
+    }
+    
+    public static String getRetireRole() {
+    	return getPreferences().getString(RETIRE_ROLE, "");
+    }
+
+    public static void setRetireRole(String rr) {
+        getPreferences().putString(RETIRE_ROLE, rr);
+    }
+    
+    public static String getRetireInRole() {
+    	return getPreferences().getString(RETIRE_INROLE, "");
+    }
+
+    public static void setRetireInRole(String rir) {
+        getPreferences().putString(RETIRE_INROLE, rir);
+    }
+    
+    public static String getRetireAssoc() {
+    	return getPreferences().getString(RETIRE_ASSOC, "");
+    }
+
+    public static void setRetireAssoc(String ra) {
+        getPreferences().putString(RETIRE_ASSOC, ra);
+    }
+    
+    public static String getRetireInAssoc() {
+    	return getPreferences().getString(RETIRE_INASSOC, "");
+    }
+
+    public static void setRetireInAssoc(String ria) {
+        getPreferences().putString(RETIRE_INASSOC, ria);
+    }
+    
+    public static String getSplitFrom() {
+    	return getPreferences().getString(SPLIT_FROM, "");
+    }
+
+    public static void setSplitFrom(String sf) {
+        getPreferences().putString(SPLIT_FROM, sf);
+    }
+    
+    public static String getMergeSource() {
+    	return getPreferences().getString(MERGE_SOURCE, "");
+    }
+
+    public static void setMergeSource(String ms) {
+        getPreferences().putString(MERGE_SOURCE, ms);
+    }
+    
+    public static String getMergeTarget() {
+    	return getPreferences().getString(MERGE_TARGET, "");
+    }
+
+    public static void setMergeTarget(String mt) {
+        getPreferences().putString(MERGE_TARGET, mt);
+    }
+    
+    public static String getMergeDesignNote() {
+    	return getPreferences().getString(MERGE_DESIGNNOTE, "");
+    }
+
+    public static void setMergeDesignNote(String mdn) {
+        getPreferences().putString(MERGE_DESIGNNOTE, mdn);
+    }
+    
+    public static String getMergeEditorNote() {
+    	return getPreferences().getString(MERGE_EDITORNOTE, "");
+    }
+
+    public static void setMergeEditorNote(String men) {
+        getPreferences().putString(MERGE_EDITORNOTE, men);
     }
     
     /**

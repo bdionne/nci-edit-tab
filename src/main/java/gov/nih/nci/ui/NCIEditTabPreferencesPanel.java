@@ -3,24 +3,37 @@ package gov.nih.nci.ui;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Vector;
 import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.FocusManager;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -35,20 +48,38 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionListener;
 
+import org.protege.editor.core.ui.error.ErrorLogPanel;
 import org.protege.editor.core.ui.list.MList;
 import org.protege.editor.core.ui.list.MListButton;
 import org.protege.editor.core.ui.list.MListItem;
 import org.protege.editor.core.ui.list.MListSectionHeader;
 import org.protege.editor.core.ui.preferences.PreferencesLayoutPanel;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.client.ClientSession;
+import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.ui.framelist.AxiomAnnotationButton;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 
 import edu.stanford.protege.csv.export.ui.UiUtils;
+import edu.stanford.protege.metaproject.ConfigurationManager;
+import edu.stanford.protege.metaproject.api.Project;
+import edu.stanford.protege.metaproject.api.ProjectId;
+import edu.stanford.protege.metaproject.api.ProjectOptions;
+import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
+import edu.stanford.protege.metaproject.impl.DescriptionImpl;
+import edu.stanford.protege.metaproject.impl.NameImpl;
+import edu.stanford.protege.metaproject.impl.ProjectIdImpl;
+import edu.stanford.protege.metaproject.impl.ProjectOptionsImpl;
+import edu.stanford.protege.metaproject.impl.UserIdImpl;
 import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
 import edu.stanford.protege.search.lucene.tab.ui.OwlEntityComboBox;
@@ -56,6 +87,9 @@ import edu.stanford.protege.search.lucene.tab.ui.OwlEntityComboBoxChangeHandler;
 import edu.stanford.protege.search.lucene.tab.ui.TabPreferences;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.PreferencesChangeEvent;
+import gov.nih.nci.utils.ProjectOptionsBuilder;
+import gov.nih.nci.utils.ProjectOptionsConfigManager;
+import uk.ac.manchester.cs.owl.owlapi.OWLAnnotationPropertyImpl;
 
 public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
 	//Add comments here
@@ -84,15 +118,20 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
 	//private OwlEntityListItem selectedRetirePropertyListItem;
 	//private OwlEntityListItem selectedMergeSourcePropertyListItem;
 	//private OwlEntityListItem selectedMergeTargetPropertyListItem;
+	private OWLClass retireCptRootClass;
 	
-	private OwlEntityComboBox retireCptRootComboBox;
+	//private OwlEntityComboBox retireCptRootComboBox;
+	private JTextField retireCptRootTxtfld;
+	private JButton retireCptRootSearchBtn;
 	private OwlEntityComboBox retireDesignNoteComboBox;
 	private OwlEntityComboBox retireEditorNoteComboBox;
 	private OwlEntityComboBox retireCptStatusComboBox;
 	private OwlEntityComboBox retireParentComboBox;
 	private OwlEntityComboBox retireChildComboBox;
 	private OwlEntityComboBox retireRoleComboBox;
+	private OwlEntityComboBox retireInRoleComboBox;
 	private OwlEntityComboBox retireAssocComboBox;
+	private OwlEntityComboBox retireInAssocComboBox;
 	
 	private OwlEntityComboBox mergeSourceComboBox;
 	private OwlEntityComboBox mergeTargetComboBox;
@@ -100,7 +139,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
 	private OwlEntityComboBox mergeEditorNoteComboBox;
 	private OwlEntityComboBox splitFromComboBox;
 	
-	private OwlEntityComboBoxChangeHandler rcrComboBoxChangeHandler;
+	/*private OwlEntityComboBoxChangeHandler rcrComboBoxChangeHandler;
 	private OwlEntityComboBoxChangeHandler rdnComboBoxChangeHandler;
 	private OwlEntityComboBoxChangeHandler renComboBoxChangeHandler;
 	private OwlEntityComboBoxChangeHandler rcsComboBoxChangeHandler;
@@ -113,10 +152,12 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
 	private OwlEntityComboBoxChangeHandler mtComboBoxChangeHandler;
 	private OwlEntityComboBoxChangeHandler mdnComboBoxChangeHandler;
 	private OwlEntityComboBoxChangeHandler menComboBoxChangeHandler;
-	private OwlEntityComboBoxChangeHandler sfComboBoxChangeHandler;
+	private OwlEntityComboBoxChangeHandler sfComboBoxChangeHandler;*/
 	
-	private OWLEditorKit editorKit = NCIEditTab.currentTab().getOWLEditorKit();
-
+	private OWLEditorKit editorKit = null;
+	List<OWLEntity> properties = new ArrayList<OWLEntity>();
+	private Map<String, Set<String>> projectOptions = new HashMap<>();
+	
     //private JLabel complexEditLabel = new JLabel("Complex Edit");
 
     JCheckBox cbSplit = new JCheckBox("Split");
@@ -128,7 +169,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
     @Override
     public void initialise() throws Exception {
         setLayout(new BorderLayout());
-        setupPropertyList();
+        
         PreferencesLayoutPanel panel = new PreferencesLayoutPanel();
         panel.setPreferredSize(new Dimension(400, 140));
         add(panel, BorderLayout.SOUTH);
@@ -167,17 +208,22 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
             NCIEditTabPreferences.setFnRetire(cbRetire.isSelected());
         });
         
-        //add server configuration
+        if (getEditorKit() == null) {
+        	this.add(panel);
+        	return;
+        }
+        
+        setupPropertyList();
         
       //  panel.addGroup("Server Configuration");
         JPanel immutPanel =new JPanel();
         immutPanel.setLayout(new GridBagLayout());
-        immutPanel.setPreferredSize(new Dimension(400, 200));
+        immutPanel.setPreferredSize(new Dimension(400, 350));
         //p1.setPreferredSize(new Dimension(600, 100));
         //p1.setPreferredSize(new Dimension(400, 500));
         //Insets insets = new Insets(2, 2, 2, 2);
         JScrollPane immutablepropScrollpane = new JScrollPane(immutablepropList);
-        immutablepropScrollpane.setPreferredSize(new Dimension(400, 140));
+        immutablepropScrollpane.setPreferredSize(new Dimension(400, 350));
         //immutablepropScrollpane.setPreferredSize(new Dimension(600, 100));
         immutablepropScrollpane.setBorder(UiUtils.MATTE_BORDER);
         JLabel immutablepropLbl = new JLabel("Immutable Properties");
@@ -187,11 +233,11 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         JPanel complexPanel =new JPanel();
         complexPanel.setLayout(new GridBagLayout());
-        complexPanel.setPreferredSize(new Dimension(400, 200));
+        complexPanel.setPreferredSize(new Dimension(400, 350));
         //p2.setPreferredSize(new Dimension(600, 100));
         //p2.setPreferredSize(new Dimension(400, 500));
         JScrollPane complexpropScrollpane = new JScrollPane(complexpropList);
-        complexpropScrollpane.setPreferredSize(new Dimension(400, 140));
+        complexpropScrollpane.setPreferredSize(new Dimension(400, 350));
         //complexpropScrollpane.setPreferredSize(new Dimension(600, 100));
         complexpropScrollpane.setBorder(UiUtils.MATTE_BORDER);
         //JLabel complexpropLbl = new JLabel("Complex Properties");
@@ -200,99 +246,164 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         JPanel retirePanel =new JPanel();
         retirePanel.setLayout(new GridBagLayout());
-        retirePanel.setPreferredSize(new Dimension(400, 200));
+        retirePanel.setPreferredSize(new Dimension(400, 350));
         /*JScrollPane retirepropScrollpane = new JScrollPane(retirepropList);
         retirepropScrollpane.setPreferredSize(new Dimension(400, 140));
         retirepropScrollpane.setBorder(UiUtils.MATTE_BORDER);
         retirePanel.add(retirepropScrollpane, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
         */
         JLabel retireCptRoot = new JLabel("Retired Concept Root");
-        retireCptRoot.setPreferredSize(new Dimension(80, 35));
+        retireCptRoot.setPreferredSize(new Dimension(100, 35));
         JLabel retiredesignnote = new JLabel("Design Note");
-        retiredesignnote.setPreferredSize(new Dimension(80, 35));
+        retiredesignnote.setPreferredSize(new Dimension(100, 35));
         JLabel retireeditornote = new JLabel("Editor Note");
-        retireeditornote.setPreferredSize(new Dimension(80, 35));
+        retireeditornote.setPreferredSize(new Dimension(100, 35));
         JLabel retireCptStatus = new JLabel("Deprecated Concept Status");
-        retireCptStatus.setPreferredSize(new Dimension(80, 35));
+        retireCptStatus.setPreferredSize(new Dimension(100, 35));
         JLabel retireParent = new JLabel("Deprecated Parent");
-        retireParent.setPreferredSize(new Dimension(80, 35));
+        retireParent.setPreferredSize(new Dimension(100, 35));
         JLabel retireChild = new JLabel("Deprecated Child");
-        retireChild.setPreferredSize(new Dimension(80, 35));
+        retireChild.setPreferredSize(new Dimension(100, 35));
         JLabel retireRole = new JLabel("Deprecated Role");
-        retireRole.setPreferredSize(new Dimension(80, 35));
+        retireRole.setPreferredSize(new Dimension(100, 35));
+        JLabel retireInRole = new JLabel("Deprecated In Role");
+        retireInRole.setPreferredSize(new Dimension(100, 35));
         JLabel retireAssoc = new JLabel("Deprecated Association");
-        retireAssoc.setPreferredSize(new Dimension(80, 35));
+        retireAssoc.setPreferredSize(new Dimension(100, 35));
+        JLabel retireInAssoc = new JLabel("Deprecated In Association");
+        retireInAssoc.setPreferredSize(new Dimension(100, 35));
         
-        retireCptRootComboBox = new OwlEntityComboBox(editorKit);
+        /*retireCptRootComboBox = new OwlEntityComboBox(editorKit);
         retireCptRootComboBox.addItemListener(retireCptRootItemListener);
         retireCptRootComboBox.addItems(getProperties());
         retireCptRootComboBox.setPreferredSize(new Dimension(460, 35));
-        rcrComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireCptRootComboBox);
+        rcrComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireCptRootComboBox);*/
+        retireCptRootTxtfld =  new JTextField();
+        retireCptRootTxtfld.setPreferredSize(new Dimension(370, 35));
+        retireCptRootTxtfld.setEditable(false);
+        retireCptRootTxtfld.setBackground(Color.WHITE);
+        retireCptRootTxtfld.setText(NCIEditTabPreferences.getRetireConceptRoot());
         
-        retireDesignNoteComboBox = new OwlEntityComboBox(editorKit);
+        retireCptRootSearchBtn = new JButton("Search");
+        retireCptRootSearchBtn.setPreferredSize(new Dimension(55, 35));
+        
+        retireCptRootSearchBtn.addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent e)
+            {
+            	Component focusOwner = FocusManager.getCurrentManager().getFocusOwner();
+		        if(focusOwner == null) {
+		            return;
+		        }
+		        
+		        retireCptRootClass = NCIEditTab.currentTab().getOWLEditorKit().getWorkspace().searchForClass(focusOwner);
+		        if (retireCptRootClass != null) {
+		        	String retireCptRootStr = retireCptRootClass.getIRI().getRemainder().get();
+		        	retireCptRootTxtfld.setText(retireCptRootStr);
+		        	NCIEditTabPreferences.setRetireConceptRoot(retireCptRootStr);
+		        }	
+            }
+        });
+        
+        retireDesignNoteComboBox = new OwlEntityComboBox(getEditorKit());
         retireDesignNoteComboBox.addItemListener(retireDesignNoteItemListener);
         retireDesignNoteComboBox.addItems(getProperties());
-        retireDesignNoteComboBox.setPreferredSize(new Dimension(460, 35));
-        rdnComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireDesignNoteComboBox);
+        retireDesignNoteComboBox.setPreferredSize(new Dimension(440, 35));
+        retireDesignNoteComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireDesignNote()));
+        //retireDesignNoteComboBox.getModel().setSelectedItem(NCIEditTabPreferences.getRetireDesignNote());
         
-        retireEditorNoteComboBox = new OwlEntityComboBox(editorKit);
+        //rdnComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireDesignNoteComboBox);
+        
+        retireEditorNoteComboBox = new OwlEntityComboBox(getEditorKit());
         retireEditorNoteComboBox.addItemListener(retireEditorNoteItemListener);
         retireEditorNoteComboBox.addItems(getProperties());
-        retireEditorNoteComboBox.setPreferredSize(new Dimension(460, 35));
-        renComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireEditorNoteComboBox);
+        retireEditorNoteComboBox.setPreferredSize(new Dimension(440, 35));
+        //retireEditorNoteComboBox.setSelectedItem(NCIEditTabPreferences.getRetireEditorNote());
+        retireEditorNoteComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireEditorNote()));
+        //renComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireEditorNoteComboBox);
         
-        retireCptStatusComboBox = new OwlEntityComboBox(editorKit);
+        retireCptStatusComboBox = new OwlEntityComboBox(getEditorKit());
         retireCptStatusComboBox.addItemListener(retireCptStatusItemListener);
         retireCptStatusComboBox.addItems(getProperties());
-        retireCptStatusComboBox.setPreferredSize(new Dimension(460, 35));
-        rcsComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireCptStatusComboBox);
+        retireCptStatusComboBox.setPreferredSize(new Dimension(440, 35));
+        retireCptStatusComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireConceptStatus()));
+        //rcsComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireCptStatusComboBox);
         
-        retireParentComboBox = new OwlEntityComboBox(editorKit);
+        retireParentComboBox = new OwlEntityComboBox(getEditorKit());
         retireParentComboBox.addItemListener(retireParentItemListener);
         retireParentComboBox.addItems(getProperties());
-        retireParentComboBox.setPreferredSize(new Dimension(460, 35));
-        rpComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireParentComboBox);
+        retireParentComboBox.setPreferredSize(new Dimension(440, 35));
+        retireParentComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireParent()));
+        //rpComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireParentComboBox);
         
-        retireChildComboBox = new OwlEntityComboBox(editorKit);
+        retireChildComboBox = new OwlEntityComboBox(getEditorKit());
         retireChildComboBox.addItemListener(retireChildItemListener);
         retireChildComboBox.addItems(getProperties());
-        retireChildComboBox.setPreferredSize(new Dimension(460, 35));
-        rcComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireChildComboBox);
+        retireChildComboBox.setPreferredSize(new Dimension(440, 35));
+        retireChildComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireChild()));
+        //rcComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireChildComboBox);
         
-        retireRoleComboBox = new OwlEntityComboBox(editorKit);
+        retireRoleComboBox = new OwlEntityComboBox(getEditorKit());
         retireRoleComboBox.addItemListener(retireRoleItemListener);
         retireRoleComboBox.addItems(getProperties());
-        retireRoleComboBox.setPreferredSize(new Dimension(460, 35));
-        rrComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireRoleComboBox);
+        retireRoleComboBox.setPreferredSize(new Dimension(440, 35));
+        retireRoleComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireRole()));
+        //rrComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireRoleComboBox);
         
-        retireAssocComboBox = new OwlEntityComboBox(editorKit);
+        retireInRoleComboBox = new OwlEntityComboBox(getEditorKit());
+        retireInRoleComboBox.addItemListener(retireInRoleItemListener);
+        retireInRoleComboBox.addItems(getProperties());
+        retireInRoleComboBox.setPreferredSize(new Dimension(440, 35));
+        retireInRoleComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireInRole()));
+        
+        retireAssocComboBox = new OwlEntityComboBox(getEditorKit());
         retireAssocComboBox.addItemListener(retireAssocItemListener);
         retireAssocComboBox.addItems(getProperties());
-        retireAssocComboBox.setPreferredSize(new Dimension(460, 35));
-        raComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireAssocComboBox);
+        retireAssocComboBox.setPreferredSize(new Dimension(440, 35));
+        retireAssocComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireAssoc()));
+        
+        retireInAssocComboBox = new OwlEntityComboBox(getEditorKit());
+        retireInAssocComboBox.addItemListener(retireInAssocItemListener);
+        retireInAssocComboBox.addItems(getProperties());
+        retireInAssocComboBox.setPreferredSize(new Dimension(440, 35));
+        retireInAssocComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireInAssoc()));
+        //raComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireAssocComboBox);
         
         retirePanel.add(retireCptRoot, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(8, 0, 2, 0), 0, 0));
         //mergePanel.add(mergeSourceScrollpane, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 40));
-        retirePanel.add(retireCptRootComboBox, new GridBagConstraints(1, 0, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(8, 0, 2, 0), 0, 0));
-        retirePanel.add(retiredesignnote, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 2, 0), 0, 0));
-        retirePanel.add(retireDesignNoteComboBox, new GridBagConstraints(1, 1, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 2, 0), 0, 0));
-        retirePanel.add(retireeditornote, new GridBagConstraints(0, 2, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 2, 0), 0, 0));
-        retirePanel.add(retireEditorNoteComboBox, new GridBagConstraints(1, 2, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 2, 0), 0, 0));
-        retirePanel.add(retireCptStatus, new GridBagConstraints(0, 3, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireCptStatusComboBox, new GridBagConstraints(1, 3, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireParent, new GridBagConstraints(0, 4, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireParentComboBox, new GridBagConstraints(1, 4, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireChild, new GridBagConstraints(0, 5, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireChildComboBox, new GridBagConstraints(1, 5, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireRole, new GridBagConstraints(0, 6, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireRoleComboBox, new GridBagConstraints(1, 6, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireAssoc, new GridBagConstraints(0, 7, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
-        retirePanel.add(retireAssocComboBox, new GridBagConstraints(1, 7, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        //retirePanel.add(retireCptRootComboBox, new GridBagConstraints(1, 0, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(8, 0, 2, 0), 0, 0));
+        retirePanel.add(retireCptRootTxtfld, new GridBagConstraints(1, 0, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(8, 0, 2, 8), 0, 0));
+        retirePanel.add(retireCptRootSearchBtn, new GridBagConstraints(2, 0, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 2, 0), 0, 0));
         
+        retirePanel.add(retiredesignnote, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 2, 0), 0, 0));
+        retirePanel.add(retireDesignNoteComboBox, new GridBagConstraints(1, 1, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 2, 0), 0, 0));
+        
+        retirePanel.add(retireeditornote, new GridBagConstraints(0, 2, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 2, 0), 0, 0));
+        retirePanel.add(retireEditorNoteComboBox, new GridBagConstraints(1, 2, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 2, 0), 0, 0));
+        
+        retirePanel.add(retireCptStatus, new GridBagConstraints(0, 3, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        retirePanel.add(retireCptStatusComboBox, new GridBagConstraints(1, 3, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        
+        retirePanel.add(retireParent, new GridBagConstraints(0, 4, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        retirePanel.add(retireParentComboBox, new GridBagConstraints(1, 4, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        
+        retirePanel.add(retireChild, new GridBagConstraints(0, 5, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        retirePanel.add(retireChildComboBox, new GridBagConstraints(1, 5, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        
+        retirePanel.add(retireRole, new GridBagConstraints(0, 6, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        retirePanel.add(retireRoleComboBox, new GridBagConstraints(1, 6, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        
+        retirePanel.add(retireInRole, new GridBagConstraints(0, 7, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        retirePanel.add(retireInRoleComboBox, new GridBagConstraints(1, 7, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        
+        retirePanel.add(retireAssoc, new GridBagConstraints(0, 8, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        retirePanel.add(retireAssocComboBox, new GridBagConstraints(1, 8, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        
+        retirePanel.add(retireInAssoc, new GridBagConstraints(0, 9, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
+        retirePanel.add(retireInAssocComboBox, new GridBagConstraints(1, 9, 2, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(2, 0, 0, 0), 0, 0));
         
         JPanel mergePanel =new JPanel();
         mergePanel.setLayout(new GridBagLayout());
-        mergePanel.setPreferredSize(new Dimension(400, 200));
+        mergePanel.setPreferredSize(new Dimension(400, 350));
         JLabel mergesrc = new JLabel("Source");
         mergesrc.setPreferredSize(new Dimension(40, 35));
         JLabel mergetgt = new JLabel("Target");
@@ -302,29 +413,33 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         JLabel mergeeditornote = new JLabel("Editor Note");
         mergeeditornote.setPreferredSize(new Dimension(40, 35));
       
-        mergeSourceComboBox = new OwlEntityComboBox(editorKit);
+        mergeSourceComboBox = new OwlEntityComboBox(getEditorKit());
         mergeSourceComboBox.addItemListener(mergeSourceItemListener);
         mergeSourceComboBox.addItems(getProperties());
         mergeSourceComboBox.setPreferredSize(new Dimension(500, 35));
-        msComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeSourceComboBox);
+        mergeSourceComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getMergeSource()));
+        //msComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeSourceComboBox);
         
-        mergeTargetComboBox = new OwlEntityComboBox(editorKit);
+        mergeTargetComboBox = new OwlEntityComboBox(getEditorKit());
         mergeTargetComboBox.addItemListener(mergeTargetItemListener);
         mergeTargetComboBox.addItems(getProperties());
         mergeTargetComboBox.setPreferredSize(new Dimension(500, 35));
-        mtComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeTargetComboBox);
+        mergeTargetComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getMergeTarget()));
+        //mtComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeTargetComboBox);
         
-        mergeDesignNoteComboBox = new OwlEntityComboBox(editorKit);
+        mergeDesignNoteComboBox = new OwlEntityComboBox(getEditorKit());
         mergeDesignNoteComboBox.addItemListener(mergeDNItemListener);
         mergeDesignNoteComboBox.addItems(getProperties());
         mergeDesignNoteComboBox.setPreferredSize(new Dimension(500, 35));
-        mdnComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeDesignNoteComboBox);
+        mergeDesignNoteComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getMergeDesignNote()));
+        //mdnComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeDesignNoteComboBox);
         
-        mergeEditorNoteComboBox = new OwlEntityComboBox(editorKit);
+        mergeEditorNoteComboBox = new OwlEntityComboBox(getEditorKit());
         mergeEditorNoteComboBox.addItemListener(mergeENItemListener);
         mergeEditorNoteComboBox.addItems(getProperties());
         mergeEditorNoteComboBox.setPreferredSize(new Dimension(500, 35));
-        menComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeEditorNoteComboBox);
+        mergeEditorNoteComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getMergeEditorNote()));
+        //menComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeEditorNoteComboBox);
         
         mergePanel.add(mergesrc, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(8, 0, 2, 0), 0, 0));
         //mergePanel.add(mergeSourceScrollpane, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 40));
@@ -344,11 +459,12 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         JLabel splitfrom = new JLabel("Split from");
         splitfrom.setPreferredSize(new Dimension(150, 40));
         
-        splitFromComboBox = new OwlEntityComboBox(editorKit);
+        splitFromComboBox = new OwlEntityComboBox(getEditorKit());
         splitFromComboBox.addItemListener(splitFromItemListener);
         splitFromComboBox.addItems(getProperties());
         splitFromComboBox.setPreferredSize(new Dimension(500, 40));
-        sfComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(splitFromComboBox);
+        splitFromComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getSplitFrom()));
+        //sfComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(splitFromComboBox);
         
         //splitPanel.add(splitfrom, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(8, 0, 2, 0), 0, 0));
         //splitPanel.add(splitFromComboBox, new GridBagConstraints(1, 0, 1, 1, 0.5, 0.5, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, new Insets(8, 0, 2, 0), 0, 0));
@@ -367,13 +483,31 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         JPanel panel2 = new JPanel();
         panel2.setLayout(new GridBagLayout());
-        panel2.setMinimumSize(new Dimension(400, 200));
+        panel2.setMinimumSize(new Dimension(400, 350));
         //panel2.setPreferredSize(new Dimension(600, 100));
         //panel2.setPreferredSize(new Dimension(410, 510));
         panel2.add(tabbedPane, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
-       
+        
         JSplitPane splitPane = new JSplitPane(SwingConstants.HORIZONTAL, panel, panel2); 
         this.add(splitPane);
+    }
+    
+    public OWLEditorKit getEditorKit() {
+    	if (NCIEditTab.currentTab() != null && editorKit == null) {
+    		editorKit = NCIEditTab.currentTab().getOWLEditorKit();
+    	}
+    	return editorKit;
+    }
+    
+    private OWLEntity getProps (String prop) {
+    	OWLEntity propResult = null;
+    	List<OWLEntity> propList = getProperties();
+    	for (OWLEntity ent : propList) {
+    		if (ent.getIRI().getRemainder().get().equals(prop)) {
+    			propResult = ent;
+    		}
+    	}
+    	return propResult;
     }
     
     private void setupPropertyList() {
@@ -385,7 +519,10 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
     }
 
     protected List<OWLEntity> getProperties() {
-        return LuceneUiUtils.getProperties(editorKit);
+    	if (properties.isEmpty()) {
+    		properties = LuceneUiUtils.getProperties(getEditorKit());
+    	}
+        return properties;
     }
     
     private void setupImmutablePropertyList() {
@@ -416,15 +553,21 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         immutablepropList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         immutablepropList.addListSelectionListener(immutablepropListSelectionListener);
-        immutablepropList.setCellRenderer(new NCIEditTabOwlEntityListCellRenderer(editorKit, immutDependentAnnotations));
+        immutablepropList.setCellRenderer(new NCIEditTabOwlEntityListCellRenderer(getEditorKit(), immutDependentAnnotations));
         immutablepropList.addKeyListener(keyAdapter);
         immutablepropList.addMouseListener(mouseAdapter);
         immutablepropList.setVisibleRowCount(5);
         immutablepropList.setBorder(new EmptyBorder(2, 2, 0, 2));
 
-        List<Object> data = new ArrayList<>();
-        data.add(new OwlPropertyListHeaderItem());
-        immutablepropList.setListData(data.toArray());
+        Vector propertylabel = new Vector();
+        List<OWLEntity> data = new ArrayList<OWLEntity>();
+        propertylabel.add(new OwlPropertyListHeaderItem());
+        List<String> imPropList = NCIEditTabPreferences.getImmutPropList();
+        for (String str : imPropList) {
+        	data.add(getProps(str));
+        }
+        this.immutablepropList.setListData(propertylabel);
+        this.addEntitiesToList(data, immutablepropList);
         immutAxiomAnnotationButton = new AxiomAnnotationButton(event -> invokeImmutAxiomAnnotationHandler());
     }
 
@@ -454,156 +597,41 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         complexpropList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         complexpropList.addListSelectionListener(complexpropListSelectionListener);
-        complexpropList.setCellRenderer(new NCIEditTabOwlEntityListCellRenderer(editorKit, complexDependentAnnotations));
+        complexpropList.setCellRenderer(new NCIEditTabOwlEntityListCellRenderer(getEditorKit(), complexDependentAnnotations));
         complexpropList.addKeyListener(keyAdapter);
         complexpropList.addMouseListener(mouseAdapter);
         complexpropList.setVisibleRowCount(5);
         complexpropList.setBorder(new EmptyBorder(2, 2, 0, 2));
 
-        List<Object> data = new ArrayList<>();
-        data.add(new OwlPropertyListHeaderItem());
-        complexpropList.setListData(data.toArray());
+        Vector propertylabel = new Vector();
+        List<OWLEntity> data = new ArrayList<OWLEntity>();
+        propertylabel.add(new OwlPropertyListHeaderItem());
+        List<String> cPropList = NCIEditTabPreferences.getComplexPropList();
+        List<String> cPropAnnotList = new ArrayList<String>();
+        OWLEntity compProp;
+        //List<OWLEntity> dataAnnot = new ArrayList<OWLEntity>();
+        for (String str : cPropList) {
+        	cPropAnnotList.clear();
+        	//dataAnnot.clear();
+        	List<OWLEntity> dataAnnot = new ArrayList<OWLEntity>();
+        	compProp = getProps(str);
+        	data.add(compProp);
+        	cPropAnnotList = NCIEditTabPreferences.getComplexPropAnnotationList(str);
+        	for (String annot : cPropAnnotList) {
+        		dataAnnot.add(getProps(annot));
+        	}
+        	complexDependentAnnotations.put(compProp, dataAnnot);
+            //addEntitiesToList(new ArrayList<OWLEntity>(), complexpropList);
+        	
+        }
+        complexpropList.setListData(propertylabel);
+        this.addEntitiesToList(data, complexpropList);
         complexAxiomAnnotationButton = new AxiomAnnotationButton(event -> invokeComplexAxiomAnnotationHandler());
     }
 
-    /*private void setupRetirePropertyList() {
-    	retirepropList = new MList() {
-    		protected void handleAdd() {
-    			addRetireProperty();
-    		}
-
-    		protected void handleDelete() {
-    			deleteRetireProperty();
-    		}
-
-    		@Override
-    		protected List<MListButton> getButtons(Object o) {
-
-    			List<MListButton> buttons = new ArrayList<>(super.getButtons(o));
-
-    			return buttons;
-    		}
-        };
-        
-        retirepropList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        retirepropList.addListSelectionListener(retirepropListSelectionListener);
-        retirepropList.setCellRenderer(new NCIEditTabOwlEntityListCellRenderer(editorKit, retireDependentAnnotations));
-        retirepropList.addKeyListener(keyAdapter);
-        retirepropList.addMouseListener(mouseAdapter);
-        retirepropList.setVisibleRowCount(5);
-        retirepropList.setBorder(new EmptyBorder(2, 2, 0, 2));
-
-        List<Object> data = new ArrayList<>();
-        data.add(new OwlPropertyListHeaderItem());
-        retirepropList.setListData(data.toArray());
-        retireAxiomAnnotationButton = new AxiomAnnotationButton(event -> invokeRetireAxiomAnnotationHandler());
-    }*/
-    
-    private void setupMergePropertyList() {
-    	//setupMergeSourcePropertyList();
-    	//setupMergeTargetPropertyList();
-    }
-    
-    /*private void setupMergeSourcePropertyList() {
-    	mergeSourceList = new MList() {
-    		protected void handleAdd() {
-    			addMergeSourceProperty();
-    		}
-
-    		protected void handleDelete() {
-    			deleteMergeSourceProperty();
-    		}
-
-    		@Override
-    		protected List<MListButton> getButtons(Object o) {
-
-    			List<MListButton> buttons = new ArrayList<>(super.getButtons(o));
-    			return buttons;
-    		}
-        };
-        
-        mergeSourceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        mergeSourceList.addListSelectionListener(mergepropListSelectionListener);
-        mergeSourceList.setCellRenderer(new NCIEditTabOwlEntityListCellRenderer(editorKit, mergeSourceDependentAnnotations));
-        mergeSourceList.addKeyListener(keyAdapter);
-        mergeSourceList.addMouseListener(mouseAdapter);
-        mergeSourceList.setVisibleRowCount(5);
-        mergeSourceList.setBorder(new EmptyBorder(2, 2, 0, 2));
-
-        List<Object> data = new ArrayList<>();
-        data.add(new OwlPropertyListHeaderItem());
-        mergeSourceList.setListData(data.toArray());
-        mergeSourceAxiomAnnotationButton = new AxiomAnnotationButton(event -> invokeRetireAxiomAnnotationHandler());
-    }*/
-    
-    /*private void setupMergeTargetPropertyList() {
-    	mergeTargetList = new MList() {
-    		protected void handleAdd() {
-    			addMergeTargetProperty();
-    		}
-
-    		protected void handleDelete() {
-    			deleteMergeTargetProperty();
-    		}
-
-    		@Override
-    		protected List<MListButton> getButtons(Object o) {
-
-    			List<MListButton> buttons = new ArrayList<>(super.getButtons(o));
-    			return buttons;
-    		}
-        };
-        
-        mergeTargetList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        mergeTargetList.addListSelectionListener(mergepropListSelectionListener);
-        mergeTargetList.setCellRenderer(new NCIEditTabOwlEntityListCellRenderer(editorKit, mergeTargetDependentAnnotations));
-        mergeTargetList.addKeyListener(keyAdapter);
-        mergeTargetList.addMouseListener(mouseAdapter);
-        mergeTargetList.setVisibleRowCount(5);
-        mergeTargetList.setBorder(new EmptyBorder(2, 2, 0, 2));
-
-        List<Object> data = new ArrayList<>();
-        data.add(new OwlPropertyListHeaderItem());
-        mergeTargetList.setListData(data.toArray());
-        mergeTargetAxiomAnnotationButton = new AxiomAnnotationButton(event -> invokeRetireAxiomAnnotationHandler());
-    }
-    
-    private void setupSplitPropertyList() {
-    	splitFromList = new MList() {
-    		protected void handleAdd() {
-    			addSplitFromProperty();
-    		}
-
-    		protected void handleDelete() {
-    			deleteSplitFromProperty();
-    		}
-
-    		@Override
-    		protected List<MListButton> getButtons(Object o) {
-
-    			List<MListButton> buttons = new ArrayList<>(super.getButtons(o));
-    			return buttons;
-    		}
-        };
-        
-        splitFromList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        splitFromList.addListSelectionListener(splitpropListSelectionListener);
-        splitFromList.setCellRenderer(new NCIEditTabOwlEntityListCellRenderer(editorKit, splitFromDependentAnnotations));
-        splitFromList.addKeyListener(keyAdapter);
-        splitFromList.addMouseListener(mouseAdapter);
-        splitFromList.setVisibleRowCount(5);
-        splitFromList.setBorder(new EmptyBorder(2, 2, 0, 2));
-
-        List<Object> data = new ArrayList<>();
-        data.add(new OwlPropertyListHeaderItem());
-        splitFromList.setListData(data.toArray());
-        splitFromAxiomAnnotationButton = new AxiomAnnotationButton(event -> invokeSplitFromAxiomAnnotationHandler());
-    }*/
-    
     private ListSelectionListener immutablepropListSelectionListener = e -> {
         if(immutablepropList.getSelectedValue() != null && !e.getValueIsAdjusting()) {
             if(immutablepropList.getSelectedValue() instanceof OwlEntityListItem) {
-                //selectedImmutablePropertyListItem = (OwlEntityListItem) immutablepropList.getSelectedValue();
                 selectedImmutablePropertyListItem = (OwlEntityListItem) immutablepropList.getSelectedValue();
             }
         }
@@ -616,48 +644,15 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
             }
         }
     };
-    
-    /*private ListSelectionListener retirepropListSelectionListener = e -> {
-        if(retirepropList.getSelectedValue() != null && !e.getValueIsAdjusting()) {
-            if(retirepropList.getSelectedValue() instanceof OwlEntityListItem) {
-                selectedRetirePropertyListItem = (OwlEntityListItem) retirepropList.getSelectedValue();
-            }
-        }
-    };*/
-    
-    /*private ListSelectionListener mergepropListSelectionListener = e -> {
-        if(mergeSourceList.getSelectedValue() != null && !e.getValueIsAdjusting()) {
-            if(mergeSourceList.getSelectedValue() instanceof OwlEntityListItem) {
-                selectedMergeSourcePropertyListItem = (OwlEntityListItem) mergeSourceList.getSelectedValue();
-            }
-        }
-        
-        if(mergeTargetList.getSelectedValue() != null && !e.getValueIsAdjusting()) {
-            if(mergeTargetList.getSelectedValue() instanceof OwlEntityListItem) {
-                selectedMergeTargetPropertyListItem = (OwlEntityListItem) mergeTargetList.getSelectedValue();
-            }
-        }
-    };*/
-    
-    private ItemListener retireCptRootItemListener = new ItemListener() {
-        @Override
-        public void itemStateChanged(ItemEvent e) {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                Object obj = e.getItem();
-                if (obj instanceof String) {
-                    ((JTextField)retireCptRootComboBox.getEditor().getEditorComponent()).setText(obj.toString());
-                }
-            }
-        }
-    };
-    
+
     private ItemListener retireDesignNoteItemListener = new ItemListener() {
-        @Override
+    	@Override
         public void itemStateChanged(ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)retireDesignNoteComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireDesignNote(obj.toString());
                 }
             }
         }
@@ -670,6 +665,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)retireEditorNoteComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireEditorNote(obj.toString());
                 }
             }
         }
@@ -682,6 +678,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)retireCptStatusComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireConceptStatus(obj.toString());
                 }
             }
         }
@@ -694,6 +691,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)retireParentComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireParent(obj.toString());
                 }
             }
         }
@@ -706,6 +704,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)retireChildComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireChild(obj.toString());
                 }
             }
         }
@@ -718,6 +717,20 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)retireRoleComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireRole(obj.toString());
+                }
+            }
+        }
+    };
+    
+    private ItemListener retireInRoleItemListener = new ItemListener() {
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                Object obj = e.getItem();
+                if (obj instanceof String) {
+                    ((JTextField)retireInRoleComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireInRole(obj.toString());
                 }
             }
         }
@@ -730,6 +743,20 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)retireAssocComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireAssoc(obj.toString());
+                }
+            }
+        }
+    };
+    
+    private ItemListener retireInAssocItemListener = new ItemListener() {
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                Object obj = e.getItem();
+                if (obj instanceof String) {
+                    ((JTextField)retireInAssocComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setRetireInAssoc(obj.toString());
                 }
             }
         }
@@ -742,6 +769,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)mergeSourceComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setMergeSource(obj.toString());
                 }
             }
         }
@@ -754,6 +782,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)mergeTargetComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setMergeTarget(obj.toString());
                 }
             }
         }
@@ -766,6 +795,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)mergeDesignNoteComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setMergeDesignNote(obj.toString());
                 }
             }
         }
@@ -778,6 +808,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)mergeEditorNoteComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setMergeEditorNote(obj.toString());
                 }
             }
         }
@@ -790,6 +821,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
                 Object obj = e.getItem();
                 if (obj instanceof String) {
                     ((JTextField)splitFromComboBox.getEditor().getEditorComponent()).setText(obj.toString());
+                    //NCIEditTabPreferences.setSplitFrom(obj.toString());
                 }
             }
         }
@@ -828,7 +860,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
     };
     
     private void addImmutableProperty() {
-    	AddPropertiesToPreferencesPanel.showDialog(editorKit, getEntities(immutablepropList),
+    	AddPropertiesToPreferencesPanel.showDialog(getEditorKit(), getEntities(immutablepropList),
         		immutDependentAnnotations, null).ifPresent(owlEntities -> addEntitiesToList(owlEntities, immutablepropList));
     } 
     
@@ -839,7 +871,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
     }
     
     private void addComplexProperty() {
-    	AddPropertiesToPreferencesPanel.showDialog(editorKit, getEntities(complexpropList),
+    	AddPropertiesToPreferencesPanel.showDialog(getEditorKit(), getEntities(complexpropList),
         		complexDependentAnnotations, null).ifPresent(owlEntities -> addEntitiesToList(owlEntities, complexpropList));
     } 
     
@@ -848,39 +880,6 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         items.remove(selectedComplexPropertyListItem);
         complexpropList.setListData(items.toArray());
     }
-    
-    /*private void addRetireProperty() {
-    	AddPropertiesToPreferencesPanel.showDialog(editorKit, getEntities(retirepropList),
-        		retireDependentAnnotations, null).ifPresent(owlEntities -> addEntitiesToList(owlEntities, retirepropList));
-    } 
-    
-    private void deleteRetireProperty() {
-        List items = getListItems(retirepropList);
-        items.remove(selectedRetirePropertyListItem);
-        retirepropList.setListData(items.toArray());
-    }*/
-    
-    /*private void addMergeSourceProperty() {
-    	AddPropertiesToPreferencesPanel.showDialog(editorKit, getEntities(mergeSourceList),
-        		mergeSourceDependentAnnotations, null).ifPresent(owlEntities -> addEntitiesToList(owlEntities, mergeSourceList));
-    } 
-    
-    private void deleteMergeSourceProperty() {
-        List items = getListItems(mergeSourceList);
-        items.remove(selectedMergeSourcePropertyListItem);
-        mergeSourceList.setListData(items.toArray());
-    }
-    
-    private void addMergeTargetProperty() {
-    	AddPropertiesToPreferencesPanel.showDialog(editorKit, getEntities(mergeTargetList),
-        		mergeTargetDependentAnnotations, null).ifPresent(owlEntities -> addEntitiesToList(owlEntities, mergeTargetList));
-    } 
-    
-    private void deleteMergeTargetProperty() {
-        List items = getListItems(mergeTargetList);
-        items.remove(selectedMergeTargetPropertyListItem);
-        mergeTargetList.setListData(items.toArray());
-    }*/
     
     private List<OWLEntity> getEntities(JList list) {
         List<OWLEntity> entities = new ArrayList<>();
@@ -923,24 +922,19 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
     }*/
     
     private void addImmutDepProps(OWLEntity ent) {
-    	AddPropertiesToPreferencesPanel.showDialog(editorKit, getEntities(immutablepropList),
+    	AddPropertiesToPreferencesPanel.showDialog(getEditorKit(), getEntities(immutablepropList),
         		immutDependentAnnotations, ent).ifPresent(owlEntities -> addImmutDepProps(owlEntities, ent));
     }
 
     private void addComplexDepProps(OWLEntity ent) {
-    	AddPropertiesToPreferencesPanel.showDialog(editorKit, getEntities(complexpropList),
+    	AddPropertiesToPreferencesPanel.showDialog(getEditorKit(), getEntities(complexpropList),
         		complexDependentAnnotations, ent).ifPresent(owlEntities -> addComplexDepProps(owlEntities, ent));
     }
-    
-    /*private void addRetireDepProps(OWLEntity ent) {
-    	AddPropertiesToPreferencesPanel.showDialog(editorKit, getEntities(retirepropList),
-        		retireDependentAnnotations, ent).ifPresent(owlEntities -> addRetireDepProps(owlEntities, ent));
-    }*/
     
     private void addImmutDepProps(List<OWLEntity> entities, OWLEntity ent) {
         immutDependentAnnotations.put(ent, entities);
         addEntitiesToList(new ArrayList<OWLEntity>(), immutablepropList);
-
+        //NCIEditTabPreferences.setImmutProps(immutablepropList.);
     }
     
     private void addComplexDepProps(List<OWLEntity> entities, OWLEntity ent) {
@@ -949,12 +943,6 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
 
     }
     
-    /*private void addRetireDepProps(List<OWLEntity> entities, OWLEntity ent) {
-        retireDependentAnnotations.put(ent, entities);
-        addEntitiesToList(new ArrayList<OWLEntity>(), retirepropList);
-
-    }*/
-    
     private void addEntitiesToList(List<OWLEntity> entities, JList list) {
         List items = getListItems(list);
         items.addAll(entities.stream().map(OwlEntityListItem::new).collect(Collectors.toList()));
@@ -962,12 +950,12 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
 
     }
 
-    public OWLProperty getRetireCptRootProperty() {
-        return (OWLProperty) retireCptRootComboBox.getSelectedItem();
+    public OWLClass getRetireCptRootClass() {
+    	return retireCptRootClass;
     }
     
     public OWLProperty getRetireDNProperty() {
-        return (OWLProperty) retireDesignNoteComboBox.getSelectedItem();
+    	return (OWLProperty) retireDesignNoteComboBox.getSelectedItem();
     }
     
     public OWLProperty getRetireENProperty() {
@@ -990,8 +978,16 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         return (OWLProperty) retireRoleComboBox.getSelectedItem();
     }
     
+    public OWLProperty getRetireInRoleProperty() {
+        return (OWLProperty) retireInRoleComboBox.getSelectedItem();
+    }
+    
     public OWLProperty getRetireAssocProperty() {
         return (OWLProperty) retireAssocComboBox.getSelectedItem();
+    }
+    
+    public OWLProperty getRetireInAssocProperty() {
+        return (OWLProperty) retireInAssocComboBox.getSelectedItem();
     }
     
     public OWLProperty getMergeSourceProperty() {
@@ -1029,9 +1025,167 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
     	
     	NCIEditTab.currentTab().fireChange(new PreferencesChangeEvent(NCIEditTab.currentTab(), 
 				ComplexEditType.PREFMODIFY));
-    	 
+    	
+    	SaveProjectOptions();
     }
     
+    public void SaveProjectOptions() {
+    	//ProjectOptionsBuilder poBuilder = new ProjectOptionsBuilder();
+    	LoadProjectOptions();
+    	//String defaultStr = "OptionsConfig";
+    	//ProjectId pid = new ProjectIdImpl (defaultStr);
+    	//Project proj = ConfigurationManager.getFactory().getProject(pid, defaultStr, new NameImpl(defaultStr), new DescriptionImpl(defaultStr), new UserIdImpl(defaultStr), Optional.of(new ProjectOptionsImpl(projectOptions)));
+    	//poBuilder.setProject(proj);
+    	ProjectOptions projOptions = new ProjectOptionsImpl(projectOptions);
+    	ProjectOptionsConfigManager.saveProjectOptionsFile(projOptions);
+    }
+    
+    private void LoadProjectOptions() {
+    	Set<String> retireCptRootValue = new TreeSet();
+    	Set<String> designNoteValue = new TreeSet();
+    	Set<String> editorNoteValue = new TreeSet();
+    	Set<String> retireCptStatusValue = new TreeSet();
+    	Set<String> retireParentValue = new TreeSet();
+    	Set<String> retireChildValue = new TreeSet();
+    	Set<String> retireRoleValue = new TreeSet();
+    	Set<String> retireInRoleValue = new TreeSet();
+    	Set<String> retireAssocValue = new TreeSet();
+    	Set<String> retireInAssocValue = new TreeSet();
+    	Set<String> mergeSourceValue = new TreeSet();
+    	Set<String> mergeTargetValue = new TreeSet();
+    	Set<String> splitFromValue = new TreeSet();
+    	
+    	if (getRetireCptRootClass() != null) {
+	    	retireCptRootValue.add(getRetireCptRootClass().getIRI().getIRIString());
+	    	this.projectOptions.put(NCIEditTabConstants.RETIRE_CONCEPTS_ROOT_NAME, retireCptRootValue);
+	    	NCIEditTabPreferences.setRetireConceptRoot(getRetireCptRootClass().getIRI().getRemainder().get());
+    	}
+    	if (getRetireDNProperty() != null) {
+    		designNoteValue.add(getRetireDNProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.DESIGN_NOTE_NAME, designNoteValue);
+    		NCIEditTabPreferences.setRetireDesignNote(getRetireDNProperty().getIRI().getRemainder().get());
+    	}
+    	if (getRetireENProperty() != null) {
+    		editorNoteValue.add(getRetireENProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.EDITOR_NOTE_NAME, editorNoteValue);
+    		NCIEditTabPreferences.setRetireEditorNote(getRetireENProperty().getIRI().getRemainder().get());
+    	}
+    	if (getRetireCptStatusProperty() != null) {
+    		retireCptStatusValue.add(getRetireCptStatusProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.DEPR_CONCEPT_STATUS_PROP_NAME, retireCptStatusValue);
+    		NCIEditTabPreferences.setRetireConceptStatus(getRetireCptStatusProperty().getIRI().getRemainder().get());
+    	}
+    	if (getRetireParentProperty() != null) {
+    		retireParentValue.add(getRetireParentProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.DEPR_PARENT_NAME, retireParentValue);
+    		NCIEditTabPreferences.setRetireParent(getRetireParentProperty().getIRI().getRemainder().get());
+    	}
+    	if (getRetireChildProperty() != null) {
+    		retireChildValue.add(getRetireChildProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.DEPR_CHILD_NAME, retireChildValue);
+    		NCIEditTabPreferences.setRetireChild(getRetireChildProperty().getIRI().getRemainder().get());
+    	}
+    	if (getRetireRoleProperty() != null) {
+    		retireRoleValue.add(getRetireRoleProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.DEPR_ROLE_NAME, retireRoleValue);
+    		NCIEditTabPreferences.setRetireRole(getRetireRoleProperty().getIRI().getRemainder().get());
+    	}
+    	if (getRetireInRoleProperty() != null) {
+    		retireInRoleValue.add(getRetireInRoleProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.DEPR_IN_ROLE_NAME, retireInRoleValue);
+    		NCIEditTabPreferences.setRetireInRole(getRetireInRoleProperty().getIRI().getRemainder().get());
+    	}
+    	if (getRetireAssocProperty() != null) {
+    		retireAssocValue.add(getRetireAssocProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.DEPR_ASSOC_NAME, retireAssocValue);
+    		NCIEditTabPreferences.setRetireAssoc(getRetireAssocProperty().getIRI().getRemainder().get());
+    	}
+    	if (getRetireInAssocProperty() != null) {
+    		retireInAssocValue.add(getRetireInAssocProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.DEPR_IN_ASSOC_NAME, retireInAssocValue);
+    		NCIEditTabPreferences.setRetireInAssoc(getRetireInAssocProperty().getIRI().getRemainder().get());
+    	}
+    	if (getMergeSourceProperty() != null) {
+    		mergeSourceValue.add(getMergeSourceProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.MERGE_SOURCE_NAME, mergeSourceValue);
+    		NCIEditTabPreferences.setMergeSource(getMergeSourceProperty().getIRI().getRemainder().get());
+    	}
+    	if (getMergeTargetProperty() != null) {
+    		mergeTargetValue.add(getMergeTargetProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.MERGE_TARGET_NAME, mergeTargetValue);
+    		NCIEditTabPreferences.setMergeTarget(getMergeTargetProperty().getIRI().getRemainder().get());
+    	}
+    	if (getSplitFromProperty() != null) {
+    		splitFromValue.add(getSplitFromProperty().getIRI().getIRIString());
+    		this.projectOptions.put(NCIEditTabConstants.SPLIT_FROM_NAME, splitFromValue);
+    		NCIEditTabPreferences.setSplitFrom(getSplitFromProperty().getIRI().getRemainder().get());
+    	}
+    	//Load immutable properties
+    	ListModel immutListModel = null;
+    	//int count = immutListModel.getSize();
+    	OwlEntityListItem entity = null;
+    	Set<String> immutPropSet = new TreeSet();	
+    	List<String> immutPropList = new ArrayList<String>();
+    	if (this.immutablepropList != null) {
+    		immutListModel = this.immutablepropList.getModel();
+	    	for (int i=0; i < immutListModel.getSize(); i++) {
+	    		if (immutListModel.getElementAt(i) instanceof OwlEntityListItem) {
+	    			entity = (OwlEntityListItem)immutListModel.getElementAt(i);
+	    			immutPropSet.add(entity.getEntity().getIRI().getIRIString());
+	    			immutPropList.add(entity.getEntity().getIRI().getRemainder().get());
+	    		}
+	    	}
+	    	this.projectOptions.put(NCIEditTabConstants.IMMUTABLE_PROPS, immutPropSet);    	
+	    	NCIEditTabPreferences.setImmutPropList(immutPropList);
+    	}
+    	//Load complex properties
+    	ListModel compPropListModel = null;
+    	OwlEntityListItem cpentity = null;
+    	Set<String> complexPropSet = new TreeSet();
+    	List<String> compPropList = new ArrayList<String>();
+    	if (this.complexpropList != null) {
+    		compPropListModel = this.complexpropList.getModel();
+	    	for (int i=0; i < compPropListModel.getSize(); i++) {
+	    		if (compPropListModel.getElementAt(i) instanceof OwlEntityListItem) {
+	    			cpentity = (OwlEntityListItem)compPropListModel.getElementAt(i);
+	    			complexPropSet.add(cpentity.getEntity().getIRI().getIRIString());
+	    			compPropList.add(cpentity.getEntity().getIRI().getRemainder().get());
+	    		}
+	    	}
+	    	this.projectOptions.put(NCIEditTabConstants.COMPLEX_PROPS, complexPropSet);
+	    	NCIEditTabPreferences.setComplexPropList(compPropList);
+    	}
+    	//Load complex property dependent annotations
+    	List<String> compPropAnnotList = new ArrayList<String>();
+    	for (Entry<OWLEntity, List<OWLEntity>> entry: complexDependentAnnotations.entrySet()) {
+    		OWLEntity comppropKey = entry.getKey();
+    		List<OWLEntity> compAnnotationList = entry.getValue();
+    		OWLEntity cpannotent = null;
+    		Set<String> compDependentAnnotationSet = new TreeSet();
+    		compPropAnnotList.clear();
+    		for (int i=0; i<compAnnotationList.size(); i++) {
+            	cpannotent = compAnnotationList.get(i);
+            	compDependentAnnotationSet.add(cpannotent.getIRI().getIRIString());
+            	compPropAnnotList.add(cpannotent.getIRI().getRemainder().get());
+            }
+            this.projectOptions.put(comppropKey.getIRI().getIRIString(), compDependentAnnotationSet);
+            NCIEditTabPreferences.setComplexPropAnnotationList(comppropKey.getIRI().getRemainder().get(), compPropAnnotList);
+    	}
+    }
+    /*private Project getProject() {
+    	ClientSession clientSession = ClientSession.getInstance(editorKit);
+    	LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
+    	Project project = null;
+    	if (lhc != null) {
+			try {
+				project = lhc.getCurrentConfig().getProject(clientSession.getActiveProject());
+			} catch (UnknownProjectIdException e) {
+				e.printStackTrace();
+			}
+		}
+    	return project;
+    }*/
+   
     /**
      * Property list header item
      */

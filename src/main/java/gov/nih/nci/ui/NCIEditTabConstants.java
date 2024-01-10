@@ -18,6 +18,19 @@ public class NCIEditTabConstants {
 	
 	public static final String COMPLEX_PROPS = "complex_properties";
 	public static final String IMMUTABLE_PROPS = "immutable_properties";
+	public static final String RETIRE_CONCEPTS_ROOT_NAME = "retired_concepts_root";
+	public static final String DESIGN_NOTE_NAME = "design_note";
+	public static final String EDITOR_NOTE_NAME = "editor_note";
+	public static final String DEPR_CONCEPT_STATUS_PROP_NAME = "deprecated_concept_status";
+	public static final String DEPR_PARENT_NAME = "deprecated_parent";
+	public static final String DEPR_CHILD_NAME = "deprecated_child";
+	public static final String DEPR_ROLE_NAME = "deprecated_role";
+	public static final String DEPR_IN_ROLE_NAME = "deprecated_in_role";
+	public static final String DEPR_ASSOC_NAME = "deprecated_assoc";
+	public static final String DEPR_IN_ASSOC_NAME = "deprecated_in_assoc";
+	public static final String MERGE_SOURCE_NAME = "merge_source";
+	public static final String MERGE_TARGET_NAME = "merge_target";
+	public static final String SPLIT_FROM_NAME = "split_from";
 	
 	public static final String PROPTABLE_VALUE_COLUMN = "Value";
 	
