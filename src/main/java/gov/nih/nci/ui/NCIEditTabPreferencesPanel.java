@@ -82,11 +82,12 @@ import edu.stanford.protege.metaproject.impl.ProjectOptionsImpl;
 import edu.stanford.protege.metaproject.impl.UserIdImpl;
 import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
-import edu.stanford.protege.search.lucene.tab.ui.OwlEntityComboBox;
+//import edu.stanford.protege.search.lucene.tab.ui.OwlEntityComboBox;
 import edu.stanford.protege.search.lucene.tab.ui.OwlEntityComboBoxChangeHandler;
 import edu.stanford.protege.search.lucene.tab.ui.TabPreferences;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.PreferencesChangeEvent;
+import gov.nih.nci.utils.OwlEntityComboBox;
 import gov.nih.nci.utils.ProjectOptionsBuilder;
 import gov.nih.nci.utils.ProjectOptionsConfigManager;
 import uk.ac.manchester.cs.owl.owlapi.OWLAnnotationPropertyImpl;
@@ -304,66 +305,66 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
             }
         });
         
-        retireDesignNoteComboBox = new OwlEntityComboBox(getEditorKit());
+        retireDesignNoteComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         retireDesignNoteComboBox.addItemListener(retireDesignNoteItemListener);
-        retireDesignNoteComboBox.addItems(getProperties());
+        //retireDesignNoteComboBox.addItems(getProperties());
         retireDesignNoteComboBox.setPreferredSize(new Dimension(440, 35));
         retireDesignNoteComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireDesignNote()));
         //retireDesignNoteComboBox.getModel().setSelectedItem(NCIEditTabPreferences.getRetireDesignNote());
         
         //rdnComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireDesignNoteComboBox);
         
-        retireEditorNoteComboBox = new OwlEntityComboBox(getEditorKit());
+        retireEditorNoteComboBox = new OwlEntityComboBox(getEditorKit(), getProperties());
         retireEditorNoteComboBox.addItemListener(retireEditorNoteItemListener);
-        retireEditorNoteComboBox.addItems(getProperties());
+        //retireEditorNoteComboBox.addItems();
         retireEditorNoteComboBox.setPreferredSize(new Dimension(440, 35));
         //retireEditorNoteComboBox.setSelectedItem(NCIEditTabPreferences.getRetireEditorNote());
         retireEditorNoteComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireEditorNote()));
         //renComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireEditorNoteComboBox);
         
-        retireCptStatusComboBox = new OwlEntityComboBox(getEditorKit());
+        retireCptStatusComboBox = new OwlEntityComboBox(getEditorKit(), getProperties());
         retireCptStatusComboBox.addItemListener(retireCptStatusItemListener);
-        retireCptStatusComboBox.addItems(getProperties());
+        //retireCptStatusComboBox.addItems(getProperties());
         retireCptStatusComboBox.setPreferredSize(new Dimension(440, 35));
         retireCptStatusComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireConceptStatus()));
         //rcsComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireCptStatusComboBox);
         
-        retireParentComboBox = new OwlEntityComboBox(getEditorKit());
+        retireParentComboBox = new OwlEntityComboBox(getEditorKit(), getProperties());
         retireParentComboBox.addItemListener(retireParentItemListener);
-        retireParentComboBox.addItems(getProperties());
+        //retireParentComboBox.addItems(getProperties());
         retireParentComboBox.setPreferredSize(new Dimension(440, 35));
         retireParentComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireParent()));
         //rpComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireParentComboBox);
         
-        retireChildComboBox = new OwlEntityComboBox(getEditorKit());
+        retireChildComboBox = new OwlEntityComboBox(getEditorKit(), getProperties());
         retireChildComboBox.addItemListener(retireChildItemListener);
-        retireChildComboBox.addItems(getProperties());
+        //retireChildComboBox.addItems(getProperties());
         retireChildComboBox.setPreferredSize(new Dimension(440, 35));
         retireChildComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireChild()));
         //rcComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireChildComboBox);
         
-        retireRoleComboBox = new OwlEntityComboBox(getEditorKit());
+        retireRoleComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         retireRoleComboBox.addItemListener(retireRoleItemListener);
-        retireRoleComboBox.addItems(getProperties());
+        //retireRoleComboBox.addItems(getProperties());
         retireRoleComboBox.setPreferredSize(new Dimension(440, 35));
         retireRoleComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireRole()));
         //rrComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireRoleComboBox);
         
-        retireInRoleComboBox = new OwlEntityComboBox(getEditorKit());
+        retireInRoleComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         retireInRoleComboBox.addItemListener(retireInRoleItemListener);
-        retireInRoleComboBox.addItems(getProperties());
+        //retireInRoleComboBox.addItems(getProperties());
         retireInRoleComboBox.setPreferredSize(new Dimension(440, 35));
         retireInRoleComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireInRole()));
         
-        retireAssocComboBox = new OwlEntityComboBox(getEditorKit());
+        retireAssocComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         retireAssocComboBox.addItemListener(retireAssocItemListener);
-        retireAssocComboBox.addItems(getProperties());
+        //retireAssocComboBox.addItems(getProperties());
         retireAssocComboBox.setPreferredSize(new Dimension(440, 35));
         retireAssocComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireAssoc()));
         
-        retireInAssocComboBox = new OwlEntityComboBox(getEditorKit());
+        retireInAssocComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         retireInAssocComboBox.addItemListener(retireInAssocItemListener);
-        retireInAssocComboBox.addItems(getProperties());
+        //retireInAssocComboBox.addItems(getProperties());
         retireInAssocComboBox.setPreferredSize(new Dimension(440, 35));
         retireInAssocComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getRetireInAssoc()));
         //raComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(retireAssocComboBox);
@@ -413,30 +414,30 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         JLabel mergeeditornote = new JLabel("Editor Note");
         mergeeditornote.setPreferredSize(new Dimension(40, 35));
       
-        mergeSourceComboBox = new OwlEntityComboBox(getEditorKit());
+        mergeSourceComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         mergeSourceComboBox.addItemListener(mergeSourceItemListener);
-        mergeSourceComboBox.addItems(getProperties());
+        //mergeSourceComboBox.addItems(getProperties());
         mergeSourceComboBox.setPreferredSize(new Dimension(500, 35));
         mergeSourceComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getMergeSource()));
         //msComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeSourceComboBox);
         
-        mergeTargetComboBox = new OwlEntityComboBox(getEditorKit());
+        mergeTargetComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         mergeTargetComboBox.addItemListener(mergeTargetItemListener);
-        mergeTargetComboBox.addItems(getProperties());
+        //mergeTargetComboBox.addItems(getProperties());
         mergeTargetComboBox.setPreferredSize(new Dimension(500, 35));
         mergeTargetComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getMergeTarget()));
         //mtComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeTargetComboBox);
         
-        mergeDesignNoteComboBox = new OwlEntityComboBox(getEditorKit());
+        mergeDesignNoteComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         mergeDesignNoteComboBox.addItemListener(mergeDNItemListener);
-        mergeDesignNoteComboBox.addItems(getProperties());
+        //mergeDesignNoteComboBox.addItems(getProperties());
         mergeDesignNoteComboBox.setPreferredSize(new Dimension(500, 35));
         mergeDesignNoteComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getMergeDesignNote()));
         //mdnComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeDesignNoteComboBox);
         
-        mergeEditorNoteComboBox = new OwlEntityComboBox(getEditorKit());
+        mergeEditorNoteComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         mergeEditorNoteComboBox.addItemListener(mergeENItemListener);
-        mergeEditorNoteComboBox.addItems(getProperties());
+        //mergeEditorNoteComboBox.addItems(getProperties());
         mergeEditorNoteComboBox.setPreferredSize(new Dimension(500, 35));
         mergeEditorNoteComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getMergeEditorNote()));
         //menComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(mergeEditorNoteComboBox);
@@ -459,9 +460,9 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         JLabel splitfrom = new JLabel("Split from");
         splitfrom.setPreferredSize(new Dimension(150, 40));
         
-        splitFromComboBox = new OwlEntityComboBox(getEditorKit());
+        splitFromComboBox = new OwlEntityComboBox(getEditorKit(), getProperties() );
         splitFromComboBox.addItemListener(splitFromItemListener);
-        splitFromComboBox.addItems(getProperties());
+        //splitFromComboBox.addItems(getProperties());
         splitFromComboBox.setPreferredSize(new Dimension(500, 40));
         splitFromComboBox.setSelectedItem(getProps(NCIEditTabPreferences.getSplitFrom()));
         //sfComboBoxChangeHandler = new OwlEntityComboBoxChangeHandler(splitFromComboBox);
