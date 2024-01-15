@@ -12,13 +12,13 @@ import edu.stanford.protege.metaproject.api.ProjectOptions;
 public class ProjectOptionsConfigManager {
 	private static final Logger logger = LoggerFactory.getLogger(ProjectOptionsConfigManager.class);
 	
-	public static void saveProjectOptionsFile(ProjectOptions projOptions) {
+	public static void saveProjectOptionsFile(ProjectOptions projOptions, String filePath) {
         try {
-            String projOptionLocation = "project-options.json";
+            //String projOptionLocation = "project-options.json";
             /*if (Strings.isNullOrEmpty(projOptionLocation)) {
             	throw new RuntimeException("Config property " + HTTPServer.SERVER_CONFIGURATION_PROPERTY + " isn't set");
 						}*/
-            File projOptionsFile = new File(projOptionLocation);
+            File projOptionsFile = new File(filePath);
             //ConfigurationManager.getConfigurationWriter().saveConfiguration(configuration, configurationFile);
             ProjectOptionsManager.getProjectOptionsWriter().saveProjectOptions(projOptions, projOptionsFile);
         }

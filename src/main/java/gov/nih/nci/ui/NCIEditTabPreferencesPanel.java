@@ -18,9 +18,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -54,6 +57,7 @@ import org.protege.editor.core.ui.list.MListButton;
 import org.protege.editor.core.ui.list.MListItem;
 import org.protege.editor.core.ui.list.MListSectionHeader;
 import org.protege.editor.core.ui.preferences.PreferencesLayoutPanel;
+import org.protege.editor.core.ui.util.UIUtil;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
@@ -124,6 +128,9 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
 	//private OwlEntityComboBox retireCptRootComboBox;
 	private JTextField retireCptRootTxtfld;
 	private JButton retireCptRootSearchBtn;
+	private File selectedFile;
+	private JTextField  userSelectedFilePathTxtfld;
+	private JButton exportBtn;
 	private OwlEntityComboBox retireDesignNoteComboBox;
 	private OwlEntityComboBox retireEditorNoteComboBox;
 	private OwlEntityComboBox retireCptStatusComboBox;
@@ -219,12 +226,12 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
       //  panel.addGroup("Server Configuration");
         JPanel immutPanel =new JPanel();
         immutPanel.setLayout(new GridBagLayout());
-        immutPanel.setPreferredSize(new Dimension(400, 350));
+        immutPanel.setPreferredSize(new Dimension(400, 250));
         //p1.setPreferredSize(new Dimension(600, 100));
         //p1.setPreferredSize(new Dimension(400, 500));
         //Insets insets = new Insets(2, 2, 2, 2);
         JScrollPane immutablepropScrollpane = new JScrollPane(immutablepropList);
-        immutablepropScrollpane.setPreferredSize(new Dimension(400, 350));
+        immutablepropScrollpane.setPreferredSize(new Dimension(400, 250));
         //immutablepropScrollpane.setPreferredSize(new Dimension(600, 100));
         immutablepropScrollpane.setBorder(UiUtils.MATTE_BORDER);
         JLabel immutablepropLbl = new JLabel("Immutable Properties");
@@ -234,11 +241,11 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         JPanel complexPanel =new JPanel();
         complexPanel.setLayout(new GridBagLayout());
-        complexPanel.setPreferredSize(new Dimension(400, 350));
+        complexPanel.setPreferredSize(new Dimension(400, 250));
         //p2.setPreferredSize(new Dimension(600, 100));
         //p2.setPreferredSize(new Dimension(400, 500));
         JScrollPane complexpropScrollpane = new JScrollPane(complexpropList);
-        complexpropScrollpane.setPreferredSize(new Dimension(400, 350));
+        complexpropScrollpane.setPreferredSize(new Dimension(400, 250));
         //complexpropScrollpane.setPreferredSize(new Dimension(600, 100));
         complexpropScrollpane.setBorder(UiUtils.MATTE_BORDER);
         //JLabel complexpropLbl = new JLabel("Complex Properties");
@@ -247,7 +254,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         JPanel retirePanel =new JPanel();
         retirePanel.setLayout(new GridBagLayout());
-        retirePanel.setPreferredSize(new Dimension(400, 350));
+        retirePanel.setPreferredSize(new Dimension(400, 250));
         /*JScrollPane retirepropScrollpane = new JScrollPane(retirepropList);
         retirepropScrollpane.setPreferredSize(new Dimension(400, 140));
         retirepropScrollpane.setBorder(UiUtils.MATTE_BORDER);
@@ -404,7 +411,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         JPanel mergePanel =new JPanel();
         mergePanel.setLayout(new GridBagLayout());
-        mergePanel.setPreferredSize(new Dimension(400, 350));
+        mergePanel.setPreferredSize(new Dimension(400, 140));
         JLabel mergesrc = new JLabel("Source");
         mergesrc.setPreferredSize(new Dimension(40, 35));
         JLabel mergetgt = new JLabel("Target");
@@ -475,20 +482,54 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         //splitPanel.add(splitFromComboBox, BorderLayout.EAST);
         
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Immutable", immutPanel);
+        tabbedPane.setPreferredSize(new Dimension(400, 250));
+        /*tabbedPane.addTab("Immutable", immutPanel);
         tabbedPane.addTab("Complex", complexPanel);
         tabbedPane.addTab("Retire", retirePanel);
         tabbedPane.addTab("Merge", mergePanel);
         tabbedPane.addTab("Split", splitPanel);
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);*/
+        tabbedPane.add(new JScrollPane(immutPanel), "Immutable");
+        tabbedPane.add(new JScrollPane(complexPanel), "Complex");
+        tabbedPane.add(new JScrollPane(retirePanel), "Retire");
+        tabbedPane.add(new JScrollPane(mergePanel), "Merge");
+        tabbedPane.add(new JScrollPane(splitPanel), "Split");
         
         JPanel panel2 = new JPanel();
         panel2.setLayout(new GridBagLayout());
-        panel2.setMinimumSize(new Dimension(400, 350));
+        panel2.setMinimumSize(new Dimension(400, 285));
         //panel2.setPreferredSize(new Dimension(600, 100));
         //panel2.setPreferredSize(new Dimension(410, 510));
         panel2.add(tabbedPane, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
+        //panel2.add(new JSeparator(SwingConstants.VERTICAL));
         
+        userSelectedFilePathTxtfld =  new JTextField(28);
+        //userSelectedFilePathTxtfld.setPreferredSize(new Dimension(310, 35));
+        //userSelectedFilePathTxtfld.setEditable(false);
+        userSelectedFilePathTxtfld.setBackground(Color.WHITE);
+        
+        exportBtn = new JButton("Export");
+        exportBtn.setPreferredSize(new Dimension(95, 35));
+        
+        exportBtn.addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent e)
+            {
+            	selectedFile = UIUtil.saveFile(NCIEditTabPreferencesPanel.this.getRootPane(), "Specify export json file", "JSON file", Collections.singleton("json"), "export.json");
+                if(selectedFile != null) {        	
+                	userSelectedFilePathTxtfld.setText(selectedFile.getAbsolutePath() /*+ selectedFile.getName()*/);
+                }
+            }
+        });
+        
+        JPanel exportPanel = new JPanel();
+        exportPanel.setLayout(new FlowLayout());
+        exportPanel.setPreferredSize(new Dimension(400, 35));
+        exportPanel.add(userSelectedFilePathTxtfld);
+        exportPanel.add(exportBtn);
+        panel2.add(exportPanel, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
+        //panel2.add(userSelectedFilePathTxtfld, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
+        //panel2.add(exportBtn, new GridBagConstraints(1, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
+               
         JSplitPane splitPane = new JSplitPane(SwingConstants.HORIZONTAL, panel, panel2); 
         this.add(splitPane);
     }
@@ -1038,7 +1079,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
     	//Project proj = ConfigurationManager.getFactory().getProject(pid, defaultStr, new NameImpl(defaultStr), new DescriptionImpl(defaultStr), new UserIdImpl(defaultStr), Optional.of(new ProjectOptionsImpl(projectOptions)));
     	//poBuilder.setProject(proj);
     	ProjectOptions projOptions = new ProjectOptionsImpl(projectOptions);
-    	ProjectOptionsConfigManager.saveProjectOptionsFile(projOptions);
+    	ProjectOptionsConfigManager.saveProjectOptionsFile(projOptions, userSelectedFilePathTxtfld.getText());
     }
     
     private void LoadProjectOptions() {
