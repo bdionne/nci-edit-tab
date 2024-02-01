@@ -31,6 +31,17 @@ public class NCIEditTabConstants {
 	public static final String MERGE_SOURCE_NAME = "merge_source";
 	public static final String MERGE_TARGET_NAME = "merge_target";
 	public static final String SPLIT_FROM_NAME = "split_from";
+	public static final String CODE_PROP_NAME = "code_prop";
+	public static final String LABEL_PROP_NAME = "label_prop";
+	public static final String PREF_NAME_NAME = "pref_name";
+	public static final String DEFINITION_NAME = "definition";
+	public static final String FULLY_QUAL_SYN_NAME = "fully_qualified_syn";
+	public static final String SYN_TYPE_NAME = "syn_type";
+	public static final String SYN_SOURCE_NAME = "syn_source";
+	public static final String DEF_SOURCE_NAME = "def_source";
+	public static final String REVIEWER_NAME_NAME = "reviewer_name";
+	public static final String REVIEW_DATE_NAME = "review_date";
+	public static final String SEMANTIC_TYPE_NAME = "semantic_type";
 	
 	public static final String PROPTABLE_VALUE_COLUMN = "Value";
 	

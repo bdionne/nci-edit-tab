@@ -45,30 +45,41 @@ public class NCIEditTabPreferences {
 
     public static final String PREFIX_INDEX_DIR = "ProtegeIndex";
 
-    public static final String FN_SPLIT = "FnSplit";
-    public static final String FN_COPY = "FnCopy";
-    public static final String FN_MERGE = "FnMerge";
-    public static final String FN_DUALEDITS = "FnDualEdits";
-    public static final String FN_RETIRE = "FnRetire";
+    private static final String FN_SPLIT = "FnSplit";
+    private static final String FN_COPY = "FnCopy";
+    private static final String FN_MERGE = "FnMerge";
+    private static final String FN_DUALEDITS = "FnDualEdits";
+    private static final String FN_RETIRE = "FnRetire";
     
-    public static final String IMMUTABLE_PROPERTYLIST = "ImmutPropList";
-    public static final String COMPLEX_PROPERTYLIST = "ComplexPropList";
-    public static final String RETIRE_CONCEPTROOT = "RetireConceptRoot";
-    public static final String RETIRE_DESIGNNOTE = "RetireDesignNote";
-    public static final String RETIRE_EDITORNOTE = "RetireEditorNote";
-    public static final String RETIRE_CONCEPTSTATUS = "RetireConceptStatus";
-    public static final String RETIRE_PARENT = "RetireParent";
-    public static final String RETIRE_CHILD = "RetireChild";
-    public static final String RETIRE_ROLE = "RetireRole";
-    public static final String RETIRE_INROLE = "RetireInRole";
-    public static final String RETIRE_ASSOC = "RetireAssoc";
-    public static final String RETIRE_INASSOC = "RetireInAssoc";
+    private static final String IMMUTABLE_PROPERTYLIST = "ImmutPropList";
+    private static final String COMPLEX_PROPERTYLIST = "ComplexPropList";
+    private static final String RETIRE_CONCEPTROOT = "RetireConceptRoot";
+    private static final String RETIRE_DESIGNNOTE = "RetireDesignNote";
+    private static final String RETIRE_EDITORNOTE = "RetireEditorNote";
+    private static final String RETIRE_CONCEPTSTATUS = "RetireConceptStatus";
+    private static final String RETIRE_PARENT = "RetireParent";
+    private static final String RETIRE_CHILD = "RetireChild";
+    private static final String RETIRE_ROLE = "RetireRole";
+    private static final String RETIRE_INROLE = "RetireInRole";
+    private static final String RETIRE_ASSOC = "RetireAssoc";
+    private static final String RETIRE_INASSOC = "RetireInAssoc";
 	
-    public static final String SPLIT_FROM = "SplitFrom";
-    public static final String MERGE_SOURCE = "MergeSource";
-    public static final String MERGE_TARGET = "MergeTarget";
-    public static final String MERGE_DESIGNNOTE = "MergeDesignNote";
-    public static final String MERGE_EDITORNOTE = "MergeEditorNote";
+    private static final String SPLIT_FROM = "SplitFrom";
+    private static final String MERGE_SOURCE = "MergeSource";
+    private static final String MERGE_TARGET = "MergeTarget";
+    private static final String MERGE_DESIGNNOTE = "MergeDesignNote";
+    private static final String MERGE_EDITORNOTE = "MergeEditorNote";
+    private static final String CODE_PROP = "CodeProp";
+    private static final String LABEL_PROP = "LabelProp";
+    private static final String PREF_NAME = "PrefName";
+    private static final String DEFINITION = "Definition";
+    private static final String FULLY_QUAL_SYN = "FullyQualSyn";
+    private static final String REVIEW_DATE = "ReviewDate";
+    private static final String REVIEWER_NAME = "ReviewerName";
+    private static final String DEF_SOURCE = "DefSource";
+    private static final String SYN_TYPE = "SynType";
+    private static final String SYN_SOURCE = "SynSource";
+    private static final String SEMANTIC_TYPE = "SemanticType";
 
     public static final String PROTEGE_DIR = ".protege";
 
@@ -315,6 +326,94 @@ public class NCIEditTabPreferences {
 
     public static void setSplitFrom(String sf) {
         getPreferences().putString(SPLIT_FROM, sf);
+    }
+    
+    public static String getCodeProp() {
+    	return getPreferences().getString(CODE_PROP, "");
+    }
+
+    public static void setCodeProp(String cp) {
+        getPreferences().putString(CODE_PROP, cp);
+    }
+    
+    public static String getLabelProp() {
+    	return getPreferences().getString(LABEL_PROP, "");
+    }
+
+    public static void setLabelProp(String lp) {
+        getPreferences().putString(LABEL_PROP, lp);
+    }
+    
+    public static String getPrefName() {
+    	return getPreferences().getString(PREF_NAME, "");
+    }
+
+    public static void setPrefName(String pn) {
+        getPreferences().putString(PREF_NAME, pn);
+    }
+    
+    public static String getDefinition() {
+    	return getPreferences().getString(DEFINITION, "");
+    }
+
+    public static void setDefinition(String df) {
+        getPreferences().putString(DEFINITION, df);
+    }
+    
+    public static String getFullyQualSyn() {
+    	return getPreferences().getString(FULLY_QUAL_SYN, "");
+    }
+
+    public static void setFullyQualSyn(String fqs) {
+        getPreferences().putString(FULLY_QUAL_SYN, fqs);
+    }
+    
+    public static String getReviewDate() {
+    	return getPreferences().getString(REVIEW_DATE, "");
+    }
+
+    public static void setReviewDate(String rd) {
+        getPreferences().putString(REVIEW_DATE, rd);
+    }
+    
+    public static String getReviewerName() {
+    	return getPreferences().getString(REVIEWER_NAME, "");
+    }
+
+    public static void setReviewerName(String rn) {
+        getPreferences().putString(REVIEWER_NAME, rn);
+    }
+    
+    public static String getDefSource() {
+    	return getPreferences().getString(DEF_SOURCE, "");
+    }
+
+    public static void setDefSource(String ds) {
+        getPreferences().putString(DEF_SOURCE, ds);
+    }
+    
+    public static String getSynType() {
+    	return getPreferences().getString(SYN_TYPE, "");
+    }
+
+    public static void setSynType(String st) {
+        getPreferences().putString(SYN_TYPE, st);
+    }
+    
+    public static String getSynSource() {
+    	return getPreferences().getString(SYN_SOURCE, "");
+    }
+
+    public static void setSynSource(String ss) {
+        getPreferences().putString(SYN_SOURCE, ss);
+    }
+    
+    public static String getSemanticType() {
+    	return getPreferences().getString(SEMANTIC_TYPE, "");
+    }
+
+    public static void setSemanticType(String st) {
+        getPreferences().putString(SEMANTIC_TYPE, st);
     }
     
     public static String getMergeSource() {

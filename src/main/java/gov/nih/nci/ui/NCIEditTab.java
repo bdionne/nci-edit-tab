@@ -1888,43 +1888,44 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 					}
 					
 					// set constants for split/merge/retirement
-					MERGE_SOURCE = getSingleProperty("merge_source", opts);
-					MERGE_TARGET = getSingleProperty("merge_target", opts);
-					SPLIT_FROM = getSingleProperty("split_from", opts);
+					MERGE_SOURCE = getSingleProperty(NCIEditTabConstants.MERGE_SOURCE_NAME, opts);
+					MERGE_TARGET = getSingleProperty(NCIEditTabConstants.MERGE_TARGET_NAME, opts);
+					SPLIT_FROM = getSingleProperty(NCIEditTabConstants.SPLIT_FROM_NAME, opts);
 					
-					DEP_PARENT = getSingleProperty("deprecated_parent", opts);
-					DEP_CHILD = getSingleProperty("deprecated_child", opts);
-					DEP_ROLE = getSingleProperty("deprecated_role", opts);
-					DEP_IN_ROLE = getSingleProperty("deprecated_in_role", opts);
-					DEP_ASSOC = getSingleProperty("deprecated_assoc", opts);
-					DEP_IN_ASSOC = getSingleProperty("deprecated_in_assoc", opts);
+					DEP_PARENT = getSingleProperty(NCIEditTabConstants.DEPR_PARENT_NAME, opts);
+					DEP_CHILD = getSingleProperty(NCIEditTabConstants.DEPR_CHILD_NAME, opts);
+					DEP_ROLE = getSingleProperty(NCIEditTabConstants.DEPR_ROLE_NAME, opts);
+					DEP_IN_ROLE = getSingleProperty(NCIEditTabConstants.DEPR_IN_ROLE_NAME, opts);
+					DEP_ASSOC = getSingleProperty(NCIEditTabConstants.DEPR_ASSOC_NAME, opts);
+					DEP_IN_ASSOC = getSingleProperty(NCIEditTabConstants.DEPR_IN_ASSOC_NAME, opts);
 					
 					PRE_MERGE_ROOT = findOWLClass("premerged_root", opts);
 					PRE_RETIRE_ROOT = findOWLClass("preretired_root", opts);
 					RETIRE_ROOT  = findOWLClass("retired_root", opts);
-					RETIRE_CONCEPTS_ROOT  = findOWLClass("retired_concepts_root", opts);
+					RETIRE_CONCEPTS_ROOT  = findOWLClass(NCIEditTabConstants.RETIRE_CONCEPTS_ROOT_NAME, opts);
 					
-					DESIGN_NOTE = getSingleProperty("design_note", opts);
-					EDITOR_NOTE = getSingleProperty("editor_note", opts);	
+					DESIGN_NOTE = getSingleProperty(NCIEditTabConstants.DESIGN_NOTE_NAME, opts);
+					EDITOR_NOTE = getSingleProperty(NCIEditTabConstants.EDITOR_NOTE_NAME, opts);	
 					
-					SYN_TYPE = getSingleProperty("syn_type", opts);
-					SYN_SOURCE = getSingleProperty("syn_source", opts);
+					SYN_TYPE = getSingleProperty(NCIEditTabConstants.SYN_TYPE_NAME, opts);
+					SYN_SOURCE = getSingleProperty(NCIEditTabConstants.SYN_SOURCE_NAME, opts);
 					
-					DEF_SOURCE = getSingleProperty("def_source", opts);
+					DEF_SOURCE = getSingleProperty(NCIEditTabConstants.DEF_SOURCE_NAME, opts);
 					
-					REVIEWER_NAME = getSingleProperty("reviewer_name", opts);
-					REVIEW_DATE = getSingleProperty("review_date", opts);
+					REVIEWER_NAME = getSingleProperty(NCIEditTabConstants.REVIEWER_NAME_NAME, opts);
+					REVIEW_DATE = getSingleProperty(NCIEditTabConstants.REVIEW_DATE_NAME, opts);
 					
-					CODE_PROP = getSingleProperty("code_prop", opts);
-					LABEL_PROP = getSingleProperty("label_prop", opts);
-					FULL_SYN = getSingleProperty("fully_qualified_syn", opts);
+					CODE_PROP = getSingleProperty(NCIEditTabConstants.CODE_PROP_NAME, opts);
+					LABEL_PROP = getSingleProperty(NCIEditTabConstants.LABEL_PROP_NAME, opts);
+					FULL_SYN = getSingleProperty(NCIEditTabConstants.FULLY_QUAL_SYN_NAME, opts);
 					immutable_properties.add(LABEL_PROP);
-					PREF_NAME = getSingleProperty("pref_name", opts);
-					DEFINITION = getSingleProperty("definition", opts);
+					//PREF_NAME = getSingleProperty("pref_name", opts);
+					PREF_NAME = getSingleProperty(NCIEditTabConstants.PREF_NAME_NAME, opts);
+					DEFINITION = getSingleProperty(NCIEditTabConstants.DEFINITION_NAME, opts);
 					
-					SEMANTIC_TYPE = getSingleProperty("semantic_type", opts); 
+					SEMANTIC_TYPE = getSingleProperty(NCIEditTabConstants.SEMANTIC_TYPE_NAME, opts); 
 					
-					Set<String> depr_con = opts.getValues("deprecated_concept_status");
+					Set<String> depr_con = opts.getValues(NCIEditTabConstants.DEPR_CONCEPT_STATUS_PROP_NAME);
 					if (!depr_con.isEmpty()) {
 						for (String s : depr_con) {
 							if (s.startsWith("http")) {
