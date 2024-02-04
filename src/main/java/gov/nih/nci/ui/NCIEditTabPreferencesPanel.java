@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import javax.swing.FocusManager;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -529,9 +530,42 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         exportPanel.add(userSelectedFilePathTxtfld);
         exportPanel.add(exportBtn);
         panel2.add(exportPanel, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
-             
+        
+        if (isModeler()) {
+        	immutablepropList.setEnabled(false);
+        	complexpropList.setEnabled(false);
+        	userSelectedFilePathTxtfld.setEnabled(false);
+        	exportBtn.setEnabled(false);
+        	//disableComponents(immutablepropList);
+        	//disableComponents(complexpropList);
+        	//disableComponents(exportBtn);
+        	disableComponents(immutPanel);
+        	disableComponents(complexPanel);
+        	disableComponents(retirePanel);
+        	disableComponents(mergePanel);
+        	disableComponents(splitPanel);
+        	disableComponents(codePanel);
+        	//disableComponents(panel2);
+        	//immutPanel.setEnabled(false);
+        	//panel2.setEnabled(false);
+        }
+        
         JSplitPane splitPane = new JSplitPane(SwingConstants.HORIZONTAL, panel, panel2); 
         this.add(splitPane);
+    }
+    
+    private boolean isModeler() {
+    	return NCIEditTab.currentTab().getWorkspace().isReadOnly(null);
+    	//return false;
+    }
+    
+    private void disableComponents(JComponent component) {
+    	Component[] com = component.getComponents();
+    	//Inside you action event where you want to disable everything
+    	//Do the following
+    	for (int a = 0; a < com.length; a++) {
+    	     com[a].setEnabled(false);
+    	}
     }
     
     public OWLEditorKit getEditorKit() {
