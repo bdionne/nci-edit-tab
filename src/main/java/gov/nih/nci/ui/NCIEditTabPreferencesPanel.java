@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -36,6 +37,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -92,6 +94,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
 	private JTextField retireCptRootTxtfld;
 	private JButton retireCptRootSearchBtn;
 	private File selectedFile;
+	private JLabel exportFilepathlbl;
 	private JTextField  userSelectedFilePathTxtfld;
 	private JButton exportBtn;
 	private OwlEntityComboBox retireDesignNoteComboBox;
@@ -508,11 +511,15 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         panel2.setMinimumSize(new Dimension(400, 285));
         panel2.add(tabbedPane, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
         
+        exportFilepathlbl = new JLabel();
+        exportFilepathlbl.setText("File will be saved to working directory if not specified");
+        exportFilepathlbl.setFont(new Font("Verdana", Font.PLAIN, 12));
         userSelectedFilePathTxtfld =  new JTextField(28);
         userSelectedFilePathTxtfld.setBackground(Color.WHITE);
+        userSelectedFilePathTxtfld.setPreferredSize(new Dimension(300, 35));
         
         exportBtn = new JButton("Export");
-        exportBtn.setPreferredSize(new Dimension(95, 35));
+        //exportBtn.setPreferredSize(new Dimension(100, 35));
         
         exportBtn.addActionListener(new ActionListener() { 
             public void actionPerformed(ActionEvent e)
@@ -525,13 +532,24 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         });
         
         JPanel exportPanel = new JPanel();
-        exportPanel.setLayout(new FlowLayout());
-        exportPanel.setPreferredSize(new Dimension(400, 35));
-        exportPanel.add(userSelectedFilePathTxtfld);
-        exportPanel.add(exportBtn);
+        //exportPanel.setLayout(new FlowLayout());
+        //exportPanel.setPreferredSize(new Dimension(400, 35));
+        //exportPanel.add(userSelectedFilePathTxtfld);
+        //exportPanel.add(exportBtn);
+        /*exportPanel.setLayout(new BorderLayout());
+        exportPanel.setPreferredSize(new Dimension(400, 70));
+        exportPanel.add(exportFilepathlbl, BorderLayout.NORTH);
+        exportPanel.add(userSelectedFilePathTxtfld, BorderLayout.WEST);
+        exportPanel.add(exportBtn, BorderLayout.CENTER);*/
+        exportPanel.setLayout(new GridBagLayout());
+        exportPanel.setPreferredSize(new Dimension(400, 75));
+        exportPanel.add(exportFilepathlbl, new GridBagConstraints(0, 0, 2, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
+        exportPanel.add(userSelectedFilePathTxtfld, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
+        exportPanel.add(exportBtn, new GridBagConstraints(1, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
+        
         panel2.add(exportPanel, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
         
-        if (isModeler()) {
+        if (NCIEditTab.currentTab() != null && isModeler()) {
         	immutablepropList.setEnabled(false);
         	complexpropList.setEnabled(false);
         	userSelectedFilePathTxtfld.setEnabled(false);
@@ -1271,7 +1289,11 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
     public void SaveProjectOptions() {
     	LoadProjectOptions();
     	ProjectOptions projOptions = new ProjectOptionsImpl(projectOptions);
-    	ProjectOptionsConfigManager.saveProjectOptionsFile(projOptions, userSelectedFilePathTxtfld.getText());
+    	String filePath = userSelectedFilePathTxtfld.getText();
+    	if (filePath == null || filePath.isEmpty()) {
+    		filePath = "project-options.json";
+    	}
+    	ProjectOptionsConfigManager.saveProjectOptionsFile(projOptions, filePath);
     }
     
     private void LoadProjectOptions() {
