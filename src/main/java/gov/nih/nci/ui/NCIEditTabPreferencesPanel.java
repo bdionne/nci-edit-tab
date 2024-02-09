@@ -499,12 +499,12 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setPreferredSize(new Dimension(400, 250));
-        tabbedPane.add(new JScrollPane(immutPanel), "Immutable");
-        tabbedPane.add(new JScrollPane(complexPanel), "Complex");
         tabbedPane.add(new JScrollPane(retirePanel), "Retire");
         tabbedPane.add(new JScrollPane(mergePanel), "Merge");
         tabbedPane.add(new JScrollPane(splitPanel), "Split");
         tabbedPane.add(new JScrollPane(codePanel), "Others");
+        tabbedPane.add(new JScrollPane(immutPanel), "Immutable");
+        tabbedPane.add(new JScrollPane(complexPanel), "Complex");
         
         JPanel panel2 = new JPanel();
         panel2.setLayout(new GridBagLayout());
@@ -513,7 +513,7 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         
         exportFilepathlbl = new JLabel();
         exportFilepathlbl.setText("File will be saved to working directory if not specified");
-        exportFilepathlbl.setFont(new Font("Verdana", Font.PLAIN, 12));
+        exportFilepathlbl.setFont(new Font("Verdana", Font.PLAIN, 14));
         userSelectedFilePathTxtfld =  new JTextField(28);
         userSelectedFilePathTxtfld.setBackground(Color.WHITE);
         userSelectedFilePathTxtfld.setPreferredSize(new Dimension(300, 35));
@@ -532,15 +532,6 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         });
         
         JPanel exportPanel = new JPanel();
-        //exportPanel.setLayout(new FlowLayout());
-        //exportPanel.setPreferredSize(new Dimension(400, 35));
-        //exportPanel.add(userSelectedFilePathTxtfld);
-        //exportPanel.add(exportBtn);
-        /*exportPanel.setLayout(new BorderLayout());
-        exportPanel.setPreferredSize(new Dimension(400, 70));
-        exportPanel.add(exportFilepathlbl, BorderLayout.NORTH);
-        exportPanel.add(userSelectedFilePathTxtfld, BorderLayout.WEST);
-        exportPanel.add(exportBtn, BorderLayout.CENTER);*/
         exportPanel.setLayout(new GridBagLayout());
         exportPanel.setPreferredSize(new Dimension(400, 75));
         exportPanel.add(exportFilepathlbl, new GridBagConstraints(0, 0, 2, 1, 0.5, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0));
@@ -554,18 +545,14 @@ public class NCIEditTabPreferencesPanel extends OWLPreferencesPanel {
         	complexpropList.setEnabled(false);
         	userSelectedFilePathTxtfld.setEnabled(false);
         	exportBtn.setEnabled(false);
-        	//disableComponents(immutablepropList);
-        	//disableComponents(complexpropList);
-        	//disableComponents(exportBtn);
         	disableComponents(immutPanel);
         	disableComponents(complexPanel);
         	disableComponents(retirePanel);
         	disableComponents(mergePanel);
         	disableComponents(splitPanel);
         	disableComponents(codePanel);
-        	//disableComponents(panel2);
-        	//immutPanel.setEnabled(false);
-        	//panel2.setEnabled(false);
+        	tabbedPane.setEnabled(false);
+        	panel2.setEnabled(false);
         }
         
         JSplitPane splitPane = new JSplitPane(SwingConstants.HORIZONTAL, panel, panel2); 
