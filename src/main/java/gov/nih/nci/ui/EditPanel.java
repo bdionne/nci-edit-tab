@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -286,14 +287,35 @@ public class EditPanel extends JPanel {
     		iri.setText(cls.getIRI().getShortForm());
 
     		List<PropertyTablePanel> tablePanelList = getPropertyTablePanelList();
+    		List<PropertyTablePanel> viewableList = new ArrayList<PropertyTablePanel>();
+    		int count = 0;
+    		this.complexPropertyPanel.removeAll();
     		for (PropertyTablePanel tablePanel : tablePanelList) {
     			tablePanel.setSelectedCls(cls);
     			if (tablePanel.isViewable()) {
-    				complexPropertyPanel.add(tablePanel);    				
-    			} else {
-    				this.complexPropertyPanel.remove(tablePanel);
-    			}
+    				count++;   
+    				viewableList.add(tablePanel);
+    			} 
     		}
+    		if (count == 1) {
+    			PropertyTablePanel tp = viewableList.get(0);
+    			complexPropertyPanel.add(tp); 
+    		} else if (count == 2) {
+    			JSplitPane complexPropertySP = new JSplitPane(JSplitPane.VERTICAL_SPLIT, viewableList.get(0), 
+    					viewableList.get(1));
+    			complexPropertySP.setDividerLocation(complexPropertyPanel.getHeight()/2);
+    			complexPropertyPanel.add(complexPropertySP);
+    			
+    		} else if (count == 3) {
+    			JSplitPane complexPropertySP2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, viewableList.get(1),
+    					viewableList.get(2));
+    			complexPropertySP2.setDividerLocation(complexPropertyPanel.getHeight()/3);
+    			JSplitPane complexPropertySP = new JSplitPane(JSplitPane.VERTICAL_SPLIT, viewableList.get(0), 
+    					complexPropertySP2);
+    			complexPropertySP.setDividerLocation(complexPropertyPanel.getHeight()/3);
+    			complexPropertyPanel.add(complexPropertySP);
+    		}
+    		
     		if (complexPropertyPanel != null) {
     			complexPropertyPanel.repaint();
     		}
