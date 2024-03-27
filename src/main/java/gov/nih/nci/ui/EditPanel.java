@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -300,20 +301,18 @@ public class EditPanel extends JPanel {
     		if (count == 1) {
     			PropertyTablePanel tp = viewableList.get(0);
     			complexPropertyPanel.add(tp); 
-    		} else if (count == 2) {
-    			JSplitPane complexPropertySP = new JSplitPane(JSplitPane.VERTICAL_SPLIT, viewableList.get(0), 
-    					viewableList.get(1));
-    			complexPropertySP.setDividerLocation(complexPropertyPanel.getHeight()/2);
-    			complexPropertyPanel.add(complexPropertySP);
+    		} else if (count > 1) {
+    			int divider = count;
+    			JSplitPane complexPropertySP = null;
     			
-    		} else if (count == 3) {
-    			JSplitPane complexPropertySP2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, viewableList.get(1),
-    					viewableList.get(2));
-    			complexPropertySP2.setDividerLocation(complexPropertyPanel.getHeight()/3);
-    			JSplitPane complexPropertySP = new JSplitPane(JSplitPane.VERTICAL_SPLIT, viewableList.get(0), 
-    					complexPropertySP2);
-    			complexPropertySP.setDividerLocation(complexPropertyPanel.getHeight()/3);
-    			complexPropertyPanel.add(complexPropertySP);
+    			while (count > 1) {
+    				if (complexPropertySP == null) {
+    					complexPropertySP = addPropTableToComplexPropPanel(divider, viewableList.get(count-2), viewableList.get(count-1));
+    				} else {
+    					complexPropertySP = addPropTableToComplexPropPanel(divider, viewableList.get(count-2), complexPropertySP);
+    				}
+    				count--;
+    			}
     		}
     		
     		if (complexPropertyPanel != null) {
@@ -355,6 +354,13 @@ public class EditPanel extends JPanel {
     		currentClass = null;
     	}
     	prefNameText.getDocument().addDocumentListener(doc_listen);
+    }
+    
+    private JSplitPane addPropTableToComplexPropPanel (int divider, JComponent propTbl1, JComponent propTbl2) {
+    	JSplitPane complexPropertySP = new JSplitPane(JSplitPane.VERTICAL_SPLIT, propTbl1, propTbl2);
+		complexPropertySP.setDividerLocation(complexPropertyPanel.getHeight()/divider);
+		complexPropertyPanel.add(complexPropertySP);
+		return complexPropertySP;
     }
     
     public OWLClass getSelectedClass() {
