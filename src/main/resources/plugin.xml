@@ -46,9 +46,9 @@
         <headerColor value="@org.protege.classcolor"/>
         <category value="@org.protege.classcategory"/>
         <navigates value="@org.protege.classcategory"/>
-        <!--
+        
         <instantiationType value="eager"/>
-        -->
+        
     </extension>
     
     <extension id="InferredTreeView"
@@ -86,9 +86,9 @@
         <class value="gov.nih.nci.ui.NCIEditViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
         <category value="NCI Edit Tab"/>
-        <!--
+        
         <instantiationType value="eager"/>
-        -->
+        
     </extension>
     
 	<extension id="ComplexEditView"
@@ -97,9 +97,9 @@
         <class value="gov.nih.nci.ui.NCIComplexEditViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
         <category value="NCI Edit Tab"/>
-        <!--
+        
         <instantiationType value="eager"/>
-        -->
+        
     </extension>
     
     <extension id="RetireView"
@@ -108,9 +108,9 @@
         <class value="gov.nih.nci.ui.NCIRetireViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
         <category value="NCI Edit Tab"/>
-        <!--
+        
         <instantiationType value="eager"/>
-        -->
+        
     </extension>
     
     <extension id="ReportWriter"
@@ -127,9 +127,9 @@
         <class value="gov.nih.nci.ui.BatchEditIRIsViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
         <category value="NCI Edit Tab"/>
-        <!--
+        
         <instantiationType value="eager"/>
-        -->
+        
     </extension>
     
     <extension id="ReadOnlyClass"
@@ -138,9 +138,9 @@
         <class value="gov.nih.nci.ui.ReadOnlyClassViewComponent"/>
         <headerColor value="@org.protege.ontologycolor"/>
         <category value="NCI Edit Tab"/>
-        <!--
+        
         <instantiationType value="eager"/>
-        -->
+        
     </extension>
 	
 	<extension id="Split"
