@@ -316,6 +316,9 @@ public class EditPanel extends JPanel {
     		}
     		
     		if (complexPropertyPanel != null) {
+    			complexPropertyPanel.validate();
+    			
+    			
     			complexPropertyPanel.repaint();
     		}
     		
