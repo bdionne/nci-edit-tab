@@ -10,10 +10,10 @@ import org.semanticweb.owlapi.model.OWLEntity;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
-import gov.nih.nci.ui.event.PreferencesChangeEvent;
-import gov.nih.nci.ui.event.PreferencesChangeListener;
+//import gov.nih.nci.ui.event.PreferencesChangeEvent;
+//import gov.nih.nci.ui.event.PreferencesChangeListener;
 
-public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponent implements EditTabChangeListener, PreferencesChangeListener {
+public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponent implements EditTabChangeListener{
 
     private static final long serialVersionUID = 1L;
 	private ComplexEditPanel complexEditPanel;
@@ -26,7 +26,7 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
         setLayout(new BorderLayout());
         add(complexEditPanel);
         NCIEditTab.addListener(this);
-        NCIEditTab.addPrefListener(this);
+        //NCIEditTab.addPrefListener(this);
                
     }
 
@@ -100,10 +100,12 @@ public class NCIComplexEditViewComponent extends OWLClassAnnotationsViewComponen
 		return NCIEditTab.currentTab().getCurrentOp().getTarget();
 	}
 
+	/**
 	@Override
 	public void handleChange(PreferencesChangeEvent event) {
 		if (event.isType(ComplexEditType.PREFMODIFY)) {
 			complexEditPanel.setRadioButtons();
 		} 
-	}	
+	}
+	**/	
 }

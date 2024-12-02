@@ -254,26 +254,26 @@ public class ComplexEditPanel extends JPanel {
     	radioButtonPanel = new JPanel();
     	radioButtonGroup = new ButtonGroup();
     	
-    	if(NCIEditTabPreferences.getFnSplit()) {
+    	//if(NCIEditTabPreferences.getFnSplit()) {
     		//splitButton = new JRadioButton("Split");
     		radioButtonGroup.add(splitButton);
     		radioButtonPanel.add(splitButton);
-    	}
-    	if(NCIEditTabPreferences.getFnCopy()) {
+    	//}
+    	//if(NCIEditTabPreferences.getFnCopy()) {
     		//cloneButton = new JRadioButton("Copy");
     		radioButtonGroup.add(cloneButton);
     		radioButtonPanel.add(cloneButton);
-    	}
-    	if(NCIEditTabPreferences.getFnMerge()) {
+    	//}
+    	//if(NCIEditTabPreferences.getFnMerge()) {
     		//mergeButton = new JRadioButton("Merge");
     		radioButtonGroup.add(mergeButton);
     		radioButtonPanel.add(mergeButton);
-    	}
-    	if(NCIEditTabPreferences.getFnDualEdits()) {
+    	//}
+    	//if(NCIEditTabPreferences.getFnDualEdits()) {
     		//dualButton = new JRadioButton("Dual Edits");
     		radioButtonGroup.add(dualButton);
     		radioButtonPanel.add(dualButton);
-    	}
+    	//}
     	
     	ActionListener cbl = new ActionListener() {
 
@@ -324,42 +324,42 @@ public class ComplexEditPanel extends JPanel {
     
     public void setRadioButtons() {
     	radioButtonGroup.clearSelection();
-    	if(NCIEditTabPreferences.getFnSplit()) {
+    	//if(NCIEditTabPreferences.getFnSplit()) {
     		radioButtonGroup.add(splitButton);
     		radioButtonPanel.add(splitButton);
     		splitButton.setEnabled(true);
-    	} else {
-    		splitButton.setEnabled(false);
-    		radioButtonGroup.remove(splitButton);
-    		radioButtonPanel.remove(splitButton);
-    	}
-    	if(NCIEditTabPreferences.getFnCopy()) {
+    	//} else {
+    		//splitButton.setEnabled(false);
+    		//radioButtonGroup.remove(splitButton);
+    		//radioButtonPanel.remove(splitButton);
+    	//}
+    	//if(NCIEditTabPreferences.getFnCopy()) {
     		radioButtonGroup.add(cloneButton);
     		radioButtonPanel.add(cloneButton);
     		cloneButton.setEnabled(true);
-    	} else {
-    		cloneButton.setEnabled(false);
-    		radioButtonGroup.remove(cloneButton);
-    		radioButtonPanel.remove(cloneButton);
-    	}
-    	if(NCIEditTabPreferences.getFnMerge()) {
+    	//} else {
+    		//cloneButton.setEnabled(false);
+    		//radioButtonGroup.remove(cloneButton);
+    		//radioButtonPanel.remove(cloneButton);
+    	//}
+    	//if(NCIEditTabPreferences.getFnMerge()) {
     		radioButtonGroup.add(mergeButton);
     		radioButtonPanel.add(mergeButton);
     		mergeButton.setEnabled(true);
-    	} else {
-    		mergeButton.setEnabled(false);
-    		radioButtonGroup.remove(mergeButton);
-    		radioButtonPanel.remove(mergeButton);
-    	}
-    	if(NCIEditTabPreferences.getFnDualEdits()) {
+    	//} else {
+    		//mergeButton.setEnabled(false);
+    		//radioButtonGroup.remove(mergeButton);
+    		//radioButtonPanel.remove(mergeButton);
+    	//}
+    	//if(NCIEditTabPreferences.getFnDualEdits()) {
     		radioButtonGroup.add(dualButton);
     		radioButtonPanel.add(dualButton);
     		dualButton.setEnabled(true);
-    	} else {
-    		dualButton.setEnabled(false);
-    		radioButtonGroup.remove(dualButton);
-    		radioButtonPanel.remove(dualButton);
-    	}
+    	//} else {
+    		//dualButton.setEnabled(false);
+    		//radioButtonGroup.remove(dualButton);
+    		//radioButtonPanel.remove(dualButton);
+    	//}
     }
     
     public boolean isSplitBtnSelected() {

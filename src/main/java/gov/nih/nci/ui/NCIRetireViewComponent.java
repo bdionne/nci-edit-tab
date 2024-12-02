@@ -9,10 +9,10 @@ import org.semanticweb.owlapi.model.OWLClass;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
-import gov.nih.nci.ui.event.PreferencesChangeEvent;
-import gov.nih.nci.ui.event.PreferencesChangeListener;
+//import gov.nih.nci.ui.event.PreferencesChangeEvent;
+//import gov.nih.nci.ui.event.PreferencesChangeListener;
 
-public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent implements EditTabChangeListener, PreferencesChangeListener {
+public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent implements EditTabChangeListener {
 
     private static final long serialVersionUID = 1L;
 	private RetirePanel retirePanel;
@@ -35,16 +35,16 @@ public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent imp
 	
 	public NCIRetireViewComponent() {
 		NCIEditTab.addListener(this);	
-		NCIEditTab.addPrefListener(this);
+		//NCIEditTab.addPrefListener(this);
 	}
 
 	@Override
 	public void initialiseClassView() throws Exception {
-		if (NCIEditTabPreferences.getFnRetire()) {
+		//if (NCIEditTabPreferences.getFnRetire()) {
 			retirePanel = new RetirePanel(getOWLEditorKit());
 	    	setLayout(new BorderLayout());
 	        add(retirePanel);
-		}
+		//}
 	}
 	
 	@Override
@@ -73,26 +73,28 @@ public class NCIRetireViewComponent extends OWLClassAnnotationsViewComponent imp
 		retirePanel.dispose();
 	}
 
-	@Override
+	
+	/**
 	public void handleChange(PreferencesChangeEvent event) {
 		try {
 		if (event.isType(ComplexEditType.PREFMODIFY)) {
-			if(NCIEditTabPreferences.getFnRetire()) {
+			//if(NCIEditTabPreferences.getFnRetire()) {
 				if (retirePanel == null) {
 					initialiseClassView();
 				} else {
 					retirePanel.enableButtons();
 				}
-	    	} else {	
-	    		remove(retirePanel);
-	    		NCIEditTab.currentTab().resetState();
-	    		retirePanel = null;
+	    	//} else {	
+	    		//remove(retirePanel);
+	    		//NCIEditTab.currentTab().resetState();
+	    		//retirePanel = null;
 	    		
-	    	}
+	    	//}
 		} 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
+	**/
 
 }

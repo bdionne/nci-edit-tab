@@ -114,8 +114,8 @@ import gov.nih.nci.ui.dialog.NoteDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
 import gov.nih.nci.ui.event.EditTabChangeEvent;
 import gov.nih.nci.ui.event.EditTabChangeListener;
-import gov.nih.nci.ui.event.PreferencesChangeEvent;
-import gov.nih.nci.ui.event.PreferencesChangeListener;
+//import gov.nih.nci.ui.event.PreferencesChangeEvent;
+//import gov.nih.nci.ui.event.PreferencesChangeListener;
 import gov.nih.nci.utils.CharMapper;
 import gov.nih.nci.utils.CuratorChecks;
 import gov.nih.nci.utils.NCIClassSearcher;
@@ -437,7 +437,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			l.handleChange(ev);
 		}		
 	}
-	
+	/**
 	private static ArrayList<PreferencesChangeListener> Prefevent_listeners = new ArrayList<PreferencesChangeListener>();
 	
 	public static void addPrefListener(PreferencesChangeListener l) {
@@ -452,6 +452,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			l.handleChange(ev);
 		}		
 	}
+	**/
 	
 	private List<OWLAnnotationProperty> complex_properties = new ArrayList<OWLAnnotationProperty>();
 	

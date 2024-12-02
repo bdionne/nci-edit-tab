@@ -25,10 +25,10 @@ public class NCIEditTabOwlEntityListCellRenderer extends DefaultListCellRenderer
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Component label = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        if(value instanceof NCIEditTabPreferencesPanel.OwlEntityListItem) {
-            OWLEntity entity = ((NCIEditTabPreferencesPanel.OwlEntityListItem) value).getEntity();
-            label = owlCellRenderer.getListCellRendererComponent(list, entity, index, isSelected, cellHasFocus);
-        }
+        //if(value instanceof NCIEditTabPreferencesPanel.OwlEntityListItem) {
+            //OWLEntity entity = ((NCIEditTabPreferencesPanel.OwlEntityListItem) value).getEntity();
+            //label = owlCellRenderer.getListCellRendererComponent(list, entity, index, isSelected, cellHasFocus);
+        //}
         return label;
     }
 }
