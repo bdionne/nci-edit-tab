@@ -277,7 +277,7 @@ public class ReportWriterPanel extends JPanel implements ActionListener
 
 			reportTextArea.append((String) generateReport());
 			reportTextArea
-			.append("\nExported using the classis configuration finished successfully.\n");
+			.append("\nExported using the classic configuration finished successfully.\n");
 			
 
 		}
