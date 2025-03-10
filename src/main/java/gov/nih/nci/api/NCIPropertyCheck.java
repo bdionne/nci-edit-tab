@@ -31,7 +31,7 @@ public class NCIPropertyCheck implements RuleService {
     	}
     	if ((assertions.size() != 1)) {
     		message.add("Warning");
-    		message.add("One and only one PT with source NCI is allowed in Full Syn.");
+    		message.add("One and only one Full Syn, with source NCI, and type PT or AQ or HD, is required.");
     		return false;
     	} 
     	message.add(assertions.get(0).getValue().asLiteral().get().getLiteral());

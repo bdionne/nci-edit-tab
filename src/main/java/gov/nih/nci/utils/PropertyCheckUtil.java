@@ -136,7 +136,7 @@ public class PropertyCheckUtil {
     	List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
     	
     	if (!isSavable) {
-    		JOptionPane.showMessageDialog(tab, "One and only one PT with source NCI is allowed in Full Syn.", "Warning", JOptionPane.WARNING_MESSAGE);
+    		JOptionPane.showMessageDialog(tab, "One and only one Full Syn, with source NCI, and type PT or AQ or HD, is required.", "Warning", JOptionPane.WARNING_MESSAGE);
     		return false;
     	} else {
     		syncPrefNameLabel(cls, message.get(0), changes);
