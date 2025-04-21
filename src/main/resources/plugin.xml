@@ -176,6 +176,7 @@
         <editorKitId value="OWLEditorKit"/>
     </extension>
     
+    <!--
      <extension id="menu.ExecuteClassificationSuggestionAxioms"
                point="org.protege.editor.core.application.EditorKitMenuAction">
         <name value="Execute classification suggestions..."/>
@@ -184,6 +185,7 @@
         <path value="org.protege.editor.core.application.menu.EditMenu/SlotN-C"/>
         <editorKitId value="OWLEditorKit"/>
     </extension>
+    -->
 	
     
 </plugin>
