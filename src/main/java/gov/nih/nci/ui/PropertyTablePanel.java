@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
@@ -243,6 +244,9 @@ public class PropertyTablePanel extends JPanel implements ActionListener {
         propertyTable.setFillsViewportHeight(true);   
         propertyTable.setAutoCreateRowSorter(true);
         tableModel.setPropertyTable(propertyTable);
+        
+        propertyTable.setTransferHandler(null);
+        
         
         ColumnListener cl = new ColumnListener(){
 
