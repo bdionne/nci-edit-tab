@@ -2375,7 +2375,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 		OWLAnnotationProperty complex_prop = lookUpShort(propName);
 		
 		OWLAxiom new_axiom = df.getOWLAnnotationAssertionAxiom(complex_prop, cls.getIRI(), 
-				df.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL));
+				df.getOWLLiteral(mapper.fix(value), OWL2Datatype.RDF_PLAIN_LITERAL));
 
 		Set<OWLAnnotation> anns = new HashSet<OWLAnnotation>();
 		Set<OWLAnnotationProperty> req_props = getConfiguredAnnotationsForAnnotation(complex_prop);
@@ -2393,7 +2393,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			String val = annotations.get(prop.getIRI().getShortForm());
 			if (val != null) {
 				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
-						df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL));
+						df.getOWLLiteral(mapper.fix(val), OWL2Datatype.RDF_PLAIN_LITERAL));
 				anns.add(new_ann);
 			} else if (is_required(prop)) {
 				String def_val = getDefaultValue(getDataType(prop), "");
@@ -2407,7 +2407,7 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
 			String val = annotations.get(prop.getIRI().getShortForm());
 			if (val != null) {
 				OWLAnnotation new_ann = df.getOWLAnnotation(prop, 
-						df.getOWLLiteral(val, OWL2Datatype.RDF_PLAIN_LITERAL));
+						df.getOWLLiteral(mapper.fix(val), OWL2Datatype.RDF_PLAIN_LITERAL));
 				anns.add(new_ann);
 			}
 		}

@@ -407,6 +407,8 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
     
     public boolean buildNewClassServer(String preferredName, Optional<String> code) {
     	
+    	CharMapper mapper = new CharMapper();
+    	
     	if (preferredName == null || preferredName.equals("")) {
     		JOptionPane.showMessageDialog(this, "Preferred name is required", "Warning", JOptionPane.WARNING_MESSAGE);
     		return false;
@@ -451,7 +453,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 		
 
 		OWLLiteral con = df.getOWLLiteral(gen_code, OWL2Datatype.RDF_PLAIN_LITERAL);
-		OWLLiteral pref_name_val = df.getOWLLiteral(preferredName, OWL2Datatype.RDF_PLAIN_LITERAL);
+		OWLLiteral pref_name_val = df.getOWLLiteral(mapper.fix(preferredName), OWL2Datatype.RDF_PLAIN_LITERAL);
 
 		OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(CODE_PROP, newClass.getIRI(), con);
 		changes.add(new AddAxiom(mngr.getActiveOntology(), ax));
@@ -507,7 +509,7 @@ public class NCIClassCreationDialog<T extends OWLEntity> extends JPanel {
 				JOptionPane.showMessageDialog(this, "Value cannot contain special characters", "Warning", JOptionPane.WARNING_MESSAGE);
 				return false; 
 			}
-			CharMapper mapper = new CharMapper();
+			
 			String value = propValueMap.get("Value");
 			if (value != null && !value.isEmpty()) {
 				new_axiom = df.getOWLAnnotationAssertionAxiom(defComplexProp, newClass.getIRI(), 
