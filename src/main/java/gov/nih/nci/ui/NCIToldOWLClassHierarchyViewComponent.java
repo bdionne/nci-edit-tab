@@ -35,6 +35,8 @@ import gov.nih.nci.ui.action.AddComplexTarget;
 import gov.nih.nci.ui.action.CloneClassTarget;
 import gov.nih.nci.ui.action.RetireClassTarget;
 import gov.nih.nci.ui.action.SplitClassTarget;
+import gov.nih.nci.ui.action.UnMergeClassTarget;
+import gov.nih.nci.ui.action.UnRetireClassTarget;
 import gov.nih.nci.ui.dialog.BatchProcessingDialog;
 import gov.nih.nci.ui.dialog.NCIClassCreationDialog;
 import gov.nih.nci.ui.event.ComplexEditType;
@@ -42,7 +44,7 @@ import gov.nih.nci.ui.event.EditTabChangeEvent;
 
 public class NCIToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarchyViewComponent
 implements CreateNewChildTarget, SplitClassTarget, CloneClassTarget,
-RetireClassTarget, AddComplexTarget, SelectionDriver {
+RetireClassTarget, UnRetireClassTarget, UnMergeClassTarget, AddComplexTarget, SelectionDriver {
 	
 	private static final Icon ADD_SUB_ICON = OWLIcons.getIcon("class.add.sub.png");
 	private static final JButton batchbutton = new JButton("Batch Load/Edit");
@@ -274,6 +276,36 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		
 	}
 	
+	@Override
+	public boolean canUnRetireClass() {
+		return (getSelectedEntities().size() == 1 &&
+				NCIEditTab.currentTab().canUnRetire(getSelectedEntity()) &&
+				isFree());
+	}
+	
+	@Override
+	public void unretireClass() {
+		OWLClass selectedClass = getSelectedEntity();
+		NCIEditTab.currentTab().unretire(selectedClass);
+		NCIEditTab.currentTab().refreshNavTree();
+		
+	}
+	
+	@Override
+	public boolean canUnMergeClass() {
+		return (getSelectedEntities().size() == 1 &&
+				NCIEditTab.currentTab().canUnMerge(getSelectedEntity()) &&
+				isFree());
+	}
+	
+	@Override
+	public void unmergeClass() {
+		OWLClass selectedClass = getSelectedEntity();
+		NCIEditTab.currentTab().unmerge(selectedClass);
+		NCIEditTab.currentTab().refreshNavTree();
+		
+	}
+	
 	public void refreshTree() {
 		this.getTree().refreshComponent();	
 	}
@@ -463,6 +495,8 @@ RetireClassTarget, AddComplexTarget, SelectionDriver {
 		    public Optional<OWLObject> getSelection() {
 		        return Optional.ofNullable(getSelectedEntity());
 		    }
+
+			
 
 			
 

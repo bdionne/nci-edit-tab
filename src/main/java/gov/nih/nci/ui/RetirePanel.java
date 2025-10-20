@@ -57,6 +57,9 @@ public class RetirePanel extends JPanel {
 	
 	public OWLClass getRetiringClass() { return classToRetire; }
 	
+	public void setRetiringClass(OWLClass c) { classToRetire = c; }
+	
+	
     private Map<OWLAnnotationProperty, Set<String>> fixups;
     
     private OWLFrameList<OWLAnnotationSubject> upperPanelList;
@@ -166,6 +169,7 @@ public class RetirePanel extends JPanel {
 	    					NCIEditTab.currentTab().completeRetire();
 	    					NCIEditTab.currentTab().fireChange(new EditTabChangeEvent(NCIEditTab.currentTab(), 
 	    							ComplexEditType.READ));
+	    					classToRetire = null;
 	    				}
     				} else {
 						upperPanelList.setRootObject(null);

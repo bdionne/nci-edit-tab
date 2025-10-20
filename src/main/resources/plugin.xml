@@ -167,6 +167,22 @@
         <path value="[NCIAssertedClassHierarchy]/SlotAA-D"/>
         <editorKitId value="OWLEditorKit"/>
     </extension>
+    <extension id="UnRetire"
+               point="org.protege.editor.core.application.EditorKitMenuAction">
+        <name value="UnRetire selected class..."/>
+        <class value="gov.nih.nci.ui.action.UnRetireClassAction"/>
+        <toolTip value="UnRetires class"/>
+        <path value="[NCIAssertedClassHierarchy]/SlotAA-D"/>
+        <editorKitId value="OWLEditorKit"/>
+    </extension>
+    <extension id="UnMerge"
+               point="org.protege.editor.core.application.EditorKitMenuAction">
+        <name value="UnMerge selected class..."/>
+        <class value="gov.nih.nci.ui.action.UnMergeClassAction"/>
+        <toolTip value="UnMerges class"/>
+        <path value="[NCIAssertedClassHierarchy]/SlotAA-D"/>
+        <editorKitId value="OWLEditorKit"/>
+    </extension>
     <extension id="AddComplex"
                point="org.protege.editor.core.application.EditorKitMenuAction">
         <name value="Add Complex Property..."/>

@@ -171,7 +171,7 @@ public class ComplexOperation {
 			}
 		}
 		
-		if (type == RETIRE) {
+		if (type == RETIRE || type == UNRETIRE || type == UNMERGE) {
 			// check intitial state
 			if (currently_editing == null) {
 				currently_editing = subjects.get(0);

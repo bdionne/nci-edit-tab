@@ -94,5 +94,12 @@ public class NCIEditTabConstants {
     public static final Operation RETIRE = factory.getSystemOperation(
             factory.getOperationId("retire"), factory.getName("Retire"),
             factory.getDescription("Accept a proposed retirement of a class"), OperationType.WRITE, Operation.Scope.POLICY);
+    
+    public static final Operation UNRETIRE = factory.getSystemOperation(
+            factory.getOperationId("unretire"), factory.getName("UnRetire"),
+            factory.getDescription("Accept a proposed unretirement of a preretired class"), OperationType.WRITE, Operation.Scope.POLICY);
 
+    public static final Operation UNMERGE = factory.getSystemOperation(
+            factory.getOperationId("unmerge"), factory.getName("UnMerge"),
+            factory.getDescription("Accept a proposed unmerge of a premerged class"), OperationType.WRITE, Operation.Scope.POLICY);
 }

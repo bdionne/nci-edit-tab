@@ -50,7 +50,9 @@ import org.protege.editor.owl.model.history.UndoManagerListener;
 import org.protege.editor.owl.server.api.CommitBundle;
 import org.protege.editor.owl.server.http.messages.History;
 import org.protege.editor.owl.server.policy.CommitBundleImpl;
+import org.protege.editor.owl.server.versioning.ChangeHistoryUtils;
 import org.protege.editor.owl.server.versioning.Commit;
+import org.protege.editor.owl.server.versioning.ReplaceChangedOntologyVisitor;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
@@ -62,7 +64,11 @@ import org.protege.editor.search.lucene.SearchContext;
 import org.protege.owlapi.inference.cls.ChildClassExtractor;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.AddImport;
+import org.semanticweb.owlapi.model.AddOntologyAnnotation;
+import org.semanticweb.owlapi.model.AnnotationChange;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.ImportChange;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
@@ -95,6 +101,9 @@ import org.semanticweb.owlapi.model.OWLProperty;
 import org.semanticweb.owlapi.model.OWLQuantifiedObjectRestriction;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.model.RemoveImport;
+import org.semanticweb.owlapi.model.RemoveOntologyAnnotation;
+import org.semanticweb.owlapi.model.SetOntologyID;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLObjectDuplicator;
@@ -1202,10 +1211,207 @@ public class NCIEditTab extends OWLWorkspaceViewsTab implements ClientSessionLis
     	}
     }
     
+public boolean canUnRetire(OWLClass cls) { 
+    	
+    	if (isUneditableRoot(cls)) {
+    		return false;    				
+    	}
+
+    	if (clientSession.hasActiveClient()) {
+			ProjectId projectId = clientSession.getActiveProject();
+			if (projectId == null) {
+				return false;
+			}
+	
+	    	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(
+	    		NCIEditTabConstants.UNRETIRE.getId(), projectId);
+			if (!can) {
+				return false;
+			}
+			
+			return isPreRetired(cls);
+
+			
+    	} else {
+    		// Not connect to a server
+    		return true;
+    	}
+    }
+
+public boolean canUnMerge(OWLClass cls) { 
+	
+	if (isUneditableRoot(cls)) {
+		return false;    				
+	}
+
+	if (clientSession.hasActiveClient()) {
+		ProjectId projectId = clientSession.getActiveProject();
+		if (projectId == null) {
+			return false;
+		}
+
+    	boolean can = clientSession.getActiveClient().getConfig().canPerformProjectOperation(
+    		NCIEditTabConstants.UNMERGE.getId(), projectId);
+		if (!can) {
+			return false;
+		}
+		
+		return isPreMerged(cls);
+
+		
+	} else {
+		// Not connect to a server
+		return true;
+	}
+}
+    
     public void retire(OWLClass selectedClass) {
     	current_op.setRetireClass(selectedClass);
     	current_op.setType(ComplexEditType.RETIRE);
     	fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
+    }
+    
+    public void unretire(OWLClass selectedClass) {
+    	System.out.println("Trying yo unretire this puppy");
+    	
+    	current_op.setType(ComplexEditType.UNRETIRE);
+    	
+    	ChangeHistory hist = clientSession.getActiveVersionOntology().getChangeHistory();    	//current_op.setRetireClass(selectedClass);
+    	
+    	
+    	List<OWLOntologyChange> cs = findRetirement(hist, selectedClass);
+    	List<OWLOntologyChange> mcs = ReplaceChangedOntologyVisitor.mutate(clientSession.getActiveVersionOntology().getOntology(),
+    			cs);
+    	
+    	List<OWLOntologyChange> rcs = new ArrayList<OWLOntologyChange>();
+    	for (OWLOntologyChange c : mcs) {
+    		rcs.add(getReverseChange(c));
+    	}
+    	
+    	System.out.println("Trying yo unretire this puppy with " + rcs.size());
+    	getOWLModelManager().applyChanges(rcs);
+    	current_op.setType(ComplexEditType.EDIT);
+    	selectClass(selectedClass);
+    	
+    	//fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
+    }
+    
+    public void unmerge(OWLClass selectedClass) {
+    	System.out.println("Trying yo unmerge this puppy");
+    	
+    	current_op.setType(ComplexEditType.UNMERGE);
+    	
+    	ChangeHistory hist = clientSession.getActiveVersionOntology().getChangeHistory();    	//current_op.setRetireClass(selectedClass);
+    	
+    	
+    	List<OWLOntologyChange> cs = findMerge(hist, selectedClass);
+    	List<OWLOntologyChange> mcs = ReplaceChangedOntologyVisitor.mutate(clientSession.getActiveVersionOntology().getOntology(),
+    			cs);
+    	
+    	List<OWLOntologyChange> rcs = new ArrayList<OWLOntologyChange>();
+    	for (OWLOntologyChange c : mcs) {
+    		rcs.add(getReverseChange(c));
+    	}
+    	
+    	System.out.println("Trying yo unretire this puppy with " + rcs.size());
+    	getOWLModelManager().applyChanges(rcs);
+    	current_op.setType(ComplexEditType.EDIT);
+    	selectClass(selectedClass);
+    	
+    	//fireChange(new EditTabChangeEvent(this, ComplexEditType.RETIRE));
+    }
+    
+    private List<OWLOntologyChange> findRetirement(ChangeHistory h, OWLClass sel) {
+    	List<OWLOntologyChange> cs = new ArrayList<OWLOntologyChange>();
+    	for (List<OWLOntologyChange> change : h.getRevisions().values()) {
+            if (isRetiredCommit(change, sel)) {
+            	// look at all in case it's repeated
+            	cs = change;
+            }
+        }		
+		return cs;	
+		
+	}
+    
+    private List<OWLOntologyChange> findMerge(ChangeHistory h, OWLClass sel) {
+    	List<OWLOntologyChange> cs = new ArrayList<OWLOntologyChange>();
+    	for (List<OWLOntologyChange> change : h.getRevisions().values()) {
+            if (isMergeCommit(change, sel)) {
+            	// look at all in case it's repeated
+            	cs = change;
+            }
+        }		
+		return cs;	
+		
+	}
+    
+    boolean isRetiredCommit(List<OWLOntologyChange> cs, OWLClass sel) {
+    	for (OWLOntologyChange c : cs) {
+    		if (c.isAddAxiom() && c.getAxiom().isLogicalAxiom()) {
+    			if (c.getAxiom() instanceof OWLSubClassOfAxiom) {
+    				OWLSubClassOfAxiom sbo = (OWLSubClassOfAxiom) c.getAxiom();
+    				if (sbo.getSuperClass().isOWLClass() &&
+    						sbo.getSuperClass().equals(NCIEditTabConstants.PRE_RETIRE_ROOT)
+    						&& sbo.getSubClass().equals(sel)) {
+    					return true;
+    				}
+    				
+    			}
+    		}
+    				
+    		
+    	}
+    	return false;
+    }
+    
+    boolean isMergeCommit(List<OWLOntologyChange> cs, OWLClass sel) {
+    	for (OWLOntologyChange c : cs) {
+    		if (c.isAddAxiom() && c.getAxiom().isLogicalAxiom()) {
+    			if (c.getAxiom() instanceof OWLSubClassOfAxiom) {
+    				OWLSubClassOfAxiom sbo = (OWLSubClassOfAxiom) c.getAxiom();
+    				if (sbo.getSuperClass().isOWLClass() &&
+    						sbo.getSuperClass().equals(NCIEditTabConstants.PRE_MERGE_ROOT)
+    						&& sbo.getSubClass().equals(sel)) {
+    					return true;
+    				}
+    				
+    			}
+    		}
+    				
+    		
+    	}
+    	return false;
+    }
+    
+    private OWLOntologyChange getReverseChange(OWLOntologyChange change) {
+        if(change.isAxiomChange()) {
+            if (change.isAddAxiom()) {
+                return new RemoveAxiom(change.getOntology(), change.getAxiom());
+            }
+            else if(change.isRemoveAxiom()) {
+                return new AddAxiom(change.getOntology(), change.getAxiom());
+            }
+        }
+        else if(change.isImportChange()) {
+            if(change instanceof AddImport) {
+                return new RemoveImport(change.getOntology(), ((ImportChange)change).getImportDeclaration());
+            }
+            else if(change instanceof RemoveImport) {
+                return new AddImport(change.getOntology(), ((ImportChange)change).getImportDeclaration());
+            }
+        }
+        else if (change instanceof AnnotationChange) {
+            if(change instanceof AddOntologyAnnotation) {
+                return new RemoveOntologyAnnotation(change.getOntology(), ((AnnotationChange)change).getAnnotation());
+            }
+            else if(change instanceof RemoveOntologyAnnotation) {
+                return new AddOntologyAnnotation(change.getOntology(), ((AnnotationChange)change).getAnnotation());
+            }
+        }
+        else if(change instanceof SetOntologyID) {
+            return new SetOntologyID(change.getOntology(), ((SetOntologyID)change).getOriginalOntologyID().getOntologyIRI().get());
+        }
+        return null;
     }
     
     public void addComplex(OWLClass selectedClass) {
