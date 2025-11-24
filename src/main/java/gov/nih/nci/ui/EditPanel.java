@@ -455,10 +455,13 @@ public class EditPanel extends JPanel {
 			 
             public void actionPerformed(ActionEvent e)
             {
-            	NCIEditTab.currentTab().undoChanges();            	
-            	//NCIEditTab.currentTab().setEditInProgress(false);
+            	NCIEditTab.currentTab().undoChanges();
+            	
+            	NCIEditTab.currentTab().setEditInProgress(false);
+            	NCIEditTab.currentTab().setCurrentlyEditing(null, true);
             	//NCIEditTab.currentTab().refreshNavTree();
-            	//disableButtons();
+            	setSelectedClass(currentClass);
+            	disableButtons();
             	
             }
         });     
